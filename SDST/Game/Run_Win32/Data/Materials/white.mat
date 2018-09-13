@@ -1,0 +1,5 @@
+<material id="white">
+   <shader id="plain_white" />
+   <texture bind="0" name="gTexDiffuse" value="white.png" />
+   <color bind="TINT" value="255,255,255,255" />
+</material>

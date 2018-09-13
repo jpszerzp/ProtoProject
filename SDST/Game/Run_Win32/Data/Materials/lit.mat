@@ -1,0 +1,6 @@
+<material id="lit">
+   <shader id="light_normalmap" />
+   <texture bind="0" name="gTexDiffuse" value="couch/couch_diffuse.png" />
+   <texture bind="1" name="gNormalMap" value="couch/couch_normal.png" />
+   <color bind="TINT" value="255,255,255,255" />
+</material>

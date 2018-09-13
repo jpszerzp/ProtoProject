@@ -1,0 +1,5 @@
+<material id="default">
+   <shader id="default" />
+   <texture bind="0" name="gTexDiffuse" value="couch/couch_diffuse.png" />
+   <color bind="TINT" value="255,255,255,255" />
+</material>

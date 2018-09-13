@@ -1,0 +1,192 @@
+<IsoSprites>
+  <!--
+    archer
+  -->
+  <isosprite id="archer_f.idle">
+    <facing dir="1, 1" src="archer_f.tr.idle" />
+    <facing dir=" -1, 1" src="archer_f.tr.idle" scale="-1, 1" />
+    <facing dir="-1, -1" src="archer_f.al.idle" />
+    <facing dir="1, -1" src="archer_f.al.idle" scale="-1, 1" />
+  </isosprite>
+  <isosprite id="archer_f.walk0">
+    <facing dir="1, 1" src="archer_f.tr.walk0" />
+    <facing dir="-1, 1" src="archer_f.tr.walk0" scale="-1, 1" />
+    <facing dir="-1, -1" src="archer_f.al.walk0" />
+    <facing dir="1, -1" src="archer_f.al.walk0" scale="-1, 1" />
+  </isosprite>
+  <isosprite id="archer_f.walk1">
+    <facing dir=" 1, 1" src="archer_f.tr.walk1" />
+    <facing dir="-1, 1" src="archer_f.tr.walk1" scale="-1, 1" />
+    <facing dir="-1,-1" src="archer_f.al.walk1" />
+    <facing dir=" 1,-1" src="archer_f.al.walk1" scale="-1, 1" />
+  </isosprite>
+  <isosprite id="archer_f.attack1">
+    <facing dir=" 1, 1" src="archer_f.tr.attack1" />
+    <facing dir="-1, 1" src="archer_f.tr.attack1" scale="-1, 1" />
+    <facing dir="-1,-1" src="archer_f.al.attack1" />
+    <facing dir=" 1,-1" src="archer_f.al.attack1" scale="-1, 1" />
+  </isosprite>
+  <isosprite id="archer_f.attack2">
+    <facing dir=" 1, 1" src="archer_f.tr.attack2" />
+    <facing dir="-1, 1" src="archer_f.tr.attack2" scale="-1, 1" />
+    <facing dir="-1,-1" src="archer_f.al.attack2" />
+    <facing dir=" 1,-1" src="archer_f.al.attack2" scale="-1, 1" />
+  </isosprite>
+  <isosprite id="archer_f.attack3">
+    <facing dir=" 1, 1" src="archer_f.tr.attack3" />
+    <facing dir="-1, 1" src="archer_f.tr.attack3" scale="-1, 1" />
+    <facing dir="-1,-1" src="archer_f.al.attack3" />
+    <facing dir=" 1,-1" src="archer_f.al.attack3" scale="-1, 1" />
+  </isosprite>
+  <isosprite id="archer_f.attack4">
+    <facing dir=" 1, 1" src="archer_f.tr.attack4" />
+    <facing dir="-1, 1" src="archer_f.tr.attack4" scale="-1, 1" />
+    <facing dir="-1,-1" src="archer_f.al.attack4" />
+    <facing dir=" 1,-1" src="archer_f.al.attack4" scale="-1, 1" />
+  </isosprite>
+  <isosprite id="archer_f.dead">
+    <facing dir=" 1, 1" src="archer_f.tr.dead" />
+    <facing dir="-1, 1" src="archer_f.tr.dead" scale="-1, 1" />
+    <facing dir="-1,-1" src="archer_f.al.dead" />
+    <facing dir=" 1,-1" src="archer_f.al.dead" scale="-1, 1" />
+  </isosprite>
+
+  <!--
+    mage
+  -->
+  <isosprite id="mage_f.idle">
+    <facing dir="1, 1" src="mage_f.tr.idle" />
+    <facing dir="-1, 1" src="mage_f.tr.idle" scale="-1, 1" />
+    <facing dir="-1, -1" src="mage_f.al.idle" />
+    <facing dir="1, -1" src="mage_f.al.idle" scale="-1, 1" />
+  </isosprite>
+  <isosprite id="mage_f.walk0">
+    <facing dir="1, 1" src="mage_f.tr.walk0" />
+    <facing dir="-1, 1" src="mage_f.tr.walk0" scale="-1, 1" />
+    <facing dir="-1, -1" src="mage_f.al.walk0" />
+    <facing dir="1, -1" src="mage_f.al.walk0" scale="-1, 1" />
+  </isosprite>
+  <isosprite id="mage_f.walk1">
+    <facing dir="1, 1" src="mage_f.tr.walk1" />
+    <facing dir="-1, 1" src="mage_f.tr.walk1" scale="-1, 1" />
+    <facing dir="-1, -1" src="mage_f.al.walk1" />
+    <facing dir="1, -1" src="mage_f.al.walk1" scale="-1, 1" />
+  </isosprite>
+  <isosprite id="mage_f.attack1">
+    <facing dir=" 1, 1" src="mage_f.tr.attack1" />
+    <facing dir="-1, 1" src="mage_f.tr.attack1" scale="-1, 1" />
+    <facing dir="-1,-1" src="mage_f.al.attack1" />
+    <facing dir=" 1,-1" src="mage_f.al.attack1" scale="-1, 1" />
+  </isosprite>
+  <isosprite id="mage_f.attack2">
+    <facing dir=" 1, 1" src="mage_f.tr.attack2" />
+    <facing dir="-1, 1" src="mage_f.tr.attack2" scale="-1, 1" />
+    <facing dir="-1,-1" src="mage_f.al.attack2" />
+    <facing dir=" 1,-1" src="mage_f.al.attack2" scale="-1, 1" />
+  </isosprite>
+  <isosprite id="mage_f.attack3">
+    <facing dir=" 1, 1" src="mage_f.tr.attack3" />
+    <facing dir="-1, 1" src="mage_f.tr.attack3" scale="-1, 1" />
+    <facing dir="-1,-1" src="mage_f.al.attack3" />
+    <facing dir=" 1,-1" src="mage_f.al.attack3" scale="-1, 1" />
+  </isosprite>
+  <isosprite id="mage_f.attack4">
+    <facing dir=" 1, 1" src="mage_f.tr.attack4" />
+    <facing dir="-1, 1" src="mage_f.tr.attack4" scale="-1, 1" />
+    <facing dir="-1,-1" src="mage_f.al.attack4" />
+    <facing dir=" 1,-1" src="mage_f.al.attack4" scale="-1, 1" />
+  </isosprite>
+  <isosprite id="mage_f.dead">
+    <facing dir=" 1, 1" src="mage_f.tr.dead" />
+    <facing dir="-1, 1" src="mage_f.tr.dead" scale="-1, 1" />
+    <facing dir="-1,-1" src="mage_f.al.dead" />
+    <facing dir=" 1,-1" src="mage_f.al.dead" scale="-1, 1" />
+  </isosprite>
+
+  <!--
+    warrior
+  -->
+  <isosprite id="warrior_f.idle">
+    <facing dir="1, 1" src="warrior_f.tr.idle" />
+    <facing dir="-1, 1" src="warrior_f.tr.idle" scale="-1, 1" />
+    <facing dir="-1, -1" src="warrior_f.al.idle" />
+    <facing dir="1, -1" src="warrior_f.al.idle" scale="-1, 1" />
+  </isosprite>
+  <isosprite id="warrior_f.walk0">
+    <facing dir="1, 1" src="warrior_f.tr.walk0" />
+    <facing dir="-1, 1" src="warrior_f.tr.walk0" scale="-1, 1" />
+    <facing dir="-1, -1" src="warrior_f.al.walk0" />
+    <facing dir="1, -1" src="warrior_f.al.walk0" scale="-1, 1" />
+  </isosprite>
+  <isosprite id="warrior_f.walk1">
+    <facing dir="1, 1" src="warrior_f.tr.walk1" />
+    <facing dir="-1, 1" src="warrior_f.tr.walk1" scale="-1, 1" />
+    <facing dir="-1, -1" src="warrior_f.al.walk1" />
+    <facing dir="1, -1" src="warrior_f.al.walk1" scale="-1, 1" />
+  </isosprite>
+  <isosprite id="warrior_f.attack1">
+    <facing dir=" 1, 1" src="warrior_f.tr.attack1" />
+    <facing dir="-1, 1" src="warrior_f.tr.attack1" scale="-1, 1" />
+    <facing dir="-1,-1" src="warrior_f.al.attack1" />
+    <facing dir=" 1,-1" src="warrior_f.al.attack1" scale="-1, 1" />
+  </isosprite>
+  <isosprite id="warrior_f.attack2">
+    <facing dir=" 1, 1" src="warrior_f.tr.attack2" />
+    <facing dir="-1, 1" src="warrior_f.tr.attack2" scale="-1, 1" />
+    <facing dir="-1,-1" src="warrior_f.al.attack2" />
+    <facing dir=" 1,-1" src="warrior_f.al.attack2" scale="-1, 1" />
+  </isosprite>
+  <isosprite id="warrior_f.attack3">
+    <facing dir=" 1, 1" src="warrior_f.tr.attack3" />
+    <facing dir="-1, 1" src="warrior_f.tr.attack3" scale="-1, 1" />
+    <facing dir="-1,-1" src="warrior_f.al.attack3" />
+    <facing dir=" 1,-1" src="warrior_f.al.attack3" scale="-1, 1" />
+  </isosprite>
+  <isosprite id="warrior_f.attack4">
+    <facing dir=" 1, 1" src="warrior_f.tr.attack4" />
+    <facing dir="-1, 1" src="warrior_f.tr.attack4" scale="-1, 1" />
+    <facing dir="-1,-1" src="warrior_f.al.attack4" />
+    <facing dir=" 1,-1" src="warrior_f.al.attack4" scale="-1, 1" />
+  </isosprite>
+  <isosprite id="warrior_f.dead">
+    <facing dir=" 1, 1" src="warrior_f.tr.dead" />
+    <facing dir="-1, 1" src="warrior_f.tr.dead" scale="-1, 1" />
+    <facing dir="-1,-1" src="warrior_f.al.dead" />
+    <facing dir=" 1,-1" src="warrior_f.al.dead" scale="-1, 1" />
+  </isosprite>
+
+  <!--<isosprite id="archer_f.hit">
+    <facing dir="-1, 1" src="archer_f.al.hit" />
+    <facing dir=" 1, 1" src="archer_f.al.hit" scale="-1, 1" />
+    <facing dir="-1,-1" src="archer_f.tr.hit" scale="-1, 1" />
+    <facing dir=" 1,-1" src="archer_f.tr.hit" />
+  </isosprite>
+
+  <isosprite id="archer_f.weak">
+    <facing dir="-1, 1" src="archer_f.al.weak" />
+    <facing dir=" 1, 1" src="archer_f.al.weak" scale="-1, 1" />
+    <facing dir="-1,-1" src="archer_f.tr.weak" scale="-1, 1" />
+    <facing dir=" 1,-1" src="archer_f.tr.weak" />
+  </isosprite>
+
+  <isosprite id="archer_f.cast">
+    <facing dir="-1, 1" src="archer_f.al.cast" />
+    <facing dir=" 1, 1" src="archer_f.al.cast" scale="-1, 1" />
+    <facing dir="-1,-1" src="archer_f.tr.cast" scale="-1, 1" />
+    <facing dir=" 1,-1" src="archer_f.tr.cast" />
+  </isosprite>
+
+  <isosprite id="archer_f.crouch">
+    <facing dir="-1, 1" src="archer_f.al.crouch" />
+    <facing dir=" 1, 1" src="archer_f.al.crouch" scale="-1, 1" />
+    <facing dir="-1,-1" src="archer_f.tr.crouch" scale="-1, 1" />
+    <facing dir=" 1,-1" src="archer_f.tr.crouch" />
+  </isosprite>
+
+  <isosprite id="archer_f.attack0">
+    <facing dir="-1, 1" src="archer_f.al.attack0" />
+    <facing dir=" 1, 1" src="archer_f.al.attack0" scale="-1, 1" />
+    <facing dir="-1,-1" src="archer_f.tr.attack0" scale="-1, 1" />
+    <facing dir=" 1,-1" src="archer_f.tr.attack0" />
+  </isosprite>-->
+</IsoSprites>

@@ -1,0 +1,16 @@
+<shader name="skybox">
+	<program>
+		<vertex file="Shaders/glsl/skybox.vs" />
+		<fragment file="Shaders/glsl/skybox.fs" />
+	</program>
+
+	<blend>
+		<color op="add" src="blend_one" dest="blend_zero" />
+	</blend>
+
+	<depth compare="lequal" write="false" />
+	
+	<wind order="ccw" />
+	
+	<cull face="front" />
+</shader>

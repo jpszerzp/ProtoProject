@@ -1,0 +1,6 @@
+<material id="default_lit">
+   <shader id="light_normalmap" />
+   <texture bind="0" name="gTexDiffuse" value="white.png" />
+   <texture bind="1" name="gNormalMap" value="white.png" />
+   <color bind="TINT" value="255,255,255,255" />
+</material>

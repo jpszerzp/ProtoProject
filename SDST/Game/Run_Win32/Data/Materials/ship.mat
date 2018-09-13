@@ -1,0 +1,6 @@
+<material id="ship">
+   <shader id="light_normalmap" />
+   <texture bind="0" name="gTexDiffuse" value="ship/SciFi_Fighter-MK6-diffuse.jpg" />
+   <texture bind="1" name="gNormalMap" value="ship/SciFi_Fighter-MK6-bump.jpg" />
+   <color bind="TINT" value="255,0,0,0" />
+</material>

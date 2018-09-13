@@ -1,0 +1,4 @@
+<material id="wireframe">
+   <shader id="wireframe" />
+   <texture bind="0" name="gTexDiffuse" value="white.png" />
+</material>

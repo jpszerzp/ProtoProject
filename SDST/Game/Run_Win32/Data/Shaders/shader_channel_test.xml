@@ -1,0 +1,27 @@
+<!-- delete this after testing multiple shader pass
+-->
+
+<shader name="shader_channel_test">
+	<program>
+		<vertex file="Shaders/glsl/light_normalmap.vs" />
+		<fragment file="Shaders/glsl/light_normalmap.fs" />
+
+		<vertex file="Shaders/glsl/empty.vs" />
+		<fragment file="Shaders/glsl/empty.fs" />
+	</program>
+
+	<order layer="1" queue="opague" />
+
+	<blend>
+		<color op="add" src="blend_one" dest="blend_zero" />
+	</blend>
+
+	<depth compare="less" write="true" />
+	
+	<wind order="ccw" />
+	
+	<cull face="back" />
+
+	<float bind="SPECULAR_AMOUNT" value="0.5" />
+    <float bind="SPECULAR_POWER" value="8.0" />
+</shader> 

@@ -1,0 +1,16 @@
+<shader name="cutout_nonmodel">
+	<program>
+		<vertex file="Shaders/glsl/cutout_nonmodel.vs" />
+		<fragment file="Shaders/glsl/cutout_nonmodel.fs" />
+	</program>
+
+	<blend>
+		<color op="add" src="blend_one" dest="blend_zero" />
+	</blend>
+
+	<depth compare="less" write="true" />
+	
+	<wind order="ccw" />
+	
+	<cull face="back" />
+</shader>

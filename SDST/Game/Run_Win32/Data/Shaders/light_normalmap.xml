@@ -1,0 +1,21 @@
+<shader name="light_normalmap">
+	<program>
+		<vertex file="Shaders/glsl/light_normalmap.vs" />
+		<fragment file="Shaders/glsl/light_normalmap.fs" />
+	</program>
+	
+	<order layer="1" queue="opague" />
+
+	<blend>
+		<color op="add" src="blend_one" dest="blend_zero" />
+	</blend>
+
+	<depth compare="less" write="true" />
+	
+	<wind order="ccw" />
+	
+	<cull face="back" />
+
+	<float bind="SPECULAR_AMOUNT" value="0.5" />
+    <float bind="SPECULAR_POWER" value="8.0" />
+</shader> 

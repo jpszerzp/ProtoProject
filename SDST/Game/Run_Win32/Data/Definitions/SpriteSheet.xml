@@ -1,0 +1,255 @@
+<SpriteSheet>
+  
+  <!--
+    archer
+  -->
+  <Sprite id="archer_f.al.idle">
+    <uv>0, 1</uv>
+    <texture src="Data/Images/archer_1.png" />
+    <offset min="0.06, -0.010" max="0.03, -0.020" />
+  </Sprite>
+  <Sprite id="archer_f.tr.idle">
+    <uv>0, 0</uv>
+    <texture src="Data/Images/archer_1.png" />
+    <offset min="0.06, -0.017" max="0.03, 0.0" />
+  </Sprite>
+  <Sprite id="archer_f.al.walk0">
+    <uv>1, 1</uv>
+    <texture src="Data/Images/archer_1.png" />
+    <offset min="0.06, -0.010" max="0.03, -0.020" />
+  </Sprite>
+  <Sprite id="archer_f.tr.walk0">
+    <uv>1, 0</uv>
+    <texture src="Data/Images/archer_1.png" />
+    <offset min="0.06, -0.017" max="0.03, 0.0" />
+  </Sprite>
+  <Sprite id="archer_f.al.walk1">
+    <uv>2, 1</uv>
+    <texture src="Data/Images/archer_1.png" />
+    <offset min="0.06, -0.010" max="0.03, -0.020" />
+  </Sprite>
+  <Sprite id="archer_f.tr.walk1">
+    <uv>2, 0</uv>
+    <texture src="Data/Images/archer_1.png" />
+    <offset min="0.06, -0.017" max="0.03, 0.0" />
+  </Sprite>
+  <Sprite id="archer_f.al.attack1">
+    <uv>2, 3</uv>
+    <texture src="Data/Images/archer_1.png" />
+    <offset min="0.02, 0.0" max="0.03, -0.02" />
+  </Sprite>
+  <Sprite id="archer_f.tr.attack1">
+    <uv>2, 2</uv>
+    <texture src="Data/Images/archer_1.png" />
+    <offset min="0.03, 0.0" max="0.01, -0.02" />
+  </Sprite>
+  <Sprite id="archer_f.al.attack2">
+    <uv>3, 3</uv>
+    <texture src="Data/Images/archer_1.png" />
+    <offset min="0.02, 0.0" max="0.01, -0.02" />
+  </Sprite>
+  <Sprite id="archer_f.tr.attack2">
+    <uv>3, 2</uv>
+    <texture src="Data/Images/archer_1.png" />
+    <offset min="0.03, 0.0" max="0.01, -0.02" />
+  </Sprite>
+  <Sprite id="archer_f.al.attack3">
+    <uv>4, 3</uv>
+    <texture src="Data/Images/archer_1.png" />
+    <offset min="0.02, 0.0" max="0.01, -0.02" />
+  </Sprite>
+  <Sprite id="archer_f.tr.attack3">
+    <uv>4, 2</uv>
+    <texture src="Data/Images/archer_1.png" />
+    <offset min="0.03, 0.0" max="0.01, -0.02" />
+  </Sprite>
+  <Sprite id="archer_f.al.attack4">
+    <uv>5, 3</uv>
+    <texture src="Data/Images/archer_1.png" />
+    <offset min="0.02, 0.0" max="0.01, -0.02" />
+  </Sprite>
+  <Sprite id="archer_f.tr.attack4">
+    <uv>5, 2</uv>
+    <texture src="Data/Images/archer_1.png" />
+    <offset min="0.03, 0.0" max="0.01, -0.02" />
+  </Sprite>
+  <Sprite id="archer_f.al.dead">
+    <uv>0, 3</uv>
+    <texture src="Data/Images/archer_1.png" />
+    <offset min="0.06, 0.0" max="0.03, -0.02" />
+  </Sprite>
+  <Sprite id="archer_f.tr.dead">
+    <uv>0, 2</uv>
+    <texture src="Data/Images/archer_1.png" />
+    <offset min="0.05, 0.0" max="0.02, -0.02" />
+  </Sprite>
+  
+  <!--
+    mage
+  -->
+  <Sprite id="mage_f.al.idle">
+    <uv>0, 1</uv>
+    <texture src="Data/Images/mage_1.png" />
+    <offset min="0.06, -0.010" max="0.03, -0.020" />
+  </Sprite>
+  <Sprite id="mage_f.tr.idle">
+    <uv>0, 0</uv>
+    <texture src="Data/Images/mage_1.png" />
+    <offset min="0.06, -0.017" max="0.03, 0.0" />
+  </Sprite>
+  <Sprite id="mage_f.al.walk0">
+    <uv>1, 1</uv>
+    <texture src="Data/Images/mage_1.png" />
+    <offset min="0.06, -0.010" max="0.03, -0.020" />
+  </Sprite>
+  <Sprite id="mage_f.tr.walk0">
+    <uv>1, 0</uv>
+    <texture src="Data/Images/mage_1.png" />
+    <offset min="0.06, -0.017" max="0.03, 0.0" />
+  </Sprite>
+  <Sprite id="mage_f.al.walk1">
+    <uv>2, 1</uv>
+    <texture src="Data/Images/mage_1.png" />
+    <offset min="0.06, -0.010" max="0.03, -0.020" />
+  </Sprite>
+  <Sprite id="mage_f.tr.walk1">
+    <uv>2, 0</uv>
+    <texture src="Data/Images/mage_1.png" />
+    <offset min="0.06, -0.017" max="0.03, 0.0" />
+  </Sprite>
+  <Sprite id="mage_f.al.attack1">
+    <uv>2, 3</uv>
+    <texture src="Data/Images/mage_1.png" />
+    <offset min="0.02, 0.0" max="0.03, -0.02" />
+  </Sprite>
+  <Sprite id="mage_f.tr.attack1">
+    <uv>2, 2</uv>
+    <texture src="Data/Images/mage_1.png" />
+    <offset min="0.03, 0.0" max="0.01, -0.02" />
+  </Sprite>
+  <Sprite id="mage_f.al.attack2">
+    <uv>3, 3</uv>
+    <texture src="Data/Images/mage_1.png" />
+    <offset min="0.02, 0.0" max="0.01, -0.02" />
+  </Sprite>
+  <Sprite id="mage_f.tr.attack2">
+    <uv>3, 2</uv>
+    <texture src="Data/Images/mage_1.png" />
+    <offset min="0.03, 0.0" max="0.01, -0.02" />
+  </Sprite>
+  <Sprite id="mage_f.al.attack3">
+    <uv>4, 3</uv>
+    <texture src="Data/Images/mage_1.png" />
+    <offset min="0.02, 0.0" max="0.01, -0.02" />
+  </Sprite>
+  <Sprite id="mage_f.tr.attack3">
+    <uv>4, 2</uv>
+    <texture src="Data/Images/mage_1.png" />
+    <offset min="0.03, 0.0" max="0.01, -0.02" />
+  </Sprite>
+  <Sprite id="mage_f.al.attack4">
+    <uv>5, 3</uv>
+    <texture src="Data/Images/mage_1.png" />
+    <offset min="0.02, 0.0" max="0.01, -0.02" />
+  </Sprite>
+  <Sprite id="mage_f.tr.attack4">
+    <uv>5, 2</uv>
+    <texture src="Data/Images/mage_1.png" />
+    <offset min="0.03, 0.0" max="0.01, -0.02" />
+  </Sprite>
+  <Sprite id="mage_f.al.dead">
+    <uv>0, 3</uv>
+    <texture src="Data/Images/mage_1.png" />
+    <offset min="0.06, 0.0" max="0.03, -0.02" />
+  </Sprite>
+  <Sprite id="mage_f.tr.dead">
+    <uv>0, 2</uv>
+    <texture src="Data/Images/mage_1.png" />
+    <offset min="0.05, 0.0" max="0.02, -0.02" />
+  </Sprite>
+
+  <!--
+    warrior
+  -->
+  <Sprite id="warrior_f.al.idle">
+    <uv>0, 1</uv>
+    <texture src="Data/Images/warrior_1.png" />
+    <offset min="0.06, -0.010" max="0.03, -0.020" />
+  </Sprite>
+  <Sprite id="warrior_f.tr.idle">
+    <uv>0, 0</uv>
+    <texture src="Data/Images/warrior_1.png" />
+    <offset min="0.06, -0.017" max="0.03, 0.0" />
+  </Sprite>
+  <Sprite id="warrior_f.al.walk0">
+    <uv>1, 1</uv>
+    <texture src="Data/Images/warrior_1.png" />
+    <offset min="0.06, -0.010" max="0.03, -0.020" />
+  </Sprite>
+  <Sprite id="warrior_f.tr.walk0">
+    <uv>1, 0</uv>
+    <texture src="Data/Images/warrior_1.png" />
+    <offset min="0.06, -0.017" max="0.03, 0.0" />
+  </Sprite>
+  <Sprite id="warrior_f.al.walk1">
+    <uv>2, 1</uv>
+    <texture src="Data/Images/warrior_1.png" />
+    <offset min="0.06, -0.010" max="0.03, -0.020" />
+  </Sprite>
+  <Sprite id="warrior_f.tr.walk1">
+    <uv>2, 0</uv>
+    <texture src="Data/Images/warrior_1.png" />
+    <offset min="0.06, -0.017" max="0.03, 0.0" />
+  </Sprite>
+  <Sprite id="warrior_f.al.attack1">
+    <uv>2, 3</uv>
+    <texture src="Data/Images/warrior_1.png" />
+    <offset min="0.05, 0.0" max="0.03, -0.04" />
+  </Sprite>
+  <Sprite id="warrior_f.tr.attack1">
+    <uv>2, 2</uv>
+    <texture src="Data/Images/warrior_1.png" />
+    <offset min="0.05, 0.0" max="0.01, -0.02" />
+  </Sprite>
+  <Sprite id="warrior_f.al.attack2">
+    <uv>3, 3</uv>
+    <texture src="Data/Images/warrior_1.png" />
+    <offset min="0.02, 0.0" max="0.01, -0.02" />
+  </Sprite>
+  <Sprite id="warrior_f.tr.attack2">
+    <uv>3, 2</uv>
+    <texture src="Data/Images/warrior_1.png" />
+    <offset min="0.03, 0.0" max="0.01, -0.02" />
+  </Sprite>
+  <Sprite id="warrior_f.al.attack3">
+    <uv>4, 3</uv>
+    <texture src="Data/Images/warrior_1.png" />
+    <offset min="0.02, 0.0" max="0.01, -0.02" />
+  </Sprite>
+  <Sprite id="warrior_f.tr.attack3">
+    <uv>4, 2</uv>
+    <texture src="Data/Images/warrior_1.png" />
+    <offset min="0.03, 0.0" max="0.01, -0.02" />
+  </Sprite>
+  <Sprite id="warrior_f.al.attack4">
+    <uv>5, 3</uv>
+    <texture src="Data/Images/warrior_1.png" />
+    <offset min="0.02, 0.0" max="0.01, -0.02" />
+  </Sprite>
+  <Sprite id="warrior_f.tr.attack4">
+    <uv>5, 2</uv>
+    <texture src="Data/Images/warrior_1.png" />
+    <offset min="0.03, 0.0" max="0.01, -0.02" />
+  </Sprite>
+  <Sprite id="warrior_f.al.dead">
+    <uv>0, 3</uv>
+    <texture src="Data/Images/warrior_1.png" />
+    <offset min="0.06, 0.0" max="0.03, -0.02" />
+  </Sprite>
+  <Sprite id="warrior_f.tr.dead">
+    <uv>0, 2</uv>
+    <texture src="Data/Images/warrior_1.png" />
+    <offset min="0.05, 0.0" max="0.02, -0.02" />
+  </Sprite>
+
+</SpriteSheet>

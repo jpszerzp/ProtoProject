@@ -1,0 +1,5 @@
+<GameConfig
+	startWorld="Protogame"
+	windowAspect="1.5"
+	isFullscreen="false"
+/>

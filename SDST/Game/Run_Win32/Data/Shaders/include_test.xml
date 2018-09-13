@@ -1,0 +1,16 @@
+<shader name="include_test">
+	<program>
+		<vertex file="Shaders/glsl/include_test.vs" />
+		<fragment file="Shaders/glsl/include_test.fs" />
+	</program>
+
+	<blend>
+		<color op="add" src="blend_one" dest="blend_zero" />
+	</blend>
+
+	<depth compare="less" write="true" />
+	
+	<wind order="ccw" />
+	
+	<cull face="back" />
+</shader>

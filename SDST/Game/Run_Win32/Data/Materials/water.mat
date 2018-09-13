@@ -1,0 +1,5 @@
+<material id="water">
+   <shader id="water" />
+   <texture bind="0" name="gTexDiffuse" value="orient.png" />
+   <color bind="TINT" value="255,0,0,0" />
+</material>

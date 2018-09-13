@@ -1,0 +1,18 @@
+<shader name="2d_default">
+	<program>
+		<vertex file="Shaders/glsl/2d_default.vs" />
+		<fragment file="Shaders/glsl/2d_default.fs" />
+	</program>
+
+	<blend>
+		<color op="add" src="blend_one" dest="blend_zero" />
+	</blend>
+
+	<depth compare="less" write="true" />
+	
+	<wind order="ccw" />
+	
+	<cull face="back" />
+
+	<texture bind="0" name="gTexDiffuse" value="white.png" />
+</shader>

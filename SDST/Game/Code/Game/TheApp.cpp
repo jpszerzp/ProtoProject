@@ -1,0 +1,269 @@
+#include "Game/TheApp.hpp"
+#include "Game/StateMachine.hpp"
+#include "Game/Physics3State.hpp"
+#include "Game/TransformTest.hpp"
+#include "Game/MathTest.hpp"
+#include "Game/DelegateTest.hpp"
+#include "Game/NetTest.hpp"
+#include "Engine/Core/Blackboard.hpp"
+#include "Engine/Core/Time/Clock.hpp"
+#include "Engine/Core/EngineCommon.hpp"
+#include "Engine/Core/ErrorWarningAssert.hpp"
+#include "Engine/Core/Console/Command.hpp"
+#include "Engine/Core/Console/DevConsole.hpp"
+#include "Engine/Core/Profiler/ProfileSystem.hpp"
+#include "Engine/Net/Net.hpp"
+#include "Engine/Net/NetAddress.hpp"
+
+TheApp::TheApp()
+{
+	DevConsole* theConsole = DevConsole::GetInstance();
+
+	XMLDocument gameConfigDoc;
+	gameConfigDoc.LoadFile("Data/GameConfig.xml");
+	g_gameConfigBlackboard = new Blackboard();
+	g_gameConfigBlackboard->PopulateFromXmlElementAttributes(*(gameConfigDoc.FirstChildElement()));
+	
+	// master clock forced to be null
+	g_masterClock = new Clock();
+	g_masterClock->SetParent(nullptr);
+
+	m_accTimer = 0.f;
+	m_frames = 0;
+
+	g_renderer = Renderer::GetInstance();
+	g_input = InputSystem::GetInstance();
+	g_audio = AudioSystem::GetInstance();
+
+	ProtoState* proto = new ProtoState();
+	PachinkoState* pachinko = new PachinkoState();
+	Physics3State* phys3 = new Physics3State();
+	StateMachine* states = new StateMachine();
+	states->AppendState(proto);
+	states->AppendState(pachinko);
+	states->AppendState(phys3);
+	g_theGame = new TheGame();
+	g_theGame->SetStateMachine(states);
+	g_theGame->UseDefaultState();
+	g_theGame->UseGameState(nullptr);
+
+	theConsole->RegisterConsoleHandler();
+	theConsole->SetFont(g_renderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png"));
+	CommandStartup();
+
+	// set up profiler
+	Profiler::GetInstance();
+
+	// set up net work
+	Net::Startup();
+	//GetAddressExample();
+
+	// set instance of rcs
+	g_rcs = RCS::GetInstance();
+	g_rcs->Startup();
+
+	// set up udp test
+	UDPTest::GetInstance();
+
+	g_input->MouseShowCursor(false);
+	g_input->MouseLockCursor(true);
+}
+
+
+TheApp::~TheApp()
+{
+	delete g_theGame;
+	g_theGame = nullptr;
+
+	Renderer::DestroyInstance();
+
+	//delete g_input;
+	//g_input = nullptr;
+
+	InputSystem::DestroyInstance();
+
+	AudioSystem::DestroyInstance();
+
+	delete g_gameConfigBlackboard;
+	g_gameConfigBlackboard = nullptr;
+
+	delete g_masterClock;
+	g_masterClock = nullptr;
+
+	delete g_atlas;
+	g_atlas = nullptr;
+
+	delete g_archer;
+	g_archer = nullptr;
+
+	delete g_mage;
+	g_mage = nullptr;
+
+	DevConsole::DestroyConsole();
+	Profiler::DestroyInstance();
+	Net::Shutdown();
+	UDPTest::DestroyInstance();
+
+	// destroy rcs
+	RCS::DestroyInstance();
+}
+
+
+void TheApp::SetInstantFPS()
+{
+	float theFps = 1.f / m_deltaSeconds;
+	g_theGame->SetFPS(theFps);
+}
+
+
+void TheApp::SetDelayedFPS()
+{
+	m_accTimer += m_deltaSeconds;
+	m_frames++;
+
+	if (m_accTimer >= 1.f)
+	{
+		float theFps = static_cast<float>(m_frames) / m_accTimer;
+		g_theGame->SetFPS(theFps);				
+		m_accTimer = 0.f;
+		m_frames = 0;
+	}
+}
+
+
+void TheApp::Update()
+{
+	UpdateTime();
+	g_input->Update();
+	g_theGame->Update();
+	//PlayState::ProfilerTestUpdate();
+
+	ProcessInput();
+
+	DevConsole* console = DevConsole::GetInstance();
+	console->Update(g_input, m_deltaSeconds);
+
+	if (console->GetAppShouldQuit())
+	{
+		OnQuitRequested();
+	}
+
+	// If it turns out problematic to put profiler update inside run_frame of app
+	// use game's process_input for input detection instead.
+	// Disable profiler update/update_input accordingly.
+	Profiler* profiler = Profiler::GetInstance();
+	profiler->Update();
+}
+
+
+void TheApp::UpdateTime()
+{
+	m_deltaSeconds = g_masterClock->frame.seconds;
+	//SetInstantFPS();
+}
+
+
+void TheApp::Render()
+{
+	g_theGame->Render(g_renderer);
+
+	DevConsole* console = DevConsole::GetInstance();
+	console->Render(g_renderer);
+	
+	// profiler render
+	Profiler* profiler = Profiler::GetInstance();
+	profiler->Render(g_renderer);
+}
+
+
+void TheApp::RunFrame()
+{
+	ClockSystemBeginFrame();
+	g_renderer->BeginFrame();
+	g_input->BeginFrame();
+	g_audio->BeginFrame();
+
+	Update();
+	Render();
+
+	g_audio->EndFrame();
+	g_input->EndFrame();
+	g_renderer->EndFrame();
+
+	//Sleep(1);
+	//::SwitchToThread();
+	//GL_CHECK_ERROR();
+}
+
+
+void TheApp::OnQuitRequested()
+{
+	m_isQuitting = true;
+}
+
+
+void TheApp::ProcessInput()
+{
+	// exit of dev console
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_ESC))
+	{
+		if (!DevConsoleIsOpen())
+		{
+			OnQuitRequested();
+		}
+	}
+
+	// dev console
+	else if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_DOT_WAVE))
+	{
+		if (!DevConsoleIsOpen())
+		{
+			DevConsole* console = DevConsole::GetInstance();
+			console->Open();
+
+			g_input->MouseLockCursor(false);
+		}
+	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_7) && !DevConsoleIsOpen())
+	{
+#if defined(PROFILE_ENABLED) 
+		Profiler* profiler = Profiler::GetInstance();
+
+		profiler->m_on = !profiler->m_on;
+#endif
+	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_1))
+	{
+		MathTest::RunMathTest();
+		TransformTest::RunTransformTest();
+		NetTest::RunNetTest();
+		RunDelegateTest();
+	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_M) && !IsProfilerOn())
+	{
+		if (g_input->m_mouseLock)
+		{
+			g_input->MouseShowCursor(true);
+			g_input->MouseLockCursor(false);
+
+			g_input->m_mouseLock = false;
+		}
+		else
+		{
+			g_input->MouseShowCursor(false);
+			g_input->MouseLockCursor(true);
+
+			g_input->m_mouseLock = true;
+		}
+	}
+}
+
+
+void TheApp::PlayAudio(std::string clipName)
+{
+	SoundID testSound = g_audio->CreateOrGetSound( clipName );
+	g_audio->PlaySound( testSound );
+}

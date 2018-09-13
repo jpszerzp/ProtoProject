@@ -1,0 +1,4 @@
+<material id="direct">
+   <shader id="direct" />
+   <texture bind="0" name="gTexDiffuse" value="white.png" />
+</material>

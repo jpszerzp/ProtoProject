@@ -1,0 +1,19 @@
+<shader name="water">
+	<program>
+		<vertex file="Shaders/glsl/mvp_lit.vs" />
+		<fragment file="Shaders/glsl/water.fs" />
+	</program>
+
+	<blend>
+		<color op="add" src="blend_src_alpha" dest="blend_one_minus_src_alpha" />
+		<alpha op="add" src="blend_one" dest="blend_one" />
+	</blend>
+
+	<depth compare="less" write="false" />
+
+	<cull face="back" />
+
+	<wind order="ccw" />
+
+	<order queue="alpha" />
+</shader>
