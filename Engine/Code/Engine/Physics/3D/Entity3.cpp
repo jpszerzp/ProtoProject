@@ -36,6 +36,14 @@ void Entity3::SetEntityForPrimitive()
 
 }
 
+bool Entity3::HasInfiniteMass() const
+{
+	MassData data = GetMassData();
+	if (data.m_invMass == 0.f)
+		return true;
+	return false;
+}
+
 void Entity3::UpdateBoundPrimitives()
 {
 	m_boundSphere.SetCenter(m_center);

@@ -7,12 +7,13 @@ class Rigidbody3 : public Entity3
 public:
 	// laws of motion introduced
 	Quaternion m_orientation;
-	Vector3 m_rotation;
+	Vector3 m_angularVelocity;
 	Matrix44 m_cachedTransform;
 	Matrix33 m_inverseInertiaTensor;		// in body space
 	Matrix33 m_inverseInertiaTensorWorld;	// in world space
 	Vector3 m_forceAcc;
 	Vector3 m_torqueAcc;
+	float m_angularDamp;
 
 public:
 	void SetInverseInertiaTensor(const Matrix33& inertiaTensor);
@@ -35,4 +36,6 @@ public:
 	void AddForcePointWorldCoord(const Vector3& force, const Vector3 point_world);		
 	Vector3 GetPointInWorld(const Vector3& pt_local);
 	void ClearAccs();
+
+	void Integrate(float deltaTime) override;
 };

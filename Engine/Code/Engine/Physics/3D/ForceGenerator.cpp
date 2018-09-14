@@ -4,9 +4,7 @@ void GravityGenerator::UpdateForce(Entity3* entity3D, float deltaTime)
 {
 	// if entity is const (infinite mass), force does not apply
 	if (entity3D->IsConst())
-	{
 		return;
-	}
 
 	entity3D->AddForce(m_gravity * entity3D->GetMass());
 }

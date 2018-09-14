@@ -8,6 +8,7 @@ void Rigidbody3::SetInverseInertiaTensor(const Matrix33& inertiaTensor)
 
 void Rigidbody3::CacheData()
 {
+	m_orientation.Normalize();
 	CacheTransform(m_cachedTransform, m_center, m_orientation);
 	CacheInverseInertiaTensorWorld(m_inverseInertiaTensorWorld, m_inverseInertiaTensor, m_cachedTransform);
 }
@@ -93,6 +94,7 @@ void Rigidbody3::AddTorque(Vector3 torque)
 void Rigidbody3::AddForcePointObjectCoord(const Vector3& force, const Vector3& point)
 {
 	Vector3 pt_world = GetPointInWorld(point);
+	AddForcePointWorldCoord(force, pt_world);
 }
 
 
@@ -117,4 +119,26 @@ void Rigidbody3::ClearAccs()
 {
 	m_forceAcc = Vector3::ZERO;
 	m_torqueAcc = Vector3::ZERO;
+}
+
+void Rigidbody3::Integrate(float deltaTime)
+{
+	// acc
+	m_linearAcceleration = m_forceAcc * m_massData.m_invMass;
+	Vector3 angularAcc = m_inverseInertiaTensorWorld * m_torqueAcc;
+
+	// vel
+	m_linearVelocity += m_linearAcceleration * deltaTime;
+	m_angularVelocity += angularAcc * deltaTime;
+
+	// damp on vel
+	m_linearVelocity *= powf(m_linearDamp, deltaTime);
+	m_angularVelocity *= powf(m_angularDamp, deltaTime);
+
+	// pos
+	m_center += m_linearVelocity * deltaTime;
+	m_orientation.AddScaledVector(m_angularVelocity, deltaTime);
+
+	CacheData();
+	ClearAccs();
 }

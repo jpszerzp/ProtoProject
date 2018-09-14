@@ -487,6 +487,9 @@
     <ClCompile Include="Physics\3D\Rigidbody3.cpp">
       <Filter>General</Filter>
     </ClCompile>
+    <ClCompile Include="Physics\3D\RigidForceGenerator.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -855,5 +858,6 @@
     <ClInclude Include="Physics\3D\ContactResolver.hpp" />
     <ClInclude Include="Net\Socket.hpp" />
     <ClInclude Include="Physics\3D\Rigidbody3.hpp" />
+    <ClInclude Include="Physics\3D\RigidForceGenerator.hpp" />
   </ItemGroup>
 </Project>

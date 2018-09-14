@@ -84,6 +84,7 @@ public:
 	void SetVerlet(bool value) { m_verlet = value; }
 	virtual void SetEntityForPrimitive();
 
+	bool HasInfiniteMass() const;
 	bool IsConst() const { return m_const; }
 	bool GetDrawBoundingSphere() const { return m_drawBoundSphere; }
 	bool GetDrawBoundingBox() const { return m_drawBoundBox; }
