@@ -63,12 +63,14 @@ Physics3State::Physics3State()
 	SetupBallistics(PISTOL, Vector3(7.f, 0.f, 0.f), true, Rgba::WHITE);
 	SetupBallistics(LASER, Vector3(8.f, 0.f, 0.f), true, Rgba::WHITE);
 	SetupBallistics(FIREBALL, Vector3(9.f, 0.f, 0.f), true, Rgba::WHITE);
+	SetupBallistics(FREEFALL, Vector3(6.f, 0.f, -.5f), true, Rgba::CYAN);
 
 	// generate one particle for firework
 	SetupFireworks(5.f, Vector3(0.f, 0.f, 5.f), Vector3::ZERO, Vector3(0.f, 4.f, 0.f), Vector3(0.f, 4.f, 0.f), false);
 
 	// force registry 
 	m_registry = new ForceRegistry();
+	m_rigidRegistry = new RigidForceRegistry();
 
 	// points for springs
 	Point* sp_point_0 = InitializePhysPoint(Vector3(0.f, 10.f, 5.f), Vector3::ZERO, 10.f, Rgba::RED);
@@ -88,9 +90,16 @@ Physics3State::Physics3State()
 	Point* rod_point_1 = InitializePhysPoint(Vector3(-10.f, 8.f, 5.f), Vector3::ZERO, 10.f, Rgba::GREEN);
 	float dist = (rod_point_0->GetWorldPosition() - rod_point_1->GetWorldPosition()).GetLength();
 	m_rod = SetupRod(dist, rod_point_0, rod_point_1);
+	
+	// verlet
+	Ballistics* verlet_basic_ballistics = SetupBallistics(FREEFALL, Vector3(7.f, 0.f, -.5f), true, Rgba::MEGENTA);
+	verlet_basic_ballistics->m_physEntity->SetVerlet(true);
+	verlet_basic_ballistics->m_physEntity->SetVerletScheme(BASIC_VERLET);
+	verlet_basic_ballistics->m_physEntity->SetEntityLastCenter(verlet_basic_ballistics->m_physEntity->GetEntityCenter());
 
-	Ballistics* verlet_ballistics = SetupBallistics(ARTILLERY, Vector3(10.f, 0.f, 0.f), true, Rgba::MEGENTA);
-	verlet_ballistics->m_physEntity->SetVerlet(true);
+	Ballistics* verlet_vel_ballistics = SetupBallistics(FREEFALL, Vector3(8.f, 0.f, -.5f), true, Rgba::PINK);
+	verlet_vel_ballistics->m_physEntity->SetVerlet(true);
+	verlet_vel_ballistics->m_physEntity->SetVerletScheme(VELOCITY_VERLET);
 
 	m_collisionData = new CollisionData3(20);	// allowing specified number of contact at max
 	m_contactResolver = new ContactResolver(2);
@@ -118,21 +127,8 @@ Physics3State::~Physics3State()
 
 	delete m_anchorSpring;
 	m_anchorSpring = nullptr;
-
-	//ClearFireworks();
 }
 
-/*
-void Physics3State::ClearFireworks()
-{
-	for (std::vector<Fireworks*>::size_type idx = 0; idx < m_fireworks.size(); ++idx)
-	{
-		delete m_fireworks[idx];
-		m_fireworks[idx] = nullptr;
-	}
-	m_fireworks.clear();
-}
-*/
 
 Sphere* Physics3State::InitializePhysSphere(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint)
 {
@@ -184,7 +180,6 @@ Fireworks* Physics3State::SetupFireworks(float age, Vector3 pos, Vector3 inherit
 	Fireworks* new_fireworks = new Fireworks(pos);
 	new_fireworks->Configure(age, inheritVel, maxVel, minVel, lastRound);
 	m_gameObjects.push_back(new_fireworks);
-	//m_fireworks.push_back(new_fireworks);			
 	m_points.push_back(new_fireworks);
 	new_fireworks->m_physEntity->SetGameobject(new_fireworks);
 	return new_fireworks;
@@ -252,6 +247,50 @@ Rod* Physics3State::SetupRod(float length, Point* p1, Point* p2)
 	return rod;
 }
 
+void Physics3State::ParticlePhysicsUpdate(float deltaTime)
+{
+	// force registry update
+	if (m_registry != nullptr)
+		m_registry->UpdateForces(deltaTime);
+
+	// GO update
+	UpdateGameobjects(deltaTime);
+
+	// contact generation
+	SingleContactUpdate();
+	m_rod->FillContact(m_collisionData->m_impulsive_contacts, 1);
+
+	// contact resolution
+	TODO("bring this to contact resolver class");
+	for (int i = 0; i < m_collisionData->m_contacts.size(); ++i)
+	{
+		// iterate contacts
+		Contact3& contact = m_collisionData->m_contacts[i];
+		contact.ResolveContactNaive();
+	}
+	if (!m_collisionData->m_impulsive_contacts.empty())
+		m_contactResolver->ResolveContacts(m_collisionData->m_impulsive_contacts, 
+		(uint)m_collisionData->m_impulsive_contacts.size(), deltaTime);
+}
+
+void Physics3State::RigidbodyPhysicsUpdate(float deltaTime)
+{
+	if (m_rigidRegistry != nullptr)
+		m_rigidRegistry->UpdateForces(deltaTime);
+
+	// start of frame
+	for (std::vector<Rigidbody3*>::size_type idx = 0; idx < m_rigidBodyObjects.size(); ++idx)
+	{
+		Entity3* rb_ent3 = m_rigidBodyObjects[idx]->m_physEntity;
+		Rigidbody3* rb3 = dynamic_cast<Rigidbody3*>(rb_ent3);
+
+		rb3->ClearAccs();
+		rb3->CacheData();
+
+		rb3->Integrate(deltaTime);
+	}
+}
+
 void Physics3State::Update(float deltaTime)
 {
 	// input update
@@ -261,27 +300,9 @@ void Physics3State::Update(float deltaTime)
 		UpdateKeyboard(deltaTime);
 	}
 
-	// force registry update
-	m_registry->UpdateForces(deltaTime);
-
-	// GO update
-	UpdateGameobjects(deltaTime);
-
-	// contact update
-	SingleContactUpdate();
-	m_rod->FillContact(m_collisionData->m_hard_constraint_contact, 1);
-
-	// contact resolution update
-	TODO("bring this to contact resolver class");
-	for (int i = 0; i < m_collisionData->m_contacts.size(); ++i)
-	{
-		// iterate contacts
-		Contact3& contact = m_collisionData->m_contacts[i];
-		contact.ResolveContactNaive();
-	}
-	if (!m_collisionData->m_hard_constraint_contact.empty())
-		m_contactResolver->ResolveContacts(m_collisionData->m_hard_constraint_contact, 
-			(uint)m_collisionData->m_hard_constraint_contact.size(), deltaTime);
+	// physics update
+	RigidbodyPhysicsUpdate(deltaTime);
+	ParticlePhysicsUpdate(deltaTime);
 
 	// debug draws
 	DebugRenderUpdate(deltaTime);
@@ -346,11 +367,6 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 			GameObject* gameobject = m_gameObjects[idx];
 			gameobject->m_debugOn = !gameobject->m_debugOn;
 		}
-		//for (std::vector<Fireworks*>::size_type idx = 0; idx < m_fireworks.size(); ++idx)
-		//{
-		//	Fireworks* fw = m_fireworks[idx];
-		//	fw->m_debugOn = !fw->m_debugOn;
-		//}
 	}
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_A))
 	{
@@ -564,36 +580,6 @@ void Physics3State::UpdateGameobjects(float deltaTime)
 }
 
 
-//void Physics3State::UpdateFireworks(float deltaTime)
-//{
-//	for (std::vector<Fireworks*>::size_type idx = 0; idx < m_fireworks.size(); ++idx)
-//	{
-//		m_fireworks[idx]->Update(deltaTime);
-//		if (m_fireworks[idx]->m_dead)
-//		{
-//			delete m_fireworks[idx];
-//			m_fireworks[idx] = nullptr;
-//			std::vector<Fireworks*>::iterator it = m_fireworks.begin() + idx;
-//			m_fireworks.erase(it);
-//			idx--;
-//		}
-//	}
-//
-//	// weird behavior, seems to change value of the removed, why?
-//	/*
-//	std::vector<Fireworks*>::iterator removed_start = std::remove_if(m_fireworks.begin(), m_fireworks.end(), IsGameobjectDead);
-//	for (std::vector<Fireworks*>::iterator it = removed_start;
-//		it != m_fireworks.end(); ++it)
-//	{
-//		Fireworks* delete_fw = *it;
-//		delete delete_fw;
-//		delete_fw = nullptr;
-//	}
-//	m_fireworks.erase(removed_start, m_fireworks.end());
-//	*/
-//}
-
-
 void Physics3State::SingleContactUpdate()
 {
 	m_collisionData->ClearContacts();
@@ -697,7 +683,6 @@ void Physics3State::Render(Renderer* renderer)
 	renderer->ClearScreen(Rgba::BLACK);
 
 	RenderGameobjects(renderer);
-	//RenderFireworks(renderer);
 	m_forwardPath->RenderScene(m_sceneGraph);
 }
 
@@ -709,11 +694,3 @@ void Physics3State::RenderGameobjects(Renderer* renderer)
 			m_gameObjects[idx]->Render(renderer);
 	}
 }
-
-/*
-void Physics3State::RenderFireworks(Renderer* renderer)
-{
-	for (std::vector<Fireworks*>::size_type idx = 0; idx < m_fireworks.size(); ++idx)
-		m_fireworks[idx]->Render(renderer);
-}
-*/

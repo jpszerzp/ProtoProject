@@ -2,6 +2,7 @@
 
 #include "Engine/Physics/3D/CollisionDetection.hpp"
 #include "Engine/Physics/3D/ContactResolver.hpp"
+#include "Engine/Physics/3D/Rigidbody3.hpp"
 #include "Engine/Core/Primitive/Sphere.hpp"
 #include "Engine/Core/Primitive/Cube.hpp"
 #include "Engine/Core/Primitive/Quad.hpp"
@@ -17,7 +18,6 @@ class Physics3State : public GameState
 public:
 	Physics3State();
 	~Physics3State();
-	//void ClearFireworks();
 
 	Sphere* InitializePhysSphere(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint);
 	Cube* InitializePhysCube(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint);
@@ -30,17 +30,17 @@ public:
 	AnchorSpring* SetupAnchorSpring(Point* end1, Point* end2, float coef, float rl);
 	Rod* SetupRod(float length, Point* p1, Point* p2);
 
+	void ParticlePhysicsUpdate(float deltaTime);
+	void RigidbodyPhysicsUpdate(float deltaTime);
 	void Update(float deltaTime) override;
 	void UpdateMouse(float deltaTime) override;
 	void UpdateKeyboard(float deltaTime) override;
 	void UpdateGameobjects(float deltaTime);
-	//void UpdateFireworks(float deltaTime);
 
 	void SingleContactUpdate();
 
 	void Render(Renderer* renderer) override;
 	void RenderGameobjects(Renderer* renderer);
-	//void RenderFireworks(Renderer* renderer);
 
 public:
 	GameObject* m_g0;
@@ -58,9 +58,9 @@ public:
 	std::vector<Cube*>	 m_cubes;
 	std::vector<Quad*>	 m_quads;
 	std::vector<Point*>  m_points;
-	//std::vector<Fireworks*> m_fireworks;
 
 	ForceRegistry* m_registry = nullptr;
+	RigidForceRegistry* m_rigidRegistry = nullptr;
 
 	CollisionData3* m_collisionData;
 	ContactResolver* m_contactResolver;

@@ -3,9 +3,16 @@
 #include "Engine/Renderer/Mesh.hpp"
 #include "Engine/Physics/MassData.hpp"
 #include "Engine/Physics/PhysicsMaterial.hpp"
+#include "Engine/Physics/3D/BoundingVolume3.hpp"
 #include "Engine/Math/Sphere3.hpp"
 #include "Engine/Math/AABB3.hpp"
 #include "Engine/Core/Quaternion.hpp"
+
+enum eVerletScheme
+{
+	BASIC_VERLET,
+	VELOCITY_VERLET
+};
 
 class GameObject;
 
@@ -47,9 +54,9 @@ protected:
 	bool m_drawBoundBox = false;
 	
 	// need updated
-	Sphere3 m_boundSphere;
+	//Sphere3 m_boundSphere;
+	BoundingSphere m_boundSphere;
 	AABB3 m_boundBox;
-	//Primitive3 m_primitive;
 
 	GameObject* m_goRef = nullptr;
 
@@ -58,10 +65,12 @@ protected:
 	bool m_considerDamp = true;		// by default, consider damping
 	float m_linearDamp = 0.f;
 
-	// verlet
+	// verlet - basic
 	bool m_verlet = false;
-	bool m_verlet_first_frame = true;	// hacky way to handle first frame freeze, try get rid of this
+	eVerletScheme m_verlet_scheme = BASIC_VERLET;
 	Vector3 m_lastCenter;
+	// verlet - velocity
+	Vector3 m_halfStepVelocity;
 
 public:
 	void SetDrawBoundingSphere(bool value) { m_drawBoundSphere = value; }
@@ -82,6 +91,7 @@ public:
 	void SetConsiderDamp(bool value) { m_considerDamp = value; }
 	void SetNetForcePersistent(bool value) { m_forcePersistent = value; }
 	void SetVerlet(bool value) { m_verlet = value; }
+	void SetVerletScheme(eVerletScheme scheme) { m_verlet_scheme = scheme; }
 	virtual void SetEntityForPrimitive();
 
 	bool HasInfiniteMass() const;

@@ -8,6 +8,7 @@ enum eBallisticsType
 	ARTILLERY,
 	FIREBALL,
 	LASER,
+	FREEFALL,
 	NUM_BALLISTICS_TYPE
 };
 

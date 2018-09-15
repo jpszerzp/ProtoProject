@@ -47,7 +47,7 @@ private:
 struct CollisionData3
 {
 	std::vector<Contact3> m_contacts;
-	std::vector<Contact3> m_hard_constraint_contact;
+	std::vector<Contact3> m_impulsive_contacts;
 	uint m_maxContacts = 0;
 
 	/*

@@ -41,7 +41,8 @@ SphereEntity3::SphereEntity3(const Sphere3& primitive, bool isConst /*= false*/)
 		m_massData.m_invInertia = 0.f;
 	}
 
-	m_boundSphere = primitive;
+	//m_boundSphere = primitive;
+	m_boundSphere = BoundingSphere(m_center, m_primitive.m_radius);
 	m_sphereBoundMesh = Mesh::CreateUVSphere(VERT_PCU, 18, 36);
 
 	Vector3 boundBoxMin = m_center - boundBoxScale / 2.f;

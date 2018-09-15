@@ -5,6 +5,7 @@ void GravityRigidForceGenerator::UpdateForce(Rigidbody3* body, float deltaTime)
 	if (body->IsConst())
 		return;
 
+	// safe check
 	if (body->HasInfiniteMass())
 		return;
 

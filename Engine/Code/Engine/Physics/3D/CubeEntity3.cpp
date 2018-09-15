@@ -55,7 +55,8 @@ CubeEntity3::CubeEntity3(const AABB3& primitive, bool isConst /*= false*/)
 		m_massData.m_invInertia = 0.f;
 	}
 
-	m_boundSphere = Sphere3(m_center, boundSphereRadius);
+	//m_boundSphere = Sphere3(m_center, boundSphereRadius);
+	m_boundSphere = BoundingSphere(m_center, boundSphereRadius);
 	m_sphereBoundMesh = Mesh::CreateUVSphere(VERT_PCU, 18, 36);
 
 	// for cube entity, primitive can be reused for BV

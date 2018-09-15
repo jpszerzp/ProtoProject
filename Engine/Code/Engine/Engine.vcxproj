@@ -342,6 +342,8 @@
     <ClCompile Include="Net\TCPSocket.cpp" />
     <ClCompile Include="Physics\2D\DiscEntity.cpp" />
     <ClCompile Include="Physics\2D\QuadEntity.cpp" />
+    <ClCompile Include="Physics\3D\BoundingVolume3.cpp" />
+    <ClCompile Include="Physics\3D\BVH3.cpp" />
     <ClCompile Include="Physics\3D\CollisionDetection.cpp" />
     <ClCompile Include="Physics\3D\ContactResolver.cpp" />
     <ClCompile Include="Physics\3D\CubeEntity3.cpp" />
@@ -493,6 +495,8 @@
     <ClInclude Include="Net\TCPSocket.hpp" />
     <ClInclude Include="Physics\2D\DiscEntity.hpp" />
     <ClInclude Include="Physics\2D\QuadEntity.hpp" />
+    <ClInclude Include="Physics\3D\BoundingVolume3.hpp" />
+    <ClInclude Include="Physics\3D\BVH3.hpp" />
     <ClInclude Include="Physics\3D\CollisionDetection.hpp" />
     <ClInclude Include="Physics\3D\ContactResolver.hpp" />
     <ClInclude Include="Physics\3D\CubeEntity3.hpp" />

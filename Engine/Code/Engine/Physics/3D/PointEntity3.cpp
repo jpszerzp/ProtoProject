@@ -38,7 +38,8 @@ PointEntity3::PointEntity3(const Particle& primitive, bool isConst /*= false*/)
 		m_massData.m_invInertia = 0.f;		// infinite inertia
 	}
 
-	m_boundSphere = Sphere3(m_center, m_primitive.m_size / 2.f);
+	//m_boundSphere = Sphere3(m_center, m_primitive.m_size / 2.f);
+	m_boundSphere = BoundingSphere(m_center, m_primitive.m_size / 2.f);
 	m_sphereBoundMesh = Mesh::CreateUVSphere(VERT_PCU, 18, 36);
 
 	Vector3 boundBoxMin = m_center - scale / 2.f;

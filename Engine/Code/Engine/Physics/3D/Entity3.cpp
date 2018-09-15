@@ -81,25 +81,29 @@ void Entity3::Translate(Vector3 translation)
 
 void Entity3::VerletIntegrate(float deltaTime)
 {
-	if (m_verlet_first_frame)
+	// basic position verlet
+	if (m_verlet_scheme == BASIC_VERLET)
 	{
+		// limitation: object of verlet needs to have a natural start (no initial velocity to kick off with)
 		Vector3 curr_pos = m_center;
+
 		m_linearAcceleration = m_netforce * m_massData.m_invMass;
-		m_lastCenter = m_center - m_linearVelocity * deltaTime;
 
 		m_center += (m_center - m_lastCenter) + m_linearAcceleration * deltaTime * deltaTime;
 		m_lastCenter = curr_pos;
-
-		m_verlet_first_frame = false;
 	}
+	// velocity verlet
 	else
 	{
-		Vector3 curr_pos = m_center;
-
 		m_linearAcceleration = m_netforce * m_massData.m_invMass;
 
-		m_center += (m_center - m_lastCenter) + m_linearAcceleration * deltaTime * deltaTime;
-		m_lastCenter = curr_pos;
+		m_halfStepVelocity = m_linearVelocity + m_linearAcceleration * .5f * deltaTime;
+		
+		m_center += m_halfStepVelocity * deltaTime;
+
+		// todo: if the force is dependent on x and t, then update m_linearAcceleration here.
+
+		m_linearVelocity = m_halfStepVelocity + m_linearAcceleration * .5f * deltaTime;
 	}
 }
 

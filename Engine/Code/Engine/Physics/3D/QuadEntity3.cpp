@@ -15,8 +15,8 @@ QuadEntity3::QuadEntity3(const Plane& primitive, bool isConst, Vector3 quadCente
 	// BV transform - sphere
 	Vector3 boundSpherePos = m_center;
 	Vector3 boundSphereRot = Vector3::ZERO;
-	float boundSphereRad = sqrtf(quadScale.x * quadScale.x + quadScale.y * quadScale.y) / 2.f;
-	Vector3 boundSphereScale = Vector3(boundSphereRad, boundSphereRad, boundSphereRad);
+	float boundSphereRadius = sqrtf(quadScale.x * quadScale.x + quadScale.y * quadScale.y) / 2.f;
+	Vector3 boundSphereScale = Vector3(boundSphereRadius, boundSphereRadius, boundSphereRadius);
 	m_sphereBoundTransform = Transform(boundSpherePos, boundSphereRot, boundSphereScale);
 
 	// BV box transform ignored
@@ -45,7 +45,8 @@ QuadEntity3::QuadEntity3(const Plane& primitive, bool isConst, Vector3 quadCente
 	}
 
 	// BV sphere primitive
-	m_boundSphere = Sphere3(boundSpherePos, boundSphereRad);
+	//m_boundSphere = Sphere3(boundSpherePos, boundSphereRad);
+	m_boundSphere = BoundingSphere(m_center, boundSphereRadius);
 	m_sphereBoundMesh = Mesh::CreateUVSphere(VERT_PCU, 18, 36);
 
 	// BV box primitive ignored

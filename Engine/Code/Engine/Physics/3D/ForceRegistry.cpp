@@ -21,3 +21,15 @@ void ForceRegistry::UpdateForces(float deltaTime)
 		theGenerator->UpdateForce(theEntity, deltaTime);
 	}
 }
+
+void RigidForceRegistry::UpdateForces(float deltaTime)
+{
+	for each (RigidbodyForceRegistration* rfr in m_registrations)
+	{
+		Entity3* theEntity = rfr->m_entity3;
+		Rigidbody3* theRigid = dynamic_cast<Rigidbody3*>(theEntity);
+		RigidForceGenerator* theGenerator = rfr->m_rigidGenerator;
+
+		theGenerator->UpdateForce(theRigid, deltaTime);
+	}
+}

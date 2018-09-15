@@ -62,6 +62,14 @@ void Ballistics::ConfigureBallisticsType()
 		m_physEntity->SetDamping(.99f);
 	}
 		break;
+	case FREEFALL:
+	{
+		m_physEntity->SetMass(1.f);
+		m_physEntity->SetLinearVelocity(Vector3::ZERO);
+		m_physEntity->SetNetForce(Vector3::GRAVITY / 2.f);
+		m_physEntity->SetDamping(.99f);
+	}
+		break;
 	case NUM_BALLISTICS_TYPE:
 		break;
 	default: 
