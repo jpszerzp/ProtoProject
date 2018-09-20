@@ -8,15 +8,23 @@ public:
 	// laws of motion introduced
 	Quaternion m_orientation;
 	Vector3 m_angularVelocity;
-	Matrix44 m_cachedTransform;
-	Matrix33 m_inverseInertiaTensor;		// in body space
-	Matrix33 m_inverseInertiaTensorWorld;	// in world space
-	Vector3 m_forceAcc;
 	Vector3 m_torqueAcc;
 	float m_angularDamp;
 
+	Matrix44 m_cachedTransform;
+	//Matrix33 m_inverseInertiaTensor;		// in body space
+	Matrix33 m_inverseInertiaTensorWorld;	// in world space
+
 public:
-	void SetInverseInertiaTensor(const Matrix33& inertiaTensor);
+	Rigidbody3();
+	~Rigidbody3();
+
+	void InitializeRigid();
+
+	//void SetInverseInertiaTensor(const Matrix33& inertiaTensor);
+	void SetQuaternionIdentity();
+	void SetQuaternion(const Quaternion& orientation);
+	void SetQuaternion(const float r, const float x, const float y, const float z);
 
 	// just before integration
 	void CacheData();
@@ -27,8 +35,6 @@ public:
 		const Matrix33& inv_inertia_tensor_body,
 		const Matrix44& rot_mat);
 
-	// only to forceacc
-	void AddForce(Vector3 force) override;	
 	// only to torqueacc
 	void AddTorque(Vector3 torque);
 	// to force and torque acc
@@ -37,5 +43,5 @@ public:
 	Vector3 GetPointInWorld(const Vector3& pt_local);
 	void ClearAccs();
 
-	void Integrate(float deltaTime) override;
+	virtual void Integrate(float deltaTime) override;
 };

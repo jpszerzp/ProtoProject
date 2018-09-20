@@ -208,7 +208,7 @@ void DebugRenderTaskAABB3::SetDebugObject(AABB3 bounds)
 	float	scaleY	= (bounds.m_max.y - bounds.m_min.y) / 1.f;
 	float	scaleZ	= (bounds.m_max.z - bounds.m_min.z) / 1.f;
 
-	m_debugObj = new Cube(center, Vector3::ZERO, Vector3(scaleX, scaleY, scaleZ), Rgba::WHITE, "cube_pcu", "");
+	m_debugObj = new Cube(center, Vector3::ZERO, Vector3(scaleX, scaleY, scaleZ), Rgba::WHITE, "cube_pcu", "", MOVE_STATIC, BODY_PARTICLE);
 
 	// fill texture and shader of material only for debug object
 	// this is because debug obj material is not defined from .mat
@@ -275,7 +275,7 @@ void DebugRenderTaskQuad::SetDebugObject(Vector3 drawmin, Vector3 up, Vector3 ri
 	// scale
 	Vector3 scale = Vector3(width, height, 0.f);
 
-	m_debugObj = new Quad(center, rot, scale, Rgba::WHITE, "quad_pcu", "", false);
+	m_debugObj = new Quad(center, rot, scale, Rgba::WHITE, "quad_pcu", "", MOVE_STATIC, BODY_PARTICLE, false);
 
 	Material* material = m_debugObj->m_renderable->GetMaterial();
 	Shader* shader = renderer->CreateOrGetShader(shaderName);
@@ -311,7 +311,7 @@ void DebugRenderTaskQuad::SetDebugObject(Vector3 drawmin, Vector3 up, Vector3 ri
 	// scale
 	Vector3 scale = Vector3(width, height, 0.f);
 
-	m_debugObj = new Quad(center, rot, scale, Rgba::WHITE, "quad_pcu", "", uvBL, uvBR, uvTL, uvTR, false);
+	m_debugObj = new Quad(center, rot, scale, Rgba::WHITE, "quad_pcu", "", uvBL, uvBR, uvTL, uvTR, MOVE_STATIC, BODY_PARTICLE, false);
 
 	Material* material = m_debugObj->m_renderable->GetMaterial();
 	Shader* shader = renderer->CreateOrGetShader(shaderName);
@@ -361,7 +361,7 @@ void DebugRenderTaskPoint::SetDebugObject(Vector3 position, Vector3 rot, float s
 {
 	Renderer* renderer = Renderer::GetInstance();
 
-	m_debugObj = new Point(position, rot, size, Rgba::WHITE, "point_pcu", "");
+	m_debugObj = new Point(position, rot, size, Rgba::WHITE, "point_pcu", "", MOVE_STATIC, BODY_PARTICLE);
 	m_debugObj->m_debugOn = true;
 
 	Material* material = m_debugObj->m_renderable->GetMaterial();

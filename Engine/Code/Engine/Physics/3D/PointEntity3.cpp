@@ -1,47 +1,82 @@
 #include "Engine/Physics/3D/PointEntity3.hpp"
+#include "Engine/Input/InputSystem.hpp"
+#include "Engine/Core/EngineCommon.hpp"
 
-PointEntity3::PointEntity3(const Particle& primitive, bool isConst /*= false*/)
+//PointEntity3::PointEntity3(const Particle& primitive, bool isConst /*= false*/)
+//{
+//	m_primitive = primitive;
+//	m_const = isConst;
+//
+//	m_linearVelocity = Vector3::ZERO;
+//	m_center = primitive.m_position;
+//
+//	Vector3 rot = Vector3::ZERO;
+//	Vector3 scale = Vector3(primitive.m_size);
+//	m_entityTransform = Transform(m_center, rot, scale);
+//
+//	m_sphereBoundTransform = m_entityTransform;
+//	m_boxBoundTransform = m_entityTransform;
+//
+//	if (!m_const)
+//	{
+//		m_massData.m_mass = 1.f;
+//		//m_massData.m_inertia = .01f;
+//		m_massData.m_invMass = 1.f / m_massData.m_mass;
+//		//m_massData.m_invInertia = 1.f / m_massData.m_inertia;
+//	}
+//	else
+//	{
+//		m_massData.m_mass = 0.f;
+//		//m_massData.m_inertia = 0.f;
+//	}
+//
+//	if (m_massData.m_mass == 0.f)
+//	{
+//		m_massData.m_invMass = 0.f;			// infinite mass
+//	}
+//	//if (m_massData.m_inertia == 0.f)
+//	//{	
+//	//	m_massData.m_invInertia = 0.f;		// infinite inertia
+//	//}
+//
+//	//m_boundSphere = Sphere3(m_center, m_primitive.m_size / 2.f);
+//	m_boundSphere = BoundingSphere(m_center, m_primitive.m_size / 2.f);
+//	m_sphereBoundMesh = Mesh::CreateUVSphere(VERT_PCU, 18, 36);
+//
+//	Vector3 boundBoxMin = m_center - scale / 2.f;
+//	Vector3 boundBoxMax = m_center + scale / 2.f;
+//	m_boundBox = AABB3(boundBoxMin, boundBoxMax);
+//	m_boxBoundMesh = Mesh::CreateCube(VERT_PCU);
+//}
+
+PointEntity3::PointEntity3(const Particle& primitive, eMoveStatus moveStat)
 {
 	m_primitive = primitive;
-	m_const = isConst;
-
+	m_moveStatus = moveStat;
+	m_bodyID = BODY_PARTICLE;
+	
 	m_linearVelocity = Vector3::ZERO;
 	m_center = primitive.m_position;
-
+	
 	Vector3 rot = Vector3::ZERO;
 	Vector3 scale = Vector3(primitive.m_size);
 	m_entityTransform = Transform(m_center, rot, scale);
-
+	
 	m_sphereBoundTransform = m_entityTransform;
 	m_boxBoundTransform = m_entityTransform;
-
-	if (!m_const)
+	
+	if (m_moveStatus != MOVE_STATIC)
 	{
 		m_massData.m_mass = 1.f;
-		//m_massData.m_mass = 100.f;
-		m_massData.m_inertia = .01f;
 		m_massData.m_invMass = 1.f / m_massData.m_mass;
-		m_massData.m_invInertia = 1.f / m_massData.m_inertia;
 	}
 	else
-	{
-		m_massData.m_mass = 0.f;
-		m_massData.m_inertia = 0.f;
-	}
-
-	if (m_massData.m_mass == 0.f)
-	{
-		m_massData.m_invMass = 0.f;			// infinite mass
-	}
-	if (m_massData.m_inertia == 0.f)
-	{	
-		m_massData.m_invInertia = 0.f;		// infinite inertia
-	}
-
+		m_massData.m_invMass = 0.f;
+	
 	//m_boundSphere = Sphere3(m_center, m_primitive.m_size / 2.f);
 	m_boundSphere = BoundingSphere(m_center, m_primitive.m_size / 2.f);
 	m_sphereBoundMesh = Mesh::CreateUVSphere(VERT_PCU, 18, 36);
-
+	
 	Vector3 boundBoxMin = m_center - scale / 2.f;
 	Vector3 boundBoxMax = m_center + scale / 2.f;
 	m_boundBox = AABB3(boundBoxMin, boundBoxMax);
@@ -58,10 +93,12 @@ void PointEntity3::UpdateEntityPrimitive()
 	m_primitive.m_position = m_center;
 }
 
-void PointEntity3::Update(float deltaTime)
-{
-
-}
+//void PointEntity3::UpdateInput(float deltaTime)
+//{
+//	InputSystem* input = InputSystem::GetInstance();
+//	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_P))
+//		m_frozen = !m_frozen;
+//}
 
 void PointEntity3::Render(Renderer* renderer)
 {

@@ -1,6 +1,8 @@
 #include "Engine/Core/Primitive/Sphere.hpp"
 #include "Engine/Renderer/Renderable.hpp"
 #include "Engine/Physics/3D/SphereEntity3.hpp"
+#include "Engine/Physics/3D/SphereRB3.hpp"
+#include "Engine/Input/InputSystem.hpp"
 
 Sphere::Sphere()
 {
@@ -8,7 +10,8 @@ Sphere::Sphere()
 }
 
 Sphere::Sphere(Vector3 pos, Vector3 rot, Vector3 scale, 
-	Rgba tint, std::string meshName, std::string materialName, bool multipass,
+	Rgba tint, std::string meshName, std::string materialName,
+	eMoveStatus moveStat, eBodyIdentity bid, bool multipass,
 	eCompare compare, eCullMode cull, eWindOrder order)
 {
 	Renderer* renderer = Renderer::GetInstance();
@@ -37,7 +40,10 @@ Sphere::Sphere(Vector3 pos, Vector3 rot, Vector3 scale,
 
 	float radius = scale.x;
 	Sphere3 sphere3 = Sphere3(pos, radius);
-	m_physEntity = new SphereEntity3(sphere3);
+	if (bid == BODY_PARTICLE)
+		m_physEntity = new SphereEntity3(sphere3, moveStat);
+	else
+		m_physEntity = new SphereRB3(4.9f, sphere3, moveStat);
 	m_physEntity->SetEntityForPrimitive();
 }
 
@@ -48,19 +54,29 @@ Sphere::~Sphere()
 }
 
 
-void Sphere::Update(float)
+void Sphere::Update(float deltaTime)
 {
-	UpdateBasis();
+	//UpdateInput(deltaTime);
 
 	if (m_physDriven)
 	{
+		m_physEntity->Integrate(deltaTime);
+		m_physEntity->UpdateEntitiesTransforms();
+		m_physEntity->UpdateEntityPrimitive();
+		m_physEntity->UpdateBoundPrimitives();
 
+		m_renderable->m_transform = m_physEntity->GetEntityTransform();
 	}
-	else
-	{
 
-	}
+	UpdateBasis();
 }
+
+//void Sphere::UpdateInput(float deltaTime)
+//{
+//	InputSystem* inputSystem = InputSystem::GetInstance();
+//	if (inputSystem->WasKeyJustPressed(InputSystem::KEYBOARD_P))
+//		m_frozen = !m_frozen;
+//}
 
 void Sphere::Render(Renderer* renderer)
 {

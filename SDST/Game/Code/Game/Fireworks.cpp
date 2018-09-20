@@ -8,7 +8,7 @@
 
 
 Fireworks::Fireworks(Vector3 pos)
-	: Point(pos, Vector3::ZERO, 5.f, Rgba::GREEN, "point_pcu", "default")
+	: Point(pos, Vector3::ZERO, 5.f, Rgba::GREEN, "point_pcu", "default", MOVE_DYNAMIC, BODY_PARTICLE)
 {
 
 }
@@ -45,6 +45,8 @@ void Fireworks::Update(float deltaTime)
 				state->SetupFireworks(5.f, GetWorldPosition(), m_physEntity->GetLinearVelocity(), Vector3(2.f), Vector3(-2.f), true);
 		}
 	}
+
+	// for fireworks, do not draw basis 
 }
 
 void Fireworks::Render(Renderer* renderer)

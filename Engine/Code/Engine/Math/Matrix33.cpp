@@ -2,6 +2,7 @@
 #include "Engine/Math/MathUtils.hpp"
 
 const Matrix33 Matrix33::IDENTITY = Matrix33();
+const Matrix33 Matrix33::ZERO = Matrix33(0.f);
 
 Matrix33::Matrix33()
 {
@@ -16,6 +17,20 @@ Matrix33::Matrix33(const Vector3& i, const Vector3& j, const Vector3& k)
 	Ix = i.x; Jx = j.x; Kx = k.x;
 	Iy = i.y; Jy = j.y; Ky = k.y;
 	Iz = i.z; Jz = j.z; Kz = k.z;
+}
+
+Matrix33::Matrix33(const float* entries)
+{
+	Ix = entries[0];	Jx = entries[3];	Kx = entries[6];
+	Iy = entries[1];	Jy = entries[4];	Ky = entries[7];
+	Iz = entries[2];	Jz = entries[5];	Kz = entries[8];
+}
+
+Matrix33::Matrix33(float entry)
+{
+	Ix = entry; Jx = entry;	Kx = entry;	
+	Iy = entry;	Jy = entry;	Ky = entry;	
+	Iz = entry;	Jz = entry;	Kz = entry;	
 }
 
 Vector3 Matrix33::operator*(const Vector3& rhs) const

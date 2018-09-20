@@ -1,5 +1,10 @@
 #include "Engine/Physics/3D/RigidForceGenerator.hpp"
 
+/*
+ * Force generates torque as a product in current model.
+ * May use torque generator to generate torque exclusively.
+ */
+
 void GravityRigidForceGenerator::UpdateForce(Rigidbody3* body, float deltaTime)
 {
 	if (body->IsConst())
@@ -10,7 +15,7 @@ void GravityRigidForceGenerator::UpdateForce(Rigidbody3* body, float deltaTime)
 		return;
 
 	// force is always applying to COM
-	body->AddForce(m_gravity * body->GetMass());	
+	body->AddForce(m_gravity * body->GetMass3());	
 }	
 
 

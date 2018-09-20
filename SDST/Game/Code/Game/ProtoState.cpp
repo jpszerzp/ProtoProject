@@ -56,76 +56,76 @@ ProtoState::ProtoState()
 		m_sceneGraph->m_camera2D = m_UICamera;
 	}
 
-	q_0 = new Quad(Vector3(-10.f, 0.f, 0.f), Vector3(0.f, 0.f, 0.f), Vector3(1.f, 1.f, 1.f), Rgba::MEGENTA, "quad_pcu", "default", false);
+	q_0 = new Quad(Vector3(-10.f, 0.f, 0.f), Vector3(0.f, 0.f, 0.f), Vector3(1.f, 1.f, 1.f), Rgba::MEGENTA, "quad_pcu", "default", MOVE_STATIC, BODY_PARTICLE, false);
 	m_gameObjects.push_back(q_0);
 
-	Quad* q_1 = new Quad(Vector3(-10.f, 0.f, 5.f), Vector3::ZERO, Vector3(3.f, 0.2f, 1.f), Rgba::CYAN, "quad_pcu", "white", false);
+	Quad* q_1 = new Quad(Vector3(-10.f, 0.f, 5.f), Vector3::ZERO, Vector3(3.f, 0.2f, 1.f), Rgba::CYAN, "quad_pcu", "white", MOVE_STATIC, BODY_PARTICLE, false);
 	m_gameObjects.push_back(q_1);
 
-	Quad* q_2 = new Quad(Vector3(-10.f, 0.5f, 5.f), Vector3::ZERO, Vector3(3.f, 0.2f, 1.f), Rgba::GREEN, "quad_pcu", "white", false, false, COMPARE_GREATER);
+	Quad* q_2 = new Quad(Vector3(-10.f, 0.5f, 5.f), Vector3::ZERO, Vector3(3.f, 0.2f, 1.f), Rgba::GREEN, "quad_pcu", "white", MOVE_STATIC, BODY_PARTICLE, false, COMPARE_GREATER);
 	m_gameObjects.push_back(q_2);
 	
-	Quad* q_3 = new Quad(Vector3(-10.f, -0.5f, 5.f), Vector3::ZERO, Vector3(3.f, 0.2f, 1.f), Rgba::BLUE, "quad_pcu", "white", false, false, COMPARE_ALWAYS);
+	Quad* q_3 = new Quad(Vector3(-10.f, -0.5f, 5.f), Vector3::ZERO, Vector3(3.f, 0.2f, 1.f), Rgba::BLUE, "quad_pcu", "white", MOVE_STATIC, BODY_PARTICLE, false, COMPARE_ALWAYS);
 	m_gameObjects.push_back(q_3);
 
 	////////////////////////////////////////////////
 	// quad surrounding point light, face up
-	Quad* q_4 = new Quad(Vector3(0.f, 4.7f, 10.f), Vector3(-90.f, 0.f, 0.f), Vector3::ONE, Rgba::WHITE, "quad_lit", "lit", false, true);
+	Quad* q_4 = new Quad(Vector3(0.f, 4.7f, 10.f), Vector3(-90.f, 0.f, 0.f), Vector3::ONE, Rgba::WHITE, "quad_lit", "lit", MOVE_STATIC, BODY_PARTICLE, true);
 	q_4->m_renderable->GetMaterial()->m_useLight = true;
 	m_gameObjects.push_back(q_4);
 	m_sceneGraph->AddRenderable(q_4);		// lit in forward path
 
 	// face down
-	Quad* q_5 = new Quad(Vector3(0.f, 6.3f, 10.f), Vector3(90.f, 0.f, 0.f), Vector3::ONE, Rgba::WHITE, "quad_lit", "lit", false, true);
+	Quad* q_5 = new Quad(Vector3(0.f, 6.3f, 10.f), Vector3(90.f, 0.f, 0.f), Vector3::ONE, Rgba::WHITE, "quad_lit", "lit", MOVE_STATIC, BODY_PARTICLE, true);
 	q_5->m_renderable->GetMaterial()->m_useLight = true;
 	m_gameObjects.push_back(q_5);
 	m_sceneGraph->AddRenderable(q_5);		// lit in forward path
 
 	// face backward
-	Quad* q_6 = new Quad(Vector3(0.f, 5.5f, 10.8f), Vector3(0.f, 0.f, 0.f), Vector3::ONE, Rgba::WHITE, "quad_lit", "lit", false, true);
+	Quad* q_6 = new Quad(Vector3(0.f, 5.5f, 10.8f), Vector3(0.f, 0.f, 0.f), Vector3::ONE, Rgba::WHITE, "quad_lit", "lit", MOVE_STATIC, BODY_PARTICLE, true);
 	q_6->m_renderable->GetMaterial()->m_useLight = true;
 	m_gameObjects.push_back(q_6);
 	m_sceneGraph->AddRenderable(q_6);		// lit in forward path
 
 	// face forward
-	Quad* q_7 = new Quad(Vector3(0.f, 5.5f, 9.2f), Vector3(0.f, 180.f, 0.f), Vector3::ONE, Rgba::WHITE, "quad_lit", "lit", false, true);
+	Quad* q_7 = new Quad(Vector3(0.f, 5.5f, 9.2f), Vector3(0.f, 180.f, 0.f), Vector3::ONE, Rgba::WHITE, "quad_lit", "lit", MOVE_STATIC, BODY_PARTICLE, true);
 	q_7->m_renderable->GetMaterial()->m_useLight = true;
 	m_gameObjects.push_back(q_7);
 	m_sceneGraph->AddRenderable(q_7);		// lit in forward path
 
 	// face left
-	Quad* q_8 = new Quad(Vector3(0.8f, 5.5f, 10.f), Vector3(0.f, -90.f, 0.f), Vector3::ONE, Rgba::WHITE, "quad_lit", "lit", false, true);
+	Quad* q_8 = new Quad(Vector3(0.8f, 5.5f, 10.f), Vector3(0.f, -90.f, 0.f), Vector3::ONE, Rgba::WHITE, "quad_lit", "lit", MOVE_STATIC, BODY_PARTICLE, true);
 	q_8->m_renderable->GetMaterial()->m_useLight = true;
 	m_gameObjects.push_back(q_8);
 	m_sceneGraph->AddRenderable(q_8);		// lit in forward path
 
 	// face right
-	Quad* q_9 = new Quad(Vector3(-0.8f, 5.5f, 10.f), Vector3(0.f, 90.f, 0.f), Vector3::ONE, Rgba::WHITE, "quad_lit", "lit", false, true);
+	Quad* q_9 = new Quad(Vector3(-0.8f, 5.5f, 10.f), Vector3(0.f, 90.f, 0.f), Vector3::ONE, Rgba::WHITE, "quad_lit", "lit", MOVE_STATIC, BODY_PARTICLE, true);
 	q_9->m_renderable->GetMaterial()->m_useLight = true;
 	m_gameObjects.push_back(q_9);
 	m_sceneGraph->AddRenderable(q_9);		// lit in forward path
 	////////////////////////////////////////////////////////////////////
 
 	// spot light test quad
-	Quad* q_10 = new Quad(Vector3(-10.f, 4.5f, 10.f), Vector3(0.f, 0.f, 0.f), Vector3(5.f, 5.f, 5.f), Rgba::WHITE, "quad_lit", "lit", false, true);
+	Quad* q_10 = new Quad(Vector3(-10.f, 4.5f, 10.f), Vector3(0.f, 0.f, 0.f), Vector3(5.f, 5.f, 5.f), Rgba::WHITE, "quad_lit", "lit", MOVE_STATIC, BODY_PARTICLE, true);
 	q_10->m_renderable->GetMaterial()->m_useLight = true;
 	m_gameObjects.push_back(q_10);
 	m_sceneGraph->AddRenderable(q_10);
 
 	// directional light test quad
-	Quad* q_11 = new Quad(Vector3(-15.f, 4.5f, 10.f), Vector3(-90.f, 0.f, 0.f), Vector3(3.f, 3.f, 3.f), Rgba::WHITE, "quad_lit", "lit", false, true);
+	Quad* q_11 = new Quad(Vector3(-15.f, 4.5f, 10.f), Vector3(-90.f, 0.f, 0.f), Vector3(3.f, 3.f, 3.f), Rgba::WHITE, "quad_lit", "lit", MOVE_STATIC, BODY_PARTICLE, true);
 	q_11->m_renderable->GetMaterial()->m_useLight = true;
 	m_gameObjects.push_back(q_11);
 	m_sceneGraph->AddRenderable(q_11);
 
-	c_0 = new Cube(Vector3(-5.f, 0.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::GREEN, "cube_pcu", "default");
+	c_0 = new Cube(Vector3(-5.f, 0.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::GREEN, "cube_pcu", "default", MOVE_STATIC, BODY_PARTICLE);
 	m_gameObjects.push_back(c_0);
 	m_sceneGraph->AddRenderable(c_0);
 
-	c_1 = new Cube(Vector3::ZERO, Vector3::ZERO, Vector3::ONE, Rgba::RED, "cube_pcu", "default");
+	c_1 = new Cube(Vector3::ZERO, Vector3::ZERO, Vector3::ONE, Rgba::RED, "cube_pcu", "default", MOVE_STATIC, BODY_PARTICLE);
 	m_gameObjects.push_back(c_1);
 
-	s_0 = new Sphere(Vector3(10.f, 0.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::WHITE, "sphere_pcu", "default");
+	s_0 = new Sphere(Vector3(10.f, 0.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::WHITE, "sphere_pcu", "default", MOVE_STATIC, BODY_PARTICLE);
 	m_gameObjects.push_back(s_0);
 
 	ship_0 = new Ship(Vector3(10.f, 0.f, 10.f), Vector3::ZERO, Vector3(0.3f, 0.3f, 0.3f), Rgba::WHITE, "ship_lit", "ship_multipass", true);
@@ -137,7 +137,7 @@ ProtoState::ProtoState()
 	m_gameObjects.push_back(ship_1);
 
 	// point
-	p_0 = new Point(Vector3(5.f, 0.f, 0.f), Vector3::ZERO, 10.f, Rgba::WHITE, "point_pcu", "white");
+	p_0 = new Point(Vector3(5.f, 0.f, 0.f), Vector3::ZERO, 10.f, Rgba::WHITE, "point_pcu", "white", MOVE_STATIC, BODY_PARTICLE);
 	m_gameObjects.push_back(p_0);
 
 	// line

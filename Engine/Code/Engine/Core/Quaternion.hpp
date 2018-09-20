@@ -9,8 +9,11 @@ public:
 	float m_real;
 	Vector3 m_imaginary;
 
+	const static Quaternion IDENTITY;
+
 public:
 	Quaternion();
+	Quaternion(float real, float x, float y, float z);
 	Quaternion(float real, Vector3 imaginary);
 	~Quaternion();
 	Quaternion(const Quaternion& copy);

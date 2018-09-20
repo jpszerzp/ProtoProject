@@ -1,10 +1,12 @@
 #include "Engine/Core/Quaternion.hpp"
 #include "Engine/Math/MathUtils.hpp"
 
+const Quaternion Quaternion::IDENTITY = Quaternion(1.f, 0.f, 0.f, 0.f);		// no rotation
 
 Quaternion::Quaternion()
+	: m_real(0.f), m_imaginary(Vector3::ZERO)
 {
-
+	// quaternion zero identity
 }
 
 
@@ -27,6 +29,12 @@ Quaternion::Quaternion(const Quaternion& copy)
 	m_imaginary = copy.m_imaginary;
 }
 
+
+Quaternion::Quaternion(float real, float x, float y, float z)
+	: m_real(real), m_imaginary(Vector3(x, y, z))
+{
+
+}
 
 Quaternion& Quaternion::operator=(const Quaternion& copy)
 {
@@ -159,10 +167,10 @@ void Quaternion::AddScaledVector(const Vector3& vec, float scale)
 	Vector3 scaledVec = Vector3(vec.x * scale, vec.y * scale, vec.z * scale);
 	Quaternion quat = Quaternion(0.f, scaledVec);
 	quat *= *this;
-	m_real = quat.m_real * 0.5f;
-	m_imaginary.x = quat.m_imaginary.x * 0.5f;
-	m_imaginary.y = quat.m_imaginary.y * 0.5f;
-	m_imaginary.z = quat.m_imaginary.z * 0.5f;
+	m_real += quat.m_real * 0.5f;
+	m_imaginary.x += quat.m_imaginary.x * 0.5f;
+	m_imaginary.y += quat.m_imaginary.y * 0.5f;
+	m_imaginary.z += quat.m_imaginary.z * 0.5f;
 }
 
 Quaternion Quaternion::GetConjugate() const

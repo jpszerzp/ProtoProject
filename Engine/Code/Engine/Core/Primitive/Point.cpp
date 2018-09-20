@@ -1,4 +1,5 @@
 #include "Engine/Core/Primitive/Point.hpp"
+#include "Engine/Core/ErrorWarningAssert.hpp"
 #include "Engine/Renderer/Renderable.hpp"
 #include "Engine/Math/Particle.hpp"
 #include "Engine/Physics/3D/PointEntity3.hpp"
@@ -10,7 +11,8 @@ Point::Point()
 }
 
 Point::Point(Vector3 pos, Vector3 rot, float size, Rgba tint,
-	std::string meshName, std::string materialName, bool multiPass,
+	std::string meshName, std::string materialName,
+	eMoveStatus moveStat, eBodyIdentity bid, bool multiPass,
 	eCompare compare, eCullMode cull, eWindOrder order)
 {
 	Renderer* renderer = Renderer::GetInstance();
@@ -39,7 +41,9 @@ Point::Point(Vector3 pos, Vector3 rot, float size, Rgba tint,
 	m_desiredOrder = order;
 
 	Particle particle = Particle(pos, size);
-	m_physEntity = new PointEntity3(particle);
+	if (bid == BODY_PARTICLE)
+		m_physEntity = new PointEntity3(particle, moveStat);
+	TODO("point rigid body");
 	m_physEntity->SetEntityForPrimitive();
 }
 
@@ -52,7 +56,7 @@ Point::~Point()
 
 void Point::Update(float deltaTime)
 {
-	if (m_physDriven && !m_frozen)
+	if (m_physDriven)
 	{
 		m_physEntity->Integrate(deltaTime);
 		m_physEntity->UpdateEntitiesTransforms();		// including bound transforms
@@ -62,24 +66,18 @@ void Point::Update(float deltaTime)
 		// physics driven, hence update renderable transform
 		m_renderable->m_transform = m_physEntity->GetEntityTransform();
 	}
-	else
-	{
-
-	}
 
 	// update basis as needed
 	UpdateBasis();
 }
 
 
-void Point::UpdateInput(float)
-{
-	InputSystem* inputSystem = InputSystem::GetInstance();
-	if (inputSystem->WasKeyJustPressed(InputSystem::KEYBOARD_P))
-	{
-		m_frozen = !m_frozen;
-	}
-}
+//void Point::UpdateInput(float)
+//{
+//	InputSystem* inputSystem = InputSystem::GetInstance();
+//	if (inputSystem->WasKeyJustPressed(InputSystem::KEYBOARD_P))
+//		m_frozen = !m_frozen;
+//}
 
 void Point::ObjectDrivePosition(Vector3 pos)
 {

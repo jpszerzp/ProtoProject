@@ -14,7 +14,7 @@ public:
 	Vector3 m_max;
 
 public:
-	AABB3(){}
+	AABB3() : m_min(Vector3::ZERO), m_max(Vector3::ZERO){}
 	AABB3(Vector3 min, Vector3 max)
 		: m_min(min), m_max(max) {}
 	~AABB3(){}

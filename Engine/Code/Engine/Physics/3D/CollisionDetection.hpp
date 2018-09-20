@@ -7,6 +7,8 @@
 #include "Engine/Physics/3D/SphereEntity3.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
 
+#define MAX_CONTACTS 20
+
 /*
  * Contains data from contact generation.
  */
@@ -34,7 +36,7 @@ public:
 
 	float ComputeSeparatingVelocity() const;
 	void ResolveContact(float deltaTime);
-	void ResolveContactNaive();		// navie: positional change only
+	//void ResolveContactNaive();		// navie: positional change only
 
 private:
 	void ResolveVelocity(float deltaTime);
@@ -47,26 +49,13 @@ private:
 struct CollisionData3
 {
 	std::vector<Contact3> m_contacts;
-	std::vector<Contact3> m_impulsive_contacts;
 	uint m_maxContacts = 0;
-
-	/*
-	// coherence contact
-	Contact3* m_coherenceContacts;
-	uint m_coherenceContactsCount = 0;
-	*/
 
 	CollisionData3(){}
 	CollisionData3(uint max) { m_maxContacts = max; }
-	~CollisionData3()
-	{
-		ClearContacts();
-	}
+	~CollisionData3() { ClearContacts(); }
 
-	void ClearContacts()
-	{
-		m_contacts.clear();
-	}
+	void ClearContacts() { m_contacts.clear(); }
 
 	std::vector<Contact3>& GetContacts() { return m_contacts; }
 };

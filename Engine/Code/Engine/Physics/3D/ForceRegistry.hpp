@@ -3,30 +3,30 @@
 #include "Engine/Physics/3D/ForceGenerator.hpp"
 #include "Engine/Physics/3D/RigidForceGenerator.hpp"
 
-struct ForceRegistration
+struct ParticleForceRegistration
 {
 	Entity3* m_entity3;
 	ForceGenerator* m_generator;
 
-	ForceRegistration(Entity3* e, ForceGenerator* fg)
+	ParticleForceRegistration(Entity3* e, ForceGenerator* fg)
 		: m_entity3(e), m_generator(fg){}
-	~ForceRegistration(){}
+	~ParticleForceRegistration(){}
 };
 
 struct RigidbodyForceRegistration
 {
-	Entity3* m_entity3;
+	Rigidbody3* m_rb3;
 	RigidForceGenerator* m_rigidGenerator;
 
-	RigidbodyForceRegistration(Entity3* e, RigidForceGenerator* rfg)
-		: m_entity3(e), m_rigidGenerator(rfg){}
+	RigidbodyForceRegistration(Rigidbody3* rb, RigidForceGenerator* rfg)
+		: m_rb3(rb), m_rigidGenerator(rfg){}
 	~RigidbodyForceRegistration(){}
 };
 
-class ForceRegistry
+class ParticleForceRegistry
 {
 public:
-	std::vector<ForceRegistration*> m_registrations;
+	std::vector<ParticleForceRegistration*> m_registrations;
 
 public:
 	void Register(Entity3* e, ForceGenerator* generator);
@@ -43,5 +43,7 @@ public:
 	std::vector<RigidbodyForceRegistration*> m_registrations;
 
 public:
+	void Register(Rigidbody3* rb, RigidForceGenerator* rbGenerator);
+
 	void UpdateForces(float deltaTime);
 };

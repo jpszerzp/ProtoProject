@@ -14,8 +14,7 @@ protected:
 	float GetCurrentLength() const;
 
 public:
-	virtual uint FillContact(std::vector<Contact3>& contacts,
-		uint limit) const = 0;
+	virtual uint FillContact(std::vector<Contact3>& contacts) const = 0;
 };
 
 class Cable : public Link
@@ -25,8 +24,7 @@ public:
 	float m_cableRestitution;
 
 public:
-	virtual uint FillContact(std::vector<Contact3>& contacts,
-		uint limit) const override;
+	virtual uint FillContact(std::vector<Contact3>& contacts) const override;
 
 };
 
@@ -38,6 +36,5 @@ public:
 public:
 	Rod(float length, Point* p1, Point* p2);
 
-	virtual uint FillContact(std::vector<Contact3>& contacts,
-		uint limit) const override;
+	virtual uint FillContact(std::vector<Contact3>& contacts) const override;
 };

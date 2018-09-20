@@ -5,37 +5,32 @@
 
 #include <vector>
 
-/**
-* The contact resolution routine for particle contacts. One
-* resolver instance can be shared for the whole simulation.
-*/
+enum eResolveScheme
+{
+	RESOLVE_ALL,
+	RESOLVE_ITERATIVE
+};
+
 class ContactResolver
 {
 protected:
-	/**
-	* Holds the number of iterations allowed.
-	*/
 	uint m_iterations;
-	/**
-	* This is a performance tracking value - we keep a record
-	* of the actual number of iterations used.
-	*/
 	uint m_iterationsUsed;
+	eResolveScheme m_scheme;
+
+	CollisionData3* m_collision;
+
 public:
-	/**
-	* Creates a new contact resolver.
-	*/
-	ContactResolver(){}
-	ContactResolver(uint iterations);
+	ContactResolver();
+	ContactResolver(uint iterations, eResolveScheme scheme);
+	ContactResolver(eResolveScheme scheme);
 	~ContactResolver(){}
-	/**
-	* Sets the number of iterations that can be used.
-	*/
+
 	void SetIterations(uint iterations) { m_iterations = iterations; }
-	/**
-	* Resolves a set of particle contacts for both penetration
-	* and velocity.
-	*/
-	void ResolveContacts(std::vector<Contact3>& contacts,
-		uint numContacts, float deltaTime);
+	void ResolveContacts(float deltaTime);
+	void ResolveContactsIterative(float deltaTime);
+	void ResolveContactsAll(float deltaTime);
+	void ClearRecords();
+
+	CollisionData3* GetCollisionData() { return m_collision; }
 };

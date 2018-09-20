@@ -14,7 +14,7 @@ public:
 	float	m_radius;
 
 public:
-	Sphere3(){}
+	Sphere3() : m_center(Vector3::ZERO), m_radius(0.f){}
 	Sphere3(Vector3 center, float radius)
 		: m_center(center), m_radius(radius){}
 	~Sphere3(){}

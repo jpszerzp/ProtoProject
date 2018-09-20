@@ -31,14 +31,9 @@ void Entity3::SetNetForce(float f_x, float f_y, float f_z)
 	m_netforce = Vector3(f_x, f_y, f_z);
 }
 
-void Entity3::SetEntityForPrimitive()
-{
-
-}
-
 bool Entity3::HasInfiniteMass() const
 {
-	MassData data = GetMassData();
+	MassData3 data = GetMassData3();
 	if (data.m_invMass == 0.f)
 		return true;
 	return false;
@@ -57,27 +52,6 @@ void Entity3::UpdateEntitiesTransforms()
 	m_sphereBoundTransform.SetLocalPosition(m_center);
 	m_boxBoundTransform.SetLocalPosition(m_center);
 }
-
-void Entity3::UpdateEntityPrimitive()
-{
-
-}
-
-void Entity3::Update(float)
-{
-
-}
-
-void Entity3::Render(Renderer*)
-{
-
-}
-
-void Entity3::Translate(Vector3 translation)
-{
-
-}
-
 
 void Entity3::VerletIntegrate(float deltaTime)
 {
@@ -121,10 +95,13 @@ void Entity3::EulerIntegrate(float deltaTime)
 
 void Entity3::Integrate(float deltaTime)
 {
-	if (!m_verlet)
-		EulerIntegrate(deltaTime);
-	else
-		VerletIntegrate(deltaTime);
+	if (!m_frozen)
+	{
+		if (!m_verlet)
+			EulerIntegrate(deltaTime);
+		else
+			VerletIntegrate(deltaTime);
+	}
 
 	// reset net force
 	if (!m_forcePersistent)

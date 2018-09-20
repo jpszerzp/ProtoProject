@@ -51,12 +51,16 @@ Physics3State::Physics3State()
 		m_UICamera->SetProjectionOrtho(window->GetWindowWidth(), window->GetWindowHeight(), 0.f, 100.f);
 	}
 
+	// force registry 
+	m_particleRegistry = new ParticleForceRegistry();
+	m_rigidRegistry = new RigidForceRegistry();
+
 	// or, initialize into other shapes (cube, etc)
-	m_g0 = InitializePhysSphere(Vector3(-5.f, 0.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::RED);
-	m_g1 = InitializePhysCube(Vector3(0.f, 0.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::RED);
-	InitializePhysCube(Vector3(0.f, 0.f, 2.f), Vector3::ZERO, Vector3::ONE, Rgba::BLUE);
-	m_g2 = InitializePhysQuad(Vector3(0.f, -2.f, 0.f), Vector3(90.f, 0.f, 0.f), Vector3(200.f, 200.f, 1.f), Rgba::GREEN, true);
-	m_g3 = InitializePhysPoint(Vector3(5.f, 0.f, 0.f), Vector3::ZERO, 10.f, Rgba::WHITE);
+	m_g0 = InitializePhysSphere(Vector3(-5.f, 0.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_KINEMATIC, BODY_PARTICLE);
+	m_g1 = InitializePhysCube(Vector3(0.f, 0.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_KINEMATIC, BODY_PARTICLE);
+	InitializePhysCube(Vector3(0.f, 0.f, 2.f), Vector3::ZERO, Vector3::ONE, Rgba::BLUE, MOVE_KINEMATIC, BODY_PARTICLE);
+	m_g2 = InitializePhysQuad(Vector3(0.f, -2.f, 0.f), Vector3(90.f, 0.f, 0.f), Vector3(200.f, 200.f, 1.f), Rgba::GREEN, MOVE_STATIC, BODY_PARTICLE);
+	m_g3 = InitializePhysPoint(Vector3(5.f, 0.f, 0.f), Vector3::ZERO, 10.f, Rgba::WHITE, MOVE_STATIC, BODY_PARTICLE);
 	
 	// more customized game objects
 	m_ballistics = SetupBallistics(ARTILLERY, Vector3(6.f, 0.f, 0.f), true, Rgba::GREEN);
@@ -68,15 +72,11 @@ Physics3State::Physics3State()
 	// generate one particle for firework
 	SetupFireworks(5.f, Vector3(0.f, 0.f, 5.f), Vector3::ZERO, Vector3(0.f, 4.f, 0.f), Vector3(0.f, 4.f, 0.f), false);
 
-	// force registry 
-	m_registry = new ForceRegistry();
-	m_rigidRegistry = new RigidForceRegistry();
-
 	// points for springs
-	Point* sp_point_0 = InitializePhysPoint(Vector3(0.f, 10.f, 5.f), Vector3::ZERO, 10.f, Rgba::RED);
-	Point* sp_point_1 = InitializePhysPoint(Vector3(0.f, 5.f, 5.f), Vector3::ZERO, 10.f, Rgba::CYAN);
-	Point* asp_point_0 = InitializePhysPoint(Vector3(-5.f, 10.f, 5.f), Vector3::ZERO, 10.f, Rgba::RED);
-	Point* asp_point_1 = InitializePhysPoint(Vector3(-5.f, 5.f, 5.f), Vector3::ZERO, 10.f, Rgba::CYAN);
+	Point* sp_point_0 = InitializePhysPoint(Vector3(0.f, 10.f, 5.f), Vector3::ZERO, 10.f, Rgba::RED, MOVE_DYNAMIC, BODY_PARTICLE);
+	Point* sp_point_1 = InitializePhysPoint(Vector3(0.f, 5.f, 5.f), Vector3::ZERO, 10.f, Rgba::CYAN, MOVE_DYNAMIC, BODY_PARTICLE);
+	Point* asp_point_0 = InitializePhysPoint(Vector3(-5.f, 10.f, 5.f), Vector3::ZERO, 10.f, Rgba::RED, MOVE_DYNAMIC, BODY_PARTICLE);
+	Point* asp_point_1 = InitializePhysPoint(Vector3(-5.f, 5.f, 5.f), Vector3::ZERO, 10.f, Rgba::CYAN, MOVE_STATIC, BODY_PARTICLE);
 
 	// setting up registrations in the registry
 	// A. springs
@@ -86,11 +86,11 @@ Physics3State::Physics3State()
 	m_anchorSpring = SetupAnchorSpring(asp_point_0, asp_point_1, 3.f, 3.f);
 
 	// rod
-	Point* rod_point_0 = InitializePhysPoint(Vector3(-5.f, 5.f, 5.f), Vector3::ZERO, 10.f, Rgba::GREEN);
-	Point* rod_point_1 = InitializePhysPoint(Vector3(-10.f, 8.f, 5.f), Vector3::ZERO, 10.f, Rgba::GREEN);
+	Point* rod_point_0 = InitializePhysPoint(Vector3(-10.f, 5.f, 5.f), Vector3::ZERO, 10.f, Rgba::GREEN, MOVE_DYNAMIC, BODY_PARTICLE);
+	Point* rod_point_1 = InitializePhysPoint(Vector3(-15.f, 8.f, 5.f), Vector3::ZERO, 10.f, Rgba::GREEN, MOVE_DYNAMIC, BODY_PARTICLE);
 	float dist = (rod_point_0->GetWorldPosition() - rod_point_1->GetWorldPosition()).GetLength();
 	m_rod = SetupRod(dist, rod_point_0, rod_point_1);
-	
+
 	// verlet
 	Ballistics* verlet_basic_ballistics = SetupBallistics(FREEFALL, Vector3(7.f, 0.f, -.5f), true, Rgba::MEGENTA);
 	verlet_basic_ballistics->m_physEntity->SetVerlet(true);
@@ -101,8 +101,16 @@ Physics3State::Physics3State()
 	verlet_vel_ballistics->m_physEntity->SetVerlet(true);
 	verlet_vel_ballistics->m_physEntity->SetVerletScheme(VELOCITY_VERLET);
 
-	m_collisionData = new CollisionData3(20);	// allowing specified number of contact at max
-	m_contactResolver = new ContactResolver(2);
+	// rigid bodies and force registry
+	m_r0 = InitializePhysSphere(Vector3(5.f, 0.f, 5.f), Vector3::ZERO, Vector3::ONE, Rgba::GREEN, MOVE_DYNAMIC, BODY_RIGID);
+	m_r0->m_physEntity->SetFrozen(true);
+	GravityRigidForceGenerator* grg = new GravityRigidForceGenerator(Vector3::GRAVITY);
+	Rigidbody3* body = dynamic_cast<Rigidbody3*>(m_r0->m_physEntity);
+	m_rigidRegistry->Register(body, grg);
+
+	//m_collisionData = new CollisionData3(20);	// allowing specified number of contact at max
+	m_iterResolver = new ContactResolver(2, RESOLVE_ITERATIVE);
+	m_allResolver = new ContactResolver();
 
 	// debug
 	DebugRenderSet3DCamera(m_camera);
@@ -111,16 +119,16 @@ Physics3State::Physics3State()
 
 Physics3State::~Physics3State()
 {
-	delete m_collisionData;
-	m_collisionData = nullptr;
+	//delete m_collisionData;
+	//m_collisionData = nullptr;
 
 	m_spheres.clear();
 	m_cubes.clear();
 	m_quads.clear();
 	m_points.clear();
 
-	delete m_registry;
-	m_registry = nullptr;
+	delete m_particleRegistry;
+	m_particleRegistry = nullptr;
 
 	delete m_spring;
 	m_spring = nullptr;
@@ -130,20 +138,23 @@ Physics3State::~Physics3State()
 }
 
 
-Sphere* Physics3State::InitializePhysSphere(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint)
+Sphere* Physics3State::InitializePhysSphere(Vector3 pos, Vector3 rot, Vector3 scale,
+	Rgba tint, eMoveStatus moveStat, eBodyIdentity bid)
 {
-	Sphere* s = new Sphere(pos, rot, scale, tint, "sphere_pcu", "default");
+	Sphere* s = new Sphere(pos, rot, scale, tint, "sphere_pcu", "default", moveStat, bid);
 	s->m_physDriven = true;
 	m_gameObjects.push_back(s);
-	m_spheres.push_back(s);
+	if (bid != BODY_RIGID)
+		m_spheres.push_back(s);
 	s->m_physEntity->SetGameobject(s);
 
 	return s;
 }
 
-Cube* Physics3State::InitializePhysCube(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint)
+Cube* Physics3State::InitializePhysCube(Vector3 pos, Vector3 rot, Vector3 scale,
+	Rgba tint, eMoveStatus moveStat, eBodyIdentity bid)
 {
-	Cube* c = new Cube(pos, rot, scale, tint, "cube_pcu", "default");
+	Cube* c = new Cube(pos, rot, scale, tint, "cube_pcu", "default", moveStat, bid);
 	c->m_physDriven = true;
 	m_gameObjects.push_back(c);
 	m_cubes.push_back(c);
@@ -152,9 +163,10 @@ Cube* Physics3State::InitializePhysCube(Vector3 pos, Vector3 rot, Vector3 scale,
 	return c;
 }
 
-Quad* Physics3State::InitializePhysQuad(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint, bool isConst)
+Quad* Physics3State::InitializePhysQuad(Vector3 pos, Vector3 rot, Vector3 scale,
+	Rgba tint, eMoveStatus moveStat, eBodyIdentity bid)
 {
-	Quad* q = new Quad(pos, rot, scale, tint, "quad_pcu", "default", isConst, false, COMPARE_LESS, CULLMODE_FRONT);
+	Quad* q = new Quad(pos, rot, scale, tint, "quad_pcu", "default", moveStat, bid, false, COMPARE_LESS, CULLMODE_FRONT);
 	q->m_physDriven = true;
 	m_gameObjects.push_back(q);
 	m_quads.push_back(q);
@@ -163,10 +175,23 @@ Quad* Physics3State::InitializePhysQuad(Vector3 pos, Vector3 rot, Vector3 scale,
 	return q;
 }
 
-
-Point* Physics3State::InitializePhysPoint(Vector3 pos, Vector3 rot, float size, Rgba tint)
+/*
+Sphere* Physics3State::InitializeRigidSphere(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint)
 {
-	Point* pt = new Point(pos, rot, size, tint, "point_pcu", "default");
+	Sphere* s = new Sphere(pos, rot, scale, tint, "sphere_pcu", "default", true);
+	s->m_physDriven = true;
+	m_gameObjects.push_back(s);
+	m_spheres.push_back(s);
+	s->m_physEntity->SetGameobject(s);
+
+	return s;
+}
+*/
+
+Point* Physics3State::InitializePhysPoint(Vector3 pos, Vector3 rot, float size,
+	Rgba tint, eMoveStatus moveStat, eBodyIdentity bid)
+{
+	Point* pt = new Point(pos, rot, size, tint, "point_pcu", "default", moveStat, bid);
 	pt->m_physDriven = true;
 	m_gameObjects.push_back(pt);
 	m_points.push_back(pt);
@@ -177,12 +202,12 @@ Point* Physics3State::InitializePhysPoint(Vector3 pos, Vector3 rot, float size, 
 
 Fireworks* Physics3State::SetupFireworks(float age, Vector3 pos, Vector3 inheritVel, Vector3 maxVel, Vector3 minVel, bool lastRound)
 {
-	Fireworks* new_fireworks = new Fireworks(pos);
-	new_fireworks->Configure(age, inheritVel, maxVel, minVel, lastRound);
-	m_gameObjects.push_back(new_fireworks);
-	m_points.push_back(new_fireworks);
-	new_fireworks->m_physEntity->SetGameobject(new_fireworks);
-	return new_fireworks;
+	Fireworks* fw = new Fireworks(pos);
+	fw->Configure(age, inheritVel, maxVel, minVel, lastRound);
+	m_gameObjects.push_back(fw);
+	m_points.push_back(fw);
+	fw->m_physEntity->SetGameobject(fw);
+	return fw;
 }
 
 Ballistics* Physics3State::SetupBallistics(eBallisticsType type, Vector3 pos, bool frozen, Rgba color)
@@ -214,8 +239,8 @@ Spring* Physics3State::SetupSpring(Point* end1, Point* end2, float coef, float r
 	SpringGenerator* sg2 = new SpringGenerator(e1, coef, rl);
 
 	// register the generator with corresponding entity
-	m_registry->Register(e1, sg1);
-	m_registry->Register(e2, sg2);
+	m_particleRegistry->Register(e1, sg1);
+	m_particleRegistry->Register(e2, sg2);
 
 	return sp;
 }
@@ -236,7 +261,7 @@ AnchorSpring* Physics3State::SetupAnchorSpring(Point* end1, Point* end2, float c
 	AnchorSpringGenerator* asg1 = new AnchorSpringGenerator(e2->GetEntityCenter(), coef, rl);
 
 	// register the generator
-	m_registry->Register(e1, asg1);
+	m_particleRegistry->Register(e1, asg1);
 
 	return asp;
 }
@@ -247,6 +272,7 @@ Rod* Physics3State::SetupRod(float length, Point* p1, Point* p2)
 	return rod;
 }
 
+/*
 void Physics3State::ParticlePhysicsUpdate(float deltaTime)
 {
 	// force registry update
@@ -290,34 +316,13 @@ void Physics3State::RigidbodyPhysicsUpdate(float deltaTime)
 		rb3->Integrate(deltaTime);
 	}
 }
+*/
 
 void Physics3State::Update(float deltaTime)
 {
-	// input update
-	if (!DevConsoleIsOpen())
-	{
-		UpdateMouse(deltaTime);
-		UpdateKeyboard(deltaTime);
-	}
-
-	// physics update
-	RigidbodyPhysicsUpdate(deltaTime);
-	ParticlePhysicsUpdate(deltaTime);
-
-	// debug draws
-	DebugRenderUpdate(deltaTime);
-	for (int i = 0; i < m_collisionData->m_contacts.size(); ++i)
-	{
-		Contact3& contact = m_collisionData->m_contacts[i];
-
-		Vector3 point = contact.m_point;
-		Vector3 end = point + contact.m_normal * contact.m_penetration;
-
-		// causing lead due to property block
-		//DebugRenderPoint(0.01f, 5.f, point, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
-
-		DebugRenderLine(0.f, point, end, 5.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
-	}
+	UpdateInput(deltaTime);			// update input
+	UpdateGameobjects(deltaTime);	// update gameobjects
+	UpdateDebugDraw(deltaTime);		// update debug draw
 }
 
 void Physics3State::UpdateMouse(float deltaTime)
@@ -462,93 +467,35 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		m_g2->ToggleBoundBoxDebugDraw();
 	}
 
-	// g0 control
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_UP_ARROW))
-	{
-		if (m_g0->m_physDriven)
-		{
-			m_g0->EntityDriveTranslate(Vector3(0.f, 0.f, .025f));
-		}
-	}
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_DOWN_ARROW))
-	{
-		if (m_g0->m_physDriven)
-		{
-			m_g0->EntityDriveTranslate(Vector3(0.f, 0.f, -.025f));
-		}
-	}
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_LEFT_ARROW))
-	{
-		if (m_g0->m_physDriven)
-		{
-			m_g0->EntityDriveTranslate(Vector3(-.025f, 0.f, 0.f));
-		}
-	}
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_RIGHT_ARROW))
-	{
-		if (m_g0->m_physDriven)
-		{
-			m_g0->EntityDriveTranslate(Vector3(.025f, 0.f, 0.f));
-		}
-	}
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEUP))
-	{
-		if (m_g0->m_physDriven)
-		{
-			m_g0->EntityDriveTranslate(Vector3(0.f, .025f, 0.f));
-		}
-	}
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEDOWN))
-	{
-		if (m_g0->m_physDriven)
-		{
-			m_g0->EntityDriveTranslate(Vector3(0.f, -.025f, 0.f));
-		}
-	}
+		m_g0->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, 5.f));
+	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_DOWN_ARROW))
+		m_g0->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, -5.f));
+	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_LEFT_ARROW))
+		m_g0->GetEntity()->SetLinearVelocity(Vector3(-5.f, 0.f, 0.f));
+	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_RIGHT_ARROW))
+		m_g0->GetEntity()->SetLinearVelocity(Vector3(5.f, 0.f, 0.f));
+	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEUP))
+		m_g0->GetEntity()->SetLinearVelocity(Vector3(0.f, 5.f, 0.f));
+	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEDOWN))
+		m_g0->GetEntity()->SetLinearVelocity(Vector3(0.f, -5.f, 0.f));
+	else
+		m_g0->GetEntity()->SetLinearVelocity(Vector3::ZERO);
 
-	// g1 control
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_I))
-	{
-		if (m_g1->m_physDriven)
-		{
-			m_g1->EntityDriveTranslate(Vector3(0.f, 0.f, .025f));
-		}
-	}
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_K))
-	{
-		if (m_g1->m_physDriven)
-		{
-			m_g1->EntityDriveTranslate(Vector3(0.f, 0.f, -.025f));
-		}
-	}
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_J))
-	{
-		if (m_g1->m_physDriven)
-		{
-			m_g1->EntityDriveTranslate(Vector3(-.025f, 0.f, 0.f));
-		}
-	}
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_L))
-	{
-		if (m_g1->m_physDriven)
-		{
-			m_g1->EntityDriveTranslate(Vector3(.025f, 0.f, 0.f));
-		}
-	}
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_U))
-	{
-		if (m_g1->m_physDriven)
-		{
-			m_g1->EntityDriveTranslate(Vector3(0.f, .025f, 0.f));
-		}
-	}
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_O))
-	{
-		if (m_g1->m_physDriven)
-		{
-			m_g1->EntityDriveTranslate(Vector3(0.f, -.025f, 0.f));
-		}
-	}
+		m_g1->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, 5.f));
+	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_K))
+		m_g1->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, -5.f));
+	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_J))
+		m_g1->GetEntity()->SetLinearVelocity(Vector3(-5.f, 0.f, 0.f));
+	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_L))
+		m_g1->GetEntity()->SetLinearVelocity(Vector3(5.f, 0.f, 0.f));
+	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_U))
+		m_g1->GetEntity()->SetLinearVelocity(Vector3(0.f, 5.f, 0.f));
+	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_O))
+		m_g1->GetEntity()->SetLinearVelocity(Vector3(0.f, -5.f, 0.f));
+	else
+		m_g1->GetEntity()->SetLinearVelocity(Vector3::ZERO);
 
 	// camera update from input
 	Vector3 camForward = m_camera->GetLocalForward(); 
@@ -563,7 +510,49 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	m_camera->GetTransform().TranslateLocal(worldOffset); 
 }
 
+void Physics3State::UpdateInput(float deltaTime)
+{
+	if (!DevConsoleIsOpen())
+	{
+		UpdateMouse(deltaTime);
+		UpdateKeyboard(deltaTime);
+	}
+}
+
 void Physics3State::UpdateGameobjects(float deltaTime)
+{
+	UpdateForceRegistry(deltaTime);		// update force registry
+	UpdateGameobjectsCore(deltaTime);	// update GO core
+	UpdateContactGeneration();			// update contact generation
+	UpdateContactResolution(deltaTime);	// update contact resolution
+}
+
+void Physics3State::UpdateDebugDraw(float deltaTime)
+{
+	DebugRenderUpdate(deltaTime);
+	for (int i = 0; i < m_allResolver->GetCollisionData()->m_contacts.size(); ++i)
+	{
+		Contact3& contact = m_allResolver->GetCollisionData()->m_contacts[i];
+
+		Vector3 point = contact.m_point;
+		Vector3 end = point + contact.m_normal * contact.m_penetration;
+
+		// causing lead due to property block
+		//DebugRenderPoint(0.01f, 5.f, point, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
+
+		DebugRenderLine(0.f, point, end, 5.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
+	}
+}
+
+void Physics3State::UpdateForceRegistry(float deltaTime)
+{
+	if (m_particleRegistry != nullptr)
+		m_particleRegistry->UpdateForces(deltaTime);
+	if (m_rigidRegistry != nullptr)
+		m_rigidRegistry->UpdateForces(deltaTime);
+}
+
+void Physics3State::UpdateGameobjectsCore(float deltaTime)
 {
 	for (std::vector<GameObject*>::size_type idx = 0; idx < m_gameObjects.size(); ++idx)
 	{
@@ -579,7 +568,118 @@ void Physics3State::UpdateGameobjects(float deltaTime)
 	}
 }
 
+void Physics3State::UpdateContactGeneration()
+{
+	m_iterResolver->ClearRecords();
+	m_allResolver->ClearRecords();
 
+	// hard constraints use iterative solver
+	m_rod->FillContact(m_iterResolver->GetCollisionData()->m_contacts);
+
+	// sphere
+	for (uint idx1 = 0; idx1 < m_spheres.size(); ++idx1)
+	{
+		// sphere vs sphere
+		for (uint idx2 = idx1 + 1; idx2 < m_spheres.size(); ++idx2)
+		{
+			Sphere* s1 = m_spheres[idx1];
+			Sphere* s2 = m_spheres[idx2];
+
+			SphereEntity3* se1 = dynamic_cast<SphereEntity3*>(s1->m_physEntity);
+			SphereEntity3* se2 = dynamic_cast<SphereEntity3*>(s2->m_physEntity);
+
+			Sphere3& sph1 = se1->GetSpherePrimitive();
+			Sphere3& sph2 = se2->GetSpherePrimitive();
+
+			CollisionDetector::Sphere3VsSphere3(sph1, sph2, m_allResolver->GetCollisionData());
+		}
+
+		// sphere vs plane
+		for (uint idx2 = 0; idx2 < m_quads.size(); ++idx2)
+		{
+			Sphere* sphere = m_spheres[idx1];
+			Quad* quad = m_quads[idx2];
+
+			SphereEntity3* se = dynamic_cast<SphereEntity3*>(sphere->m_physEntity);
+			QuadEntity3* qe = dynamic_cast<QuadEntity3*>(quad->m_physEntity);
+
+			Sphere3& sph = se->GetSpherePrimitive();
+			Plane& pl = qe->GetPlanePrimitive();
+
+			CollisionDetector::Sphere3VsPlane3(sph, pl, m_allResolver->GetCollisionData());
+		}
+
+		// sphere vs aabb3
+		for (uint idx2 = 0; idx2 < m_cubes.size(); ++idx2)
+		{
+			Sphere* sphere = m_spheres[idx1];
+			Cube* cube = m_cubes[idx2];
+
+			SphereEntity3* se = dynamic_cast<SphereEntity3*>(sphere->m_physEntity);
+			CubeEntity3* ce = dynamic_cast<CubeEntity3*>(cube->m_physEntity);
+
+			Sphere3& sph = se->GetSpherePrimitive();
+			AABB3& aabb3 = ce->GetCubePrimitive();
+
+			CollisionDetector::Sphere3VsAABB3(sph, aabb3, m_allResolver->GetCollisionData());
+		}
+	}
+
+	// cubes
+	for (uint idx1 = 0; idx1 < m_cubes.size(); ++idx1)
+	{
+		// aabb3 vs aabb3
+		for (uint idx2 = idx1 + 1; idx2 < m_cubes.size(); ++idx2)
+		{
+			Cube* c1 = m_cubes[idx1];
+			Cube* c2 = m_cubes[idx2];
+
+			CubeEntity3* ce1 = dynamic_cast<CubeEntity3*>(c1->m_physEntity);
+			CubeEntity3* ce2 = dynamic_cast<CubeEntity3*>(c2->m_physEntity);
+
+			AABB3& aabb3_1 = ce1->GetCubePrimitive();
+			AABB3& aabb3_2 = ce2->GetCubePrimitive();
+
+			CollisionDetector::AABB3VsAABB3Single(aabb3_1, aabb3_2, m_allResolver->GetCollisionData());
+		}
+
+		// aabb3 vs plane
+		for (uint idx2 = 0; idx2 < m_quads.size(); ++idx2)
+		{
+			Cube* cube = m_cubes[idx1];
+			Quad* plane = m_quads[idx2];
+
+			CubeEntity3* ce = dynamic_cast<CubeEntity3*>(cube->m_physEntity);
+			QuadEntity3* qe = dynamic_cast<QuadEntity3*>(plane->m_physEntity);
+
+			AABB3& aabb = ce->GetCubePrimitive();
+			Plane& pl = qe->GetPlanePrimitive();
+
+			// todo: modify this so that it returns one contact
+			CollisionDetector::AABB3VsPlane3Single(aabb, pl, m_allResolver->GetCollisionData());
+		}
+	}
+
+	// plane
+	for (uint idx1 = 0; idx1 < m_quads.size(); ++idx1)
+	{
+		// plane vs plane
+		for (uint idx2 = idx1; idx2 < m_quads.size(); ++idx2)
+		{
+
+		}
+	}
+
+	TODO("Generate contact for free points later");
+}
+
+void Physics3State::UpdateContactResolution(float deltaTime)
+{
+	m_iterResolver->ResolveContacts(deltaTime);
+	m_allResolver->ResolveContacts(deltaTime);
+}
+
+/*
 void Physics3State::SingleContactUpdate()
 {
 	m_collisionData->ClearContacts();
@@ -676,6 +776,7 @@ void Physics3State::SingleContactUpdate()
 		}
 	}
 }
+*/
 
 void Physics3State::Render(Renderer* renderer)
 {

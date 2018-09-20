@@ -11,7 +11,8 @@ Cube::Cube()
 
 
 Cube::Cube(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint,
-	std::string meshName, std::string materialName, bool multipass,
+	std::string meshName, std::string materialName, 
+	eMoveStatus moveStat, eBodyIdentity bid, bool multipass,
 	eCompare compare, eCullMode cull, eWindOrder order)
 {
 	Renderer* renderer = Renderer::GetInstance();
@@ -44,7 +45,9 @@ Cube::Cube(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint,
 	Vector3 aabbMin = pos - halfAABB;
 	Vector3 aabbMax = pos + halfAABB;
 	AABB3 aabb3 = AABB3(aabbMin, aabbMax);
-	m_physEntity = new CubeEntity3(aabb3);
+	if (bid == BODY_PARTICLE)
+		m_physEntity = new CubeEntity3(aabb3, moveStat);
+	TODO("cube rigid body");
 	m_physEntity->SetEntityForPrimitive();
 }
 
@@ -56,21 +59,19 @@ Cube::~Cube()
 }
 
 
-void Cube::Update(float)
+void Cube::Update(float deltaTime)
 {
-	UpdateBasis();
-
 	if (m_physDriven)
 	{
+		m_physEntity->Integrate(deltaTime);
+		m_physEntity->UpdateEntitiesTransforms();
+		m_physEntity->UpdateEntityPrimitive();
+		m_physEntity->UpdateBoundPrimitives();
 
+		m_renderable->m_transform = m_physEntity->GetEntityTransform();
 	}
-	else
-	{
-		// gameobject changes physics entity
-		TODO("Not physics driven,"
-			 "update entity transform with game object activity,"
-			 "also update entity aabb (in fact, all aabbs)");
-	}
+
+	UpdateBasis();
 }
 
 void Cube::Render(Renderer* renderer)

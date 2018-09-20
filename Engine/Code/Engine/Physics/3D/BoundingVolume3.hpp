@@ -1,10 +1,13 @@
 #pragma once
 #include "Engine/Math/Vector3.hpp"
+#include "Engine/Renderer/Renderer.hpp"
 
 struct BoundingSphere
 {
 	Vector3 m_center;
 	float m_radius;
+	Transform m_transform;			// assigned when BVH updated, used for non-leaves
+	Mesh* m_boundMesh = nullptr;	// used when this bounding sphere is not a leaf node in BVH
 
 public:
 	BoundingSphere() : m_center(Vector3::ZERO), m_radius(0.f){}
@@ -18,4 +21,6 @@ public:
 	// legacy 
 	void Translate(Vector3 translation);
 	void SetCenter(Vector3 center);
+
+	void DrawBound(Renderer* renderer);
 };

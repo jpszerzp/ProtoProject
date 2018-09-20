@@ -10,9 +10,8 @@ class GameObject
 {
 public:
 	bool		m_physDriven = false;
-	bool		m_kinematic = false;
 	bool		m_dead = false;
-	bool		m_frozen = false;
+	//bool		m_frozen = false;
 
 	bool		m_drawBasis = false;
 	bool		m_debugOn = false;
@@ -33,8 +32,8 @@ public:
 	Entity3* m_physEntity = nullptr;
 
 public:
-	virtual void Update(float deltaTime);
-	virtual void UpdateInput(float deltaTime);
+	virtual void Update(float deltaTime){}
+	virtual void UpdateInput(float deltaTime){}
 	virtual void UpdateBasis();
 
 	virtual void Render(Renderer* renderer);
@@ -47,6 +46,7 @@ public:
 	virtual void ObjectDrivePosition(Vector3 pos);
 
 	Vector3 GetWorldPosition();
+	Entity3* GetEntity() { return m_physEntity; }
 
 	GameObject();
 	~GameObject();

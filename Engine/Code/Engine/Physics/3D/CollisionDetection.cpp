@@ -31,6 +31,7 @@ Contact3::~Contact3()
 
 }
 
+/*
 void Contact3::ResolveContactNaive()
 {
 	// normal is toward first entity
@@ -40,8 +41,8 @@ void Contact3::ResolveContactNaive()
 	// calculate proportions for entities in correcting positions
 	if (!m_e1->IsConst() && !m_e2->IsConst())
 	{
-		float mass1 = m_e1->GetMassData().m_mass;
-		float mass2 = m_e2->GetMassData().m_mass;
+		float mass1 = m_e1->GetMassData3().m_mass;
+		float mass2 = m_e2->GetMassData3().m_mass;
 		Vector3 correction1 = m_normal * (m_penetration * (mass2 / (mass1 + mass2)));
 		Vector3 correction2 = -m_normal * (m_penetration * (mass1 / (mass1 + mass2)));
 
@@ -65,6 +66,7 @@ void Contact3::ResolveContactNaive()
 
 	}
 }
+*/
 
 void Contact3::ResolveContact(float deltaTime)
 {
@@ -115,10 +117,10 @@ void Contact3::ResolveVelocity(float deltaTime)
 	// We apply the change in velocity to each object in proportion to
 	// its inverse mass (i.e., those with lower inverse mass [higher
 	// actual mass] get less change in velocity).
-	float e1_inv_mass = m_e1->GetMassData().m_invMass;
+	float e1_inv_mass = m_e1->GetMassData3().m_invMass;
 	float e2_inv_mass = 0.f;
 	if (m_e2 != nullptr)
-		e2_inv_mass = m_e2->GetMassData().m_invMass;
+		e2_inv_mass = m_e2->GetMassData3().m_invMass;
 	float total_inv_mass = e1_inv_mass + e2_inv_mass;
 	// If all particles have infinite mass, then impulses have no effect.
 	if (total_inv_mass <= 0.f) 
@@ -128,14 +130,19 @@ void Contact3::ResolveVelocity(float deltaTime)
 	// Find the amount of impulse per unit of inverse mass.
 	Vector3 impulse_per_inv_mass = m_normal * impulse_amount;
 
+
 	// Apply impulses: they are applied in the direction of the contact,
 	// and are proportional to the inverse mass.
-	m_e1->SetLinearVelocity(m_e1->GetLinearVelocity() +
-		impulse_per_inv_mass * m_e1->GetMassData().m_invMass);
+	if (!m_e1->IsEntityStatic() && !m_e1->IsEntityKinematic())
+		m_e1->SetLinearVelocity(m_e1->GetLinearVelocity() +
+			impulse_per_inv_mass * m_e1->GetMassData3().m_invMass);
 	if (m_e2 != nullptr)
-		// Particle 1 goes in the opposite direction.
-		m_e2->SetLinearVelocity(m_e2->GetLinearVelocity() +
-			impulse_per_inv_mass * (-m_e2->GetMassData().m_invMass));
+	{
+		if (!m_e2->IsEntityStatic() && !m_e2->IsEntityKinematic())
+			// Particle 1 goes in the opposite direction.
+			m_e2->SetLinearVelocity(m_e2->GetLinearVelocity() +
+				impulse_per_inv_mass * (-m_e2->GetMassData3().m_invMass));
+	}
 }
 
 void Contact3::ResolvePenetration(float deltaTime)
@@ -145,10 +152,10 @@ void Contact3::ResolvePenetration(float deltaTime)
 		return;
 	// The movement of each object is based on its inverse mass, so
 	// total that.
-	float e1_inv_mass = m_e1->GetMassData().m_invMass;
+	float e1_inv_mass = m_e1->GetMassData3().m_invMass;
 	float e2_inv_mass = 0.f;
 	if (m_e2 != nullptr)
-		e2_inv_mass = m_e2->GetMassData().m_invMass;
+		e2_inv_mass = m_e2->GetMassData3().m_invMass;
 	float total_inv_mass = e1_inv_mass + e2_inv_mass;
 	// If all particles have infinite mass, then we do nothing.
 	if (total_inv_mass <= 0) 
@@ -156,12 +163,14 @@ void Contact3::ResolvePenetration(float deltaTime)
 	// Find the amount of penetration resolution per unit of inverse mass.
 	Vector3 move_per_inv_mass = m_normal * (m_penetration / total_inv_mass);
 	// Apply the penetration resolution.
-	m_e1->SetEntityCenter(m_e1->GetEntityCenter() +
-		move_per_inv_mass * m_e1->GetMassData().m_invMass);
+	if (!m_e1->IsEntityStatic())
+		m_e1->SetEntityCenter(m_e1->GetEntityCenter() +
+			move_per_inv_mass * m_e1->GetMassData3().m_invMass);
 	if (m_e2 != nullptr)
 	{
-		m_e2->SetEntityCenter(m_e2->GetEntityCenter() +
-			move_per_inv_mass * (-m_e2->GetMassData().m_invMass));
+		if (!m_e2->IsEntityStatic())
+			m_e2->SetEntityCenter(m_e2->GetEntityCenter() +
+				move_per_inv_mass * (-m_e2->GetMassData3().m_invMass));
 	}
 }
 

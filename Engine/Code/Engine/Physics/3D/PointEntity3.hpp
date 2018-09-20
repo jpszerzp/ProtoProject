@@ -9,11 +9,12 @@ private:
 	Particle m_primitive;
 
 public:
-	PointEntity3(const Particle& primitive, bool isConst = false);
+	//PointEntity3(const Particle& primitive, bool isConst = false);
+	PointEntity3(const Particle& primitive, eMoveStatus moveStat);
 	~PointEntity3();
 
 	void UpdateEntityPrimitive() override;
-	void Update(float deltaTime) override;
+	//void UpdateInput(float deltaTime) override;
 	void Render(Renderer* renderer) override;
 
 	void Translate(Vector3 translation) override;

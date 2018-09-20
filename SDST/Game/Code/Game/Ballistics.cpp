@@ -1,4 +1,5 @@
 #include "Engine/Renderer/Renderable.hpp"
+#include "Engine/Input/InputSystem.hpp"
 #include "Game/Ballistics.hpp"
 
 Ballistics::Ballistics()
@@ -7,16 +8,16 @@ Ballistics::Ballistics()
 }
 
 Ballistics::Ballistics(eBallisticsType type, Vector3 pos)
-	: Point(pos, Vector3::ZERO, 10.f, Rgba::WHITE, "point_pcu", "default")
+	: Point(pos, Vector3::ZERO, 10.f, Rgba::WHITE, "point_pcu", "default", MOVE_DYNAMIC, BODY_PARTICLE)
 {
 	m_type = type;
 	ConfigureBallisticsType();
 }
 
 Ballistics::Ballistics(eBallisticsType type, Vector3 pos, bool frozen, Rgba color)
-	: Point(pos, Vector3::ZERO, 10.f, color, "point_pcu", "default")
+	: Point(pos, Vector3::ZERO, 10.f, color, "point_pcu", "default", MOVE_DYNAMIC, BODY_PARTICLE)
 {
-	m_frozen = frozen;
+	m_physEntity->SetFrozen(frozen);
 	m_type = type;
 	ConfigureBallisticsType();
 }
@@ -82,17 +83,24 @@ void Ballistics::Update(float deltaTime)
 	UpdateInput(deltaTime);
 
 	// Ballistics is supposed to be physics driven by nature, hence I do not check it here
-	if (!m_frozen)
-	{
-		m_physEntity->Integrate(deltaTime);
-		m_physEntity->UpdateEntitiesTransforms();
-		m_physEntity->UpdateEntityPrimitive();
-		m_physEntity->UpdateBoundPrimitives();
+	m_physEntity->Integrate(deltaTime);
+	m_physEntity->UpdateEntitiesTransforms();
+	m_physEntity->UpdateEntityPrimitive();
+	m_physEntity->UpdateBoundPrimitives();
 
-		// physics driven, hence update renderable transform
-		m_renderable->m_transform = m_physEntity->GetEntityTransform();
-	}
+	// physics driven, hence update renderable transform
+	m_renderable->m_transform = m_physEntity->GetEntityTransform();
 
 	UpdateBasis();
+}
+
+void Ballistics::UpdateInput(float deltaTime)
+{
+	InputSystem* input = InputSystem::GetInstance();
+	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_P))
+	{
+		bool frostness = m_physEntity->IsFrozen();
+		m_physEntity->SetFrozen(!frostness);
+	}
 }
 

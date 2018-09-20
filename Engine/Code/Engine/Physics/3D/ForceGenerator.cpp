@@ -6,7 +6,7 @@ void GravityGenerator::UpdateForce(Entity3* entity3D, float deltaTime)
 	if (entity3D->IsConst())
 		return;
 
-	entity3D->AddForce(m_gravity * entity3D->GetMass());
+	entity3D->AddForce(m_gravity * entity3D->GetMass3());
 }
 
 void DragGenerator::UpdateForce(Entity3* entity3D, float deltaTime)

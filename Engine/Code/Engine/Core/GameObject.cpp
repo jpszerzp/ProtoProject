@@ -30,19 +30,6 @@ GameObject::~GameObject()
 	m_physEntity = nullptr;
 }
 
-
-void GameObject::Update(float)
-{
-
-}
-
-
-void GameObject::UpdateInput(float)
-{
-
-}
-
-
 void GameObject::UpdateBasis()
 {
 	if (m_drawBasis)

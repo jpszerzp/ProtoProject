@@ -7,9 +7,12 @@ class Matrix33
 public:
 	float Ix, Iy, Iz, Jx, Jy, Jz, Kx, Ky, Kz;
 	static const Matrix33 IDENTITY;
+	static const Matrix33 ZERO;
 
 	Matrix33();
+	Matrix33(float entry);
 	~Matrix33(){}
+	explicit Matrix33(const float* entries);
 	explicit Matrix33(const Vector3& i, const Vector3& j, const Vector3& k);
 
 	Vector3 operator*(const Vector3& rhs) const;

@@ -1,4 +1,5 @@
 #include "Engine/Core/Primitive/Quad.hpp"
+#include "Engine/Core/ErrorWarningAssert.hpp"
 #include "Engine/Renderer/Renderable.hpp"
 #include "Engine/Math/MathUtils.hpp"
 #include "Engine/Math/Plane.hpp"
@@ -12,7 +13,8 @@ Quad::Quad()
 
 Quad::Quad(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint, std::string meshName,
 	std::string materialName, Vector2 uvBL, Vector2 uvBR, Vector2 uvTL, Vector2 uvTR,
-	bool isConst, bool multipass, eCompare compare, eCullMode cull, eWindOrder order)
+	eMoveStatus moveStat, eBodyIdentity bid, bool multipass, 
+	eCompare compare, eCullMode cull, eWindOrder order)
 {
 	Renderer* renderer = Renderer::GetInstance();
 
@@ -41,13 +43,16 @@ Quad::Quad(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint, std::string meshN
 	Vector3 worldForward = transform.GetWorldForward();				// same as normal
 	float offset = DotProduct(pos, worldForward.GetNormalized());
 	Plane plane = Plane(worldForward, offset);
-	m_physEntity = new QuadEntity3(plane, isConst, pos, rot, scale);
+	if (bid == BODY_PARTICLE)
+		m_physEntity = new QuadEntity3(plane, moveStat, pos, rot, scale);
+	TODO("quad rigid body");
 	m_physEntity->SetEntityForPrimitive();
 }
 
 
 Quad::Quad(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint, std::string meshName,
-	std::string materialName, bool isConst, bool multipass, eCompare compare, eCullMode cull, eWindOrder order)
+	std::string materialName, eMoveStatus moveStat, eBodyIdentity bid, bool multipass,
+	eCompare compare, eCullMode cull, eWindOrder order)
 {
 	Renderer* renderer = Renderer::GetInstance();
 
@@ -76,7 +81,9 @@ Quad::Quad(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint, std::string meshN
 	Vector3 worldForward = transform.GetWorldForward();				// same as normal
 	float offset = DotProduct(pos, worldForward.GetNormalized());
 	Plane plane = Plane(worldForward, offset);
-	m_physEntity = new QuadEntity3(plane, isConst, pos, rot, scale);
+	if (bid == BODY_PARTICLE)
+		m_physEntity = new QuadEntity3(plane, moveStat, pos, rot, scale);
+	TODO("quad rigid body");
 	m_physEntity->SetEntityForPrimitive();
 }
 
@@ -88,18 +95,19 @@ Quad::~Quad()
 }
 
 
-void Quad::Update(float)
+void Quad::Update(float deltaTime)
 {
-	UpdateBasis();
-
 	if (m_physDriven)
 	{
+		m_physEntity->Integrate(deltaTime);
+		m_physEntity->UpdateEntitiesTransforms();
+		m_physEntity->UpdateEntityPrimitive();
+		m_physEntity->UpdateBoundPrimitives();
 
+		m_renderable->m_transform = m_physEntity->GetEntityTransform();
 	}
-	else
-	{
 
-	}
+	UpdateBasis();
 }
 
 

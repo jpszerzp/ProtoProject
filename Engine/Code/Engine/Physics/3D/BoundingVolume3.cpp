@@ -66,3 +66,28 @@ void BoundingSphere::SetCenter(Vector3 center)
 {
 	m_center = center;
 }
+
+void BoundingSphere::DrawBound(Renderer* renderer)
+{
+	// if at leaf, we can set this mesh to null so that this draw is ignored
+	if (m_boundMesh != nullptr)
+	{
+		Shader* shader = renderer->CreateOrGetShader("wireframe");
+		renderer->UseShader(shader);
+
+		Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
+		renderer->SetTexture2D(0, texture);
+		renderer->SetSampler2D(0, texture->GetSampler());
+
+		renderer->m_objectData.model = m_transform.GetWorldMatrix();
+
+		Vector4 colorV4;
+		Rgba color = Rgba::BLUE;
+		color.GetAsFloats(colorV4.x, colorV4.y, colorV4.z, colorV4.w);
+		renderer->m_colorData.rgba = colorV4;
+		renderer->SetColorUBO(shader->GetShaderProgram()->GetHandle());
+
+		glLineWidth(1.f);
+		renderer->DrawMesh(m_boundMesh);
+	}
+}

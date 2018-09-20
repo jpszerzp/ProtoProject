@@ -6,7 +6,7 @@ float Link::GetCurrentLength() const
 	return rel_pos.GetLength();
 }
 
-uint Cable::FillContact(std::vector<Contact3>& contacts, uint) const
+uint Cable::FillContact(std::vector<Contact3>& contacts) const
 {
 	float length = GetCurrentLength();
 
@@ -14,18 +14,18 @@ uint Cable::FillContact(std::vector<Contact3>& contacts, uint) const
 		return 0;		// have not overextended
 
 	// have overextended, create new contact
-	Contact3 new_contact = Contact3();
-	new_contact.m_e1 = m_p1->m_physEntity;
-	new_contact.m_e2 = m_p2->m_physEntity;
+	Contact3 contact = Contact3();
+	contact.m_e1 = m_p1->m_physEntity;
+	contact.m_e2 = m_p2->m_physEntity;
 
 	Vector3 normal = m_p2->GetWorldPosition() - m_p1->GetWorldPosition();
 	normal.NormalizeAndGetLength();
-	new_contact.m_normal = normal;
+	contact.m_normal = normal;
 
-	new_contact.m_penetration = length - m_maxLength;
-	new_contact.m_restitution = m_cableRestitution;
+	contact.m_penetration = length - m_maxLength;
+	contact.m_restitution = m_cableRestitution;
 
-	contacts.push_back(new_contact);
+	contacts.push_back(contact);
 
 	return 1;
 }
@@ -49,10 +49,8 @@ Rod::Rod(float length, Point* p1, Point* p2)
 	m_p2->m_physEntity->SetNetForcePersistent(true);
 }
 
-uint Rod::FillContact(std::vector<Contact3>& contacts, uint) const
+uint Rod::FillContact(std::vector<Contact3>& contacts) const
 {
-	contacts.clear();
-
 	float length = GetCurrentLength();
 
 	if (length == m_length)

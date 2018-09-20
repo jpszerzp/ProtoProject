@@ -1,16 +1,53 @@
 #include "Engine/Physics/3D/Rigidbody3.hpp"
 
-void Rigidbody3::SetInverseInertiaTensor(const Matrix33& inertiaTensor)
+Rigidbody3::Rigidbody3()
 {
-	m_inverseInertiaTensor.SetInverse(inertiaTensor);
+	InitializeRigid();
 }
 
+Rigidbody3::~Rigidbody3()
+{
+
+}
+
+void Rigidbody3::InitializeRigid()
+{
+	// basic setup for a general rigid body
+	SetQuaternionIdentity();
+	m_angularVelocity = Vector3::ZERO;
+	m_cachedTransform = Matrix44::IDENTITY;
+	m_torqueAcc = Vector3::ZERO;
+	m_angularDamp = 0.f;
+}
+
+//void Rigidbody3::SetInverseInertiaTensor(const Matrix33& inertiaTensor)
+//{
+//	m_inverseInertiaTensor.SetInverse(inertiaTensor);
+//}
+
+
+void Rigidbody3::SetQuaternionIdentity()
+{
+	SetQuaternion(Quaternion::IDENTITY);
+}
+
+void Rigidbody3::SetQuaternion(const Quaternion& orientation)
+{
+	m_orientation = orientation;
+	m_orientation.Normalize();
+}
+
+void Rigidbody3::SetQuaternion(const float r, const float x, const float y, const float z)
+{
+	SetQuaternion(Quaternion(r, x, y, z));
+	m_orientation.Normalize();
+}
 
 void Rigidbody3::CacheData()
 {
 	m_orientation.Normalize();
 	CacheTransform(m_cachedTransform, m_center, m_orientation);
-	CacheInverseInertiaTensorWorld(m_inverseInertiaTensorWorld, m_inverseInertiaTensor, m_cachedTransform);
+	CacheInverseInertiaTensorWorld(m_inverseInertiaTensorWorld, m_massData.m_invTensor, m_cachedTransform);
 }
 
 void Rigidbody3::CacheTransform(Matrix44& transform, const Vector3& position, const Quaternion& orientation)
@@ -81,10 +118,6 @@ void Rigidbody3::CacheInverseInertiaTensorWorld(Matrix33& inv_inertia_tensor_wor
 	inv_inertia_tensor_world.Kz = t52 * rot_mat.Iz + t57 * rot_mat.Jz + t62 * rot_mat.Kz;
 }
 
-void Rigidbody3::AddForce(Vector3 force)
-{
-	m_forceAcc += force;
-}
 
 void Rigidbody3::AddTorque(Vector3 torque)
 {
@@ -104,7 +137,7 @@ void Rigidbody3::AddForcePointWorldCoord(const Vector3& force, const Vector3 poi
 	Vector3 pt = point_world;
 	pt -= m_center;
 
-	m_forceAcc += force;
+	m_netforce += force;
 	m_torqueAcc += pt.Cross(force);
 }
 
@@ -117,28 +150,32 @@ Vector3 Rigidbody3::GetPointInWorld(const Vector3& pt_local)
 
 void Rigidbody3::ClearAccs()
 {
-	m_forceAcc = Vector3::ZERO;
+	m_netforce = Vector3::ZERO;
 	m_torqueAcc = Vector3::ZERO;
 }
 
 void Rigidbody3::Integrate(float deltaTime)
 {
-	// acc
-	m_linearAcceleration = m_forceAcc * m_massData.m_invMass;
-	Vector3 angularAcc = m_inverseInertiaTensorWorld * m_torqueAcc;
-
-	// vel
-	m_linearVelocity += m_linearAcceleration * deltaTime;
-	m_angularVelocity += angularAcc * deltaTime;
-
-	// damp on vel
-	m_linearVelocity *= powf(m_linearDamp, deltaTime);
-	m_angularVelocity *= powf(m_angularDamp, deltaTime);
-
-	// pos
-	m_center += m_linearVelocity * deltaTime;
-	m_orientation.AddScaledVector(m_angularVelocity, deltaTime);
-
 	CacheData();
+
+	if (!m_frozen)
+	{
+		// acc
+		m_linearAcceleration = m_netforce * m_massData.m_invMass;
+		Vector3 angularAcc = m_inverseInertiaTensorWorld * m_torqueAcc;
+
+		// vel
+		m_linearVelocity += m_linearAcceleration * deltaTime;
+		m_angularVelocity += angularAcc * deltaTime;
+
+		// damp on vel
+		m_linearVelocity *= powf(m_linearDamp, deltaTime);	// damp 1 means no damp	
+		m_angularVelocity *= powf(m_angularDamp, deltaTime);
+
+		// pos
+		m_center += m_linearVelocity * deltaTime;
+		m_orientation.AddScaledVector(m_angularVelocity, deltaTime);
+	}
+
 	ClearAccs();
 }

@@ -26,4 +26,5 @@ public:
 	void ConfigureBallisticsType();
 
 	void Update(float deltaTime) override;
+	void UpdateInput(float deltaTime) override;
 };

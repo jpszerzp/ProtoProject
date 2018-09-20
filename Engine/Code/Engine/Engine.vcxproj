@@ -357,6 +357,7 @@
     <ClCompile Include="Physics\3D\Rigidbody3.cpp" />
     <ClCompile Include="Physics\3D\RigidForceGenerator.cpp" />
     <ClCompile Include="Physics\3D\SphereEntity3.cpp" />
+    <ClCompile Include="Physics\3D\SphereRB3.cpp" />
     <ClCompile Include="Physics\MassData.cpp" />
     <ClCompile Include="Physics\PhysicsMaterial.cpp" />
     <ClCompile Include="Physics\PhysicsPhase.cpp" />
@@ -510,6 +511,7 @@
     <ClInclude Include="Physics\3D\Rigidbody3.hpp" />
     <ClInclude Include="Physics\3D\RigidForceGenerator.hpp" />
     <ClInclude Include="Physics\3D\SphereEntity3.hpp" />
+    <ClInclude Include="Physics\3D\SphereRB3.hpp" />
     <ClInclude Include="Physics\MassData.hpp" />
     <ClInclude Include="Physics\PhysicsMaterial.hpp" />
     <ClInclude Include="Physics\PhysicsPhase.hpp" />

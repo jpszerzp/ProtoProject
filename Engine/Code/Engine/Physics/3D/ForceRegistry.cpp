@@ -1,19 +1,19 @@
 #include "Engine/Physics/3D/ForceRegistry.hpp"
 
-void ForceRegistry::Register(Entity3* e, ForceGenerator* generator)
+void ParticleForceRegistry::Register(Entity3* e, ForceGenerator* generator)
 {
-	ForceRegistration* registration = new ForceRegistration(e, generator);
+	ParticleForceRegistration* registration = new ParticleForceRegistration(e, generator);
 	m_registrations.push_back(registration);
 }
 
-void ForceRegistry::ClearAllRegistries()
+void ParticleForceRegistry::ClearAllRegistries()
 {
 	m_registrations.clear();
 }
 
-void ForceRegistry::UpdateForces(float deltaTime)
+void ParticleForceRegistry::UpdateForces(float deltaTime)
 {
-	for each (ForceRegistration* fr in m_registrations)
+	for each (ParticleForceRegistration* fr in m_registrations)
 	{
 		Entity3* theEntity = fr->m_entity3;
 		ForceGenerator* theGenerator = fr->m_generator;
@@ -22,14 +22,18 @@ void ForceRegistry::UpdateForces(float deltaTime)
 	}
 }
 
+void RigidForceRegistry::Register(Rigidbody3* rb, RigidForceGenerator* rbGenerator)
+{
+	RigidbodyForceRegistration* rbRegistration = new RigidbodyForceRegistration(rb, rbGenerator);
+	m_registrations.push_back(rbRegistration);
+}
+
 void RigidForceRegistry::UpdateForces(float deltaTime)
 {
 	for each (RigidbodyForceRegistration* rfr in m_registrations)
 	{
-		Entity3* theEntity = rfr->m_entity3;
-		Rigidbody3* theRigid = dynamic_cast<Rigidbody3*>(theEntity);
 		RigidForceGenerator* theGenerator = rfr->m_rigidGenerator;
 
-		theGenerator->UpdateForce(theRigid, deltaTime);
+		theGenerator->UpdateForce(rfr->m_rb3, deltaTime);
 	}
 }

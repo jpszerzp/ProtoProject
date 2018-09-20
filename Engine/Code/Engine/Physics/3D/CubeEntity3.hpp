@@ -9,10 +9,11 @@ private:
 	AABB3 m_primitive;
 
 public:
-	CubeEntity3(const AABB3& primitive, bool isConst = false);
+	//CubeEntity3(const AABB3& primitive, bool isConst = false);
+	CubeEntity3(const AABB3& primitive, eMoveStatus moveStat);
 	~CubeEntity3();
 
-	void Update(float deltaTime) override;
+	void UpdateEntityPrimitive() override;
 	void Render(Renderer* renderer) override;
 
 	void Translate(Vector3 translation) override;
