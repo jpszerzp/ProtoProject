@@ -11,7 +11,6 @@ class GameObject
 public:
 	bool		m_physDriven = false;
 	bool		m_dead = false;
-	//bool		m_frozen = false;
 
 	bool		m_drawBasis = false;
 	bool		m_debugOn = false;

@@ -126,10 +126,11 @@ public:
 	bool IsEntityKinematic() const { return (GetEntityMoveStatus() == MOVE_KINEMATIC); }
 	bool IsEntityDynamic() const { return (GetEntityMoveStatus() == MOVE_DYNAMIC); }
 	bool IsFrozen() const { return m_frozen; }
+	const eBodyIdentity& GetEntityBodyID() const { return m_bodyID; }
 
 	void UpdateBoundPrimitives();
 	virtual void UpdateEntityPrimitive(){}	// do not know which primitive this entity has, hence virtual
-	void UpdateEntitiesTransforms();		// all transforms
+	virtual void UpdateEntitiesTransforms();		// all transforms
 	virtual void Update(float deltaTime){}
 	virtual void UpdateInput(float deltaTime){}
 	virtual void Render(Renderer* renderer){}

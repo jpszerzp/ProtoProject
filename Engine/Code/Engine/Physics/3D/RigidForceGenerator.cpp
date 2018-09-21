@@ -1,4 +1,5 @@
 #include "Engine/Physics/3D/RigidForceGenerator.hpp"
+#include "Engine/Renderer/DebugRenderer.hpp"
 
 /*
  * Force generates torque as a product in current model.
@@ -15,16 +16,23 @@ void GravityRigidForceGenerator::UpdateForce(Rigidbody3* body, float deltaTime)
 		return;
 
 	// force is always applying to COM
-	body->AddForce(m_gravity * body->GetMass3());	
+	Vector3 force = m_gravity * body->GetMass3();
+	body->AddForce(force);	
+	
+	Vector3 center = body->GetEntityCenter();
+	DebugRenderLine(.01f, center, center + force, 
+		5.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
 }	
 
 
-void SpringRigidForceGenerator::UpdateForce(Rigidbody3* body, float deltaTime)
+void AnchorSpringRigidForceGenerator::UpdateForce(Rigidbody3* body, float deltaTime)
 {
-	Vector3 my_connect_world = body->GetPointInWorld(m_myConnect);
-	Vector3 other_connect_world = body->GetPointInWorld(m_otherConnect);
-	Vector3 extension = m_myConnect - other_connect_world;
+	Vector3 attach_world = body->GetPointInWorld(m_attachLocal);
+	Vector3 extension = m_anchorWorld - attach_world;
 	float delta = extension.GetLength() - m_restLength;
-	Vector3 force = extension.GetNormalized() * (-delta * m_const);
-	body->AddForcePointWorldCoord(force, my_connect_world);
+	Vector3 force = extension.GetNormalized() * (delta * m_const);
+	body->AddForcePointWorldCoord(force, attach_world);
+
+	DebugRenderLine(.01f, attach_world, attach_world + force,
+		5.f, Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
 }

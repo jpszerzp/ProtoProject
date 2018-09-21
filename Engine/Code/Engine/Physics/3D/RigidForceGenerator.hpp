@@ -19,19 +19,19 @@ public:
 	virtual void UpdateForce(Rigidbody3* body, float deltaTime) override;
 };
 
-class SpringRigidForceGenerator : public RigidForceGenerator
+class AnchorSpringRigidForceGenerator : public RigidForceGenerator
 {
 public:
-	Vector3 m_myConnect;
-	Vector3 m_otherConnect;
+	Vector3 m_anchorWorld;
+	Vector3 m_attachLocal;
 	Rigidbody3* m_other;
 	float m_const;
 	float m_restLength;
 
 public:
-	SpringRigidForceGenerator(const Vector3& connect, Rigidbody3* other,
-		const Vector3& otherConnect, float const_coef, float restLength)
-		: m_myConnect(connect), m_otherConnect(otherConnect), m_other(other),
+	AnchorSpringRigidForceGenerator(const Vector3& anchorWorld, Rigidbody3* other,
+		const Vector3& attachLocal, float const_coef, float restLength)
+		: m_anchorWorld(anchorWorld), m_attachLocal(attachLocal), m_other(other),
 		m_const(const_coef), m_restLength(restLength){}
 
 	virtual void UpdateForce(Rigidbody3* body, float deltaTime) override;

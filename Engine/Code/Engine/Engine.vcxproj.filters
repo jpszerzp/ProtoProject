@@ -499,6 +499,9 @@
     <ClCompile Include="Physics\3D\SphereRB3.cpp">
       <Filter>General</Filter>
     </ClCompile>
+    <ClCompile Include="Physics\3D\PointRB3.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -871,5 +874,6 @@
     <ClInclude Include="Physics\3D\BVH3.hpp" />
     <ClInclude Include="Physics\3D\BoundingVolume3.hpp" />
     <ClInclude Include="Physics\3D\SphereRB3.hpp" />
+    <ClInclude Include="Physics\3D\PointRB3.hpp" />
   </ItemGroup>
 </Project>

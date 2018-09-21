@@ -17,7 +17,7 @@ public:
 	void Render(Renderer* renderer) override;
 	void Translate(Vector3 translation) override;
 
-	Sphere3& GetSpherePrimitive() { return m_primitive; }
+	const Sphere3& GetSpherePrimitive() const { return m_primitive; }
 
 	void SetEntityForPrimitive() override;
 };

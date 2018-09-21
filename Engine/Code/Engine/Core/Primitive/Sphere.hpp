@@ -19,4 +19,6 @@ public:
 		eCullMode cull = CULLMODE_BACK,
 		eWindOrder = WIND_COUNTER_CLOCKWISE);
 	~Sphere();
+
+	float GetRadius() const;
 };

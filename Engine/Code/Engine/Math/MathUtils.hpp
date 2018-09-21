@@ -96,6 +96,7 @@ Vector2 PolarToCartesian(float radius, float degree);
 Vector3 PolarToCartesian( float radius, float rotationDeg, float azimuthDeg ); 
 Vector3 PolarToCartesian( Vector3 spherical ); 
 Vector3 CartesianToPolar( Vector3 position );
+bool ProjectPlaneToSphere(Vector2 pos, float r, Vector3& out_pos);	// a spherical coord operation
 
 bool  Quadratic(Vector2& out, float a, float b, float c);
 int   ComputeManhattanDistanceInt(IntVector2 v1, IntVector2 v2);
@@ -125,3 +126,6 @@ bool  AABB3VsAABB3Intersection(const AABB3& aabb_1, const AABB3& aabb_2, Vector3
 
 // minkowski
 AABB2 MinkowskiAABBVsAABB(const AABB2& aabb1, const AABB2& aabb2);
+
+// more shape test
+bool IsPointInCircle(Vector2 pos, float r);

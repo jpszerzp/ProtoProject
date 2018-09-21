@@ -44,6 +44,7 @@ public:
 
 public:
 	void Register(Rigidbody3* rb, RigidForceGenerator* rbGenerator);
+	void ClearAllRegistries();
 
 	void UpdateForces(float deltaTime);
 };

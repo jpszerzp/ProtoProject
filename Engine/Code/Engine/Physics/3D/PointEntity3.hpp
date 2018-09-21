@@ -19,7 +19,7 @@ public:
 
 	void Translate(Vector3 translation) override;
 
-	Particle& GetParticlePrimitive() { return m_primitive; }
+	const Particle& GetParticlePrimitive() const { return m_primitive; }
 
 	void SetEntityForPrimitive() override;
 };

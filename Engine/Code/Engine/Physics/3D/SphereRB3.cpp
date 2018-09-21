@@ -75,6 +75,22 @@ void SphereRB3::SetEntityForPrimitive()
 	m_primitive.SetEntity(this);
 }
 
+void SphereRB3::UpdateEntitiesTransforms()
+{
+	m_entityTransform.SetLocalPosition(m_center);
+
+	// rot
+	Matrix44 transMat;
+	CacheTransform(transMat, m_center, m_orientation);
+	Vector3 euler = Matrix44::DecomposeMatrixIntoEuler(transMat);
+	m_entityTransform.SetLocalRotation(euler);
+
+	// assume scale is unchanged
+
+	m_sphereBoundTransform.SetLocalPosition(m_center);
+	m_boxBoundTransform.SetLocalPosition(m_center);
+}
+
 void SphereRB3::UpdateInput(float deltaTime)
 {
 	InputSystem* input = InputSystem::GetInstance();

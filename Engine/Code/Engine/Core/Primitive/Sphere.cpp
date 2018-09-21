@@ -54,6 +54,27 @@ Sphere::~Sphere()
 }
 
 
+float Sphere::GetRadius() const
+{
+	float res = 0.f;
+
+	const eBodyIdentity& bid = m_physEntity->GetEntityBodyID();
+	if (bid == BODY_PARTICLE)
+	{
+		SphereEntity3* entity = dynamic_cast<SphereEntity3*>(m_physEntity);
+		const Sphere3& s3 = entity->GetSpherePrimitive();
+		res = s3.m_radius;
+	}
+	else if (bid == BODY_RIGID)
+	{
+		SphereRB3* rigid = dynamic_cast<SphereRB3*>(m_physEntity);
+		const Sphere3& s3 = rigid->GetSpherePrimitive();
+		res = s3.m_radius;
+	}
+
+	return res;
+}
+
 void Sphere::Update(float deltaTime)
 {
 	//UpdateInput(deltaTime);

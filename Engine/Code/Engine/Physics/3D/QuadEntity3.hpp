@@ -24,7 +24,7 @@ public:
 	void Render(Renderer* renderer) override;
 	void Translate(Vector3 translation) override;
 
-	Plane& GetPlanePrimitive() { return m_primitive; }
+	const Plane& GetPlanePrimitive() const { return m_primitive; }
 
 	void SetEntityForPrimitive() override;
 };

@@ -43,7 +43,7 @@ Point::Point(Vector3 pos, Vector3 rot, float size, Rgba tint,
 	Particle particle = Particle(pos, size);
 	if (bid == BODY_PARTICLE)
 		m_physEntity = new PointEntity3(particle, moveStat);
-	TODO("point rigid body");
+	// for a point gameobject, it should ALWAYS be a particle entity, not rigidbody
 	m_physEntity->SetEntityForPrimitive();
 }
 

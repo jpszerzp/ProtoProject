@@ -68,11 +68,13 @@ public:
 
 	// rigid body
 	GameObject* m_r0;
+	GameObject* m_r1;
 
 	Ballistics* m_ballistics;
 	Spring* m_spring;
 	AnchorSpring* m_anchorSpring;
 	Rod* m_rod;
+	GeneralRigidAnchorSpring* m_rigidAnchorSpring;
 
 	// for collision process
 	std::vector<Sphere*> m_spheres;
@@ -83,7 +85,6 @@ public:
 	ParticleForceRegistry* m_particleRegistry = nullptr;
 	RigidForceRegistry* m_rigidRegistry = nullptr;
 
-	//CollisionData3* m_collisionData;		// a storage of all contacts
 	ContactResolver* m_allResolver;		
 	ContactResolver* m_iterResolver;
 };

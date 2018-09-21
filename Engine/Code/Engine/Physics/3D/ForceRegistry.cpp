@@ -28,6 +28,11 @@ void RigidForceRegistry::Register(Rigidbody3* rb, RigidForceGenerator* rbGenerat
 	m_registrations.push_back(rbRegistration);
 }
 
+void RigidForceRegistry::ClearAllRegistries()
+{
+	m_registrations.clear();
+}
+
 void RigidForceRegistry::UpdateForces(float deltaTime)
 {
 	for each (RigidbodyForceRegistration* rfr in m_registrations)

@@ -18,7 +18,7 @@ public:
 
 	void Translate(Vector3 translation) override;
 
-	AABB3& GetCubePrimitive() { return m_primitive; }
+	const AABB3& GetCubePrimitive() const { return m_primitive; }
 
 	void SetEntityForPrimitive() override;
 };

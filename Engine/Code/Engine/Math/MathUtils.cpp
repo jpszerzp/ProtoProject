@@ -729,6 +729,21 @@ Vector3 CartesianToPolar( Vector3 position )
 }
 
 
+bool ProjectPlaneToSphere(Vector2 pos, float r, Vector3& out_pos)
+{
+	bool inCircle = IsPointInCircle(pos, r);
+	if (!inCircle)
+		return inCircle;
+
+	float toOriginSq = pos.GetLengthSquared();
+	float radSq = r * r;
+	float height = sqrtf(radSq - toOriginSq);
+	out_pos.x = pos.x;
+	out_pos.y = height;
+	out_pos.z = pos.y;
+	return inCircle;
+}
+
 bool Quadratic(Vector2& out, float a, float b, float c)
 {
 	float delta = b * b - 4 * a * c;
@@ -1168,5 +1183,10 @@ AABB2 MinkowskiAABBVsAABB(const AABB2& aabb1, const AABB2& aabb2)
 	Vector2 size = aabb1.GetDimensions() + aabb2.GetDimensions();
 	Vector2 topRight = bottomLeft + size;
 	return AABB2(bottomLeft, topRight);
+}
+
+bool IsPointInCircle(Vector2 pos, float r)
+{
+	return (pos.GetLength() <= r);
 }
 
