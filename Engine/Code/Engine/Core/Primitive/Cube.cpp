@@ -160,7 +160,5 @@ void Cube::Render(Renderer* renderer)
 	RenderBasis(renderer);
 
 	if (m_physEntity != nullptr)
-	{
 		m_physEntity->Render(renderer);
-	}
 }

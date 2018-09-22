@@ -43,5 +43,6 @@ public:
 	Vector3 GetPointInWorld(const Vector3& pt_local);
 	void ClearAccs();
 
+	virtual void Render(Renderer* renderer) override;
 	virtual void Integrate(float deltaTime) override;
 };

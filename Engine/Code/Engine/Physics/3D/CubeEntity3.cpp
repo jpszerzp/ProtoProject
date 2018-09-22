@@ -24,7 +24,8 @@ CubeEntity3::CubeEntity3(const AABB3& primitive, eMoveStatus moveStat)
 	float boundSphereRadius = sqrtf(xDim * xDim + yDim * yDim + zDim * zDim) / 2.f;
 	Vector3 boundSphereScale = Vector3(boundSphereRadius, boundSphereRadius, 1.f);
 	m_boxBoundTransform = m_entityTransform;
-	m_sphereBoundTransform = Transform(pos, rot, boundSphereScale);
+	//m_sphereBoundTransform = Transform(pos, rot, boundSphereScale);
+	m_boundSphere.m_transform = Transform(pos, rot, boundSphereScale);
 
 	if (m_moveStatus != MOVE_STATIC)
 	{
@@ -35,7 +36,8 @@ CubeEntity3::CubeEntity3(const AABB3& primitive, eMoveStatus moveStat)
 		m_massData.m_invMass = 0.f;
 
 	m_boundSphere = BoundingSphere(m_center, boundSphereRadius);
-	m_sphereBoundMesh = Mesh::CreateUVSphere(VERT_PCU, 18, 36);
+	//m_sphereBoundMesh = Mesh::CreateUVSphere(VERT_PCU, 18, 36);
+	m_boundSphere.m_boundMesh = Mesh::CreateUVSphere(VERT_PCU, 18, 36);
 
 	m_boundBox = primitive;
 	m_boxBoundMesh = Mesh::CreateCube(VERT_PCU);
@@ -140,23 +142,27 @@ void CubeEntity3::Render(Renderer* renderer)
 
 	if (m_drawBoundSphere)
 	{
-		Shader* shader = renderer->CreateOrGetShader("wireframe");
-		renderer->UseShader(shader);
+		//Shader* shader = renderer->CreateOrGetShader("wireframe");
+		//renderer->UseShader(shader);
 
-		Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
-		renderer->SetTexture2D(0, texture);
-		renderer->SetSampler2D(0, texture->GetSampler());
+		//Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
+		//renderer->SetTexture2D(0, texture);
+		//renderer->SetSampler2D(0, texture->GetSampler());
 
-		renderer->m_objectData.model = m_sphereBoundTransform.GetWorldMatrix();
+		////renderer->m_objectData.model = m_sphereBoundTransform.GetWorldMatrix();
+		//renderer->m_objectData.model = m_boundSphere.m_transform.GetWorldMatrix();
 
-		Vector4 colorV4;
-		Rgba color = Rgba::BLUE;
-		color.GetAsFloats(colorV4.x, colorV4.y, colorV4.z, colorV4.w);
-		renderer->m_colorData.rgba = colorV4;
-		renderer->SetColorUBO(shader->GetShaderProgram()->GetHandle());
+		//Vector4 colorV4;
+		//Rgba color = Rgba::BLUE;
+		//color.GetAsFloats(colorV4.x, colorV4.y, colorV4.z, colorV4.w);
+		//renderer->m_colorData.rgba = colorV4;
+		//renderer->SetColorUBO(shader->GetShaderProgram()->GetHandle());
 
-		glLineWidth(1.f);
-		renderer->DrawMesh(m_sphereBoundMesh);
+		//glLineWidth(1.f);
+		////renderer->DrawMesh(m_sphereBoundMesh);
+		//renderer->DrawMesh(m_boundSphere.m_boundMesh);
+
+		m_boundSphere.DrawBound(renderer);
 	}
 }
 
@@ -166,7 +172,8 @@ void CubeEntity3::Translate(Vector3 translation)
 
 	// update transform
 	m_entityTransform.SetLocalPosition(m_center);
-	m_sphereBoundTransform.SetLocalPosition(m_center);
+	//m_sphereBoundTransform.SetLocalPosition(m_center);
+	m_boundSphere.m_transform.SetLocalPosition(m_center);
 	m_boxBoundTransform.SetLocalPosition(m_center);
 
 	// update primitive

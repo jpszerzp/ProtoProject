@@ -85,6 +85,9 @@ public:
 	//	const AABB3& aabb3_2, CollisionData3* data);
 	//static uint CoherentProcessingAABB3VsAABB3(const AABB3& aabb_1,
 	//	const AABB3& aabb3_2, CollisionData3* data);
+	
+	// general entity detection
+	static uint Entity3VsEntity3(Entity3* e1, Entity3* e2, CollisionData3* data);
 
 	// TODO
 	static void BoxAndPointPenetration(const AABB3& aabb, const Vector3& point, float* out_penetration);

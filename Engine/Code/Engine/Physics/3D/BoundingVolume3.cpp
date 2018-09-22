@@ -7,6 +7,7 @@ BoundingSphere::BoundingSphere(const BoundingSphere& child_one, const BoundingSp
 	float distSqrd = disp.GetLengthSquared();
 	float radDiff = child_two.m_radius - child_one.m_radius;
 
+	// one sphere is entirely encapsulating another
 	if (radDiff * radDiff >= distSqrd)
 	{
 		if (child_one.m_radius > child_two.m_radius)
@@ -21,7 +22,6 @@ BoundingSphere::BoundingSphere(const BoundingSphere& child_one, const BoundingSp
 			m_radius = child_two.m_radius;
 		}
 	}
-
 	else
 	{
 		// spheres are overlapping
@@ -34,7 +34,13 @@ BoundingSphere::BoundingSphere(const BoundingSphere& child_one, const BoundingSp
 	}
 }
 
-bool BoundingSphere::Overlaps(BoundingSphere* other) const
+BoundingSphere::~BoundingSphere()
+{
+	//delete m_boundMesh;
+	//m_boundMesh = nullptr;
+}
+
+bool BoundingSphere::Overlaps(const BoundingSphere* other) const
 {
 	Vector3 disp = m_center - other->m_center;
 	float distSqrd = disp.GetLengthSquared();
@@ -64,7 +70,7 @@ void BoundingSphere::Translate(Vector3 translation)
 
 void BoundingSphere::SetCenter(Vector3 center)
 {
-	m_center = center;
+	m_center = center;						// update center
 }
 
 void BoundingSphere::DrawBound(Renderer* renderer)
@@ -82,7 +88,7 @@ void BoundingSphere::DrawBound(Renderer* renderer)
 		renderer->m_objectData.model = m_transform.GetWorldMatrix();
 
 		Vector4 colorV4;
-		Rgba color = Rgba::BLUE;
+		Rgba color = Rgba::CYAN;
 		color.GetAsFloats(colorV4.x, colorV4.y, colorV4.z, colorV4.w);
 		renderer->m_colorData.rgba = colorV4;
 		renderer->SetColorUBO(shader->GetShaderProgram()->GetHandle());

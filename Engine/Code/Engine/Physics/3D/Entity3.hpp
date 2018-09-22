@@ -33,12 +33,12 @@ class Entity3
 {
 protected:
 	Mesh* m_colliderMesh = nullptr;
-	Mesh* m_sphereBoundMesh = nullptr;
+	//Mesh* m_sphereBoundMesh = nullptr;
 	Mesh* m_boxBoundMesh = nullptr;
 	
 	// need updated
 	Transform m_entityTransform;
-	Transform m_sphereBoundTransform;
+	//Transform m_sphereBoundTransform;
 	Transform m_boxBoundTransform;
 
 	// p 
@@ -127,6 +127,7 @@ public:
 	bool IsEntityDynamic() const { return (GetEntityMoveStatus() == MOVE_DYNAMIC); }
 	bool IsFrozen() const { return m_frozen; }
 	const eBodyIdentity& GetEntityBodyID() const { return m_bodyID; }
+	const BoundingSphere& GetBoundingSphere() const { return m_boundSphere; }
 
 	void UpdateBoundPrimitives();
 	virtual void UpdateEntityPrimitive(){}	// do not know which primitive this entity has, hence virtual

@@ -3,6 +3,7 @@
 #include "Engine/Physics/3D/CollisionDetection.hpp"
 #include "Engine/Physics/3D/ContactResolver.hpp"
 #include "Engine/Physics/3D/Rigidbody3.hpp"
+#include "Engine/Physics/3D/BVH3.hpp"
 #include "Engine/Core/Primitive/Sphere.hpp"
 #include "Engine/Core/Primitive/Cube.hpp"
 #include "Engine/Core/Primitive/Quad.hpp"
@@ -55,9 +56,11 @@ public:
 	void UpdateGameobjectsCore(float deltaTime);
 	void UpdateContactGeneration();
 	void UpdateContactResolution(float deltaTime);
+	void UpdateBVH();
 
 	void Render(Renderer* renderer) override;
 	void RenderGameobjects(Renderer* renderer);
+	void RenderBVH(Renderer* renderer);
 
 public:
 	// entity
@@ -87,4 +90,9 @@ public:
 
 	ContactResolver* m_allResolver;		
 	ContactResolver* m_iterResolver;
+	
+	bool m_broadPhase = false;
+	std::vector<BVHContact> m_bvhContacts;
+	BVHNode<BoundingSphere>* m_node;
+	int m_nodeCount = 0;			// temp: later will flush all GO into tree at once
 };

@@ -2,10 +2,10 @@
 
 #include "Engine/Physics/3D/Rigidbody3.hpp"
 
-struct PotentialContact
+struct BVHContact
 {
-	Rigidbody3* m_rb1;
-	Rigidbody3* m_rb2;
+	Entity3* m_rb1;
+	Entity3* m_rb2;
 };
 
 template<class T>
@@ -15,27 +15,98 @@ public:
 	BVHNode* m_children[2];
 	BVHNode* m_parent;
 	T m_volume;
-	Rigidbody3* m_body;
+	Entity3* m_body;
 
 public:
-	BVHNode(BVHNode* parent, const T& volume, Rigidbody3* body = nullptr);
+	BVHNode(BVHNode* parent, const T& volume, Entity3* body = nullptr);
 	~BVHNode();
 
 	bool IsLeaf() const { return (m_body != nullptr); }
-	uint GetPotentialContacts(std::vector<PotentialContact>& contacts, uint limit) const;
 
+	uint GetContacts(std::vector<BVHContact>& contacts, uint limit) const;
 	bool Overlaps(const BVHNode<T>* other) const;
-	uint GetPotentialContactsAgainst(const BVHNode<T>* other, std::vector<PotentialContact>& contacts, uint limit) const;
+	uint GetContactsAgainst(const BVHNode<T>* other, 
+		std::vector<BVHContact>& contacts, uint limit) const;
 
-	void Insert(Rigidbody3* body, const T& volume);
-	void RecalculateBV(bool recursive = true);
+	void Insert(Entity3* body, const T& volume);
+	BVHNode<T>* GetRightLeaf();
+	void RecalculateBV();
+
+	void DrawNode(Renderer* renderer);
+	void UpdateNode();
+	void UpdateBV();
 };
+
+template<class T>
+BVHNode<T>* BVHNode<T>::GetRightLeaf()
+{
+	BVHNode<T>* res = nullptr;
+
+	if (!IsLeaf())
+		res = m_children[1]->GetRightLeaf();
+	else
+		res = this;
+
+	return res;
+}
+
+template<class T>
+void BVHNode<T>::UpdateBV()
+{
+	TODO("If later scale of BV or other information for rigid changes, need to update here too");
+
+	if (IsLeaf())
+	{
+		m_volume.m_center = m_body->GetBoundingSphere().GetCenter();
+		m_volume.m_transform.SetLocalPosition(m_volume.m_center);
+	}
+	else
+	{
+		m_volume = T(m_children[0]->m_volume, m_children[1]->m_volume);
+
+		// bv recalculated, need to update mesh and transform
+		Renderer* renderer = Renderer::GetInstance();
+		m_volume.m_boundMesh = renderer->CreateOrGetMesh("sphere_pcu");
+		m_volume.m_transform = Transform(
+			m_volume.m_center, 
+			Vector3::ZERO, 
+			Vector3(m_volume.m_radius)); 
+	}
+
+	if (m_parent != nullptr)
+		m_parent->UpdateBV();
+}
+
+template<class T>
+void BVHNode<T>::UpdateNode()
+{
+	if (!IsLeaf())
+	{
+		m_children[0]->UpdateNode();
+		m_children[1]->UpdateNode();
+	}
+	else
+		UpdateBV();
+}
+
+template<class T>
+void BVHNode<T>::DrawNode(Renderer* renderer)
+{
+	m_volume.DrawBound(renderer);
+
+	if (!IsLeaf())
+	{
+		m_children[0]->DrawNode(renderer);
+		m_children[1]->DrawNode(renderer);
+	}
+}
 
 template<class T>
 BVHNode<T>::~BVHNode()
 {
 	if (m_parent != nullptr)
 	{
+		// in our scheme, sibling will NEVER be nullptr
 		BVHNode<T>* sibling;
 		if (m_parent->m_children[0] == this)
 			sibling = m_parent->m_children[1];
@@ -69,7 +140,7 @@ BVHNode<T>::~BVHNode()
 }
 
 template<class T>
-BVHNode<T>::BVHNode(BVHNode* parent, const T& volume, Rigidbody3* body /*= nullptr*/)
+BVHNode<T>::BVHNode(BVHNode* parent, const T& volume, Entity3* body /*= nullptr*/)
 {
 	m_parent = parent;
 	m_volume = volume;
@@ -79,24 +150,34 @@ BVHNode<T>::BVHNode(BVHNode* parent, const T& volume, Rigidbody3* body /*= nullp
 }
 
 template<class T>
-void BVHNode<T>::RecalculateBV(bool recursive /*= true*/)
+void BVHNode<T>::RecalculateBV()
 {
 	if (IsLeaf())
 		return;
 	m_volume = T(m_children[0]->m_volume, m_children[1]->m_volume);
+
+	// bv recalculated, need to update mesh and transform
+	Renderer* renderer = Renderer::GetInstance();
+	m_volume.m_boundMesh = renderer->CreateOrGetMesh("sphere_pcu");
+	m_volume.m_transform = Transform(
+		m_volume.m_center, 
+		Vector3::ZERO, 
+		Vector3(m_volume.m_radius));
 
 	if (m_parent != nullptr)
 		m_parent->RecalculateBV();
 }
 
 template<class T>
-void BVHNode<T>::Insert(Rigidbody3* body, const T& volume)
+void BVHNode<T>::Insert(Entity3* body, const T& volume)
 {
 	if (IsLeaf())
 	{
 		m_children[0] = new BVHNode<T>(this, m_volume, m_body);
 		m_children[1] = new BVHNode<T>(this, volume, body);
 		this->m_body = nullptr;
+		m_children[0]->m_parent = this;
+		m_children[1]->m_parent = this;
 		RecalculateBV();
 	}
 	else
@@ -111,28 +192,29 @@ void BVHNode<T>::Insert(Rigidbody3* body, const T& volume)
 template<class T>
 bool BVHNode<T>::Overlaps(const BVHNode<T>* other) const
 {
-	TODO("Implement Overlaps in bounding volume class");
-	return m_volume->Overlaps(other->m_volume);
+	return m_volume.Overlaps(&other->m_volume);
 }
 
 template<class T>
-uint BVHNode<T>::GetPotentialContacts(std::vector<PotentialContact>& contacts, uint limit) const
+uint BVHNode<T>::GetContacts(std::vector<BVHContact>& contacts, uint limit) const
 {
 	if (IsLeaf() || limit == 0)
 		return 0;
 
-	uint potential_contact = m_children[0]->GetPotentialContactsAgainst(m_children[1], contacts, limit);
+	uint potential_contact = m_children[0]->GetContactsAgainst(m_children[1], contacts, limit);
 	return potential_contact;
 }
 
 template<class T>
-uint BVHNode<T>::GetPotentialContactsAgainst(const BVHNode<T>* other, std::vector<PotentialContact>& contacts, uint limit) const
+uint BVHNode<T>::GetContactsAgainst(const BVHNode<T>* other, 
+	std::vector<BVHContact>& contacts, uint limit) const
 {
 	if (!Overlaps(other) || limit == 0)
 		return 0;
 
-	// when both node at leaf, generate potential contact
-	PotentialContact pContact = PotentialContact();
+	// when both node at leaf (ent to ent),
+	// generate potential contact
+	BVHContact pContact = BVHContact();
 	if (IsLeaf() && other->IsLeaf())
 	{
 		pContact.m_rb1 = m_body;
@@ -141,27 +223,26 @@ uint BVHNode<T>::GetPotentialContactsAgainst(const BVHNode<T>* other, std::vecto
 		return 1;
 	}
 
-	TODO("Implement GetVolume in bounding volume class");
-	if (other->IsLeaf() || (!IsLeaf() && (m_volume->GetVolume() >= other->m_volume->GetVolume())))
+	if (other->IsLeaf() || (!IsLeaf() && (m_volume.GetVolume() >= other->m_volume.GetVolume())))
 	{
-		uint count = m_children[0]->GetPotentialContactsAgainst(other, contacts, limit);
+		uint count = m_children[0]->GetContactsAgainst(other, contacts, limit);
 		
 		if (limit > count)
 		{
 			// process the other child branch since we still have space open
-			uint other_contact = m_children[1]->GetPotentialContactsAgainst(other, contacts, limit - count);
-			return (count + other_contact);
+			uint other_count = m_children[1]->GetContactsAgainst(other, contacts, limit - count);
+			return (count + other_count);
 		}
 		else
 			return count;
 	}
 	else
 	{
-		uint count = GetPotentialContactsAgainst(other->m_children[0], contacts, limit);
+		uint count = GetContactsAgainst(other->m_children[0], contacts, limit);
 
 		if (limit > count)
 		{
-			uint other_count = GetPotentialContactsAgainst(other->m_children[1], contacts, limit - count);
+			uint other_count = GetContactsAgainst(other->m_children[1], contacts, limit - count);
 			return (count + other_count);
 		}
 		else

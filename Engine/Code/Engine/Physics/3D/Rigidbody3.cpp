@@ -154,6 +154,13 @@ void Rigidbody3::ClearAccs()
 	m_torqueAcc = Vector3::ZERO;
 }
 
+void Rigidbody3::Render(Renderer* renderer)
+{
+	// only draw bounding sphere on rigid for now
+	if (m_drawBoundSphere)
+		m_boundSphere.DrawBound(renderer);
+}
+
 void Rigidbody3::Integrate(float deltaTime)
 {
 	CacheData();

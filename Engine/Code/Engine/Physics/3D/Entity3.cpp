@@ -2,7 +2,8 @@
 
 void Entity3::SetBoundSpherePos(Vector3 pos)
 {
-	m_sphereBoundTransform.SetLocalPosition(pos);
+	//m_sphereBoundTransform.SetLocalPosition(pos);
+	m_boundSphere.m_transform.SetLocalPosition(pos);
 }
 
 void Entity3::SetBoundBoxPos(Vector3 pos)
@@ -49,7 +50,8 @@ void Entity3::UpdateEntitiesTransforms()
 {
 	// update transform
 	m_entityTransform.SetLocalPosition(m_center);
-	m_sphereBoundTransform.SetLocalPosition(m_center);
+	//m_sphereBoundTransform.SetLocalPosition(m_center);
+	m_boundSphere.m_transform.SetLocalPosition(m_center);
 	m_boxBoundTransform.SetLocalPosition(m_center);
 }
 

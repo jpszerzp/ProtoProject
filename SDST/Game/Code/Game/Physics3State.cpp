@@ -55,9 +55,45 @@ Physics3State::Physics3State()
 	m_particleRegistry = new ParticleForceRegistry();
 	m_rigidRegistry = new RigidForceRegistry();
 
+	GravityRigidForceGenerator* grg = new GravityRigidForceGenerator(Vector3::GRAVITY);
+
 	// or, initialize into other shapes (cube, etc)
 	m_g0 = InitializePhysSphere(Vector3(-5.f, 0.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_KINEMATIC, BODY_PARTICLE);
 	m_g1 = InitializePhysCube(Vector3(0.f, 0.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_KINEMATIC, BODY_PARTICLE);
+
+	//////////////////////////////// For rigid spring ////////////////////////////////
+	// the rigid ball
+	m_r1 = InitializePhysSphere(
+		Vector3(10.f, 0.f, 5.f),
+		Vector3::ZERO, Vector3::ONE, Rgba::MEGENTA,
+		MOVE_DYNAMIC, BODY_RIGID);
+	m_r1->m_physEntity->SetFrozen(true);
+
+	// anchor
+	Point* theAnchor = InitializePhysPoint(
+		Vector3(10.f, 13.f, 5.f),
+		Vector3::ZERO, 10.f, Rgba::MEGENTA,
+		MOVE_STATIC, BODY_PARTICLE);
+
+	// entities
+	Entity3* anchor_ent = theAnchor->GetEntity();
+	Rigidbody3* other_rigid = static_cast<Rigidbody3*>(m_r1->GetEntity());
+
+	// set up anchor spring
+	m_rigidAnchorSpring = new GeneralRigidAnchorSpring(anchor_ent, other_rigid, 3.f, 5.f);
+
+	// force generator
+	Vector3 attachLocal = Vector3::ZERO;
+	Sphere* theSphere = static_cast<Sphere*>(m_r1);
+	ProjectPlaneToSphere(Vector2(.1f, .1f), theSphere->GetRadius(), attachLocal);
+	AnchorSpringRigidForceGenerator* asrfg = new AnchorSpringRigidForceGenerator(
+		theAnchor->GetWorldPosition(), other_rigid, attachLocal, 3.f, 5.f);
+
+	// force registration
+	m_rigidRegistry->Register(other_rigid, asrfg);
+	m_rigidRegistry->Register(other_rigid, grg);
+	//////////////////////////////////////////////////////////////////////////////////
+
 	InitializePhysCube(Vector3(0.f, 0.f, 2.f), Vector3::ZERO, Vector3::ONE, Rgba::BLUE, MOVE_KINEMATIC, BODY_PARTICLE);
 	m_g2 = InitializePhysQuad(Vector3(0.f, -2.f, 0.f), Vector3(90.f, 0.f, 0.f), Vector3(200.f, 200.f, 1.f), Rgba::GREEN, MOVE_STATIC, BODY_PARTICLE);
 	m_g3 = InitializePhysPoint(Vector3(5.f, 0.f, 0.f), Vector3::ZERO, 10.f, Rgba::WHITE, MOVE_STATIC, BODY_PARTICLE);
@@ -104,42 +140,8 @@ Physics3State::Physics3State()
 	// rigid bodies and force registry
 	m_r0 = InitializePhysSphere(Vector3(5.f, 0.f, 5.f), Vector3::ZERO, Vector3::ONE, Rgba::GREEN, MOVE_DYNAMIC, BODY_RIGID);
 	m_r0->m_physEntity->SetFrozen(true);
-	GravityRigidForceGenerator* grg = new GravityRigidForceGenerator(Vector3::GRAVITY);
 	Rigidbody3* body = dynamic_cast<Rigidbody3*>(m_r0->m_physEntity);
 	m_rigidRegistry->Register(body, grg);
-
-	//////////////////////////////// For rigid spring ////////////////////////////////
-	// anchor
-	Point* theAnchor = InitializePhysPoint(
-		Vector3(10.f, 13.f, 5.f),
-		Vector3::ZERO, 10.f, Rgba::MEGENTA,
-		MOVE_STATIC, BODY_PARTICLE);
-
-	// the rigid ball
-	m_r1 = InitializePhysSphere(
-		Vector3(10.f, 0.f, 5.f),
-		Vector3::ZERO, Vector3::ONE, Rgba::MEGENTA,
-		MOVE_DYNAMIC, BODY_RIGID);
-	m_r1->m_physEntity->SetFrozen(true);
-
-	// entities
-	Entity3* anchor_ent = theAnchor->GetEntity();
-	Rigidbody3* other_rigid = static_cast<Rigidbody3*>(m_r1->GetEntity());
-
-	// set up anchor spring
-	m_rigidAnchorSpring = new GeneralRigidAnchorSpring(anchor_ent, other_rigid, 3.f, 5.f);
-
-	// force generator
-	Vector3 attachLocal = Vector3::ZERO;
-	Sphere* theSphere = static_cast<Sphere*>(m_r1);
-	ProjectPlaneToSphere(Vector2(.5f, .5f), theSphere->GetRadius(), attachLocal);
-	AnchorSpringRigidForceGenerator* asrfg = new AnchorSpringRigidForceGenerator(
-		theAnchor->GetWorldPosition(), other_rigid, attachLocal, 3.f, 5.f);
-	
-	// force registration
-	m_rigidRegistry->Register(other_rigid, asrfg);
-	m_rigidRegistry->Register(other_rigid, grg);
-	//////////////////////////////////////////////////////////////////////////////////
 
 	//m_collisionData = new CollisionData3(20);	// allowing specified number of contact at max
 	m_iterResolver = new ContactResolver(2, RESOLVE_ITERATIVE);
@@ -488,16 +490,62 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_5))
 	{
 		// toggle debug draw of entity bounding sphere
-		//m_g0->ToggleBoundSphereDebugDraw();
+		m_g0->ToggleBoundSphereDebugDraw();
 		//m_g1->ToggleBoundSphereDebugDraw();
 		//m_g2->ToggleBoundSphereDebugDraw();
 	}
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_6))
 	{
 		// toggle debug draw of entity bounding box
-		//m_g0->ToggleBoundBoxDebugDraw();
+		m_g0->ToggleBoundBoxDebugDraw();
 		//m_g1->ToggleBoundBoxDebugDraw();
 		//m_g2->ToggleBoundBoxDebugDraw();
+	}
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_T))
+	{
+		if (m_broadPhase)
+		{
+			// get rigid body expect to insert
+			Entity3* ent = m_gameObjects[m_nodeCount]->GetEntity();
+
+			// add gameobject to BVH
+			if (m_node == nullptr)
+				m_node = new BVHNode<BoundingSphere>(nullptr, ent->GetBoundingSphere(), ent);
+			else
+				m_node->Insert(ent, ent->GetBoundingSphere());
+
+			m_nodeCount++;
+		}
+	}
+	// test removing from leaf
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_R))
+	{
+		if (m_node != nullptr && m_broadPhase)
+		{
+			BVHNode<BoundingSphere>* leaf = m_node->GetRightLeaf();
+
+			if (leaf != nullptr)
+			{
+				if (leaf->m_parent == nullptr)
+					m_node = nullptr;
+
+				delete leaf;
+				m_nodeCount--;
+			}
+		}
+	}
+	// test removing branch
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_Y))
+	{
+		if (m_broadPhase)
+		{
+			BVHNode<BoundingSphere>* branch = m_node->m_children[1];
+
+			if (branch != nullptr)
+				delete branch;
+
+			m_nodeCount = 1;
+		}
 	}
 
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_UP_ARROW))
@@ -556,6 +604,7 @@ void Physics3State::UpdateGameobjects(float deltaTime)
 {
 	UpdateForceRegistry(deltaTime);		// update force registry
 	UpdateGameobjectsCore(deltaTime);	// update GO core
+	UpdateBVH();						// update BVH 
 	UpdateContactGeneration();			// update contact generation
 	UpdateContactResolution(deltaTime);	// update contact resolution
 }
@@ -603,113 +652,146 @@ void Physics3State::UpdateGameobjectsCore(float deltaTime)
 
 void Physics3State::UpdateContactGeneration()
 {
-	m_iterResolver->ClearRecords();
-	m_allResolver->ClearRecords();
-
-	// hard constraints use iterative solver
-	m_rod->FillContact(m_iterResolver->GetCollisionData()->m_contacts);
-
-	// sphere
-	for (uint idx1 = 0; idx1 < m_spheres.size(); ++idx1)
+	if (!m_broadPhase)
 	{
-		// sphere vs sphere
-		for (uint idx2 = idx1 + 1; idx2 < m_spheres.size(); ++idx2)
+		m_iterResolver->ClearRecords();
+		m_allResolver->ClearRecords();
+
+		// hard constraints use iterative solver
+		m_rod->FillContact(m_iterResolver->GetCollisionData()->m_contacts);
+
+		// sphere
+		for (uint idx1 = 0; idx1 < m_spheres.size(); ++idx1)
 		{
-			Sphere* s1 = m_spheres[idx1];
-			Sphere* s2 = m_spheres[idx2];
+			// sphere vs sphere
+			for (uint idx2 = idx1 + 1; idx2 < m_spheres.size(); ++idx2)
+			{
+				Sphere* s1 = m_spheres[idx1];
+				Sphere* s2 = m_spheres[idx2];
 
-			SphereEntity3* se1 = dynamic_cast<SphereEntity3*>(s1->m_physEntity);
-			SphereEntity3* se2 = dynamic_cast<SphereEntity3*>(s2->m_physEntity);
+				SphereEntity3* se1 = dynamic_cast<SphereEntity3*>(s1->m_physEntity);
+				SphereEntity3* se2 = dynamic_cast<SphereEntity3*>(s2->m_physEntity);
 
-			const Sphere3& sph1 = se1->GetSpherePrimitive();
-			const Sphere3& sph2 = se2->GetSpherePrimitive();
+				const Sphere3& sph1 = se1->GetSpherePrimitive();
+				const Sphere3& sph2 = se2->GetSpherePrimitive();
 
-			CollisionDetector::Sphere3VsSphere3(sph1, sph2, m_allResolver->GetCollisionData());
+				CollisionDetector::Sphere3VsSphere3(sph1, sph2, m_allResolver->GetCollisionData());
+			}
+
+			// sphere vs plane
+			for (uint idx2 = 0; idx2 < m_quads.size(); ++idx2)
+			{
+				Sphere* sphere = m_spheres[idx1];
+				Quad* quad = m_quads[idx2];
+
+				SphereEntity3* se = dynamic_cast<SphereEntity3*>(sphere->m_physEntity);
+				QuadEntity3* qe = dynamic_cast<QuadEntity3*>(quad->m_physEntity);
+
+				const Sphere3& sph = se->GetSpherePrimitive();
+				const Plane& pl = qe->GetPlanePrimitive();
+
+				CollisionDetector::Sphere3VsPlane3(sph, pl, m_allResolver->GetCollisionData());
+			}
+
+			// sphere vs aabb3
+			for (uint idx2 = 0; idx2 < m_cubes.size(); ++idx2)
+			{
+				Sphere* sphere = m_spheres[idx1];
+				Cube* cube = m_cubes[idx2];
+
+				SphereEntity3* se = dynamic_cast<SphereEntity3*>(sphere->m_physEntity);
+				CubeEntity3* ce = dynamic_cast<CubeEntity3*>(cube->m_physEntity);
+
+				const Sphere3& sph = se->GetSpherePrimitive();
+				const AABB3& aabb3 = ce->GetCubePrimitive();
+
+				CollisionDetector::Sphere3VsAABB3(sph, aabb3, m_allResolver->GetCollisionData());
+			}
 		}
 
-		// sphere vs plane
-		for (uint idx2 = 0; idx2 < m_quads.size(); ++idx2)
+		// cubes
+		for (uint idx1 = 0; idx1 < m_cubes.size(); ++idx1)
 		{
-			Sphere* sphere = m_spheres[idx1];
-			Quad* quad = m_quads[idx2];
+			// aabb3 vs aabb3
+			for (uint idx2 = idx1 + 1; idx2 < m_cubes.size(); ++idx2)
+			{
+				Cube* c1 = m_cubes[idx1];
+				Cube* c2 = m_cubes[idx2];
 
-			SphereEntity3* se = dynamic_cast<SphereEntity3*>(sphere->m_physEntity);
-			QuadEntity3* qe = dynamic_cast<QuadEntity3*>(quad->m_physEntity);
+				CubeEntity3* ce1 = dynamic_cast<CubeEntity3*>(c1->m_physEntity);
+				CubeEntity3* ce2 = dynamic_cast<CubeEntity3*>(c2->m_physEntity);
 
-			const Sphere3& sph = se->GetSpherePrimitive();
-			const Plane& pl = qe->GetPlanePrimitive();
+				const AABB3& aabb3_1 = ce1->GetCubePrimitive();
+				const AABB3& aabb3_2 = ce2->GetCubePrimitive();
 
-			CollisionDetector::Sphere3VsPlane3(sph, pl, m_allResolver->GetCollisionData());
+				CollisionDetector::AABB3VsAABB3Single(aabb3_1, aabb3_2, m_allResolver->GetCollisionData());
+			}
+
+			// aabb3 vs plane
+			for (uint idx2 = 0; idx2 < m_quads.size(); ++idx2)
+			{
+				Cube* cube = m_cubes[idx1];
+				Quad* plane = m_quads[idx2];
+
+				CubeEntity3* ce = dynamic_cast<CubeEntity3*>(cube->m_physEntity);
+				QuadEntity3* qe = dynamic_cast<QuadEntity3*>(plane->m_physEntity);
+
+				const AABB3& aabb = ce->GetCubePrimitive();
+				const Plane& pl = qe->GetPlanePrimitive();
+
+				// todo: modify this so that it returns one contact
+				CollisionDetector::AABB3VsPlane3Single(aabb, pl, m_allResolver->GetCollisionData());
+			}
 		}
 
-		// sphere vs aabb3
-		for (uint idx2 = 0; idx2 < m_cubes.size(); ++idx2)
+		// plane
+		for (uint idx1 = 0; idx1 < m_quads.size(); ++idx1)
 		{
-			Sphere* sphere = m_spheres[idx1];
-			Cube* cube = m_cubes[idx2];
+			// plane vs plane
+			for (uint idx2 = idx1; idx2 < m_quads.size(); ++idx2)
+			{
 
-			SphereEntity3* se = dynamic_cast<SphereEntity3*>(sphere->m_physEntity);
-			CubeEntity3* ce = dynamic_cast<CubeEntity3*>(cube->m_physEntity);
+			}
+		}
 
-			const Sphere3& sph = se->GetSpherePrimitive();
-			const AABB3& aabb3 = ce->GetCubePrimitive();
+		TODO("Generate contact for free points later");
+	}
+	else
+	{
+		m_iterResolver->ClearRecords();
+		m_allResolver->ClearRecords();
+		m_bvhContacts.clear();
 
-			CollisionDetector::Sphere3VsAABB3(sph, aabb3, m_allResolver->GetCollisionData());
+		// rod constraint is always here
+		m_rod->FillContact(m_iterResolver->GetCollisionData()->m_contacts);
+
+		// broad phase, use BVH to generate contacts
+		if (m_node != nullptr)
+		{
+			m_node->GetContacts(m_bvhContacts, 1000);
+
+			for (const BVHContact& bvhc : m_bvhContacts)
+			{
+				Entity3* e1 = bvhc.m_rb1;
+				Entity3* e2 = bvhc.m_rb2;
+
+				CollisionDetector::Entity3VsEntity3(e1, e2, m_allResolver->GetCollisionData());
+			}
 		}
 	}
-
-	// cubes
-	for (uint idx1 = 0; idx1 < m_cubes.size(); ++idx1)
-	{
-		// aabb3 vs aabb3
-		for (uint idx2 = idx1 + 1; idx2 < m_cubes.size(); ++idx2)
-		{
-			Cube* c1 = m_cubes[idx1];
-			Cube* c2 = m_cubes[idx2];
-
-			CubeEntity3* ce1 = dynamic_cast<CubeEntity3*>(c1->m_physEntity);
-			CubeEntity3* ce2 = dynamic_cast<CubeEntity3*>(c2->m_physEntity);
-
-			const AABB3& aabb3_1 = ce1->GetCubePrimitive();
-			const AABB3& aabb3_2 = ce2->GetCubePrimitive();
-
-			CollisionDetector::AABB3VsAABB3Single(aabb3_1, aabb3_2, m_allResolver->GetCollisionData());
-		}
-
-		// aabb3 vs plane
-		for (uint idx2 = 0; idx2 < m_quads.size(); ++idx2)
-		{
-			Cube* cube = m_cubes[idx1];
-			Quad* plane = m_quads[idx2];
-
-			CubeEntity3* ce = dynamic_cast<CubeEntity3*>(cube->m_physEntity);
-			QuadEntity3* qe = dynamic_cast<QuadEntity3*>(plane->m_physEntity);
-
-			const AABB3& aabb = ce->GetCubePrimitive();
-			const Plane& pl = qe->GetPlanePrimitive();
-
-			// todo: modify this so that it returns one contact
-			CollisionDetector::AABB3VsPlane3Single(aabb, pl, m_allResolver->GetCollisionData());
-		}
-	}
-
-	// plane
-	for (uint idx1 = 0; idx1 < m_quads.size(); ++idx1)
-	{
-		// plane vs plane
-		for (uint idx2 = idx1; idx2 < m_quads.size(); ++idx2)
-		{
-
-		}
-	}
-
-	TODO("Generate contact for free points later");
 }
 
 void Physics3State::UpdateContactResolution(float deltaTime)
 {
 	m_iterResolver->ResolveContacts(deltaTime);
 	m_allResolver->ResolveContacts(deltaTime);
+}
+
+void Physics3State::UpdateBVH()
+{
+	// update BVH bottom up
+	if (m_node != nullptr && m_broadPhase)
+		m_node->UpdateNode();
 }
 
 /*
@@ -818,6 +900,8 @@ void Physics3State::Render(Renderer* renderer)
 
 	RenderGameobjects(renderer);
 	m_forwardPath->RenderScene(m_sceneGraph);
+
+	RenderBVH(renderer);
 }
 
 void Physics3State::RenderGameobjects(Renderer* renderer)
@@ -827,4 +911,11 @@ void Physics3State::RenderGameobjects(Renderer* renderer)
 		if (!m_gameObjects[idx]->m_isInForwardPath)
 			m_gameObjects[idx]->Render(renderer);
 	}
+}
+
+void Physics3State::RenderBVH(Renderer* renderer)
+{
+	// traverse the BVH
+	if (m_node != nullptr && m_broadPhase)
+		m_node->DrawNode(renderer);
 }

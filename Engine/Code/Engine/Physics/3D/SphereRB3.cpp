@@ -23,7 +23,8 @@ SphereRB3::SphereRB3(float mass, Sphere3 primitive, eMoveStatus moveStat)
 
 	float boundBoxDim = 2.f * radius;
 	Vector3 boundBoxScale = Vector3(boundBoxDim);
-	m_sphereBoundTransform = m_entityTransform;
+	//m_sphereBoundTransform = m_entityTransform;
+	m_boundSphere.m_transform = m_entityTransform;
 	m_boxBoundTransform = Transform(m_center, rot, boundBoxScale);
 
 	if (m_moveStatus != MOVE_STATIC)
@@ -54,7 +55,8 @@ SphereRB3::SphereRB3(float mass, Sphere3 primitive, eMoveStatus moveStat)
 	}
 
 	m_boundSphere = BoundingSphere(m_center, m_primitive.m_radius);
-	m_sphereBoundMesh = Mesh::CreateUVSphere(VERT_PCU, 18, 36);
+	//m_sphereBoundMesh = Mesh::CreateUVSphere(VERT_PCU, 18, 36);
+	m_boundSphere.m_boundMesh = Mesh::CreateUVSphere(VERT_PCU, 18, 36);
 
 	Vector3 boundBoxMin = m_center - boundBoxScale / 2.f;
 	Vector3 boundBoxMax = m_center + boundBoxScale / 2.f;
@@ -87,7 +89,8 @@ void SphereRB3::UpdateEntitiesTransforms()
 
 	// assume scale is unchanged
 
-	m_sphereBoundTransform.SetLocalPosition(m_center);
+	//m_sphereBoundTransform.SetLocalPosition(m_center);
+	m_boundSphere.m_transform.SetLocalPosition(m_center);
 	m_boxBoundTransform.SetLocalPosition(m_center);
 }
 

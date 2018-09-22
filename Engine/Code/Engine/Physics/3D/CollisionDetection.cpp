@@ -1,4 +1,8 @@
 #include "Engine/Physics/3D/CollisionDetection.hpp"
+#include "Engine/Physics/3D/CubeEntity3.hpp"
+#include "Engine/Physics/3D/QuadEntity3.hpp"
+#include "Engine/Physics/3D/PointEntity3.hpp"
+#include "Engine/Physics/3D/SphereRB3.hpp"
 #include "Engine/Core/GameObject.hpp"
 #include "Engine/Core/Util/DataUtils.hpp"
 
@@ -371,6 +375,147 @@ uint CollisionDetector::AABB3VsAABB3Single(const AABB3& aabb3_1, const AABB3& aa
 	data->m_contacts.push_back(theContact);
 
 	return 1;
+}
+
+uint CollisionDetector::Entity3VsEntity3(Entity3* e1, Entity3* e2, CollisionData3* data)
+{
+	uint res = 0;
+
+	SphereEntity3* s1 = dynamic_cast<SphereEntity3*>(e1);
+	SphereRB3* srb1 = dynamic_cast<SphereRB3*>(e1);
+	CubeEntity3* c1 = dynamic_cast<CubeEntity3*>(e1);
+	QuadEntity3* q1 = dynamic_cast<QuadEntity3*>(e1);
+	//PointEntity3* p1 = dynamic_cast<PointEntity3*>(e1);
+
+	SphereEntity3* s2 = dynamic_cast<SphereEntity3*>(e2);
+	SphereRB3* srb2 = dynamic_cast<SphereRB3*>(e2);
+	CubeEntity3* c2 = dynamic_cast<CubeEntity3*>(e2);
+	QuadEntity3* q2 = dynamic_cast<QuadEntity3*>(e2);
+	//PointEntity3* p2 = dynamic_cast<PointEntity3*>(e2);
+
+	if (s1 != nullptr)
+	{
+		if (s2 != nullptr)
+		{
+			const Sphere3& sph1 = s1->GetSpherePrimitive();
+			const Sphere3& sph2 = s2->GetSpherePrimitive();
+
+			res = Sphere3VsSphere3(sph1, sph2, data);
+		}
+		else if (srb2 != nullptr)
+		{
+			const Sphere3& sph1 = s1->GetSpherePrimitive();
+			const Sphere3& sph2 = srb2->GetSpherePrimitive();
+
+			res = Sphere3VsSphere3(sph1, sph2, data);
+		}
+		else if (c2 != nullptr)
+		{
+			const Sphere3& sph = s1->GetSpherePrimitive();
+			const AABB3& aabb3 = c2->GetCubePrimitive();
+
+			res = Sphere3VsAABB3(sph, aabb3, data);
+		}
+		else if (q2 != nullptr)
+		{
+			const Sphere3& sph = s1->GetSpherePrimitive();
+			const Plane& pl = q2->GetPlanePrimitive();
+
+			res = Sphere3VsPlane3(sph, pl, data);
+		}
+	}
+	else if (srb1 != nullptr)
+	{
+		if (s2 != nullptr)
+		{
+			const Sphere3& sph1 = srb1->GetSpherePrimitive();
+			const Sphere3& sph2 = s2->GetSpherePrimitive();
+
+			res = Sphere3VsSphere3(sph1, sph2, data);
+		}
+		else if (srb2 != nullptr)
+		{
+			const Sphere3& sph1 = srb1->GetSpherePrimitive();
+			const Sphere3& sph2 = srb2->GetSpherePrimitive();
+
+			res = Sphere3VsSphere3(sph1, sph2, data);
+		}
+		else if (c2 != nullptr)
+		{
+			const Sphere3& sph = srb1->GetSpherePrimitive();
+			const AABB3& aabb3 = c2->GetCubePrimitive();
+
+			res = Sphere3VsAABB3(sph, aabb3, data);
+		}
+		else if (q2 != nullptr)
+		{
+			const Sphere3& sph = srb1->GetSpherePrimitive();
+			const Plane& pl = q2->GetPlanePrimitive();
+
+			res = Sphere3VsPlane3(sph, pl, data);
+		}
+	}
+	else if (c1 != nullptr)
+	{
+		if (s2 != nullptr)
+		{
+			const AABB3& aabb3 = c1->GetCubePrimitive();
+			const Sphere3& sph = s2->GetSpherePrimitive();
+
+			res = Sphere3VsAABB3(sph, aabb3, data);
+		}
+		else if (srb2 != nullptr)
+		{
+			const AABB3& aabb3 = c1->GetCubePrimitive();
+			const Sphere3& sph = srb2->GetSpherePrimitive();
+
+			res = Sphere3VsAABB3(sph, aabb3, data);
+		}
+		else if (c2 != nullptr)
+		{
+			const AABB3& aabb3_1 = c1->GetCubePrimitive();
+			const AABB3& aabb3_2 = c2->GetCubePrimitive();
+
+			res = AABB3VsAABB3Single(aabb3_1, aabb3_2, data);
+		}
+		else if (q2 != nullptr)
+		{
+			const AABB3& aabb3 = c1->GetCubePrimitive();
+			const Plane& pl = q2->GetPlanePrimitive();
+
+			res = AABB3VsPlane3Single(aabb3, pl, data);
+		}
+	}
+	else if (q1 != nullptr)
+	{
+		if (s2 != nullptr)
+		{
+			const Plane& pl = q1->GetPlanePrimitive();
+			const Sphere3& sph = s2->GetSpherePrimitive();
+
+			res = Sphere3VsPlane3(sph, pl, data);
+		}
+		else if (srb2 != nullptr)
+		{
+			const Plane& pl = q1->GetPlanePrimitive();
+			const Sphere3& sph = srb2->GetSpherePrimitive();
+
+			res = Sphere3VsPlane3(sph, pl, data);
+		}
+		else if (c2 != nullptr)
+		{
+			const Plane& pl = q1->GetPlanePrimitive();
+			const AABB3& aabb = c2->GetCubePrimitive();
+
+			res = AABB3VsPlane3Single(aabb, pl, data);
+		}
+		else if (q2 != nullptr)
+		{
+			TODO("Later deal with quad vs quad");
+		}
+	}
+
+	return res;
 }
 
 /*
