@@ -88,6 +88,8 @@ protected:
 	bool m_frozen = false;
 
 public:
+	virtual ~Entity3(){}
+
 	void SetDrawBoundingSphere(bool value) { m_drawBoundSphere = value; }
 	void SetDrawBoundingBox(bool value) { m_drawBoundBox = value; }
 	void SetBoundSpherePos(Vector3 pos);

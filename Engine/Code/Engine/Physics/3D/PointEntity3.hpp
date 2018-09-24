@@ -9,7 +9,6 @@ private:
 	Particle m_primitive;
 
 public:
-	//PointEntity3(const Particle& primitive, bool isConst = false);
 	PointEntity3(const Particle& primitive, eMoveStatus moveStat);
 	~PointEntity3();
 

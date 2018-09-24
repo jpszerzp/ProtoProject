@@ -50,7 +50,6 @@ void Entity3::UpdateEntitiesTransforms()
 {
 	// update transform
 	m_entityTransform.SetLocalPosition(m_center);
-	//m_sphereBoundTransform.SetLocalPosition(m_center);
 	m_boundSphere.m_transform.SetLocalPosition(m_center);
 	m_boxBoundTransform.SetLocalPosition(m_center);
 }

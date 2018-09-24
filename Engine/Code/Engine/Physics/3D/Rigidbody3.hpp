@@ -17,7 +17,7 @@ public:
 
 public:
 	Rigidbody3();
-	~Rigidbody3();
+	virtual ~Rigidbody3();
 
 	void InitializeRigid();
 

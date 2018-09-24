@@ -267,6 +267,7 @@
     <ClCompile Include="Core\Log\FileUtils.cpp" />
     <ClCompile Include="Core\Log\LogSystem.cpp" />
     <ClCompile Include="Core\MapChunk.cpp" />
+    <ClCompile Include="Core\Primitive\Box.cpp" />
     <ClCompile Include="Core\Profiler\ProfileLogScoped.cpp" />
     <ClCompile Include="Core\Profiler\ProfilerNode.cpp" />
     <ClCompile Include="Core\Profiler\ProfileSystem.cpp" />
@@ -343,6 +344,8 @@
     <ClCompile Include="Physics\2D\DiscEntity.cpp" />
     <ClCompile Include="Physics\2D\QuadEntity.cpp" />
     <ClCompile Include="Physics\3D\BoundingVolume3.cpp" />
+    <ClCompile Include="Physics\3D\BoxEntity3.cpp" />
+    <ClCompile Include="Physics\3D\BoxRB3.cpp" />
     <ClCompile Include="Physics\3D\BVH3.cpp" />
     <ClCompile Include="Physics\3D\CollisionDetection.cpp" />
     <ClCompile Include="Physics\3D\ContactResolver.cpp" />
@@ -420,6 +423,7 @@
     <ClInclude Include="Core\Log\FileUtils.hpp" />
     <ClInclude Include="Core\Log\LogSystem.hpp" />
     <ClInclude Include="Core\MapChunk.hpp" />
+    <ClInclude Include="Core\Primitive\Box.hpp" />
     <ClInclude Include="Core\Profiler\ProfileLogScoped.hpp" />
     <ClInclude Include="Core\Profiler\ProfilerNode.hpp" />
     <ClInclude Include="Core\Profiler\ProfileSystem.hpp" />
@@ -498,6 +502,8 @@
     <ClInclude Include="Physics\2D\DiscEntity.hpp" />
     <ClInclude Include="Physics\2D\QuadEntity.hpp" />
     <ClInclude Include="Physics\3D\BoundingVolume3.hpp" />
+    <ClInclude Include="Physics\3D\BoxEntity3.hpp" />
+    <ClInclude Include="Physics\3D\BoxRB3.hpp" />
     <ClInclude Include="Physics\3D\BVH3.hpp" />
     <ClInclude Include="Physics\3D\CollisionDetection.hpp" />
     <ClInclude Include="Physics\3D\ContactResolver.hpp" />

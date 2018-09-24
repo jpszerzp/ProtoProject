@@ -143,6 +143,8 @@ Physics3State::Physics3State()
 	Rigidbody3* body = dynamic_cast<Rigidbody3*>(m_r0->m_physEntity);
 	m_rigidRegistry->Register(body, grg);
 
+	m_g4 = InitializePhysBox(Vector3(5.f, 0.f, 10.f), Vector3(45.f), Vector3(2.f, 1.f, 1.5f), Rgba::CYAN, MOVE_KINEMATIC, BODY_PARTICLE);
+
 	//m_collisionData = new CollisionData3(20);	// allowing specified number of contact at max
 	m_iterResolver = new ContactResolver(2, RESOLVE_ITERATIVE);
 	m_allResolver = new ContactResolver();
@@ -208,6 +210,17 @@ Quad* Physics3State::InitializePhysQuad(Vector3 pos, Vector3 rot, Vector3 scale,
 	q->m_physEntity->SetGameobject(q);
 
 	return q;
+}
+
+Box* Physics3State::InitializePhysBox(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint, eMoveStatus moveStat, eBodyIdentity bid)
+{
+	Box* b = new Box(pos, rot, scale, tint, "cube_pcu", "default", moveStat, bid);
+	b->m_physDriven = true;
+	m_gameObjects.push_back(b);
+	m_boxes.push_back(b);
+	b->m_physEntity->SetGameobject(b);
+
+	return b;
 }
 
 /*
@@ -493,6 +506,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		m_g0->ToggleBoundSphereDebugDraw();
 		//m_g1->ToggleBoundSphereDebugDraw();
 		//m_g2->ToggleBoundSphereDebugDraw();
+		m_g4->ToggleBoundSphereDebugDraw();
 	}
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_6))
 	{
@@ -500,6 +514,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		m_g0->ToggleBoundBoxDebugDraw();
 		//m_g1->ToggleBoundBoxDebugDraw();
 		//m_g2->ToggleBoundBoxDebugDraw();
+		m_g4->ToggleBoundBoxDebugDraw();
 	}
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_T))
 	{
@@ -564,19 +579,26 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		m_g0->GetEntity()->SetLinearVelocity(Vector3::ZERO);
 
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_I))
-		m_g1->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, 5.f));
+		//m_g1->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, 5.f));
+		m_g4->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, 5.f));
 	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_K))
-		m_g1->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, -5.f));
+		//m_g1->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, -5.f));
+		m_g4->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, -5.f));
 	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_J))
-		m_g1->GetEntity()->SetLinearVelocity(Vector3(-5.f, 0.f, 0.f));
+		//m_g1->GetEntity()->SetLinearVelocity(Vector3(-5.f, 0.f, 0.f));
+		m_g4->GetEntity()->SetLinearVelocity(Vector3(-5.f, 0.f, 0.f));
 	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_L))
-		m_g1->GetEntity()->SetLinearVelocity(Vector3(5.f, 0.f, 0.f));
+		//m_g1->GetEntity()->SetLinearVelocity(Vector3(5.f, 0.f, 0.f));
+		m_g4->GetEntity()->SetLinearVelocity(Vector3(5.f, 0.f, 0.f));
 	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_U))
-		m_g1->GetEntity()->SetLinearVelocity(Vector3(0.f, 5.f, 0.f));
+		//m_g1->GetEntity()->SetLinearVelocity(Vector3(0.f, 5.f, 0.f));
+		m_g4->GetEntity()->SetLinearVelocity(Vector3(0.f, 5.f, 0.f));
 	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_O))
-		m_g1->GetEntity()->SetLinearVelocity(Vector3(0.f, -5.f, 0.f));
+		//m_g1->GetEntity()->SetLinearVelocity(Vector3(0.f, -5.f, 0.f));
+		m_g4->GetEntity()->SetLinearVelocity(Vector3(0.f, -5.f, 0.f));
 	else
-		m_g1->GetEntity()->SetLinearVelocity(Vector3::ZERO);
+		//m_g1->GetEntity()->SetLinearVelocity(Vector3::ZERO);
+		m_g4->GetEntity()->SetLinearVelocity(Vector3::ZERO);
 
 	// camera update from input
 	Vector3 camForward = m_camera->GetLocalForward(); 

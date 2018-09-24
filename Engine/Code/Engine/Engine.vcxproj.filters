@@ -502,6 +502,15 @@
     <ClCompile Include="Physics\3D\PointRB3.cpp">
       <Filter>General</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Primitive\Box.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\3D\BoxRB3.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\3D\BoxEntity3.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -875,5 +884,8 @@
     <ClInclude Include="Physics\3D\BoundingVolume3.hpp" />
     <ClInclude Include="Physics\3D\SphereRB3.hpp" />
     <ClInclude Include="Physics\3D\PointRB3.hpp" />
+    <ClInclude Include="Core\Primitive\Box.hpp" />
+    <ClInclude Include="Physics\3D\BoxRB3.hpp" />
+    <ClInclude Include="Physics\3D\BoxEntity3.hpp" />
   </ItemGroup>
 </Project>

@@ -9,7 +9,6 @@ private:
 	AABB3 m_primitive;
 
 public:
-	//CubeEntity3(const AABB3& primitive, bool isConst = false);
 	CubeEntity3(const AABB3& primitive, eMoveStatus moveStat);
 	~CubeEntity3();
 

@@ -8,6 +8,7 @@
 #include "Engine/Core/Primitive/Cube.hpp"
 #include "Engine/Core/Primitive/Quad.hpp"
 #include "Engine/Core/Primitive/Point.hpp"
+#include "Engine/Core/Primitive/Box.hpp"
 #include "Game/GameState.hpp"
 #include "Game/Ballistics.hpp"
 #include "Game/Fireworks.hpp"
@@ -27,6 +28,8 @@ public:
 	Point* InitializePhysPoint(Vector3 pos, Vector3 rot, float size, 
 		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid);
 	Quad* InitializePhysQuad(Vector3 pos, Vector3 rot, Vector3 scale,
+		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid);
+	Box* InitializePhysBox(Vector3 pos, Vector3 rot, Vector3 scale,
 		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid);
 
 	//Sphere* InitializeRigidSphere(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint);
@@ -68,6 +71,7 @@ public:
 	GameObject* m_g1;
 	GameObject* m_g2;
 	GameObject* m_g3;
+	GameObject* m_g4;
 
 	// rigid body
 	GameObject* m_r0;
@@ -84,6 +88,7 @@ public:
 	std::vector<Cube*>	 m_cubes;
 	std::vector<Quad*>	 m_quads;
 	std::vector<Point*>  m_points;
+	std::vector<Box*>	 m_boxes;
 
 	ParticleForceRegistry* m_particleRegistry = nullptr;
 	RigidForceRegistry* m_rigidRegistry = nullptr;

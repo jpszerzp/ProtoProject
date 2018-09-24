@@ -48,5 +48,5 @@ public:
 	Entity3* GetEntity() { return m_physEntity; }
 
 	GameObject();
-	~GameObject();
+	virtual ~GameObject();
 };

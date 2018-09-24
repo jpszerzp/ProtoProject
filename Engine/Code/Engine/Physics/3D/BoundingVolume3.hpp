@@ -18,6 +18,7 @@ public:
 	bool Overlaps(const BoundingSphere* other) const;
 	float GetVolume() const;
 	float GetGrowth(const BoundingSphere& other) const;
+	float GetRadius() const { return m_radius; }
 	Vector3 GetCenter() const { return m_center; }
 
 	// legacy code directly operating on center

@@ -9,13 +9,7 @@ class QuadEntity3 : public Entity3
 private:
 	Plane m_primitive;
 
-	// because plane primitive is special: it does mot bare with pos/rot/scale info
-	//Vector3 m_quadCenter;
-	//Vector3 m_quadRot;
-	//Vector3 m_quadScale;
-
 public:
-	//QuadEntity3(const Plane& primitive, bool isConst, Vector3 center, Vector3 rot, Vector3 scale);
 	QuadEntity3(const Plane& primitive, eMoveStatus moveStat,
 		Vector3 center, Vector3 rot, Vector3 scale);
 	~QuadEntity3();

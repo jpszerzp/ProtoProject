@@ -9,7 +9,6 @@ private:
 	Sphere3 m_primitive;
 
 public:
-	//SphereEntity3(const Sphere3& primitive, bool isConst = false);
 	SphereEntity3(const Sphere3& primitive, eMoveStatus moveStat);
 	~SphereEntity3();
 

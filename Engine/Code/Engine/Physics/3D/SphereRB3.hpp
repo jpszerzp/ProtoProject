@@ -14,6 +14,7 @@ public:
 
 	void SetEntityForPrimitive() override;
 
+	void UpdateEntityPrimitive() override;
 	void UpdateEntitiesTransforms() override;
 	void UpdateInput(float deltaTime) override;
 	void Integrate(float deltaTime) override;

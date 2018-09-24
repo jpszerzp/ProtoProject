@@ -3,23 +3,32 @@
 #include "Engine/Math/Vector3.hpp"
 #include "Engine/Math/Matrix33.hpp"
 
+class Entity3;
+
 class OBB3
 {
+private:
+	Entity3* m_entity = nullptr;
+
 public:
-	//Vector3  m_center;
-	//Vector3  m_rot;
-	//Vector3  m_scale;
-
-	//Vector3  m_extents;
-	//Vector3  m_forward;
-	//Vector3  m_right;
-	//Vector3  m_up;
-
 	Vector3 m_center;			// OBB center point
-	Vector3 m_basis[3];			// basis
-	Vector3 m_extends;			// halfway extends of OBB along basis 
+	Vector3 m_forward;
+	Vector3 m_up;
+	Vector3 m_right;
+	Vector3 m_halfExt;			// halfway extends of OBB along basis 
 
 public:
 	OBB3(){}
+	OBB3(Vector3 center, Vector3 forward, Vector3 up, Vector3 right, Vector3 halfExt)
+		: m_center(center), m_forward(forward), m_up(up), m_right(right), m_halfExt(halfExt){}
 	~OBB3(){}
+
+	float GetDiagonalRadius() const { return m_halfExt.GetLength(); }
+	const Vector3& GetHalfExt() const { return m_halfExt; }
+	float GetFullExtX() const { return m_halfExt.x * 2.f; }
+	float GetFullExtY() const { return m_halfExt.y * 2.f; }
+	float GetFullExtZ() const { return m_halfExt.z * 2.f; }
+
+	void SetEntity(Entity3* ent) { m_entity = ent; }
+	void SetCenter(const Vector3& center) { m_center = center; }
 };
