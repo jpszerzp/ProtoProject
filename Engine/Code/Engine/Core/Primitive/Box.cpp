@@ -67,7 +67,3 @@ void Box::Update(float deltaTime)
 	UpdateBasis();
 }
 
-//void Box::Render(Renderer* renderer)
-//{
-//
-//}

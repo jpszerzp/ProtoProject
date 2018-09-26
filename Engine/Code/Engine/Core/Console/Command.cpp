@@ -784,6 +784,25 @@ void UDPSendCommand(Command& cmd)
 	ConsolePrintfUnit(Rgba::GREEN, "UDP sending");
 }
 
+void BroadPhaseCommand(Command& cmd)
+{
+	std::string subStr = cmd.GetNextString();
+	Rgba outputColor;
+
+	if (subStr == "true")
+	{
+		g_broadphase = true;
+		ConsolePrintfUnit(Rgba::GREEN, "broad phase on!");
+	}
+	else if (subStr == "false")
+	{
+		g_broadphase = false;
+		ConsolePrintfUnit(Rgba::YELLOW, "broad phase off!");
+	}
+	else
+		ConsolePrintfUnit(Rgba::RED, "Unknown arg!");
+}
+
 void EncounterCommand(Command&)
 {
 	g_rcs->m_echo = 2;
@@ -918,6 +937,9 @@ void CommandStartup()
 	CommandRegister("udp_start", UDPStartCommand, "{}", "Starting UDP test");
 	CommandRegister("udp_stop", UDPStopCommand, "{}", "Stopping UDP test");
 	CommandRegister("udp_send", UDPSendCommand, "{}", "Sending with UDP");
+
+	// physics
+	CommandRegister("broadphase", BroadPhaseCommand, "{bool}", "Turn on/off broadphase");
 }
 
 

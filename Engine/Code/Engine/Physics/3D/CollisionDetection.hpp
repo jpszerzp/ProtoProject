@@ -7,7 +7,7 @@
 #include "Engine/Physics/3D/SphereEntity3.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
 
-#define MAX_CONTACTS 20
+#define MAX_CONTACTS 200
 
 /*
  * Contains data from contact generation.
@@ -85,6 +85,13 @@ public:
 	//	const AABB3& aabb3_2, CollisionData3* data);
 	//static uint CoherentProcessingAABB3VsAABB3(const AABB3& aabb_1,
 	//	const AABB3& aabb3_2, CollisionData3* data);
+
+	static uint OBB3VsPlane3(const OBB3& obb,
+		const Plane& plane, CollisionData3* data);
+	static uint OBB3VsSphere3(const OBB3& obb,
+		const Sphere3& sphere, CollisionData3* data);
+	static uint OBB3VsOBB3(const OBB3& obb1,
+		const OBB3& obb2, CollisionData3* data);
 	
 	// general entity detection
 	static uint Entity3VsEntity3(Entity3* e1, Entity3* e2, CollisionData3* data);

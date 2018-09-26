@@ -17,5 +17,6 @@ class RCS;
 extern Blackboard*		g_gameConfigBlackboard;
 extern Clock*			g_masterClock;
 extern RCS*				g_rcs;
+extern bool				g_broadphase;
 
 typedef unsigned int uint;

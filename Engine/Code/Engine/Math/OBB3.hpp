@@ -2,6 +2,7 @@
 
 #include "Engine/Math/Vector3.hpp"
 #include "Engine/Math/Matrix33.hpp"
+#include "Engine/Core/Transform.hpp"
 
 class Entity3;
 
@@ -24,10 +25,15 @@ public:
 	~OBB3(){}
 
 	float GetDiagonalRadius() const { return m_halfExt.GetLength(); }
-	const Vector3& GetHalfExt() const { return m_halfExt; }
 	float GetFullExtX() const { return m_halfExt.x * 2.f; }
 	float GetFullExtY() const { return m_halfExt.y * 2.f; }
 	float GetFullExtZ() const { return m_halfExt.z * 2.f; }
+	const Vector3& GetHalfExt() const { return m_halfExt; }
+	const Vector3& GetHalfExtX() const { return m_right * m_halfExt.x; }
+	const Vector3& GetHalfExtY() const { return m_up * m_halfExt.y; }
+	const Vector3& GetHalfExtZ() const { return m_forward * m_halfExt.z; }
+	const Vector3& GetCenter() const { return m_center; }
+	Entity3* GetEntity() const { return m_entity; }
 
 	void SetEntity(Entity3* ent) { m_entity = ent; }
 	void SetCenter(const Vector3& center) { m_center = center; }

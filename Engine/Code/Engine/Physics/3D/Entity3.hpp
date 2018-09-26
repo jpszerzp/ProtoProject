@@ -110,6 +110,7 @@ public:
 	void SetVerlet(bool value) { m_verlet = value; }
 	void SetVerletScheme(eVerletScheme scheme) { m_verlet_scheme = scheme; }
 	void SetFrozen(bool value) { m_frozen = value; }
+	void SetTransform(const Transform& t) { m_entityTransform = t; }
 	virtual void SetEntityForPrimitive(){}
 
 	bool HasInfiniteMass() const;
@@ -117,7 +118,7 @@ public:
 	bool GetDrawBoundingSphere() const { return m_drawBoundSphere; }
 	bool GetDrawBoundingBox() const { return m_drawBoundBox; }
 	Vector3 GetEntityCenter() const { return m_center; }
-	Transform GetEntityTransform() const { return m_entityTransform; }
+	const Transform& GetEntityTransform() const { return m_entityTransform; }
 	GameObject* GetGameobject() const { return m_goRef; }
 	MassData3 GetMassData3() const { return m_massData; }
 	float GetMass3() const { return GetMassData3().m_mass; }

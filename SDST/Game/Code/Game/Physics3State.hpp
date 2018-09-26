@@ -32,8 +32,6 @@ public:
 	Box* InitializePhysBox(Vector3 pos, Vector3 rot, Vector3 scale,
 		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid);
 
-	//Sphere* InitializeRigidSphere(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint);
-	
 	Fireworks* SetupFireworks(float age, Vector3 pos, Vector3 inheritVel, Vector3 maxVel, Vector3 minVel, bool lastRound = false);
 	Ballistics* SetupBallistics(eBallisticsType type, Vector3 pos, bool frozen, Rgba color);
 	Spring* SetupSpring(Point* end1, Point* end2, float coef, float rl);

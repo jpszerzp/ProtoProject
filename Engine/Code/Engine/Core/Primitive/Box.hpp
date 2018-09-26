@@ -5,7 +5,6 @@
 class Box : public GameObject
 {
 public:
-	//void Render(Renderer* renderer) override;
 	void Update(float deltaTime) override;
 
 	Box();

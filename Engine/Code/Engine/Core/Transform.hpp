@@ -36,9 +36,15 @@ struct sTransform
 	Matrix44	GetMatrixEulerTranspose() const;
 
 	// basis transform
+	// scale
 	Matrix44 ToWorld() const;
-	Matrix44 ToLocalOrthogonal() const;
-	Matrix44 ToLocalGeneral() const;
+	Matrix44 ToLocalOrthogonal() const;	
+	Matrix44 ToLocalGeneral() const;	
+
+	// non-scale
+	Matrix44 ToWorldNonScale() const;
+	Matrix44 ToLocalOrtho() const;  
+	Matrix44 ToLocalGen() const;	
 };
 
 class Transform 
@@ -79,11 +85,21 @@ public:
 	Matrix44	GetLocalMatrixEulerTranspose() const;
 	Matrix44    GetWorldMatrixEulerTranspose() const;
 
+	// scale
 	static Vector3 TransformLocalToWorldPos(Vector3 local, Transform transform);
-	static Vector3 TransformWorldToLocalPosOrthogonal(Vector3 world,
-		Transform transform);	// assumes orthogonal bases
-	static Vector3 TransformWorldToLocalGeneral(Vector3 world,
-		Transform transform);	// no assumption on bases
+	static Vector3 TransformWorldToLocalPosOrthogonal(const Vector3& world,
+		const Transform& transform);	// assumes orthogonal bases
+	static Vector3 TransformWorldToLocalPosGeneral(const Vector3& world,
+		const Transform& transform);	// no assumption on bases
+
+	// non-scale
+	static Vector3 LocalToWorldPos(Vector3 local, Transform transform);
+	static Vector3 WorldToLocalOrthogonal(const Vector3& world, 
+		const Transform& transform);	
+	static Vector3 WorldToLocalGeneral(const Vector3& world,
+		const Transform& transform);	
+
+	// dir
 	static Vector3 TransformDirToWorld(Vector3 dir_local, Transform transform);
 	static Vector3 TransformDirToLocal(Vector3 dir_world, Transform transform);
 

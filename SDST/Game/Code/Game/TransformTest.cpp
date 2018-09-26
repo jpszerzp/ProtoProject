@@ -45,7 +45,7 @@ void TransformTest::LocalWorldTransformTest()
 	Vector3 scale_3 = Vector3::ONE;
 	Transform base_3 = Transform(pos_3, rot_3, scale_3);
 	Vector3 world_3 = Vector3(-10.f, 0.f, -20.f);
-	Vector3 local_3 = Transform::TransformWorldToLocalGeneral(world_3, base_3);
+	Vector3 local_3 = Transform::TransformWorldToLocalPosGeneral(world_3, base_3);
 	Vector3 local_3_true = Vector3(0.f, -5.f, 0.f);
 	bool pass_3 = local_3 == local_3_true;
 	ASSERT_OR_DIE(pass_3, "3: world to local is wrong!");

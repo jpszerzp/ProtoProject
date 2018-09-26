@@ -68,6 +68,8 @@ void BoxRB3::SetEntityForPrimitive()
 void BoxRB3::UpdateEntityPrimitive()
 {
 	m_primitive.m_center = m_center;
+
+	TODO("Update rot for primitive, otherwise visual will look off");
 }
 
 void BoxRB3::UpdateInput(float deltaTime)

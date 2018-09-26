@@ -2,9 +2,11 @@
 #include "Engine/Physics/3D/CubeEntity3.hpp"
 #include "Engine/Physics/3D/QuadEntity3.hpp"
 #include "Engine/Physics/3D/PointEntity3.hpp"
+#include "Engine/Physics/3D/BoxEntity3.hpp"
 #include "Engine/Physics/3D/SphereRB3.hpp"
 #include "Engine/Core/GameObject.hpp"
 #include "Engine/Core/Util/DataUtils.hpp"
+#include "Engine/Math/MathUtils.hpp"
 
 #define INVALID_DEPTH_BOX_TO_POINT -1.f
 #define INVALID_DEPTH_EDGE_TO_EDGE -1.f
@@ -375,6 +377,108 @@ uint CollisionDetector::AABB3VsAABB3Single(const AABB3& aabb3_1, const AABB3& aa
 	data->m_contacts.push_back(theContact);
 
 	return 1;
+}
+
+uint CollisionDetector::OBB3VsPlane3(const OBB3& obb, const Plane& plane, CollisionData3* data)
+{
+	if (data->m_contacts.size() >= data->m_maxContacts)
+		// no contacts amount left, return directly
+		return 0;
+
+	float r = obb.m_halfExt.x * abs(DotProduct(plane.m_normal, obb.m_right)) +
+		obb.m_halfExt.y * abs(DotProduct(plane.m_normal, obb.m_up)) +
+		obb.m_halfExt.z * abs(DotProduct(plane.m_normal, obb.m_forward));
+	float s = DotProduct(plane.m_normal, obb.m_center) - plane.m_offset;
+	
+	if (abs(s) > r)
+		return 0;
+	else
+	{
+		float penetration = r - abs(s);		// > 0
+		Vector3 usedNormal;
+		if (s > 0)
+			usedNormal = plane.GetNormal();
+		else
+			usedNormal = -plane.GetNormal();
+		Vector3 contactPoint = obb.GetCenter() + (-usedNormal) * s;
+		Contact3 theContact = Contact3(obb.GetEntity(), plane.GetEntity(),
+			usedNormal, contactPoint, penetration);
+
+		data->m_contacts.push_back(theContact);
+		return 1;
+	}
+}
+
+uint CollisionDetector::OBB3VsSphere3(const OBB3& obb, const Sphere3& sphere, CollisionData3* data)
+{
+	if (data->m_contacts.size() >= data->m_maxContacts)
+		// no contacts amount left, return directly
+		return 0;
+
+	// get obb transform
+	BoxEntity3* boxEnt = dynamic_cast<BoxEntity3*>(obb.GetEntity());
+	ASSERT_OR_DIE(boxEnt != nullptr, "OBB is not using particle entity, try rigid body");
+	const Transform& t = boxEnt->GetEntityTransform();
+	
+	// transform sphere to local coord of obb 
+	Vector3 center_local = Transform::WorldToLocalOrthogonal(sphere.GetCenter(), t);
+	float r = sphere.GetRadius();
+	Sphere3 local_sph = Sphere3(center_local, r);
+
+	// construct local aabb
+	Vector3 halfExt = obb.GetHalfExt();
+	AABB3 local_box = AABB3(-halfExt, halfExt);
+	Vector3 aabb3HalfDim = local_box.GetDimensions() / 2.f;
+
+	// early out in aabb3 coord
+	bool xtest = (abs(center_local.x) - r) > aabb3HalfDim.x;
+	bool ytest = (abs(center_local.y) - r) > aabb3HalfDim.y;
+	bool ztest = (abs(center_local.z) - r) > aabb3HalfDim.z;
+	if (xtest || ytest || ztest)
+		return false;
+
+	Vector3 closestPointLocal = Vector3::ZERO;
+	float dist;
+
+	// clamp x
+	dist = center_local.x;
+	if (dist > aabb3HalfDim.x) dist = aabb3HalfDim.x;
+	if (dist < -aabb3HalfDim.x) dist = -aabb3HalfDim.x;
+	closestPointLocal.x = dist;
+
+	// clamp y
+	dist = center_local.y;
+	if (dist > aabb3HalfDim.y) dist = aabb3HalfDim.y;
+	if (dist < -aabb3HalfDim.y) dist = -aabb3HalfDim.y;
+	closestPointLocal.y = dist;
+
+	// clamp z
+	dist = center_local.z;
+	if (dist > aabb3HalfDim.z) dist = aabb3HalfDim.z;
+	if (dist < -aabb3HalfDim.z) dist = -aabb3HalfDim.z;
+	closestPointLocal.z = dist;
+
+	// check if we are in contact
+	dist = (closestPointLocal - center_local).GetLengthSquared();
+	if (dist > r * r) return 0;
+
+	// at this point we get the contact point in the local space
+	// we need to transform it back to world space
+	Vector3 closestPointWorld = Transform::LocalToWorldPos(closestPointLocal, t);
+
+	Vector3 usedNormal = (sphere.GetCenter() - closestPointWorld).GetNormalized();
+	Vector3 contactPoint = closestPointWorld;
+	float penetration = r - sqrtf(dist);
+	Contact3 theContact = Contact3(sphere.GetEntity(), obb.GetEntity(),
+		usedNormal, contactPoint, penetration);
+
+	data->m_contacts.push_back(theContact);
+	return 1;
+}
+
+uint CollisionDetector::OBB3VsOBB3(const OBB3& obb1, const OBB3& obb2, CollisionData3* data)
+{
+	return 0;
 }
 
 uint CollisionDetector::Entity3VsEntity3(Entity3* e1, Entity3* e2, CollisionData3* data)

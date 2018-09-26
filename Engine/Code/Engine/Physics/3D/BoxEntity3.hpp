@@ -14,7 +14,7 @@ public:
 	void UpdateEntityPrimitive() override;
 	void Render(Renderer* renderer) override;
 
-	const OBB3& GetCubePrimitive() const { return m_primitive; }
+	const OBB3& GetBoxPrimitive() const { return m_primitive; }
 
 	void SetEntityForPrimitive() override;
 };

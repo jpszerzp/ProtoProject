@@ -8,6 +8,7 @@
 #include "Engine/Math/MathUtils.hpp"
 #include "Engine/Physics/3D/QuadEntity3.hpp"
 #include "Engine/Physics/3D/CubeEntity3.hpp"
+#include "Engine/Physics/3D/BoxEntity3.hpp"
 #include <algorithm>
 
 bool IsGameobjectDead(GameObject* go) { return go->m_dead; }
@@ -113,6 +114,10 @@ Physics3State::Physics3State()
 	Point* sp_point_1 = InitializePhysPoint(Vector3(0.f, 5.f, 5.f), Vector3::ZERO, 10.f, Rgba::CYAN, MOVE_DYNAMIC, BODY_PARTICLE);
 	Point* asp_point_0 = InitializePhysPoint(Vector3(-5.f, 10.f, 5.f), Vector3::ZERO, 10.f, Rgba::RED, MOVE_DYNAMIC, BODY_PARTICLE);
 	Point* asp_point_1 = InitializePhysPoint(Vector3(-5.f, 5.f, 5.f), Vector3::ZERO, 10.f, Rgba::CYAN, MOVE_STATIC, BODY_PARTICLE);
+	sp_point_0->GetEntity()->SetFrozen(true);
+	sp_point_1->GetEntity()->SetFrozen(true);
+	asp_point_0->GetEntity()->SetFrozen(true);
+	asp_point_1->GetEntity()->SetFrozen(true);
 
 	// setting up registrations in the registry
 	// A. springs
@@ -223,18 +228,6 @@ Box* Physics3State::InitializePhysBox(Vector3 pos, Vector3 rot, Vector3 scale, R
 	return b;
 }
 
-/*
-Sphere* Physics3State::InitializeRigidSphere(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint)
-{
-	Sphere* s = new Sphere(pos, rot, scale, tint, "sphere_pcu", "default", true);
-	s->m_physDriven = true;
-	m_gameObjects.push_back(s);
-	m_spheres.push_back(s);
-	s->m_physEntity->SetGameobject(s);
-
-	return s;
-}
-*/
 
 Point* Physics3State::InitializePhysPoint(Vector3 pos, Vector3 rot, float size,
 	Rgba tint, eMoveStatus moveStat, eBodyIdentity bid)
@@ -368,6 +361,7 @@ void Physics3State::RigidbodyPhysicsUpdate(float deltaTime)
 
 void Physics3State::Update(float deltaTime)
 {
+	m_broadPhase = g_broadphase;	// hacky...
 	UpdateInput(deltaTime);			// update input
 	UpdateGameobjects(deltaTime);	// update gameobjects
 	UpdateDebugDraw(deltaTime);		// update debug draw
@@ -628,7 +622,7 @@ void Physics3State::UpdateGameobjects(float deltaTime)
 	UpdateGameobjectsCore(deltaTime);	// update GO core
 	UpdateBVH();						// update BVH 
 	UpdateContactGeneration();			// update contact generation
-	UpdateContactResolution(deltaTime);	// update contact resolution
+	UpdateContactResolution(deltaTime);	// contact resolution
 }
 
 void Physics3State::UpdateDebugDraw(float deltaTime)
@@ -729,9 +723,24 @@ void Physics3State::UpdateContactGeneration()
 
 				CollisionDetector::Sphere3VsAABB3(sph, aabb3, m_allResolver->GetCollisionData());
 			}
+
+			// sphere vs obb3
+			for (uint idx2 = 0; idx2 < m_boxes.size(); ++idx2)
+			{
+				Sphere* sphere = m_spheres[idx1];
+				Box* box = m_boxes[idx2];
+
+				SphereEntity3* se = dynamic_cast<SphereEntity3*>(sphere->m_physEntity);
+				BoxEntity3* be = dynamic_cast<BoxEntity3*>(box->m_physEntity);
+
+				const Sphere3& sph = se->GetSpherePrimitive();
+				const OBB3& obb3 = be->GetBoxPrimitive();
+
+				CollisionDetector::OBB3VsSphere3(obb3, sph, m_allResolver->GetCollisionData());
+			}
 		}
 
-		// cubes
+		// cubes: deprecated, replaced with obb3 (obb3 and cube3 do not coexist)
 		for (uint idx1 = 0; idx1 < m_cubes.size(); ++idx1)
 		{
 			// aabb3 vs aabb3
@@ -766,11 +775,45 @@ void Physics3State::UpdateContactGeneration()
 			}
 		}
 
+		// obb3
+		for (uint idx1 = 0; idx1 < m_boxes.size(); ++idx1)
+		{
+			// obb3 vs obb3
+			for (uint idx2 = idx1 + 1; idx2 < m_boxes.size(); ++idx2)
+			{
+				Box* b1 = m_boxes[idx1];
+				Box* b2 = m_boxes[idx2];
+
+				BoxEntity3* be1 = dynamic_cast<BoxEntity3*>(b1->m_physEntity);
+				BoxEntity3* be2 = dynamic_cast<BoxEntity3*>(b2->m_physEntity);
+
+				const OBB3& obb3_1 = be1->GetBoxPrimitive();
+				const OBB3& obb3_2 = be2->GetBoxPrimitive();
+
+				CollisionDetector::OBB3VsOBB3(obb3_1, obb3_2, m_allResolver->GetCollisionData());
+			}
+
+			// obb3 vs plane
+			for (uint idx2 = 0; idx2 < m_quads.size(); ++idx2)
+			{
+				Box* box = m_boxes[idx1];
+				Quad* plane = m_quads[idx2];
+
+				BoxEntity3* be = dynamic_cast<BoxEntity3*>(box->m_physEntity);
+				QuadEntity3* qe = dynamic_cast<QuadEntity3*>(plane->m_physEntity);
+
+				const OBB3& obb = be->GetBoxPrimitive();
+				const Plane& pl = qe->GetPlanePrimitive();
+
+				CollisionDetector::OBB3VsPlane3(obb, pl, m_allResolver->GetCollisionData());
+			}
+		}
+
 		// plane
 		for (uint idx1 = 0; idx1 < m_quads.size(); ++idx1)
 		{
 			// plane vs plane
-			for (uint idx2 = idx1; idx2 < m_quads.size(); ++idx2)
+			for (uint idx2 = idx1 + 1; idx2 < m_quads.size(); ++idx2)
 			{
 
 			}

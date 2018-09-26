@@ -59,6 +59,44 @@ Matrix44 sTransform::ToLocalGeneral() const
 	return res;
 }
 
+Matrix44 sTransform::ToWorldNonScale() const
+{
+	Matrix44 rotationMatrix = Matrix44::MakeRotationDegrees3D(m_euler);
+	Matrix44 translationMatrix = Matrix44::MakeTranslation3D(m_position);
+
+	// tr
+	Matrix44 res = Matrix44::IDENTITY;
+	res.Append(translationMatrix);
+	res.Append(rotationMatrix);
+
+	return res;
+}
+
+Matrix44 sTransform::ToLocalOrtho() const
+{
+	Matrix44 rotationMatrix = Matrix44::MakeRotationDegrees3D(m_euler).Transpose();		// assumes bases are orthogonal
+	Matrix44 translationMatrix = Matrix44::MakeTranslation3D(-m_position);
+
+	// srt
+	Matrix44 res = Matrix44::IDENTITY;
+	res.Append(rotationMatrix);
+	res.Append(translationMatrix);
+
+	return res;
+}
+
+Matrix44 sTransform::ToLocalGen() const
+{
+	Matrix44 rotationMatrix = Matrix44::MakeRotationDegrees3D(m_euler).Invert();
+	Matrix44 translationMatrix = Matrix44::MakeTranslation3D(-m_position);
+
+	Matrix44 res = Matrix44::IDENTITY;
+	res.Append(rotationMatrix);
+	res.Append(translationMatrix);
+
+	return res;
+}
+
 void sTransform::SetPosition(Vector3 pos)
 {
 	m_position = pos;
@@ -178,7 +216,7 @@ Vector3 Transform::TransformLocalToWorldPos(Vector3 local, Transform transform)
 	return world;
 }
 
-Vector3 Transform::TransformWorldToLocalPosOrthogonal(Vector3 world, Transform transform)
+Vector3 Transform::TransformWorldToLocalPosOrthogonal(const Vector3& world, const Transform& transform)
 {
 	Matrix44 toLocal = transform.m_localTransform.ToLocalOrthogonal();
 	Vector4 worldPos = world.ToVector4(1.f);
@@ -187,9 +225,36 @@ Vector3 Transform::TransformWorldToLocalPosOrthogonal(Vector3 world, Transform t
 	return local;
 }
 
-Vector3 Transform::TransformWorldToLocalGeneral(Vector3 world, Transform transform)
+Vector3 Transform::TransformWorldToLocalPosGeneral(const Vector3& world, const Transform& transform)
 {
 	Matrix44 toLocal = transform.m_localTransform.ToLocalGeneral();
+	Vector4 worldPos = world.ToVector4(1.f);
+	Vector4 localPos = toLocal * worldPos;
+	Vector3 local = localPos.ToVector3();
+	return local;
+}
+
+Vector3 Transform::LocalToWorldPos(Vector3 local, Transform transform)
+{
+	Matrix44 toWorld = transform.m_localTransform.ToWorldNonScale();
+	Vector4 localPos = local.ToVector4(1.f);
+	Vector4 worldPos = toWorld * localPos;
+	Vector3 world = worldPos.ToVector3();
+	return world;
+}
+
+Vector3 Transform::WorldToLocalOrthogonal(const Vector3& world, const Transform& transform)
+{
+	Matrix44 toLocal = transform.m_localTransform.ToLocalOrtho();
+	Vector4 worldPos = world.ToVector4(1.f);
+	Vector4 localPos = toLocal * worldPos;
+	Vector3 local = localPos.ToVector3();
+	return local;
+}
+
+Vector3 Transform::WorldToLocalGeneral(const Vector3& world, const Transform& transform)
+{
+	Matrix44 toLocal = transform.m_localTransform.ToLocalGen();
 	Vector4 worldPos = world.ToVector4(1.f);
 	Vector4 localPos = toLocal * worldPos;
 	Vector3 local = localPos.ToVector3();
