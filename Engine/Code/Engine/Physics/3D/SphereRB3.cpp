@@ -1,5 +1,6 @@
 #include "Engine/Physics/3D/SphereRB3.hpp"
 #include "Engine/Input/InputSystem.hpp"
+#include "Engine/Core/Console/DevConsole.hpp"
 
 SphereRB3::SphereRB3()
 {
@@ -103,7 +104,8 @@ void SphereRB3::UpdateEntitiesTransforms()
 void SphereRB3::UpdateInput(float deltaTime)
 {
 	InputSystem* input = InputSystem::GetInstance();
-	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_P))
+	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_P)
+		&& !DevConsoleIsOpen())
 		m_frozen = !m_frozen;
 }
 

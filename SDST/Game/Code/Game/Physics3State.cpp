@@ -510,7 +510,8 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		//m_g2->ToggleBoundBoxDebugDraw();
 		m_g4->ToggleBoundBoxDebugDraw();
 	}
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_T))
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_T)
+		&& !DevConsoleIsOpen())
 	{
 		if (m_broadPhase)
 		{
@@ -527,7 +528,8 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		}
 	}
 	// test removing from leaf
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_R))
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_R)
+		&& !DevConsoleIsOpen())
 	{
 		if (m_node != nullptr && m_broadPhase)
 		{
@@ -544,7 +546,8 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		}
 	}
 	// test removing branch
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_Y))
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_Y)
+		&& !DevConsoleIsOpen())
 	{
 		if (m_broadPhase)
 		{

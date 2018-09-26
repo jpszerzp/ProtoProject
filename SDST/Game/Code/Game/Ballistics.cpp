@@ -1,5 +1,6 @@
 #include "Engine/Renderer/Renderable.hpp"
 #include "Engine/Input/InputSystem.hpp"
+#include "Engine/Core/Console/DevConsole.hpp"
 #include "Game/Ballistics.hpp"
 
 Ballistics::Ballistics()
@@ -97,7 +98,8 @@ void Ballistics::Update(float deltaTime)
 void Ballistics::UpdateInput(float deltaTime)
 {
 	InputSystem* input = InputSystem::GetInstance();
-	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_P))
+	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_P)
+		&& !DevConsoleIsOpen())
 	{
 		bool frostness = m_physEntity->IsFrozen();
 		m_physEntity->SetFrozen(!frostness);

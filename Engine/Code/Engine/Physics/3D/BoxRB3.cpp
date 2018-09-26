@@ -1,5 +1,6 @@
 #include "Engine/Physics/3D/BoxRB3.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
+#include "Engine/Core/Console/DevConsole.hpp"
 #include "Engine/Input/InputSystem.hpp"
 
 BoxRB3::BoxRB3(float mass, const OBB3& primitive, const Vector3& euler, eMoveStatus status)
@@ -75,7 +76,8 @@ void BoxRB3::UpdateEntityPrimitive()
 void BoxRB3::UpdateInput(float deltaTime)
 {
 	InputSystem* input = InputSystem::GetInstance();
-	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_P))
+	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_P)
+		&& !DevConsoleIsOpen())
 		m_frozen = !m_frozen;
 }
 
