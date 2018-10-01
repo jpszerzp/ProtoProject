@@ -35,6 +35,14 @@ float GetDistanceSquared(const Vector2& a, const Vector2& b);
 bool  DoDiscsOverlap (const Disc2& a, const Disc2& b);
 bool  DoDiscsOverlap (const Vector2& aCenter, float aRadius, const Vector2& bCenter, float bRadius);
 bool  DoAABBsOverlap( const AABB2& a, const AABB2& b );
+float GetSquredDistPointVsAABB3(const Vector3& point, const AABB3& aabb3);
+bool  SphereVsAABB3Intersection(const Sphere3& sphere, const AABB3& aabb3);
+bool  SphereVsOBB3Intersection(const Sphere3& sphere, const OBB3& obb3);
+bool  SphereVsSphereIntersection(const Sphere3& s1, const Sphere3& s2);
+bool  AABB3VsPlaneIntersection(const AABB3& aabb, const Plane& plane);
+bool  AABB3VsAABB3Intersection(const AABB3& aabb_1, const AABB3& aabb_2);
+bool  AABB3VsAABB3Intersection(const AABB3& aabb_1, const AABB3& aabb_2,
+	Vector3& axis, float& overlap);
 
 // rounding, clamping and range mapping
 float RangeMapFloat(float inValue, float inStart, float inEnd, float outStart, float outEnd);
@@ -96,6 +104,9 @@ Vector2 PolarToCartesian(float radius, float degree);
 Vector3 PolarToCartesian( float radius, float rotationDeg, float azimuthDeg ); 
 Vector3 PolarToCartesian( Vector3 spherical ); 
 Vector3 CartesianToPolar( Vector3 position );
+void MakeOrthonormalBasis(const Vector3& x, Vector3& y, Vector3& z);
+void MakeOrthonormalBasisOpt(const Vector3& x, Vector3& y, Vector3& z);
+void MakeOrthonormalBasisStable(const Vector3& x);
 bool ProjectPlaneToSphere(Vector2 pos, float r, Vector3& out_pos);	// a spherical coord operation
 
 bool  Quadratic(Vector2& out, float a, float b, float c);
@@ -114,15 +125,6 @@ void SwapFloat(float& t1, float& t2);
 // approximation
 bool IsIdenticalFloat(float f1, float f2);
 bool IsIdenticalVector3(Vector3 v1, Vector3 v2);
-
-// collision test
-float GetSquredDistPointVsAABB3(const Vector3& point, const AABB3& aabb3);
-bool  SphereVsAABB3Intersection(const Sphere3& sphere, const AABB3& aabb3);
-bool  SphereVsOBB3Intersection(const Sphere3& sphere, const OBB3& obb3);
-bool  SphereVsSphereIntersection(const Sphere3& s1, const Sphere3& s2);
-bool  AABB3VsPlaneIntersection(const AABB3& aabb, const Plane& plane);
-bool  AABB3VsAABB3Intersection(const AABB3& aabb_1, const AABB3& aabb_2);
-bool  AABB3VsAABB3Intersection(const AABB3& aabb_1, const AABB3& aabb_2, Vector3& axis, float& overlap);
 
 // minkowski
 AABB2 MinkowskiAABBVsAABB(const AABB2& aabb1, const AABB2& aabb2);

@@ -8,6 +8,22 @@
 #include "Engine/Core/ErrorWarningAssert.hpp"
 
 #define MAX_CONTACTS 200
+#define COHERENT_THRESHOLD -0.01f
+
+enum eContactFeature
+{
+	V1, V2, V3, V4, V5, V6, V7, V8,
+	F1, F2, F3, F4, F5, F6,
+	E1, E2, E3, E4, E5, E6, E7, E8, E9, E10, E11, E12,
+	UNKNOWN
+};
+
+enum eContactType
+{
+	POINT_FACE,
+	EDGE_EDGE,
+	NO_CARE
+};
 
 /*
  * Contains data from contact generation.
@@ -15,6 +31,10 @@
 class Contact3
 {
 public:
+	eContactType m_type = NO_CARE;
+	eContactFeature m_f1;	// feature from e1
+	eContactFeature m_f2;	// feature from e2
+
 	Entity3* m_e1;
 	Entity3* m_e2;
 
@@ -56,12 +76,18 @@ struct CollisionData3
 	~CollisionData3() { ClearContacts(); }
 
 	void ClearContacts() { m_contacts.clear(); }
+	void ClearCoherent();
+
+	bool HasAndUpdateContact(const Contact3& contact);
 
 	std::vector<Contact3>& GetContacts() { return m_contacts; }
 };
 
 class CollisionDetector
 {
+protected:
+	const static Vector3 ISA;
+
 public:
 	CollisionDetector();
 	~CollisionDetector();
@@ -90,18 +116,21 @@ public:
 		const Plane& plane, CollisionData3* data);
 	static uint OBB3VsSphere3(const OBB3& obb,
 		const Sphere3& sphere, CollisionData3* data);
-	static uint OBB3VsOBB3(const OBB3& obb1,
+	static uint OBB3VsOBB3Shallow(const OBB3& obb1,
 		const OBB3& obb2, CollisionData3* data);
+	static uint OBB3VsOBB3Deep(const OBB3& obb1,
+		const OBB3& obb2, CollisionData3* data);
+	static uint OBB3VsPoint(const OBB3& obb, const Vector3& p, Contact3& contact, bool reverse);
 	
 	// general entity detection
 	static uint Entity3VsEntity3(Entity3* e1, Entity3* e2, CollisionData3* data);
 
 	// TODO
-	static void BoxAndPointPenetration(const AABB3& aabb, const Vector3& point, float* out_penetration);
-	static void BoxAndEdgePenetration(const AABB3& aabb, const Vector3& edge, float* out_penetration);
-	static void EdgeAndEdgePenetration(const Vector3& e1, const Vector3& e2, float* out_penetration);
-	static uint BoxAndPointContact(const AABB3& aabb, const Vector3& point, CollisionData3* data);
-	static uint BoxAndEdgeContact(const AABB3& aabb, const Vector3& edge, CollisionData3* data);
-	static uint EdgeAndEdgeContact(const Vector3& edge1, const Vector3& edge2, CollisionData3* data);
+	//static void BoxAndPointPenetration(const AABB3& aabb, const Vector3& point, float* out_penetration);
+	//static void BoxAndEdgePenetration(const AABB3& aabb, const Vector3& edge, float* out_penetration);
+	//static void EdgeAndEdgePenetration(const Vector3& e1, const Vector3& e2, float* out_penetration);
+	//static uint BoxAndPointContact(const AABB3& aabb, const Vector3& point, CollisionData3* data);
+	//static uint BoxAndEdgeContact(const AABB3& aabb, const Vector3& edge, CollisionData3* data);
+	//static uint EdgeAndEdgeContact(const Vector3& edge1, const Vector3& edge2, CollisionData3* data);
 };
 

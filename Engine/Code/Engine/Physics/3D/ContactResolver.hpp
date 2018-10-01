@@ -8,7 +8,8 @@
 enum eResolveScheme
 {
 	RESOLVE_ALL,
-	RESOLVE_ITERATIVE
+	RESOLVE_ITERATIVE,
+	RESOLVE_COHERENT
 };
 
 class ContactResolver
@@ -21,15 +22,16 @@ protected:
 	CollisionData3* m_collision;
 
 public:
-	ContactResolver();
-	ContactResolver(uint iterations, eResolveScheme scheme);
-	ContactResolver(eResolveScheme scheme);
+	ContactResolver();							// default to all resolver
+	ContactResolver(uint iterations);			// for iterative resolver
+	ContactResolver(eResolveScheme scheme);	
 	~ContactResolver(){}
 
 	void SetIterations(uint iterations) { m_iterations = iterations; }
 	void ResolveContacts(float deltaTime);
 	void ResolveContactsIterative(float deltaTime);
 	void ResolveContactsAll(float deltaTime);
+	void ResolveContactCoherent(float deltaTime);
 	void ClearRecords();
 
 	CollisionData3* GetCollisionData() { return m_collision; }

@@ -29,10 +29,19 @@ public:
 	float GetFullExtY() const { return m_halfExt.y * 2.f; }
 	float GetFullExtZ() const { return m_halfExt.z * 2.f; }
 	const Vector3& GetHalfExt() const { return m_halfExt; }
+	Vector3 GetHalfExtCopy() const { return m_halfExt; }
 	const Vector3& GetHalfExtX() const { return m_right * m_halfExt.x; }
 	const Vector3& GetHalfExtY() const { return m_up * m_halfExt.y; }
 	const Vector3& GetHalfExtZ() const { return m_forward * m_halfExt.z; }
 	const Vector3& GetCenter() const { return m_center; }
+	const Vector3& GetFTL() const;
+	const Vector3& GetFBL() const;
+	const Vector3& GetFBR() const;
+	const Vector3& GetFTR() const;
+	const Vector3& GetBTL() const;
+	const Vector3& GetBBL() const;
+	const Vector3& GetBBR() const;
+	const Vector3& GetBTR() const;
 	Entity3* GetEntity() const { return m_entity; }
 
 	void SetEntity(Entity3* ent) { m_entity = ent; }

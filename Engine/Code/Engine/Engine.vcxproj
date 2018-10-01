@@ -318,6 +318,7 @@
     <ClCompile Include="Math\IntRange.cpp" />
     <ClCompile Include="Math\IntVector2.cpp" />
     <ClCompile Include="Math\IntVector3.cpp" />
+    <ClCompile Include="Math\Line3.cpp" />
     <ClCompile Include="Math\MathUtils.cpp" />
     <ClCompile Include="Math\Matrix33.cpp" />
     <ClCompile Include="Math\Matrix44.cpp" />
@@ -476,6 +477,7 @@
     <ClInclude Include="Math\IntRange.hpp" />
     <ClInclude Include="Math\IntVector2.hpp" />
     <ClInclude Include="Math\IntVector3.hpp" />
+    <ClInclude Include="Math\Line3.hpp" />
     <ClInclude Include="Math\MathUtils.hpp" />
     <ClInclude Include="Math\Matrix33.hpp" />
     <ClInclude Include="Math\Matrix44.hpp" />

@@ -1,5 +1,6 @@
 #include "Engine/Math/Matrix33.hpp"
 #include "Engine/Math/MathUtils.hpp"
+#include "Engine/Core/ErrorWarningAssert.hpp"
 
 const Matrix33 Matrix33::IDENTITY = Matrix33();
 const Matrix33 Matrix33::ZERO = Matrix33(0.f);
@@ -51,6 +52,24 @@ void Matrix33::operator*(const float rhs)
 	Ix *= rhs;		Jx *= rhs;		Kx *= rhs;
 	Iy *= rhs;		Jy *= rhs;		Ky *= rhs;
 	Iz *= rhs;		Jz *= rhs;		Kz *= rhs;
+}
+
+const float Matrix33::operator[](const int idx) const
+{
+	switch (idx)
+	{
+	case 0: return Ix;
+	case 1: return Iy;
+	case 2: return Iz;
+	case 3: return Jx;
+	case 4: return Jy;
+	case 5: return Jz;
+	case 6: return Kx;
+	case 7: return Ky;
+	case 8: return Kz;
+	default:
+		ASSERT_OR_DIE(false, "Invalid matrix entry index");
+	}
 }
 
 float Matrix33::GetDeterminant() const

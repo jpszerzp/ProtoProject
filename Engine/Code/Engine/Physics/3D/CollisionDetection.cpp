@@ -7,6 +7,7 @@
 #include "Engine/Core/GameObject.hpp"
 #include "Engine/Core/Util/DataUtils.hpp"
 #include "Engine/Math/MathUtils.hpp"
+#include "Engine/Math/Line3.hpp"
 
 #define INVALID_DEPTH_BOX_TO_POINT -1.f
 #define INVALID_DEPTH_EDGE_TO_EDGE -1.f
@@ -179,6 +180,69 @@ void Contact3::ResolvePenetration(float deltaTime)
 				move_per_inv_mass * (-m_e2->GetMassData3().m_invMass));
 	}
 }
+
+void CollisionData3::ClearCoherent()
+{
+	for (std::vector<Contact3>::size_type idx = 0; idx < m_contacts.size(); ++idx)
+	{
+		if (m_contacts[idx].m_penetration < COHERENT_THRESHOLD)
+		{
+			std::vector<Contact3>::iterator it = m_contacts.begin() + idx;
+			m_contacts.erase(it);
+			idx--;
+		}
+	}
+}
+
+
+bool CollisionData3::HasAndUpdateContact(const Contact3& contact)
+{
+	bool found = false;
+
+	for (Contact3& c : m_contacts)
+	{
+		if (contact.m_type == POINT_FACE)
+		{
+			if (contact.m_f1 == UNKNOWN)
+			{
+				found = (contact.m_f2 == c.m_f2);
+				if (found)
+				{
+					c = contact;
+					break;
+				}
+			}
+			else 
+			{
+				found = (contact.m_f1 == c.m_f1);
+				if (found)
+				{
+					c = contact;
+					break;
+				}
+			}
+		}
+		else if (contact.m_type == EDGE_EDGE)
+		{
+			found = (contact.m_f1 == c.m_f1) && (contact.m_f2 == c.m_f2);
+			if (found)
+			{
+				c = contact;
+				break;
+			}
+		}
+		else
+		{
+			// we do not care if contact has other types
+			// we will not use this function in those cases either
+			break;
+		}
+	}
+
+	return found;
+}
+
+const Vector3 CollisionDetector::ISA = Vector3(-INFINITY);
 
 CollisionDetector::CollisionDetector()
 {
@@ -476,9 +540,531 @@ uint CollisionDetector::OBB3VsSphere3(const OBB3& obb, const Sphere3& sphere, Co
 	return 1;
 }
 
-uint CollisionDetector::OBB3VsOBB3(const OBB3& obb1, const OBB3& obb2, CollisionData3* data)
+uint CollisionDetector::OBB3VsOBB3Shallow(const OBB3& obb1, const OBB3& obb2, CollisionData3* data)
 {
-	return 0;
+	if (data->m_contacts.size() >= data->m_maxContacts)
+		// no contacts amount left, return directly
+		return 0;
+
+	Vector3 obb1_local[3] = {obb1.m_right, obb1.m_up, obb1.m_forward};	// x y z
+	Vector3 obb2_local[3] = {obb2.m_right, obb2.m_up, obb2.m_forward};
+
+	// SAT, if fails, no collision
+	// 1 - rotation matrix where obb2 is expressed with obb1 coord (obb2 -> obb1)
+	float entries[9];
+	for (int i = 0; i < 3; ++i)
+	{
+		for (int j = 0; j < 3; ++j)
+		{
+			int idx = 3 * j + i;
+			entries[idx] = DotProduct(obb1_local[i], obb2_local[j]);
+		}
+	}
+	Matrix33 rotation = Matrix33(entries);
+
+	// 2 - find translation t from obb1 to obb2, and use that to translate to obb1's frame
+	Vector3 t = obb2.m_center - obb1.m_center;
+	t = Vector3(DotProduct(t, obb1.m_right), 
+		DotProduct(t, obb1.m_up),
+		DotProduct(t, obb1.m_forward));
+
+	// 3 - robust SAT
+	float abs_entries[9];
+	for (int i = 0; i < 3; ++i)
+	{
+		for (int j = 0; j < 3; ++j)
+		{
+			int idx = 3 * j + i;
+			abs_entries[idx] = abs(entries[idx]) + .0f;		// offset to prevent parallel axis but cause representation accuracy issue
+		}
+	}
+	Matrix33 abs_rotation = Matrix33(abs_entries);
+	// axis record 
+	IntVector2 axis_pair;
+	//float deepest = -INFINITY;
+	float shallowest = INFINITY;
+
+	// 4 - test obb1 basis
+	float r1, r2;
+	for (int i = 0; i < 3; ++i)
+	{
+		r1 = obb1.GetHalfExtCopy()[i];
+		r2 = obb2.GetHalfExtCopy()[0] * abs_rotation[i] +
+			obb2.GetHalfExtCopy()[1] * abs_rotation[3 + i] +
+			obb2.GetHalfExtCopy()[2] * abs_rotation[6 + i];
+		if (abs(t[i]) > (r1 + r2))
+			return 0;
+		else
+		{
+			float overlap = (r1 + r2) - abs(t[i]);
+			//if (overlap > deepest)
+			//{
+			//	deepest = overlap;
+			//	axis_pair = IntVector2(i, -1);	// means the i axis of obb1, no axis from obb2
+			//}
+			if (overlap < shallowest)
+			{
+				shallowest = overlap;
+				axis_pair = IntVector2(i, -1);
+			}
+		}
+	}
+
+	// 5 - test obb2 basis
+	for (int i = 0; i < 3; ++i)
+	{
+		r1 = obb1.GetHalfExtCopy()[0] * abs_rotation[3 * i] +
+			obb1.GetHalfExtCopy()[1] * abs_rotation[3 * i + 1] +
+			obb1.GetHalfExtCopy()[2] * abs_rotation[3 * i + 2];
+		r2 = obb2.GetHalfExtCopy()[i];
+		float dist = abs(t[0] * rotation[3*i] + t[1] * rotation[3*i+1] + t[2] * rotation[3*i+2]); 
+		if (dist > (r1 + r2))
+			return 0;
+		else
+		{
+			float overlap = (r1 + r2) - dist;
+			//if (overlap > deepest)
+			//{
+			//	deepest = overlap;
+			//	axis_pair = IntVector2(-1, i);	// means no axis from obb1, and i axis from obb2
+			//}
+			if (overlap < shallowest)
+			{
+				shallowest = overlap;
+				axis_pair = IntVector2(-1, i);
+			}
+		}
+	}
+
+	// 6 - test axis obb1x cross obb2x
+	r1 = obb1.m_halfExt[1] * abs_rotation[2] + obb1.m_halfExt[2] * abs_rotation[1];
+	r2 = obb2.m_halfExt[1] * abs_rotation[6] + obb2.m_halfExt[2] * abs_rotation[3];
+	float dist = abs(t[2] * rotation[1] - t[1] * rotation[2]);
+	if (dist > (r1 + r2))
+		return 0;
+	else
+	{
+		float overlap = (r1 + r2) - dist;
+		//if (overlap > deepest)
+		//{
+		//	deepest = overlap;
+		//	axis_pair = IntVector2(0, 0);	// x axis from both
+		//}
+		if (overlap < shallowest)
+		{
+			shallowest = overlap;
+			axis_pair = IntVector2(0, 0);
+		}
+	}
+
+	// 7 - test axis obb1x cross obb2y
+	r1 = obb1.m_halfExt[1] * abs_rotation[5] + obb1.m_halfExt[2] * abs_rotation[4];
+	r2 = obb2.m_halfExt[0] * abs_rotation[6] + obb2.m_halfExt[2] * abs_rotation[0];
+	dist = abs(t[2] * rotation[4] - t[1] * rotation[5]);
+	if (dist > (r1 + r2))
+		return 0;
+	else
+	{
+		float overlap = (r1 + r2) - dist;
+		//if (overlap > deepest)
+		//{
+		//	deepest = overlap;
+		//	axis_pair = IntVector2(0, 1);	// x from 1, y from 2
+		//}
+		if (overlap < shallowest)
+		{
+			shallowest = overlap;
+			axis_pair = IntVector2(0, 1);
+		}
+	}
+
+	// 8 - test axis obb1x cross obb2z
+	r1 = obb1.m_halfExt[1] * abs_rotation[8] + obb1.m_halfExt[2] * abs_rotation[7];
+	r2 = obb2.m_halfExt[0] * abs_rotation[3] + obb2.m_halfExt[1] * abs_rotation[0];
+	dist = abs(t[2] * rotation[7] - t[1] * rotation[8]);
+	if (dist > (r1 + r2))
+		return 0;
+	else
+	{
+		float overlap = (r1 + r2) - dist;
+		//if (overlap > deepest)
+		//{
+		//	deepest = overlap;
+		//	axis_pair = IntVector2(0, 2);	// x from 1, z from 2
+		//}
+		if (overlap < shallowest)
+		{
+			shallowest = overlap;
+			axis_pair = IntVector2(0, 2);
+		}
+	}
+
+	// 9 - test axis obb1y cross obb2x
+	r1 = obb1.m_halfExt[0] * abs_rotation[2] + obb1.m_halfExt[2] * abs_rotation[0];
+	r2 = obb2.m_halfExt[1] * abs_rotation[7] + obb2.m_halfExt[2] * abs_rotation[4];
+	dist = abs(t[0] * rotation[2] - t[2] * rotation[0]);
+	if (dist > (r1 + r2))
+		return 0;
+	else
+	{
+		float overlap = (r1 + r2) - dist;
+		//if (overlap > deepest)
+		//{
+		//	deepest = overlap;
+		//	axis_pair = IntVector2(1, 0);	// y from 1, x from 2
+		//}
+		if (overlap < shallowest)
+		{
+			shallowest = overlap;
+			axis_pair = IntVector2(1, 0);
+		}
+	}
+
+	// 10 - test axis obb1y cross obb2y
+	r1 = obb1.m_halfExt[0] * abs_rotation[5] + obb1.m_halfExt[2] * abs_rotation[3];
+	r2 = obb2.m_halfExt[0] * abs_rotation[7] + obb2.m_halfExt[2] * abs_rotation[1];
+	dist = abs(t[0] * rotation[5] - t[2] * rotation[3]);
+	if (dist > (r1 + r2))
+		return 0;
+	else
+	{
+		float overlap = (r1 + r2) - dist;
+		//if (overlap > deepest)
+		//{
+		//	deepest = overlap;
+		//	axis_pair = IntVector2(1, 1);	// y from 1, y from 2
+		//}
+		if (overlap < shallowest)
+		{
+			shallowest = overlap;
+			axis_pair = IntVector2(1, 1);
+		}
+	}
+
+	// 11 - test axis obb1y cross obb2z
+	r1 = obb1.m_halfExt[0] * abs_rotation[8] + obb1.m_halfExt[2] * abs_rotation[6];
+	r2 = obb2.m_halfExt[0] * abs_rotation[4] + obb2.m_halfExt[1] * abs_rotation[1];
+	dist = abs(t[0] * rotation[8] - t[2] * rotation[6]);
+	if (dist > (r1 + r2))
+		return 0;
+	else
+	{
+		float overlap = (r1 + r2) - dist;
+		//if (overlap > deepest)
+		//{
+		//	deepest = overlap;
+		//	axis_pair = IntVector2(1, 2);	// y from 1, z from 2
+		//}
+		if (overlap < shallowest)
+		{
+			shallowest = overlap;
+			axis_pair = IntVector2(1, 2);
+		}
+	}
+
+	// 12 - test axis obb1z cross obb2x
+	r1 = obb1.m_halfExt[0] * abs_rotation[1] + obb1.m_halfExt[1] * abs_rotation[0];
+	r2 = obb2.m_halfExt[1] * abs_rotation[8] + obb2.m_halfExt[2] * abs_rotation[5];
+	dist = abs(t[1] * rotation[0] - t[0] * rotation[1]);
+	if (dist > (r1 + r2))
+		return 0;
+	else
+	{
+		float overlap = (r1 + r2) - dist;
+		//if (overlap > deepest)
+		//{
+		//	deepest = overlap;
+		//	axis_pair = IntVector2(2, 0);	// z from 1, x from 2
+		//}
+		if (overlap < shallowest)
+		{
+			shallowest = overlap;
+			axis_pair = IntVector2(2, 0);
+		}
+	}
+
+	// 13 - test axis obb1z cross obb2y
+	r1 = obb1.m_halfExt[0] * abs_rotation[4] + obb1.m_halfExt[1] * abs_rotation[3];
+	r2 = obb2.m_halfExt[0] * abs_rotation[8] + obb2.m_halfExt[2] * abs_rotation[2];
+	dist = abs(t[1] * rotation[3] - t[0] * rotation[4]);
+	if (dist > (r1 + r2))
+		return 0;
+	else
+	{
+		float overlap = (r1 + r2) - dist;
+		//if (overlap > deepest)
+		//{
+		//	deepest = overlap;
+		//	axis_pair = IntVector2(2, 1);	// z from 1, y from 2
+		//}
+		if (overlap < shallowest)
+		{
+			shallowest = overlap;
+			axis_pair = IntVector2(2, 1);
+		}
+	}
+
+	// 14 - test axis obb1z cross obb2z
+	r1 = obb1.m_halfExt[0] * abs_rotation[7] + obb1.m_halfExt[1] * abs_rotation[6];
+	r2 = obb2.m_halfExt[0] * abs_rotation[5] + obb2.m_halfExt[1] * abs_rotation[2];
+	dist = abs(t[1] * rotation[6] - t[0] * rotation[7]);
+	if (dist > (r1 + r2))
+		return 0;
+	else
+	{
+		float overlap = (r1 + r2) - dist;
+		//if (overlap > deepest)
+		//{
+		//	deepest = overlap;
+		//	axis_pair = IntVector2(2, 2);	// z from 1, z from 2
+		//}
+		if (overlap < shallowest)
+		{
+			shallowest = overlap;
+			axis_pair = IntVector2(2, 2);
+		}
+	}
+
+	// 15 - restore axis and hence find normal
+	Vector3 usedNormal;
+	Vector3 a1 = ISA;
+	Vector3 a2 = ISA;
+	int basis1 = axis_pair.x;
+	int basis2 = axis_pair.y;
+	switch (basis1)
+	{
+	case -1: break;
+	case 0: a1 = obb1.m_right; break;
+	case 1: a1 = obb1.m_up; break;
+	case 2: a1 = obb1.m_forward; break;
+	default: break;
+	}
+	switch (basis2)
+	{
+	case -1: break;
+	case 0: a2 = obb2.m_right; break;
+	case 1: a2 = obb2.m_up; break;
+	case 2: a2 = obb2.m_forward; break;
+	default: break;
+	}
+	if(a1 == ISA)
+		// valid subject axis is a2
+		usedNormal = a2;
+	else if (a2 == ISA)
+		usedNormal = a1;
+	else
+		usedNormal = a1.Cross(a2);
+	if (DotProduct(usedNormal, obb2.m_center - obb1.m_center) > 0.f)	// should not equal 0
+		usedNormal *= -1.f;
+
+	// 16 - generate contact
+	usedNormal.NormalizeAndGetLength();
+	Vector3 contactPoint = obb1.m_center;
+	//float penetration = deepest;
+	float penetration = shallowest;
+	Contact3 theContact = Contact3(obb1.GetEntity(), obb2.GetEntity(),
+		usedNormal, contactPoint, penetration);
+
+	data->m_contacts.push_back(theContact);
+	return 1;
+}
+
+uint CollisionDetector::OBB3VsOBB3Deep(const OBB3& obb1, const OBB3& obb2, CollisionData3* data)
+{
+	if (data->m_contacts.size() >= data->m_maxContacts)
+		// no contacts amount left, return directly
+		return 0;
+
+	BoxEntity3* e1 = static_cast<BoxEntity3*>(obb1.GetEntity());
+	BoxEntity3* e2 = static_cast<BoxEntity3*>(obb2.GetEntity());
+
+	// 1 - get all candidates of obb1 verts intersecting with obb2
+	std::vector<Contact3> candidates1;
+	for (int i = 0; i < 8; ++i)
+	{
+		eContactFeature feature = e1->m_features[i];
+		Vector3 vert = e1->GetFeaturedPoint(feature);
+
+		Contact3 contact;
+		contact.m_e1 = e1; contact.m_e2 = e2;
+		contact.m_f1 = feature;	contact.m_f2 = UNKNOWN;
+		uint intersected = OBB3VsPoint(obb2, vert, contact, false);
+		if (intersected == 1) 
+			candidates1.push_back(contact);
+	}
+
+	// 2 - pick the deepest as final candidate of obb1
+	Contact3 final1;
+	final1.m_penetration = -INFINITY;
+	for (const Contact3& c : candidates1)
+	{
+		if (c.m_penetration > final1.m_penetration)
+			final1 = c;
+	}
+
+	// 3 - get all candidates of obb2 verts intersecting with obb1
+	std::vector<Contact3> candidates2;
+	for (int i = 0; i < 8; ++i)
+	{
+		eContactFeature feature = e2->m_features[i];
+		Vector3 vert = e2->GetFeaturedPoint(feature);
+
+		Contact3 contact;
+		contact.m_e1 = e1; contact.m_e2 = e2;
+		contact.m_f1 = UNKNOWN; contact.m_f2 = feature; 
+		uint intersected = OBB3VsPoint(obb1, vert, contact, true);
+		if (intersected == 1) 
+			candidates1.push_back(contact);
+	}
+
+	// 4 - pick the deepest as final candidate of obb2
+	Contact3 final2;
+	final2.m_penetration = -INFINITY;
+	for (const Contact3& c : candidates2)
+	{
+		if (c.m_penetration > final2.m_penetration)
+			final2 = c;
+	}
+
+	// 5 - pick the overall deepest, set as point-face candidate
+	Contact3 pointFace;
+	pointFace.m_penetration = -INFINITY;
+	if (final1.m_penetration > final2.m_penetration)
+		pointFace = final1;
+	else if (final1.m_penetration < final2.m_penetration)
+		pointFace = final2;
+	else
+	{
+		if (final1.m_penetration != -INFINITY)
+			// default to final1 if penetrations are the same
+			pointFace = final1;
+		// otherwise there is no point-face contact, leaving the candidate has a -INFINITY penetration
+	}
+	pointFace.m_type = POINT_FACE;
+
+	std::vector<Contact3> edgeCandidates;
+	// edge to edge contacts
+	for (int i = 14; i < 26; ++i)
+	{
+		// 6 - get each edge for 1
+		eContactFeature feature1 = e1->m_features[i];
+		LineSegment3 seg1 = e1->GetFeaturedEdge(feature1);
+
+		// 7 - compute its shallowest penetration (not separation) with each edge of 2
+		Contact3 candidate;
+		candidate.m_penetration = INFINITY;
+		candidate.m_e1 = e1;
+		candidate.m_e2 = e2;
+		candidate.m_f1 = feature1;
+		candidate.m_type = EDGE_EDGE;
+		for (int j = 14; j < 26; ++j)
+		{
+			eContactFeature feature2 = e2->m_features[j];
+			LineSegment3 seg2 = e2->GetFeaturedEdge(feature2);
+
+			float t1, t2;
+			Vector3 close1, close2;
+			float distSquared = LineSegment3::ClosestPointsSegments(seg1, seg2, t1, t2, close1, close2);
+
+			// see if this dist is pen dist or sep dist
+			float distSame = (close2 - obb2.m_center).GetLength();
+			float distDiff = (close1 - obb2.m_center).GetLength();
+			if (distDiff < distSame)		// this is a pen
+			{
+				float dist = sqrtf(distSquared);
+				if (dist < candidate.m_penetration)
+				{
+					candidate.m_penetration = dist;
+					candidate.m_f2 = feature2;
+					candidate.m_point = close1;
+					candidate.m_normal = close2 - close1;
+					candidate.m_normal.NormalizeAndGetLength();
+				}
+			}
+		}
+
+		// 8 - sanity check for the candidate, is it valid?
+		if (candidate.m_penetration != INFINITY)
+			edgeCandidates.push_back(candidate);
+	}
+
+	// 9 - get the contact with deepest pen
+	Contact3 edgeEdge;
+	edgeEdge.m_penetration = -INFINITY;
+	for (const Contact3& c : edgeCandidates)
+	{
+		if (c.m_penetration > edgeEdge.m_penetration)
+			edgeEdge = c;
+	}
+
+	// 10 - get the deeper of point-face winner and edge-edge winner
+	Contact3 winner;
+	winner.m_penetration = -INFINITY;		// -INFINITY means the contact is not valid
+	if (pointFace.m_penetration > edgeEdge.m_penetration)
+		winner = pointFace;
+	else if (edgeEdge.m_penetration > pointFace.m_penetration)
+		winner = edgeEdge;
+	else
+	{
+		if (pointFace.m_penetration != -INFINITY)
+			winner = pointFace;			// default to point face contact if pen is the same
+		// otherwise winner contact remains to be invalid
+		else
+			// meaning that there is no valid contact
+			return 0;
+	}
+
+	// 11 - if the winner contact already exists, update it
+	bool existed = data->HasAndUpdateContact(winner);
+
+	// 12 - if not, push it as a new contact
+	if (!existed)
+		data->m_contacts.push_back(winner);
+
+	return 1;		
+	// in this case, 1 does not necessarily mean that we have 1 more collision,
+	// but also could mean that we "updated" 1 collision
+}
+
+uint CollisionDetector::OBB3VsPoint(const OBB3& obb, const Vector3& p, Contact3& contact, bool reverse)
+{
+	BoxEntity3* ent = static_cast<BoxEntity3*>(obb.GetEntity());
+
+	Vector3 local = Transform::WorldToLocalOrthogonal(p, ent->GetEntityTransform());
+
+	Vector3 normal;
+	float shallow = obb.GetHalfExt().x - abs(local.x);
+	if (shallow < 0.f) return 0;
+	normal = obb.m_right.GetNormalized() * ((local.x < 0.f) ? -1.f : 1.f);		// in world coord
+	if (reverse)
+		normal *= -1.f;
+
+	float depth = obb.GetHalfExt().y - abs(local.y);
+	if (depth < 0.f) return 0;
+	else if (depth < shallow)
+	{
+		shallow = depth;
+		normal = obb.m_up.GetNormalized() * ((local.y < 0.f) ? -1.f : 1.f);	// in world
+		if (reverse)
+			normal *= -1.f;
+	}
+
+	depth = obb.GetHalfExt().z - abs(local.z);
+	if (depth < 0.f) return 0;
+	else if  (depth < shallow)
+	{
+		shallow = depth;
+		normal = obb.m_forward.GetNormalized() * ((local.z < 0.f) ? -1.f : 1.f);	// in world
+		if (reverse)
+			normal *= -1.f;
+	}
+
+	// assumption: contact entity already set at this point
+	contact.m_normal = normal;
+	contact.m_penetration = shallow;
+	contact.m_point = p;
+	
+	return 1;
 }
 
 uint CollisionDetector::Entity3VsEntity3(Entity3* e1, Entity3* e2, CollisionData3* data)
@@ -937,6 +1523,7 @@ uint CollisionDetector::AABB3VsPlane3Single(const AABB3& aabb, const Plane& plan
 	}
 }
 
+/*
 void CollisionDetector::BoxAndPointPenetration(const AABB3& aabb, const Vector3& point, float* out_penetration)
 {
 	// todo: generate box and point penetration, if invalid leave the out value be
@@ -972,3 +1559,4 @@ uint CollisionDetector::EdgeAndEdgeContact(const Vector3& edge1, const Vector3& 
 	// todo: contact between an edge and an edge
 	return 0;
 }
+*/

@@ -1,8 +1,9 @@
 #include "Engine/Physics/3D/ContactResolver.hpp"
 
-ContactResolver::ContactResolver(uint iterations, eResolveScheme scheme)
-	: m_iterations(iterations), m_scheme(scheme)
+ContactResolver::ContactResolver(uint iterations)
+	: m_iterations(iterations)
 {
+	m_scheme = RESOLVE_ITERATIVE;
 	m_collision = new CollisionData3(MAX_CONTACTS);
 }
 
@@ -29,6 +30,8 @@ void ContactResolver::ResolveContacts(float deltaTime)
 		ResolveContactsAll(deltaTime);
 	else if (m_scheme == RESOLVE_ITERATIVE)
 		ResolveContactsIterative(deltaTime);
+	else
+		ResolveContactCoherent(deltaTime);
 }
 
 void ContactResolver::ResolveContactsIterative(float deltaTime)
@@ -68,8 +71,15 @@ void ContactResolver::ResolveContactsAll(float deltaTime)
 	}
 }
 
-void ContactResolver::ClearRecords()
+void ContactResolver::ResolveContactCoherent(float deltaTime)
 {
-	m_collision->ClearContacts();
+
 }
 
+void ContactResolver::ClearRecords()
+{
+	if (m_scheme == RESOLVE_ALL || m_scheme == RESOLVE_ITERATIVE)
+		m_collision->ClearContacts();
+	else
+		m_collision->ClearCoherent();	// clear contacts exceeding threshold
+}

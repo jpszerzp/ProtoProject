@@ -728,6 +728,51 @@ Vector3 CartesianToPolar( Vector3 position )
 	return res;
 }
 
+// assume x is normalized 
+void MakeOrthonormalBasis(const Vector3& x, Vector3& y, Vector3& z)
+{
+	z = x.Cross(y);
+
+	if (z.GetLengthSquared() == 0.f)
+		return;
+
+	y = z.Cross(x);
+
+	// normalize
+	y.Normalize();
+	z.Normalize();
+}
+
+void MakeOrthonormalBasisOpt(const Vector3& x, Vector3& y, Vector3& z)
+{
+	const float s = 1.f / sqrtf(x.z * x.z + x.x * x.x);
+
+	z.x = x.z * s;
+	z.y = 0.f;
+	z.z = -x.x * s;
+
+	y.x = x.y * z.x;
+	y.y = x.z * z.x - x.x * z.z;
+	y.z = -x.y * z.x;
+}
+
+void MakeOrthonormalBasisStable(const Vector3& x)
+{
+	if (abs(x.x) > abs(x.y))
+	{
+		// near x axis, suggest y axis
+		Vector3 y = Vector3(0.f, 1.f, 0.f);
+		Vector3 z;
+		MakeOrthonormalBasisOpt(x, y, z);
+	}
+	else
+	{
+		// near y axis, suggest x axis
+		Vector3 y = Vector3(1.f, 0.f, 0.f);
+		Vector3 z;
+		MakeOrthonormalBasisOpt(x, y, z);
+	}
+}
 
 bool ProjectPlaneToSphere(Vector2 pos, float r, Vector3& out_pos)
 {

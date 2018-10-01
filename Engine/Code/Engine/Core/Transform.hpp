@@ -98,6 +98,7 @@ public:
 		const Transform& transform);	
 	static Vector3 WorldToLocalGeneral(const Vector3& world,
 		const Transform& transform);	
+	static void TransformRotationAtoBCoord(Matrix44& rotation, const Transform& A, const Transform& B);
 
 	// dir
 	static Vector3 TransformDirToWorld(Vector3 dir_local, Transform transform);

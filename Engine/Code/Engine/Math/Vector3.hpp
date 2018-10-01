@@ -30,11 +30,13 @@ public:
 	void operator=( const Vector3& copyFrom );						
 	bool operator==( const Vector3& compare ) const;				
 	bool operator!=( const Vector3& compare ) const;	
+	const float operator[](const int idx) const;
 	const Vector3 operator-() const;
  
 	float	GetLength() const;
 	float	GetLengthSquared() const;
 	float	NormalizeAndGetLength();
+	void	Normalize();
 	Vector3 Cross(const Vector3& rhs) const;
 	Vector3 GetNormalized() const;
 

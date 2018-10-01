@@ -47,6 +47,16 @@ const Vector3 Vector3::operator + ( const Vector3& vecToAdd ) const
 }
 
 
+const float Vector3::operator[](const int idx) const
+{
+	if (idx == 0)
+		return x;
+	if (idx == 1)
+		return y;
+	if (idx == 2)
+		return z;
+}
+
 //-----------------------------------------------------------------------------------------------
 const Vector3 Vector3::operator-( const Vector3& vecToSubtract ) const
 {
@@ -174,6 +184,14 @@ float Vector3::NormalizeAndGetLength()
 	return length;
 }
 
+
+void Vector3::Normalize()
+{
+	float length = GetLength();
+	x = x / length;
+	y = y / length;
+	z = z / length;
+}
 
 Vector3 Vector3::GetNormalized() const
 {

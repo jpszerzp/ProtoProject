@@ -36,6 +36,43 @@ BoxEntity3::~BoxEntity3()
 
 }
 
+Vector3 BoxEntity3::GetFeaturedPoint(eContactFeature feature)
+{
+	switch (feature)
+	{
+	case V1: return m_primitive.GetFTL(); break;
+	case V2: return m_primitive.GetFBL(); break;
+	case V3: return m_primitive.GetFBR(); break;
+	case V4: return m_primitive.GetFTR(); break;
+	case V5: return m_primitive.GetBTL(); break;
+	case V6: return m_primitive.GetBBL(); break;
+	case V7: return m_primitive.GetBBR(); break;
+	case V8: return m_primitive.GetBTR(); break;
+	default: break;
+	}
+}
+
+LineSegment3 BoxEntity3::GetFeaturedEdge(eContactFeature feature)
+{
+	switch (feature)
+	{
+	case E1: return LineSegment3(GetFeaturedPoint(V1), GetFeaturedPoint(V2)); break;
+	case E2: return LineSegment3(GetFeaturedPoint(V2), GetFeaturedPoint(V3)); break;
+	case E3: return LineSegment3(GetFeaturedPoint(V3), GetFeaturedPoint(V4)); break;
+	case E4: return LineSegment3(GetFeaturedPoint(V4), GetFeaturedPoint(V1)); break;
+	case E5: return LineSegment3(GetFeaturedPoint(V5), GetFeaturedPoint(V6)); break;
+	case E6: return LineSegment3(GetFeaturedPoint(V6), GetFeaturedPoint(V7)); break;
+	case E7: return LineSegment3(GetFeaturedPoint(V7), GetFeaturedPoint(V8)); break;
+	case E8: return LineSegment3(GetFeaturedPoint(V8), GetFeaturedPoint(V5)); break;
+	case E9: return LineSegment3(GetFeaturedPoint(V5), GetFeaturedPoint(V1)); break;
+	case E10: return LineSegment3(GetFeaturedPoint(V8), GetFeaturedPoint(V4)); break;
+	case E11: return LineSegment3(GetFeaturedPoint(V7), GetFeaturedPoint(V3)); break;
+	case E12: return LineSegment3(GetFeaturedPoint(V6), GetFeaturedPoint(V2)); break;
+	case UNKNOWN: break;
+	default: break;
+	}
+}
+
 void BoxEntity3::UpdateEntityPrimitive()
 {
 	m_primitive.SetCenter(m_center);

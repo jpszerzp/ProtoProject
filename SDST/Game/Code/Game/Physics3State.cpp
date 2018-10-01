@@ -60,7 +60,7 @@ Physics3State::Physics3State()
 
 	// or, initialize into other shapes (cube, etc)
 	m_g0 = InitializePhysSphere(Vector3(-5.f, 0.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_KINEMATIC, BODY_PARTICLE);
-	m_g1 = InitializePhysCube(Vector3(0.f, 0.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_KINEMATIC, BODY_PARTICLE);
+	//m_g1 = InitializePhysCube(Vector3(0.f, 0.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_KINEMATIC, BODY_PARTICLE);
 
 	//////////////////////////////// For rigid spring ////////////////////////////////
 	// the rigid ball
@@ -95,7 +95,7 @@ Physics3State::Physics3State()
 	m_rigidRegistry->Register(other_rigid, grg);
 	//////////////////////////////////////////////////////////////////////////////////
 
-	InitializePhysCube(Vector3(0.f, 0.f, 2.f), Vector3::ZERO, Vector3::ONE, Rgba::BLUE, MOVE_KINEMATIC, BODY_PARTICLE);
+	//InitializePhysCube(Vector3(0.f, 0.f, 2.f), Vector3::ZERO, Vector3::ONE, Rgba::BLUE, MOVE_KINEMATIC, BODY_PARTICLE);
 	m_g2 = InitializePhysQuad(Vector3(0.f, -2.f, 0.f), Vector3(90.f, 0.f, 0.f), Vector3(200.f, 200.f, 1.f), Rgba::GREEN, MOVE_STATIC, BODY_PARTICLE);
 	m_g3 = InitializePhysPoint(Vector3(5.f, 0.f, 0.f), Vector3::ZERO, 10.f, Rgba::WHITE, MOVE_STATIC, BODY_PARTICLE);
 	
@@ -142,17 +142,20 @@ Physics3State::Physics3State()
 	verlet_vel_ballistics->m_physEntity->SetVerlet(true);
 	verlet_vel_ballistics->m_physEntity->SetVerletScheme(VELOCITY_VERLET);
 
-	// rigid bodies and force registry
-	m_r0 = InitializePhysSphere(Vector3(5.f, 0.f, 5.f), Vector3::ZERO, Vector3::ONE, Rgba::GREEN, MOVE_DYNAMIC, BODY_RIGID);
-	m_r0->m_physEntity->SetFrozen(true);
-	Rigidbody3* body = dynamic_cast<Rigidbody3*>(m_r0->m_physEntity);
-	m_rigidRegistry->Register(body, grg);
+	//// rigid bodies and force registry
+	//m_r0 = InitializePhysSphere(Vector3(5.f, 0.f, 5.f), Vector3::ZERO, Vector3::ONE, Rgba::GREEN, MOVE_DYNAMIC, BODY_RIGID);
+	//m_r0->m_physEntity->SetFrozen(true);
+	//Rigidbody3* body = dynamic_cast<Rigidbody3*>(m_r0->m_physEntity);
+	//m_rigidRegistry->Register(body, grg);
 
-	m_g4 = InitializePhysBox(Vector3(5.f, 0.f, 10.f), Vector3(45.f), Vector3(2.f, 1.f, 1.5f), Rgba::CYAN, MOVE_KINEMATIC, BODY_PARTICLE);
+	m_g4 = InitializePhysBox(Vector3(5.f, 0.f, 10.f), Vector3(45.f), Vector3(1.f), Rgba::CYAN, MOVE_KINEMATIC, BODY_PARTICLE);
+	m_g5 = InitializePhysBox(Vector3(10.f, 0.f, 10.f), 
+		Vector3(GetRandomFloatInRange(0.f, 360.f), GetRandomFloatInRange(0.f, 360.f), GetRandomFloatInRange(0.f, 360.f)),
+		Vector3(1.f), Rgba::TEAL, MOVE_KINEMATIC, BODY_PARTICLE);
 
-	//m_collisionData = new CollisionData3(20);	// allowing specified number of contact at max
-	m_iterResolver = new ContactResolver(2, RESOLVE_ITERATIVE);
+	m_iterResolver = new ContactResolver(2);
 	m_allResolver = new ContactResolver();
+	m_coherentResolver = new ContactResolver(RESOLVE_COHERENT);
 
 	// debug
 	DebugRenderSet3DCamera(m_camera);
@@ -561,19 +564,26 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	}
 
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_UP_ARROW))
-		m_g0->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, 5.f));
+		//m_g0->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, 5.f));
+		m_g5->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, 5.f));
 	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_DOWN_ARROW))
-		m_g0->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, -5.f));
+		//m_g0->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, -5.f));
+		m_g5->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, -5.f));
 	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_LEFT_ARROW))
-		m_g0->GetEntity()->SetLinearVelocity(Vector3(-5.f, 0.f, 0.f));
+		//m_g0->GetEntity()->SetLinearVelocity(Vector3(-5.f, 0.f, 0.f));
+		m_g5->GetEntity()->SetLinearVelocity(Vector3(-5.f, 0.f, 0.f));
 	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_RIGHT_ARROW))
-		m_g0->GetEntity()->SetLinearVelocity(Vector3(5.f, 0.f, 0.f));
+		//m_g0->GetEntity()->SetLinearVelocity(Vector3(5.f, 0.f, 0.f));
+		m_g5->GetEntity()->SetLinearVelocity(Vector3(5.f, 0.f, 0.f));
 	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEUP))
-		m_g0->GetEntity()->SetLinearVelocity(Vector3(0.f, 5.f, 0.f));
+		//m_g0->GetEntity()->SetLinearVelocity(Vector3(0.f, 5.f, 0.f));
+		m_g5->GetEntity()->SetLinearVelocity(Vector3(0.f, 5.f, 0.f));
 	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEDOWN))
-		m_g0->GetEntity()->SetLinearVelocity(Vector3(0.f, -5.f, 0.f));
+		//m_g0->GetEntity()->SetLinearVelocity(Vector3(0.f, -5.f, 0.f));
+		m_g5->GetEntity()->SetLinearVelocity(Vector3(0.f, -5.f, 0.f));
 	else
-		m_g0->GetEntity()->SetLinearVelocity(Vector3::ZERO);
+		//m_g0->GetEntity()->SetLinearVelocity(Vector3::ZERO);
+		m_g5->GetEntity()->SetLinearVelocity(Vector3::ZERO);
 
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_I))
 		//m_g1->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, 5.f));
@@ -621,15 +631,16 @@ void Physics3State::UpdateInput(float deltaTime)
 
 void Physics3State::UpdateGameobjects(float deltaTime)
 {
-	UpdateForceRegistry(deltaTime);		// update force registry
-	UpdateGameobjectsCore(deltaTime);	// update GO core
-	UpdateBVH();						// update BVH 
-	UpdateContactGeneration();			// update contact generation
-	UpdateContactResolution(deltaTime);	// contact resolution
+	UpdateForceRegistry(deltaTime);			// update force registry
+	UpdateGameobjectsCore(deltaTime);		// update GO core
+	UpdateBVH();							// update BVH 
+	UpdateContactGeneration();				// update contact generation
+	UpdateContactResolution(deltaTime);		// contact resolution
 }
 
 void Physics3State::UpdateDebugDraw(float deltaTime)
 {
+	// debug draw for all-at-once resolver
 	DebugRenderUpdate(deltaTime);
 	for (int i = 0; i < m_allResolver->GetCollisionData()->m_contacts.size(); ++i)
 	{
@@ -641,6 +652,19 @@ void Physics3State::UpdateDebugDraw(float deltaTime)
 		// causing lead due to property block
 		//DebugRenderPoint(0.01f, 5.f, point, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
 
+		DebugRenderLine(0.f, point, end, 5.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
+	}
+
+	// debug draw for iterative resolver
+	TODO("Debug draw for iterative resolver");
+
+	// debug draw for coherent resolver
+	for (int i = 0; i < m_coherentResolver->GetCollisionData()->m_contacts.size(); ++i)
+	{
+		Contact3& contact = m_coherentResolver->GetCollisionData()->m_contacts[i];
+
+		Vector3 point = contact.m_point;
+		Vector3 end = point + contact.m_normal * contact.m_penetration;
 		DebugRenderLine(0.f, point, end, 5.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
 	}
 }
@@ -673,9 +697,12 @@ void Physics3State::UpdateContactGeneration()
 {
 	if (!m_broadPhase)
 	{
+		///////////////////////////////////////////// Clear Resolver ////////////////////////////////////////////
 		m_iterResolver->ClearRecords();
 		m_allResolver->ClearRecords();
+		m_coherentResolver->ClearRecords();
 
+		///////////////////////////////////////////// Fill Resolver ////////////////////////////////////////////
 		// hard constraints use iterative solver
 		m_rod->FillContact(m_iterResolver->GetCollisionData()->m_contacts);
 
@@ -781,7 +808,7 @@ void Physics3State::UpdateContactGeneration()
 		// obb3
 		for (uint idx1 = 0; idx1 < m_boxes.size(); ++idx1)
 		{
-			// obb3 vs obb3
+			// obb3 vs obb3: for this we want coherent contacts
 			for (uint idx2 = idx1 + 1; idx2 < m_boxes.size(); ++idx2)
 			{
 				Box* b1 = m_boxes[idx1];
@@ -793,7 +820,8 @@ void Physics3State::UpdateContactGeneration()
 				const OBB3& obb3_1 = be1->GetBoxPrimitive();
 				const OBB3& obb3_2 = be2->GetBoxPrimitive();
 
-				CollisionDetector::OBB3VsOBB3(obb3_1, obb3_2, m_allResolver->GetCollisionData());
+				//CollisionDetector::OBB3VsOBB3Shallow(obb3_1, obb3_2, m_allResolver->GetCollisionData());
+				CollisionDetector::OBB3VsOBB3Deep(obb3_1, obb3_2, m_coherentResolver->GetCollisionData());
 			}
 
 			// obb3 vs plane
@@ -853,6 +881,7 @@ void Physics3State::UpdateContactResolution(float deltaTime)
 {
 	m_iterResolver->ResolveContacts(deltaTime);
 	m_allResolver->ResolveContacts(deltaTime);
+	m_coherentResolver->ResolveContacts(deltaTime);
 }
 
 void Physics3State::UpdateBVH()

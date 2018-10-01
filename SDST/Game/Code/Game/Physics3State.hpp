@@ -70,6 +70,7 @@ public:
 	GameObject* m_g2;
 	GameObject* m_g3;
 	GameObject* m_g4;
+	GameObject* m_g5;
 
 	// rigid body
 	GameObject* m_r0;
@@ -93,6 +94,7 @@ public:
 
 	ContactResolver* m_allResolver;		
 	ContactResolver* m_iterResolver;
+	ContactResolver* m_coherentResolver;
 	
 	bool m_broadPhase = false;
 	std::vector<BVHContact> m_bvhContacts;
