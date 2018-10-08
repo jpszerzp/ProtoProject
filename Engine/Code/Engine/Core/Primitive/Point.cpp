@@ -19,13 +19,9 @@ Point::Point(Vector3 pos, Vector3 rot, float size, Rgba tint,
 
 	Material* material;
 	if (!multiPass)
-	{
 		material = renderer->CreateOrGetMaterial(materialName);
-	}
 	else
-	{
 		material = renderer->CreateOrGetStagedMaterial(materialName);
-	}
 
 	Mesh* mesh = renderer->CreateOrGetMesh(meshName);
 	Vector3 scale = Vector3(size);
@@ -59,9 +55,8 @@ void Point::Update(float deltaTime)
 	if (m_physDriven)
 	{
 		m_physEntity->Integrate(deltaTime);
-		m_physEntity->UpdateEntitiesTransforms();		// including bound transforms
-		m_physEntity->UpdateEntityPrimitive();
-		m_physEntity->UpdateBoundPrimitives();
+		m_physEntity->UpdateTransforms();		// including bound transforms
+		m_physEntity->UpdatePrimitives();
 
 		// physics driven, hence update renderable transform
 		m_renderable->m_transform = m_physEntity->GetEntityTransform();
@@ -71,22 +66,13 @@ void Point::Update(float deltaTime)
 	UpdateBasis();
 }
 
-
-//void Point::UpdateInput(float)
-//{
-//	InputSystem* inputSystem = InputSystem::GetInstance();
-//	if (inputSystem->WasKeyJustPressed(InputSystem::KEYBOARD_P))
-//		m_frozen = !m_frozen;
-//}
-
 void Point::ObjectDrivePosition(Vector3 pos)
 {
 	m_renderable->m_transform.SetLocalPosition(pos);
 
 	m_physEntity->SetEntityCenter(pos);
-	m_physEntity->UpdateEntitiesTransforms();
-	m_physEntity->UpdateEntityPrimitive();
-	m_physEntity->UpdateBoundPrimitives();
+	m_physEntity->UpdateTransforms();
+	m_physEntity->UpdatePrimitives();
 }
 
 void Point::Render(Renderer* renderer)
@@ -120,7 +106,8 @@ void Point::Render(Renderer* renderer)
 			renderer->SetSampler2D(0, texture->GetSampler());
 
 			PointEntity3* pte = dynamic_cast<PointEntity3*>(m_physEntity);
-			float ptSize = pte->GetParticlePrimitive().m_size;
+			Particle particle = pte->GetParticlePrimitive();
+			float ptSize = particle.m_size;
 			glPointSize(ptSize);
 		}
 		renderer->UseShader(shader);

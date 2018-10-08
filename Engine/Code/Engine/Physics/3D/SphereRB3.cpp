@@ -24,8 +24,6 @@ SphereRB3::SphereRB3(float mass, Sphere3 primitive, eMoveStatus moveStat)
 
 	float boundBoxDim = 2.f * radius;
 	Vector3 boundBoxScale = Vector3(boundBoxDim);
-	//m_sphereBoundTransform = m_entityTransform;
-	//m_boundSphere.m_transform = m_entityTransform;
 	m_boxBoundTransform = Transform(m_center, rot, boundBoxScale);
 
 	if (m_moveStatus != MOVE_STATIC)
@@ -34,7 +32,7 @@ SphereRB3::SphereRB3(float mass, Sphere3 primitive, eMoveStatus moveStat)
 		m_massData.m_invMass = 1.f / mass;
 
 		// initialize sphere inertia tensor as needed
-		float factor = 0.4f * GetMass3() * m_primitive.GetRadius() * m_primitive.GetRadius();
+		float factor = 0.4f * mass * primitive.m_radius * primitive.m_radius;
 		Vector3 tensor_i = Vector3(factor, 0.f, 0.f);
 		Vector3 tensor_j = Vector3(0.f, factor, 0.f);
 		Vector3 tensor_k = Vector3(0.f, 0.f, factor);
@@ -55,8 +53,7 @@ SphereRB3::SphereRB3(float mass, Sphere3 primitive, eMoveStatus moveStat)
 		m_massData.m_invTensor = Matrix33::ZERO;
 	}
 
-	m_boundSphere = BoundingSphere(m_center, m_primitive.m_radius);
-	//m_sphereBoundMesh = Mesh::CreateUVSphere(VERT_PCU, 18, 36);
+	m_boundSphere = BoundingSphere(m_center, primitive.m_radius);
 	m_boundSphere.m_boundMesh = Mesh::CreateUVSphere(VERT_PCU, 18, 36);
 	m_boundSphere.m_transform = m_entityTransform;
 
@@ -79,12 +76,15 @@ void SphereRB3::SetEntityForPrimitive()
 	m_primitive.SetEntity(this);
 }
 
-void SphereRB3::UpdateEntityPrimitive()
+void SphereRB3::UpdatePrimitives()
 {
-	m_primitive.m_center = m_center;
+	m_boundSphere.SetCenter(m_center);
+	m_boundBox.SetCenter(m_center);
+
+	m_primitive.SetCenter(m_center);
 }
 
-void SphereRB3::UpdateEntitiesTransforms()
+void SphereRB3::UpdateTransforms()
 {
 	m_entityTransform.SetLocalPosition(m_center);
 
@@ -96,12 +96,11 @@ void SphereRB3::UpdateEntitiesTransforms()
 
 	// assume scale is unchanged
 
-	//m_sphereBoundTransform.SetLocalPosition(m_center);
 	m_boundSphere.m_transform.SetLocalPosition(m_center);
 	m_boxBoundTransform.SetLocalPosition(m_center);
 }
 
-void SphereRB3::UpdateInput(float deltaTime)
+void SphereRB3::UpdateInput(float)
 {
 	InputSystem* input = InputSystem::GetInstance();
 	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_P)
@@ -118,6 +117,7 @@ void SphereRB3::Integrate(float deltaTime)
 	if (!m_frozen)
 	{
 		// acc
+		m_lastAcc = m_linearAcceleration;
 		m_linearAcceleration = m_netforce * m_massData.m_invMass;
 		Vector3 angularAcc = m_inverseInertiaTensorWorld * m_torqueAcc;
 

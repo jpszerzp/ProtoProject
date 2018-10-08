@@ -1,6 +1,6 @@
 #include "Engine/Physics/3D/ForceGenerator.hpp"
 
-void GravityGenerator::UpdateForce(Entity3* entity3D, float deltaTime)
+void GravityGenerator::UpdateForce(Entity3* entity3D, float)
 {
 	// if entity is const (infinite mass), force does not apply
 	if (entity3D->IsConst())
@@ -9,7 +9,7 @@ void GravityGenerator::UpdateForce(Entity3* entity3D, float deltaTime)
 	entity3D->AddForce(m_gravity * entity3D->GetMass3());
 }
 
-void DragGenerator::UpdateForce(Entity3* entity3D, float deltaTime)
+void DragGenerator::UpdateForce(Entity3* entity3D, float)
 {
 	Vector3 vel = entity3D->GetLinearVelocity();
 
@@ -22,7 +22,7 @@ void DragGenerator::UpdateForce(Entity3* entity3D, float deltaTime)
 	entity3D->AddForce(force);
 }
 
-void SpringGenerator::UpdateForce(Entity3* entity3D, float deltaTime)
+void SpringGenerator::UpdateForce(Entity3* entity3D, float)
 {
 	Vector3 extension = entity3D->GetEntityCenter() - m_other->GetEntityCenter();
 	
@@ -33,7 +33,7 @@ void SpringGenerator::UpdateForce(Entity3* entity3D, float deltaTime)
 	entity3D->AddForce(force);
 }
 
-void AnchorSpringGenerator::UpdateForce(Entity3* entity3D, float deltaTime)
+void AnchorSpringGenerator::UpdateForce(Entity3* entity3D, float)
 {
 	Vector3 extension = entity3D->GetEntityCenter() - m_anchor;
 

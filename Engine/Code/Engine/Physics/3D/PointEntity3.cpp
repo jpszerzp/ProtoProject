@@ -27,7 +27,7 @@ PointEntity3::PointEntity3(const Particle& primitive, eMoveStatus moveStat)
 		m_massData.m_invMass = 0.f;
 	
 	//m_boundSphere = Sphere3(m_center, m_primitive.m_size / 2.f);
-	m_boundSphere = BoundingSphere(m_center, m_primitive.m_size / 2.f);
+	m_boundSphere = BoundingSphere(m_center, primitive.m_size / 2.f);
 	//m_sphereBoundMesh = Mesh::CreateUVSphere(VERT_PCU, 18, 36);
 	m_boundSphere.m_boundMesh = Mesh::CreateUVSphere(VERT_PCU, 18, 36);
 	m_boundSphere.m_transform = m_entityTransform;
@@ -43,17 +43,13 @@ PointEntity3::~PointEntity3()
 
 }
 
-void PointEntity3::UpdateEntityPrimitive()
+void PointEntity3::UpdatePrimitives()
 {
-	m_primitive.m_position = m_center;
-}
+	m_boundSphere.SetCenter(m_center);
+	m_boundBox.SetCenter(m_center);
 
-//void PointEntity3::UpdateInput(float deltaTime)
-//{
-//	InputSystem* input = InputSystem::GetInstance();
-//	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_P))
-//		m_frozen = !m_frozen;
-//}
+	m_primitive.SetCenter(m_center);
+}
 
 void PointEntity3::Render(Renderer* renderer)
 {
@@ -98,6 +94,7 @@ void PointEntity3::Translate(Vector3 translation)
 	m_boundBox.Translate(translation);
 	m_boundSphere.Translate(translation);
 }
+
 
 void PointEntity3::SetEntityForPrimitive()
 {

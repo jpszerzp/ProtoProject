@@ -261,7 +261,7 @@ Vector3 Transform::WorldToLocalGeneral(const Vector3& world, const Transform& tr
 	return local;
 }
 
-void Transform::TransformRotationAtoBCoord(Matrix44& rotation, const Transform& A, const Transform& B)
+void Transform::TransformRotationAtoBCoord(Matrix44&, const Transform&, const Transform&)
 {
 
 }

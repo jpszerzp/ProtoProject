@@ -40,13 +40,7 @@ bool Entity3::HasInfiniteMass() const
 	return false;
 }
 
-void Entity3::UpdateBoundPrimitives()
-{
-	m_boundSphere.SetCenter(m_center);
-	m_boundBox.SetCenter(m_center);
-}
-
-void Entity3::UpdateEntitiesTransforms()
+void Entity3::UpdateTransforms()
 {
 	// update transform
 	m_entityTransform.SetLocalPosition(m_center);

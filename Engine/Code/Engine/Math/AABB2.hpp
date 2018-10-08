@@ -6,7 +6,6 @@
 
 class AABB2
 {
-
 public:
 	Vector2 mins;
 	Vector2 maxs;

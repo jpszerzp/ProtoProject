@@ -21,3 +21,8 @@ void Particle::Translate(Vector3 translation)
 	m_position += translation;
 }
 
+void Particle::SetCenter(const Vector3& center)
+{
+	m_position = center;
+}
+

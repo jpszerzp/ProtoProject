@@ -15,10 +15,10 @@ public:
 
 	void SetEntityForPrimitive() override;
 
-	void UpdateEntityPrimitive() override;
+	void UpdatePrimitives() override;
+	void UpdateTransforms() override;
 	void UpdateInput(float deltaTime) override;
-	void UpdateEntitiesTransforms() override;
 	void Integrate(float deltaTime) override;
 
-	const OBB3& GetOBBPrimitive() const { return m_primitive; }
+	OBB3 GetBoxPrimitive() { return m_primitive; }
 };

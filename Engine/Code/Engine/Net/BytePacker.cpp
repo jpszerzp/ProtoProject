@@ -219,7 +219,7 @@ uint16_t BytePacker::ReadSize()
 		else
 		{
 			size_t res_size = m_size[m_sizeOfHowManyBytes - 1];
-			return res_size;
+			return (uint16_t)res_size;
 		}
 	}
 
@@ -229,7 +229,7 @@ uint16_t BytePacker::ReadSize()
 	std::vector<uint8_t> finalBits(first, last);
 	size_t decoded_size = DecimalFromBinary(finalBits);
 
-	return decoded_size;		
+	return (uint16_t)decoded_size;		
 }
 
 

@@ -14,10 +14,10 @@ public:
 
 	void SetEntityForPrimitive() override;
 
-	void UpdateEntityPrimitive() override;
-	void UpdateEntitiesTransforms() override;
+	void UpdatePrimitives() override;
+	void UpdateTransforms() override;
 	void UpdateInput(float deltaTime) override;
 	void Integrate(float deltaTime) override;
 
-	const Sphere3& GetSpherePrimitive() const { return m_primitive; }
+	Sphere3 GetSpherePrimitive() { return m_primitive; }
 };

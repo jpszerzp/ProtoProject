@@ -28,7 +28,7 @@ SphereEntity3::SphereEntity3(const Sphere3& primitive, eMoveStatus moveStat)
 		m_massData.m_invMass = 0.f;
 
 	//m_boundSphere = primitive;
-	m_boundSphere = BoundingSphere(m_center, m_primitive.m_radius);
+	m_boundSphere = BoundingSphere(m_center, primitive.m_radius);
 	//m_sphereBoundMesh = Mesh::CreateUVSphere(VERT_PCU, 18, 36);
 	m_boundSphere.m_boundMesh = Mesh::CreateUVSphere(VERT_PCU, 18, 36);
 	m_boundSphere.m_transform = m_entityTransform;
@@ -45,9 +45,12 @@ SphereEntity3::~SphereEntity3()
 }
 
 
-void SphereEntity3::UpdateEntityPrimitive()
+void SphereEntity3::UpdatePrimitives()
 {
-	m_primitive.m_center = m_center;
+	m_boundSphere.SetCenter(m_center);
+	m_boundBox.SetCenter(m_center);
+
+	m_primitive.SetCenter(m_center);
 }
 
 void SphereEntity3::Render(Renderer* renderer)
@@ -93,6 +96,7 @@ void SphereEntity3::Translate(Vector3 translation)
 	m_boundBox.Translate(translation);
 	m_boundSphere.Translate(translation);
 }
+
 
 void SphereEntity3::SetEntityForPrimitive()
 {

@@ -31,8 +31,8 @@ public:
 	Entity3* m_physEntity = nullptr;
 
 public:
-	virtual void Update(float deltaTime){}
-	virtual void UpdateInput(float deltaTime){}
+	virtual void Update(float){}
+	virtual void UpdateInput(float){}
 	virtual void UpdateBasis();
 
 	virtual void Render(Renderer* renderer);
@@ -41,8 +41,8 @@ public:
 	void ToggleBoundSphereDebugDraw();
 	void ToggleBoundBoxDebugDraw();
 
-	virtual void EntityDriveTranslate(Vector3 translation);
-	virtual void ObjectDrivePosition(Vector3 pos);
+	virtual void EntityDrivePosition(Vector3 translation);
+	virtual void ObjectDrivePosition(Vector3 pos){}
 
 	Vector3 GetWorldPosition();
 	Entity3* GetEntity() { return m_physEntity; }

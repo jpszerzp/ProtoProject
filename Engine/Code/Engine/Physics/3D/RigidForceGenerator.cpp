@@ -6,7 +6,7 @@
  * May use torque generator to generate torque exclusively.
  */
 
-void GravityRigidForceGenerator::UpdateForce(Rigidbody3* body, float deltaTime)
+void GravityRigidForceGenerator::UpdateForce(Rigidbody3* body, float)
 {
 	if (body->IsConst())
 		return;
@@ -25,7 +25,7 @@ void GravityRigidForceGenerator::UpdateForce(Rigidbody3* body, float deltaTime)
 }	
 
 
-void AnchorSpringRigidForceGenerator::UpdateForce(Rigidbody3* body, float deltaTime)
+void AnchorSpringRigidForceGenerator::UpdateForce(Rigidbody3* body, float)
 {
 	Vector3 attach_world = body->GetPointInWorld(m_attachLocal);
 	Vector3 extension = m_anchorWorld - attach_world;

@@ -10,7 +10,7 @@ const Vector3 Vector3::ONE = Vector3(1.f, 1.f, 1.f);
 const Vector3 Vector3::UP = Vector3(0.f, 1.f, 0.f);
 const Vector3 Vector3::GRAVITY = Vector3(0.f, -9.81f, 0.f);
 const Vector3 Vector3::HIGH_GRAVITY = Vector3(0.f, -19.62f, 0.f);
-
+const Vector3 Vector3::INVALID = Vector3(-INFINITY);
 
 //-----------------------------------------------------------------------------------------------
 Vector3::Vector3( const Vector3& copy )
@@ -51,10 +51,15 @@ const float Vector3::operator[](const int idx) const
 {
 	if (idx == 0)
 		return x;
-	if (idx == 1)
+	else if (idx == 1)
 		return y;
-	if (idx == 2)
+	else if (idx == 2)
 		return z;
+	else
+	{
+		ASSERT_OR_DIE(false, "Vector3 index must be 0, 1 or 2");
+		return -INFINITY;
+	}
 }
 
 //-----------------------------------------------------------------------------------------------

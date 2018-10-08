@@ -57,9 +57,8 @@ void Box::Update(float deltaTime)
 	if (m_physDriven)
 	{
 		m_physEntity->Integrate(deltaTime);
-		m_physEntity->UpdateEntitiesTransforms();
-		m_physEntity->UpdateEntityPrimitive();
-		m_physEntity->UpdateBoundPrimitives();
+		m_physEntity->UpdateTransforms();
+		m_physEntity->UpdatePrimitives();
 
 		m_renderable->m_transform = m_physEntity->GetEntityTransform();
 	}

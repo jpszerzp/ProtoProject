@@ -6,6 +6,7 @@
 #include "Engine/Physics/3D/BoundingVolume3.hpp"
 #include "Engine/Math/Sphere3.hpp"
 #include "Engine/Math/AABB3.hpp"
+#include "Engine/Math/Primitive3.hpp"
 #include "Engine/Core/Quaternion.hpp"
 
 enum eVerletScheme
@@ -87,6 +88,8 @@ protected:
 
 	bool m_frozen = false;
 
+	//Primitive3 m_primitive;
+
 public:
 	virtual ~Entity3(){}
 
@@ -98,6 +101,7 @@ public:
 	void SetMass(float mass);
 	void SetLinearVelocity(float vel_x, float vel_y, float vel_z);
 	void SetLinearVelocity(Vector3 vel) { m_linearVelocity = vel; }
+	void IncrementVelocity(Vector3 added) { m_linearVelocity += added; }
 	void SetLinearAcceleration(float acc_x, float acc_y, float acc_z);
 	void SetLinearAcceleration(Vector3 acc) { m_linearAcceleration = acc; }
 	void SetDamping(float damp) { m_linearDamp = damp; }
@@ -118,27 +122,26 @@ public:
 	bool GetDrawBoundingSphere() const { return m_drawBoundSphere; }
 	bool GetDrawBoundingBox() const { return m_drawBoundBox; }
 	Vector3 GetEntityCenter() const { return m_center; }
-	const Transform& GetEntityTransform() const { return m_entityTransform; }
+	Transform GetEntityTransform() const { return m_entityTransform; }
 	GameObject* GetGameobject() const { return m_goRef; }
 	MassData3 GetMassData3() const { return m_massData; }
 	float GetMass3() const { return GetMassData3().m_mass; }
 	Vector3 GetLinearVelocity() const { return m_linearVelocity; }
 	Vector3 GetLinearAcceleration() const { return m_linearAcceleration; }
-	const eMoveStatus& GetEntityMoveStatus() const { return m_moveStatus; }
+	eMoveStatus GetEntityMoveStatus() const { return m_moveStatus; }
 	bool IsEntityStatic() const { return (GetEntityMoveStatus() == MOVE_STATIC); }
 	bool IsEntityKinematic() const { return (GetEntityMoveStatus() == MOVE_KINEMATIC); }
 	bool IsEntityDynamic() const { return (GetEntityMoveStatus() == MOVE_DYNAMIC); }
 	bool IsFrozen() const { return m_frozen; }
-	const eBodyIdentity& GetEntityBodyID() const { return m_bodyID; }
-	const BoundingSphere& GetBoundingSphere() const { return m_boundSphere; }
+	eBodyIdentity GetEntityBodyID() const { return m_bodyID; }
+	BoundingSphere GetBoundingSphere() const { return m_boundSphere; }
 
-	void UpdateBoundPrimitives();
-	virtual void UpdateEntityPrimitive(){}	// do not know which primitive this entity has, hence virtual
-	virtual void UpdateEntitiesTransforms();		// all transforms
-	virtual void Update(float deltaTime){}
-	virtual void UpdateInput(float deltaTime){}
-	virtual void Render(Renderer* renderer){}
-	virtual void Translate(Vector3 translation){}
+	virtual void UpdatePrimitives(){}	// do not know which primitive this entity has, hence virtual
+	virtual void UpdateTransforms();		// all transforms
+	virtual void Update(float){}
+	virtual void UpdateInput(float){}
+	virtual void Render(Renderer*){}
+	virtual void Translate(Vector3){}
 
 	void VerletIntegrate(float deltaTime);
 	void EulerIntegrate(float deltaTime);

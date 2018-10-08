@@ -48,8 +48,11 @@ QuadEntity3::~QuadEntity3()
 
 }
 
-void QuadEntity3::UpdateEntityPrimitive()
+void QuadEntity3::UpdatePrimitives()
 {
+	m_boundSphere.SetCenter(m_center);
+	m_boundBox.SetCenter(m_center);
+
 	m_primitive.m_offset = DotProduct(m_center, m_primitive.m_normal);
 }
 
@@ -78,6 +81,7 @@ void QuadEntity3::Translate(Vector3 translation)
 	m_primitive.Translate(translation);
 	m_boundSphere.Translate(translation);
 }
+
 
 void QuadEntity3::SetEntityForPrimitive()
 {

@@ -48,8 +48,11 @@ CubeEntity3::~CubeEntity3()
 
 }
 
-void CubeEntity3::UpdateEntityPrimitive()
+void CubeEntity3::UpdatePrimitives()
 {
+	m_boundSphere.SetCenter(m_center);
+	m_boundBox.SetCenter(m_center);
+
 	m_primitive.SetCenter(m_center);
 }
 

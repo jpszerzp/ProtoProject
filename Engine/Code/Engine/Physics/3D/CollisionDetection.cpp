@@ -81,6 +81,393 @@ void Contact3::ResolveContact(float deltaTime)
 	ResolvePenetration(deltaTime);
 }
 
+void Contact3::MakeContactCoord(Matrix33& contactToWorldRot)
+{
+	Vector3 tangent[2];		// tangent[0] is y and the other z
+
+	if (abs(m_normal.x) > abs(m_normal.y))
+	{
+		float s = 1.f / sqrtf(m_normal.z * m_normal.z + m_normal.x * m_normal.x);
+
+		tangent[0].x = m_normal.z * s;
+		tangent[0].y = 0.f;
+		tangent[0].z = -m_normal.x * s;
+
+		tangent[1].x = m_normal.y * tangent[0].x;
+		tangent[1].y = m_normal.z * tangent[0].x - m_normal.x * tangent[0].z;
+		tangent[1].z = -m_normal.y * tangent[0].x;
+	}
+	else 
+	{
+		float s = 1.f / sqrtf(m_normal.z * m_normal.z + m_normal.y * m_normal.y);
+
+		tangent[0].x = 0.f;
+		tangent[0].y = -m_normal.z * s;
+		tangent[0].z = m_normal.y * s;
+
+		tangent[1].x = m_normal.y * tangent[0].z - m_normal.z * tangent[0].y;
+		tangent[1].y = -m_normal.x * tangent[0].z;
+		tangent[1].z = m_normal.x * tangent[0].y;
+	}
+
+	contactToWorldRot.SetBasis(m_normal, tangent[0], tangent[1]);
+}
+
+float Contact3::GetVelPerImpulseContact()
+{
+	Vector3 relativePos1 = m_point - m_e1->GetEntityCenter();
+	Vector3 velWorld = relativePos1.Cross(m_normal);
+
+	Rigidbody3* rigid1 = dynamic_cast<Rigidbody3*>(m_e1);
+	Matrix33 iit;
+	if (rigid1 != nullptr)
+		iit = rigid1->m_inverseInertiaTensorWorld;
+
+	velWorld = iit * velWorld;
+	velWorld = velWorld.Cross(relativePos1);
+
+	// orthonormal basis means we can use transpose for inverse
+	Matrix33 contactToWorld;
+	MakeContactCoord(contactToWorld);
+	Matrix33 worldToContact = contactToWorld.Transpose();
+	Vector3 velContact = worldToContact * velWorld;
+	float deltaVel = velContact.x;		// angular contribution
+
+	// linear contribution
+	deltaVel += rigid1->GetMassData3().m_invMass;
+
+	// second body
+	if (m_e2 != nullptr)
+	{
+		Vector3 relativePos2 = m_point - m_e2->GetEntityCenter();
+		velWorld = relativePos2.Cross(m_normal);
+
+		Rigidbody3* rigid2 = dynamic_cast<Rigidbody3*>(m_e2);
+		if (rigid2 != nullptr)
+			iit = rigid2->m_inverseInertiaTensorWorld;
+
+		velWorld = iit * velWorld;
+		velWorld = velWorld.Cross(relativePos2);
+
+		velContact = worldToContact * velWorld;
+
+		// angular contrib from 2
+		deltaVel += velContact.x;
+
+		// linear contrib from 2
+		deltaVel += rigid2->GetMassData3().m_invMass;
+	}
+
+	return deltaVel;
+}
+
+float Contact3::GetDeltaVel()
+{
+	Vector3 relPos1 = m_point - m_e1->GetEntityCenter();
+	Rigidbody3* rigid1 = dynamic_cast<Rigidbody3*>(m_e1);
+	Vector3 vel = Vector3::ZERO;
+	if (rigid1 != nullptr)
+	{
+		// contrib from 1
+		vel += rigid1->GetAngularVelocity().Cross(relPos1);	// angular
+		vel += rigid1->GetLinearVelocity();					// linear
+	}
+
+	Vector3 relPos2 = m_point - m_e2->GetEntityCenter();
+	Rigidbody3* rigid2 = dynamic_cast<Rigidbody3*>(m_e2);
+	if (rigid2 != nullptr)
+	{
+		vel += rigid2->GetAngularVelocity().Cross(relPos2);
+		vel += rigid2->GetLinearVelocity();
+	}
+
+	Matrix33 contactToWorld;
+	MakeContactCoord(contactToWorld);
+	Matrix33 worldToContact = contactToWorld.Transpose();
+	Vector3 contactVel = worldToContact * vel;
+
+	float deltaVel = -(1.f + m_restitution) * contactVel.x;
+	// try 0.4 for restitution
+
+	return deltaVel;
+}
+
+Vector3 Contact3::ComputeContactImpulse()
+{
+	float desired = GetDeltaVel();
+	float delta = GetVelPerImpulseContact();
+	return Vector3(desired / delta, 0.f, 0.f);
+}
+
+Vector3 Contact3::ComputeWorldImpulse()
+{
+	Matrix33 contactToWorld;
+	MakeContactCoord(contactToWorld);
+	return contactToWorld * ComputeContactImpulse();
+}
+
+void Contact3::ApplyImpulse()
+{
+	Vector3 pos_linearChange[2]; Vector3 pos_angularChange[2];
+	Vector3 vel_linearChange[2]; Vector3 vel_angularChange[2];
+	ResolveVelocityCoherent(vel_linearChange, vel_angularChange);
+	ResolvePositionCoherent(pos_linearChange, pos_angularChange);
+}
+
+void Contact3::ResolveVelocityCoherent(Vector3 linearChange[2], Vector3 angularChange[2])
+{
+	// apply velocity change
+	Rigidbody3* rigid1 = dynamic_cast<Rigidbody3*>(m_e1);
+	Vector3 impulse = ComputeWorldImpulse();
+
+	if (rigid1 != nullptr)
+	{
+		Vector3 linear = impulse * rigid1->GetMassData3().m_invMass;
+
+		Vector3 relPos1 = m_point - rigid1->GetEntityCenter();
+		Vector3 torque = impulse.Cross(relPos1);
+		Vector3 rotation = rigid1->m_inverseInertiaTensorWorld * torque;
+
+		// apply change 
+		rigid1->IncrementVelocity(linear);
+		rigid1->IncrementAngularVelocity(rotation);
+
+		linearChange[0] = linear;
+		angularChange[0] = rotation;
+	}
+
+	Rigidbody3* rigid2 = dynamic_cast<Rigidbody3*>(m_e2);
+	if (rigid2 != nullptr)
+	{
+		impulse *= -1.f;
+
+		Vector3 linear = impulse * rigid2->GetMassData3().m_invMass;
+
+		Vector3 relPos2 = m_point - rigid2->GetEntityCenter();
+		Vector3 torque = impulse.Cross(relPos2);
+		Vector3 rotation = rigid2->m_inverseInertiaTensorWorld * torque;
+
+		rigid2->IncrementVelocity(linear);
+		rigid2->IncrementAngularVelocity(rotation);
+
+		linearChange[1] = linear;
+		angularChange[1] = rotation;
+	}
+}
+
+void Contact3::ResolvePositionCoherent(Vector3 linearChange[2], Vector3 angularChange[2])
+{
+	Rigidbody3* rigid1 = dynamic_cast<Rigidbody3*>(m_e1);
+	Rigidbody3* rigid2 = dynamic_cast<Rigidbody3*>(m_e2);
+
+	// apply position change
+	float angularInertia[2]; float linearInertia[2];
+	float angularMove[2]; float linearMove[2];
+
+	SolveNonlinearProjection(angularInertia, linearInertia, angularMove, linearMove);
+
+	if (rigid1 != nullptr)
+	{
+		const Vector3& pos1 = rigid1->GetEntityCenter();
+		const Vector3& relPos1 = m_point - pos1;
+
+		// linear
+		Vector3 translation = m_normal * linearMove[0];
+		rigid1->SetEntityCenter(pos1 + translation);	// linear change: may want to store this
+
+		// angular
+		Vector3 impulsiveTorque = relPos1.Cross(m_normal);
+		Vector3 impulsePerMove = rigid1->m_inverseInertiaTensorWorld * impulsiveTorque;
+		Vector3 rotationPerMove = impulsePerMove * (1.f / angularInertia[0]);
+		Vector3 rotation = rotationPerMove * angularMove[0];		// angular change
+		Quaternion q = rigid1->GetQuaternion();
+		q.AddScaledVector(rotation, 1.f);
+		rigid1->SetQuaternion(q);		// auto normalized
+
+		linearChange[0] = translation;
+		angularChange[0] = rotation;
+	}
+
+	if (rigid2 != nullptr)
+	{
+		const Vector3& pos2 = rigid2->GetEntityCenter();
+		const Vector3& relPos2 = m_point - pos2;
+
+		// linear
+		Vector3 translation = m_normal * linearMove[1];
+		rigid2->SetEntityCenter(pos2 + translation);
+
+		// angular
+		Vector3 impulsiveTorque = relPos2.Cross(m_normal);
+		Vector3 impulsePerMove = rigid2->m_inverseInertiaTensorWorld * impulsiveTorque;
+		Vector3 rotationPerMove = impulsePerMove * (1.f / angularInertia[1]);
+		Vector3 rotation = rotationPerMove * angularMove[1];
+		Quaternion q = rigid2->GetQuaternion();
+		q.AddScaledVector(rotation, 1.f);
+		rigid2->SetQuaternion(q);		// auto normalized
+
+		linearChange[1] = translation;
+		angularChange[1] = rotation;
+	}
+}
+
+void Contact3::PrepareInternal(float deltaTime)
+{
+	if (m_e1 == nullptr)
+		SwapEntities();
+	ASSERT_OR_DIE(m_e1 != nullptr, "Swapped body should not be null");
+
+	// contact matrix
+	MakeContactCoord(m_toWorld);
+
+	m_relativePosWorld[0] = m_point - m_e1->GetEntityCenter();
+	if (m_e2 != nullptr)
+		m_relativePosWorld[1] = m_point - m_e2->GetEntityCenter();
+
+	m_closingVel = ComputeLocalVelocity(0, m_e1, deltaTime);
+	if (m_e2 != nullptr)
+		m_closingVel -= ComputeLocalVelocity(1, m_e2, deltaTime);
+
+	// desired change in vel as resolving coherent contacts
+	ComputeDesiredVelDeltaCoherent(deltaTime);
+}
+
+void Contact3::SwapEntities()
+{
+	m_normal *= -1.f;
+
+	Entity3* temp = m_e1;
+	m_e1 = m_e2;
+	m_e2 = temp;
+
+	// swap feature
+	eContactFeature tempFeature = m_f1;
+	m_f1 = m_f2;
+	m_f2 = tempFeature;
+}
+
+Vector3 Contact3::ComputeLocalVelocity(int idx, Entity3* ent, float)
+{
+	Rigidbody3* rigid = static_cast<Rigidbody3*>(ent);
+	Vector3 vel = rigid->GetAngularVelocity().Cross(m_relativePosWorld[idx]);
+	vel += rigid->GetLinearVelocity();
+	const Matrix33& toContact = m_toWorld.Transpose();
+
+	Vector3 contactVel = toContact * vel;	// to contact coord
+
+	//Vector3 acc = rigid->GetLastAcc() * deltaTime;
+	//acc = toContact * acc;
+	//acc.x = 0.f;
+	//contactVel += acc;
+
+	return contactVel;
+}
+
+void Contact3::ComputeDesiredVelDeltaCoherent(float deltaTime)
+{
+	static const float velLimit = .25f;
+
+	float velAcc = 0.f;
+
+	Rigidbody3* rb1 = static_cast<Rigidbody3*>(m_e1);
+	Rigidbody3* rb2 = static_cast<Rigidbody3*>(m_e2);
+	
+	if (rb1 != nullptr)
+		velAcc += DotProduct(rb1->GetLastAcc() * deltaTime, m_normal);
+
+	if (rb2 != nullptr)
+		velAcc -= DotProduct(rb2->GetLastAcc() * deltaTime, m_normal);
+
+	float r = m_restitution;
+	if (abs(m_closingVel.x) < velLimit)
+		r = 0.f;
+
+	m_desiredVelDelta = -m_closingVel.x - r * (m_closingVel.x - velAcc);
+}
+
+void Contact3::SolveNonlinearProjection(		
+	float angularInertia[2], float linearInertia[2],
+	float angularMove[2], float linearMove[2])
+{
+	float totalInertia = 0.f;
+	Rigidbody3* rigid1 = dynamic_cast<Rigidbody3*>(m_e1);
+	Rigidbody3* rigid2 = dynamic_cast<Rigidbody3*>(m_e2);
+	Vector3 relPos1 = m_point - rigid1->GetEntityCenter();
+	Vector3 relPos2 = m_point - rigid2->GetEntityCenter();
+
+	Matrix33 contactToWorld;
+	MakeContactCoord(contactToWorld);
+	Matrix33 worldToContact = contactToWorld.Transpose();
+
+	if (rigid1 != nullptr)
+	{
+		const Matrix33& iitWorld = rigid1->m_inverseInertiaTensorWorld;
+
+		Vector3 angInertiaWorld = relPos1.Cross(m_normal);
+		angInertiaWorld = iitWorld * angInertiaWorld;
+		angInertiaWorld = angInertiaWorld.Cross(relPos1);
+
+		Vector3 angInertiaContact = worldToContact * angInertiaWorld;
+		float angComponent = angInertiaContact.x;
+
+		angularInertia[0] = angComponent;
+		linearInertia[0] = rigid1->GetMassData3().m_invMass;
+
+		totalInertia += (angularInertia[0] + linearInertia[0]);
+	}
+	if (rigid2 != nullptr)
+	{
+		const Matrix33& iitWorld = rigid2->m_inverseInertiaTensorWorld;
+
+		Vector3 angInertiaWorld = relPos2.Cross(m_normal);
+		angInertiaWorld = iitWorld * angInertiaWorld;
+		angInertiaWorld = angInertiaWorld.Cross(relPos2);
+
+		Vector3 angInertiaContact = worldToContact * angInertiaWorld;
+		float angComponent = angInertiaContact.x;
+
+		angularInertia[1] = angComponent;
+		linearInertia[1] = rigid2->GetMassData3().m_invMass;
+
+		totalInertia += (angularInertia[1] + linearInertia[1]);
+	}
+
+	float contact_ii = 1.f / totalInertia;
+
+	linearMove[0] = m_penetration * linearInertia[0] * contact_ii;
+	linearMove[1] = -m_penetration * linearInertia[1] * contact_ii;
+	angularMove[0] = m_penetration * angularInertia[0] * contact_ii;
+	angularMove[1] = -m_penetration * angularInertia[1] * contact_ii;
+
+	// limit angular movement 
+	const float angularLimit = .2f;
+	float limit1 = angularLimit * relPos1.GetLength();
+	if (abs(angularMove[0]) >= limit1)
+	{
+		float totalMove1 = linearMove[0] + angularMove[0];
+
+		if (angularMove[0] >= 0.f)
+			angularMove[0] = limit1;
+		else
+			angularMove[0] = -limit1;
+
+		linearMove[0] = totalMove1 - angularMove[0];
+	}
+
+	float limit2 = angularLimit * relPos2.GetLength();
+	if (abs(angularMove[1]) > limit2)
+	{
+		float totalMove2 = linearMove[1] + angularMove[1];
+
+		if (angularMove[1] >= 0.f)
+			angularMove[1] = limit2;
+		else
+			angularMove[1] = -limit2;
+
+		linearMove[1] = totalMove2 - angularMove[1];
+	}
+}
+
 float Contact3::ComputeSeparatingVelocity() const
 {
 	Vector3 e1_vel = m_e1->GetLinearVelocity();
@@ -152,7 +539,7 @@ void Contact3::ResolveVelocity(float deltaTime)
 	}
 }
 
-void Contact3::ResolvePenetration(float deltaTime)
+void Contact3::ResolvePenetration(float)
 {
 	// If we don’t have any penetration, skip this step.
 	if (m_penetration <= 0) 
@@ -201,43 +588,62 @@ bool CollisionData3::HasAndUpdateContact(const Contact3& contact)
 
 	for (Contact3& c : m_contacts)
 	{
-		if (contact.m_type == POINT_FACE)
-		{
-			if (contact.m_f1 == UNKNOWN)
-			{
-				found = (contact.m_f2 == c.m_f2);
-				if (found)
-				{
-					c = contact;
-					break;
-				}
-			}
-			else 
-			{
-				found = (contact.m_f1 == c.m_f1);
-				if (found)
-				{
-					c = contact;
-					break;
-				}
-			}
-		}
-		else if (contact.m_type == EDGE_EDGE)
-		{
-			found = (contact.m_f1 == c.m_f1) && (contact.m_f2 == c.m_f2);
-			if (found)
-			{
-				c = contact;
-				break;
-			}
-		}
-		else
-		{
-			// we do not care if contact has other types
-			// we will not use this function in those cases either
+		found = FeatureMatchAndUpdate(contact, c);		// obb3 vs obb3, obb3 vs plane
+
+		if (!found)
+			found = EntityMatchAndUpdate(contact, c);	// sphere vs plane, sphere vs sphere
+
+		if (found)
 			break;
+	}
+
+	return found;
+}
+
+bool CollisionData3::FeatureMatchAndUpdate(const Contact3& comparer, Contact3& comparee)
+{
+	bool found = false;
+
+	if (comparer.m_type == POINT_FACE)
+	{
+		if (comparer.m_f1 == UNKNOWN)
+		{
+			found = (comparer.m_f2 == comparee.m_f2);
+			if (found)
+				comparee = comparer;
+		}
+		else 
+		{
+			found = (comparer.m_f1 == comparee.m_f1);
+			if (found)
+				comparee = comparer;
 		}
 	}
+	else if (comparer.m_type == EDGE_EDGE)
+	{
+		found = (comparer.m_f1 == comparee.m_f1) && (comparer.m_f2 == comparee.m_f2);
+		if (found)
+			comparee = comparer;
+	}
+	else
+	{
+		// we do not care if contact has other types
+		// we will not use this function in those cases either
+	}
+
+	return found;
+}
+
+bool CollisionData3::EntityMatchAndUpdate(const Contact3& comparer, Contact3& comparee)
+{
+	bool found = false;
+
+	bool ent1Match = (comparer.m_e1 == comparee.m_e1);
+	bool ent2Match = (comparer.m_e2 == comparee.m_e2);
+	found = (ent1Match && ent2Match);
+
+	if (found)
+		comparee = comparer;
 
 	return found;
 }
@@ -289,23 +695,15 @@ uint CollisionDetector::Sphere3VsSphere3(const Sphere3& s1, const Sphere3& s2, C
 	return 1;
 }
 
-uint CollisionDetector::Sphere3VsPlane3(const Sphere3& sph, const Plane& pl, CollisionData3* data)
+bool CollisionDetector::Sphere3VsPlane3Core(const Sphere3& sph, const Plane& pl, Contact3& contact)
 {
-	if (data->m_contacts.size() >= data->m_maxContacts)
-	{
-		// no contacts amount left, return directly
-		return 0;
-	}
-
 	float sphereRad = sph.GetRadius();
 	Vector3 spherePos = sph.GetCenter();
 	Vector3 planeNormal = pl.GetNormal().GetNormalized();			// guarantee to be normalized
 	float sphereToOriginAlongPlaneDir = DotProduct(planeNormal, spherePos);
 	float signedDistToPlane = sphereToOriginAlongPlaneDir - pl.GetOffset();
 	if (abs(signedDistToPlane) >= sphereRad)
-	{
-		return 0;
-	}
+		return false;
 
 	// we are certain that there is some contact between sphere and plane
 
@@ -322,7 +720,44 @@ uint CollisionDetector::Sphere3VsPlane3(const Sphere3& sph, const Plane& pl, Col
 	Vector3 contactPoint = spherePos - planeNormal * signedDistToPlane;
 	Contact3 theContact = Contact3(sph.GetEntity(), pl.GetEntity(),
 		usedNormal, contactPoint, penetration);
+	contact = theContact;
+
+	return true;
+}
+
+uint CollisionDetector::Sphere3VsPlane3Single(const Sphere3& sph, const Plane& pl, CollisionData3* data)
+{
+	if (data->m_contacts.size() >= data->m_maxContacts)
+		// no contacts amount left, return directly
+		return 0;
+
+	Contact3 theContact;
+	bool contactGenerated = Sphere3VsPlane3Core(sph, pl, theContact);
+
+	if (!contactGenerated)
+		return 0;
+
 	data->m_contacts.push_back(theContact);
+
+	return 1;
+}
+
+uint CollisionDetector::Sphere3VsPlane3Coherent(const Sphere3& sph, const Plane& pl, CollisionData3* data)
+{
+	if (data->m_contacts.size() >= data->m_maxContacts)
+		// no contacts amount left, return directly
+		return 0;
+
+	Contact3 theContact;
+	bool contactGenerated = Sphere3VsPlane3Core(sph, pl, theContact);
+
+	if (!contactGenerated)
+		return 0;
+
+	bool existed = data->HasAndUpdateContact(theContact);
+
+	if (!existed)
+		data->m_contacts.push_back(theContact);
 
 	return 1;
 }
@@ -392,7 +827,7 @@ uint CollisionDetector::Sphere3VsAABB3(const Sphere3& sph, const AABB3& aabb3, C
 	return 1;
 }
 
-uint CollisionDetector::AABB3VsAABB3(const AABB3& aabb3_1, const AABB3& aabb3_2, CollisionData3* data)
+uint CollisionDetector::AABB3VsAABB3Coherent(const AABB3&, const AABB3&, CollisionData3*)
 {
 	/////////////////////////////////////// NON-COHERENCE PROCESSING ///////////////////////////////////////
 	//uint succeed = NonCoherentProcessingAABB3VsAABB3(aabb3_1, aabb3_2, data);
@@ -540,7 +975,7 @@ uint CollisionDetector::OBB3VsSphere3(const OBB3& obb, const Sphere3& sphere, Co
 	return 1;
 }
 
-uint CollisionDetector::OBB3VsOBB3Shallow(const OBB3& obb1, const OBB3& obb2, CollisionData3* data)
+uint CollisionDetector::OBB3VsOBB3Single(const OBB3& obb1, const OBB3& obb2, CollisionData3* data)
 {
 	if (data->m_contacts.size() >= data->m_maxContacts)
 		// no contacts amount left, return directly
@@ -869,7 +1304,7 @@ uint CollisionDetector::OBB3VsOBB3Shallow(const OBB3& obb1, const OBB3& obb2, Co
 	return 1;
 }
 
-uint CollisionDetector::OBB3VsOBB3Deep(const OBB3& obb1, const OBB3& obb2, CollisionData3* data)
+uint CollisionDetector::OBB3VsOBB3Coherent(const OBB3& obb1, const OBB3& obb2, CollisionData3* data)
 {
 	if (data->m_contacts.size() >= data->m_maxContacts)
 		// no contacts amount left, return directly
@@ -1071,107 +1506,111 @@ uint CollisionDetector::Entity3VsEntity3(Entity3* e1, Entity3* e2, CollisionData
 {
 	uint res = 0;
 
+	// 1
 	SphereEntity3* s1 = dynamic_cast<SphereEntity3*>(e1);
 	SphereRB3* srb1 = dynamic_cast<SphereRB3*>(e1);
-	CubeEntity3* c1 = dynamic_cast<CubeEntity3*>(e1);
-	QuadEntity3* q1 = dynamic_cast<QuadEntity3*>(e1);
-	//PointEntity3* p1 = dynamic_cast<PointEntity3*>(e1);
 
+	CubeEntity3* c1 = dynamic_cast<CubeEntity3*>(e1);
+
+	QuadEntity3* q1 = dynamic_cast<QuadEntity3*>(e1);
+
+	// 2
 	SphereEntity3* s2 = dynamic_cast<SphereEntity3*>(e2);
 	SphereRB3* srb2 = dynamic_cast<SphereRB3*>(e2);
+
 	CubeEntity3* c2 = dynamic_cast<CubeEntity3*>(e2);
+
 	QuadEntity3* q2 = dynamic_cast<QuadEntity3*>(e2);
-	//PointEntity3* p2 = dynamic_cast<PointEntity3*>(e2);
 
 	if (s1 != nullptr)
 	{
 		if (s2 != nullptr)
 		{
-			const Sphere3& sph1 = s1->GetSpherePrimitive();
-			const Sphere3& sph2 = s2->GetSpherePrimitive();
+			Sphere3 sph1 = s1->GetSpherePrimitive();
+			Sphere3 sph2 = s2->GetSpherePrimitive();
 
 			res = Sphere3VsSphere3(sph1, sph2, data);
 		}
 		else if (srb2 != nullptr)
 		{
-			const Sphere3& sph1 = s1->GetSpherePrimitive();
-			const Sphere3& sph2 = srb2->GetSpherePrimitive();
+			Sphere3 sph1 = s1->GetSpherePrimitive();
+			Sphere3 sph2 = srb2->GetSpherePrimitive();
 
 			res = Sphere3VsSphere3(sph1, sph2, data);
 		}
 		else if (c2 != nullptr)
 		{
-			const Sphere3& sph = s1->GetSpherePrimitive();
-			const AABB3& aabb3 = c2->GetCubePrimitive();
+			Sphere3 sph = s1->GetSpherePrimitive();
+			AABB3 aabb3 = c2->GetCubePrimitive();
 
 			res = Sphere3VsAABB3(sph, aabb3, data);
 		}
 		else if (q2 != nullptr)
 		{
-			const Sphere3& sph = s1->GetSpherePrimitive();
-			const Plane& pl = q2->GetPlanePrimitive();
+			Sphere3 sph = s1->GetSpherePrimitive();
+			Plane pl = q2->GetPlanePrimitive();
 
-			res = Sphere3VsPlane3(sph, pl, data);
+			res = Sphere3VsPlane3Single(sph, pl, data);
 		}
 	}
 	else if (srb1 != nullptr)
 	{
 		if (s2 != nullptr)
 		{
-			const Sphere3& sph1 = srb1->GetSpherePrimitive();
-			const Sphere3& sph2 = s2->GetSpherePrimitive();
+			Sphere3 sph1 = srb1->GetSpherePrimitive();
+			Sphere3 sph2 = s2->GetSpherePrimitive();
 
 			res = Sphere3VsSphere3(sph1, sph2, data);
 		}
 		else if (srb2 != nullptr)
 		{
-			const Sphere3& sph1 = srb1->GetSpherePrimitive();
-			const Sphere3& sph2 = srb2->GetSpherePrimitive();
+			Sphere3 sph1 = srb1->GetSpherePrimitive();
+			Sphere3 sph2 = srb2->GetSpherePrimitive();
 
 			res = Sphere3VsSphere3(sph1, sph2, data);
 		}
 		else if (c2 != nullptr)
 		{
-			const Sphere3& sph = srb1->GetSpherePrimitive();
-			const AABB3& aabb3 = c2->GetCubePrimitive();
+			Sphere3 sph = srb1->GetSpherePrimitive();
+			AABB3 aabb3 = c2->GetCubePrimitive();
 
 			res = Sphere3VsAABB3(sph, aabb3, data);
 		}
 		else if (q2 != nullptr)
 		{
-			const Sphere3& sph = srb1->GetSpherePrimitive();
-			const Plane& pl = q2->GetPlanePrimitive();
+			Sphere3 sph = srb1->GetSpherePrimitive();
+			Plane pl = q2->GetPlanePrimitive();
 
-			res = Sphere3VsPlane3(sph, pl, data);
+			res = Sphere3VsPlane3Single(sph, pl, data);
 		}
 	}
 	else if (c1 != nullptr)
 	{
 		if (s2 != nullptr)
 		{
-			const AABB3& aabb3 = c1->GetCubePrimitive();
-			const Sphere3& sph = s2->GetSpherePrimitive();
+			AABB3 aabb3 = c1->GetCubePrimitive();
+			Sphere3 sph = s2->GetSpherePrimitive();
 
 			res = Sphere3VsAABB3(sph, aabb3, data);
 		}
 		else if (srb2 != nullptr)
 		{
-			const AABB3& aabb3 = c1->GetCubePrimitive();
-			const Sphere3& sph = srb2->GetSpherePrimitive();
+			AABB3 aabb3 = c1->GetCubePrimitive();
+			Sphere3 sph = srb2->GetSpherePrimitive();
 
 			res = Sphere3VsAABB3(sph, aabb3, data);
 		}
 		else if (c2 != nullptr)
 		{
-			const AABB3& aabb3_1 = c1->GetCubePrimitive();
-			const AABB3& aabb3_2 = c2->GetCubePrimitive();
+			AABB3 aabb3_1 = c1->GetCubePrimitive();
+			AABB3 aabb3_2 = c2->GetCubePrimitive();
 
 			res = AABB3VsAABB3Single(aabb3_1, aabb3_2, data);
 		}
 		else if (q2 != nullptr)
 		{
-			const AABB3& aabb3 = c1->GetCubePrimitive();
-			const Plane& pl = q2->GetPlanePrimitive();
+			AABB3 aabb3 = c1->GetCubePrimitive();
+			Plane pl = q2->GetPlanePrimitive();
 
 			res = AABB3VsPlane3Single(aabb3, pl, data);
 		}
@@ -1180,22 +1619,22 @@ uint CollisionDetector::Entity3VsEntity3(Entity3* e1, Entity3* e2, CollisionData
 	{
 		if (s2 != nullptr)
 		{
-			const Plane& pl = q1->GetPlanePrimitive();
-			const Sphere3& sph = s2->GetSpherePrimitive();
+			Plane pl = q1->GetPlanePrimitive();
+			Sphere3 sph = s2->GetSpherePrimitive();
 
-			res = Sphere3VsPlane3(sph, pl, data);
+			res = Sphere3VsPlane3Single(sph, pl, data);
 		}
 		else if (srb2 != nullptr)
 		{
-			const Plane& pl = q1->GetPlanePrimitive();
-			const Sphere3& sph = srb2->GetSpherePrimitive();
+			Plane pl = q1->GetPlanePrimitive();
+			Sphere3 sph = srb2->GetSpherePrimitive();
 
-			res = Sphere3VsPlane3(sph, pl, data);
+			res = Sphere3VsPlane3Single(sph, pl, data);
 		}
 		else if (c2 != nullptr)
 		{
-			const Plane& pl = q1->GetPlanePrimitive();
-			const AABB3& aabb = c2->GetCubePrimitive();
+			Plane pl = q1->GetPlanePrimitive();
+			AABB3 aabb = c2->GetCubePrimitive();
 
 			res = AABB3VsPlane3Single(aabb, pl, data);
 		}
@@ -1208,131 +1647,7 @@ uint CollisionDetector::Entity3VsEntity3(Entity3* e1, Entity3* e2, CollisionData
 	return res;
 }
 
-/*
-uint CollisionDetector::NonCoherentProcessingAABB3VsAABB3(const AABB3& aabb3_1, const AABB3& aabb3_2, CollisionData3* data)
-{
-	if (data->m_contacts.size() >= data->m_maxContacts)
-	{
-		// no contacts amount left, return directly
-		return 0;
-	}
-
-	// early out with SAT
-	bool overlapped = AABB3VsAABB3Intersection(aabb3_1, aabb3_2);
-	if (!overlapped) return 0;
-
-	// two aabbs do overlap
-	// determine one contact to use, either point-face or edge-edge
-
-	Vector3 vertices_1[8];
-	aabb3_1.GetVertices(vertices_1);
-	float vert_depth[8];
-
-	// go over vertices of 1 to add depths against 2
-	for (uint i = 0; i < 8; ++i)
-	{
-		float vp = INVALID_DEPTH_BOX_TO_POINT;
-		CollisionDetector::BoxAndPointPenetration(aabb3_2, vertices_1[i], &vp);
-
-		vert_depth[i] = vp;
-	}
-
-	Vector3 edges_1[12];
-	aabb3_1.GetEdges(edges_1);
-	float edge_depth[12];			// record edge penetration for all edges of 1
-
-	// go over edges of 1 to add edge depths against 2 (against 2's edges under the hook)
-	for (uint i = 0; i < 12; ++i)
-	{
-		float ep = INVALID_DEPTH_EDGE_TO_EDGE;
-		CollisionDetector::BoxAndEdgePenetration(aabb3_2, edges_1[i], &ep);
-
-		edge_depth[i] = ep;
-	}
-
-	// get the deepest depth and its relevant information of both situations
-	//int v_large_index = PickLargestElementIndexArray(vert_depth, 8);
-	//int e_large_index = PickLargestElementIndexArray(edge_depth, 8);
-	int v_large_index = 0;
-	int e_large_index = 0;
-	float v_large_depth = vert_depth[v_large_index];
-	float e_large_depth = edge_depth[e_large_index];
-
-	if (v_large_depth > e_large_depth)
-	{
-		// point-face depth larger than edge-edge depth
-		uint succeeded = CollisionDetector::BoxAndPointContact(aabb3_2, vertices_1[v_large_index], data);
-		return succeeded;
-	}
-	else 
-	{
-		uint succeeded = CollisionDetector::BoxAndEdgeContact(aabb3_2, edges_1[e_large_index], data);
-		return succeeded;
-	}
-}
-*/
-
-//uint CollisionDetector::CoherentProcessingAABB3VsAABB3(const AABB3& aabb_1, const AABB3& aabb3_2, CollisionData3* data)
-//{
-//	/*
-//	// go over vertices of 1 to check penetration against 2
-//	for (uint i = 0; i < 8; ++i)
-//	{
-//	float penetration;
-//	Vector3 vert_1 = vertices_1[i];
-//	uint pointInBox = CollisionDetector::AABB3AndPointPenetration(aabb3_2, vert_1, &penetration);
-//
-//	if (pointInBox == 1)
-//	{
-//	// point is in box, take the shallowest penetration along axes
-//	vertices_1_depth[i] = penetration;
-//	}
-//	else
-//	{
-//	// point is out of box
-//	vertices_1_depth[i] = INVALID_DEPTH_BOX_TO_POINT;
-//	}
-//	}
-//
-//	// go over vertices of 2 to check penetration against 1
-//	for (uint j = 0; j < 8; ++j)
-//	{
-//	float penetration;
-//	Vector3 vert_2 = vertices_2[j];
-//	uint pointInBox = CollisionDetector::AABB3AndPointPenetration(aabb3_1, vert_2, &penetration);
-//
-//	if (pointInBox == 1)
-//	{
-//	vertices_2_depth[j] = penetration;
-//	}
-//	else
-//	{
-//	vertices_2_depth[j] = INVALID_DEPTH_BOX_TO_POINT;
-//	}
-//	}
-//
-//	// pick index of deepest penetrations
-//	int deep_ind_1 = PickLargestElementIndexArray(vertices_1_depth, 8);
-//	int deep_ind_2 = PickLargestElementIndexArray(vertices_2_depth, 8);
-//	float depth_1 = vertices_1_depth[deep_ind_1];
-//	float depth_2 = vertices_2_depth[deep_ind_2];
-//
-//	if (depth_1 > depth_2)
-//	{
-//	// use a vert of aabb_1 against aabb_2
-//	CollisionDetector::AABB3AndPointContact(aabb3_2, vertices_1[deep_ind_1], &pointToBoxDeepestContact);
-//	}
-//	else
-//	{
-//	CollisionDetector::AABB3AndPointContact(aabb3_1, vertices_2[deep_ind_2], &pointToBoxDeepestContact);
-//	}
-//	// at this point we have deepest contact for face-point case
-//	*/
-//
-//	return 0;
-//}
-
-uint CollisionDetector::AABB3VsPlane3(const AABB3& aabb, const Plane& plane, CollisionData3* data)
+uint CollisionDetector::AABB3VsPlane3Coherent(const AABB3& aabb, const Plane& plane, CollisionData3* data)
 {
 	if (data->m_contacts.size() >= data->m_maxContacts)
 	{
@@ -1522,41 +1837,3 @@ uint CollisionDetector::AABB3VsPlane3Single(const AABB3& aabb, const Plane& plan
 		return 1;
 	}
 }
-
-/*
-void CollisionDetector::BoxAndPointPenetration(const AABB3& aabb, const Vector3& point, float* out_penetration)
-{
-	// todo: generate box and point penetration, if invalid leave the out value be
-
-}
-
-void CollisionDetector::BoxAndEdgePenetration(const AABB3& aabb, const Vector3& edge, float* out_penetration)
-{
-	// todo: go over all edges of aabb against input edge, retrieve the shallowest penetration E 
-
-}
-
-void CollisionDetector::EdgeAndEdgePenetration(const Vector3& e1, const Vector3& e2, float* out_penetration)
-{
-	// todo: retrieve the penetration of the pair of edge
-
-}
-
-uint CollisionDetector::BoxAndPointContact(const AABB3& aabb, const Vector3& point, CollisionData3* data)
-{
-	// todo: contact between a box and a point
-	return 0;
-}
-
-uint CollisionDetector::BoxAndEdgeContact(const AABB3& aabb, const Vector3& edge, CollisionData3* data)
-{
-	// todo: contact between a box and an edge
-	return 0;
-}
-
-uint CollisionDetector::EdgeAndEdgeContact(const Vector3& edge1, const Vector3& edge2, CollisionData3* data)
-{
-	// todo: contact between an edge and an edge
-	return 0;
-}
-*/

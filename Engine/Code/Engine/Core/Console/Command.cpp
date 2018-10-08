@@ -700,7 +700,7 @@ void RemoteHostCommand(Command& cmd)
 	g_rcs->m_echo = 2;
 }
 
-void RemoteEchoCommand(Command& cmd)
+void RemoteEchoCommand(Command&)
 {
 	g_rcs->m_echo = 2;
 }

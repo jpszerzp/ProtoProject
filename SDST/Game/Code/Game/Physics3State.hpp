@@ -4,6 +4,7 @@
 #include "Engine/Physics/3D/ContactResolver.hpp"
 #include "Engine/Physics/3D/Rigidbody3.hpp"
 #include "Engine/Physics/3D/BVH3.hpp"
+#include "Engine/Physics/3D/SphereRB3.hpp"
 #include "Engine/Core/Primitive/Sphere.hpp"
 #include "Engine/Core/Primitive/Cube.hpp"
 #include "Engine/Core/Primitive/Quad.hpp"
@@ -38,11 +39,6 @@ public:
 	AnchorSpring* SetupAnchorSpring(Point* end1, Point* end2, float coef, float rl);
 	Rod* SetupRod(float length, Point* p1, Point* p2);
 
-	// DEPRCATED
-	//void ParticlePhysicsUpdate(float deltaTime);
-	//void RigidbodyPhysicsUpdate(float deltaTime);
-	//void SingleContactUpdate();
-
 	void Update(float deltaTime) override;
 	void UpdateMouse(float deltaTime) override;
 	void UpdateKeyboard(float deltaTime) override;
@@ -56,6 +52,7 @@ public:
 	void UpdateForceRegistry(float deltaTime);
 	void UpdateGameobjectsCore(float deltaTime);
 	void UpdateContactGeneration();
+	void UpdateCore();
 	void UpdateContactResolution(float deltaTime);
 	void UpdateBVH();
 
@@ -82,7 +79,7 @@ public:
 	Rod* m_rod;
 	GeneralRigidAnchorSpring* m_rigidAnchorSpring;
 
-	// for collision process
+	// entities
 	std::vector<Sphere*> m_spheres;
 	std::vector<Cube*>	 m_cubes;
 	std::vector<Quad*>	 m_quads;

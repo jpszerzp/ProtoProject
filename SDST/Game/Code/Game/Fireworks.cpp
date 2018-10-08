@@ -25,9 +25,9 @@ void Fireworks::Update(float deltaTime)
 	if (!m_dead)
 	{
 		m_physEntity->Integrate(deltaTime);
-		m_physEntity->UpdateEntitiesTransforms();
-		m_physEntity->UpdateEntityPrimitive();
-		m_physEntity->UpdateBoundPrimitives();
+		m_physEntity->UpdateTransforms();
+		m_physEntity->UpdatePrimitives();
+		//m_physEntity->UpdateBoundPrimitives();
 
 		// physics driven, hence update renderable transform
 		m_renderable->m_transform = m_physEntity->GetEntityTransform();
@@ -82,7 +82,8 @@ void Fireworks::Render(Renderer* renderer)
 				renderer->SetSampler2D(0, texture->GetSampler());
 
 				PointEntity3* pte = dynamic_cast<PointEntity3*>(m_physEntity);
-				float ptSize = pte->GetParticlePrimitive().m_size;
+				Particle particle = pte->GetParticlePrimitive();
+				float ptSize = particle.m_size;
 				glPointSize(ptSize);
 			}
 			renderer->UseShader(shader);

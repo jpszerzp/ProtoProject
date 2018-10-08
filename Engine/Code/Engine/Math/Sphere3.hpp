@@ -1,10 +1,11 @@
 #pragma once
 
 #include "Engine/Math/Vector3.hpp"
+#include "Engine/Math/Primitive3.hpp"
 
 class Entity3;
 
-class Sphere3
+class Sphere3 
 {
 private:
 	Entity3* m_entity = nullptr;
@@ -25,6 +26,6 @@ public:
 
 	void Translate(Vector3 translation);
 
+	void SetCenter(const Vector3& center);
 	void SetEntity(Entity3* ent) { m_entity = ent; }
-	void SetCenter(Vector3 center) { m_center = center; }
 };

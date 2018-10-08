@@ -85,9 +85,9 @@ void Ballistics::Update(float deltaTime)
 
 	// Ballistics is supposed to be physics driven by nature, hence I do not check it here
 	m_physEntity->Integrate(deltaTime);
-	m_physEntity->UpdateEntitiesTransforms();
-	m_physEntity->UpdateEntityPrimitive();
-	m_physEntity->UpdateBoundPrimitives();
+	m_physEntity->UpdateTransforms();
+	m_physEntity->UpdatePrimitives();
+	//m_physEntity->UpdateBoundPrimitives();
 
 	// physics driven, hence update renderable transform
 	m_renderable->m_transform = m_physEntity->GetEntityTransform();
@@ -95,7 +95,7 @@ void Ballistics::Update(float deltaTime)
 	UpdateBasis();
 }
 
-void Ballistics::UpdateInput(float deltaTime)
+void Ballistics::UpdateInput(float)
 {
 	InputSystem* input = InputSystem::GetInstance();
 	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_P)

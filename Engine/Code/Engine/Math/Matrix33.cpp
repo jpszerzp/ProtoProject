@@ -79,6 +79,28 @@ float Matrix33::GetDeterminant() const
 	return det;
 }
 
+void Matrix33::SetRight(Vector3 right)
+{
+	Kx = right.x; Ky = right.y; Kz = right.z;
+}
+
+void Matrix33::SetUp(Vector3 up)
+{
+	Jx = up.x; Jy = up.y; Jz = up.z;
+}
+
+void Matrix33::SetForward(Vector3 forward)
+{
+	Ix = forward.x; Iy = forward.y; Iz = forward.z;
+}
+
+void Matrix33::SetBasis(Vector3 right, Vector3 up, Vector3 forward)
+{
+	SetRight(right);
+	SetUp(up);
+	SetForward(forward);
+}
+
 Matrix33 Matrix33::Invert() const
 {
 	// det

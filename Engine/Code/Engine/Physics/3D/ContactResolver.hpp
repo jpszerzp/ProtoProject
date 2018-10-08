@@ -5,6 +5,11 @@
 
 #include <vector>
 
+#define COHERENT_POS_ITER 2
+#define COHERENT_VEL_ITER 2
+#define COHERENT_POS_EPSILON 0
+#define COHERENT_VEL_EPSILON 0
+
 enum eResolveScheme
 {
 	RESOLVE_ALL,
@@ -29,9 +34,19 @@ public:
 
 	void SetIterations(uint iterations) { m_iterations = iterations; }
 	void ResolveContacts(float deltaTime);
+
+	// iterative
 	void ResolveContactsIterative(float deltaTime);
+
+	// all
 	void ResolveContactsAll(float deltaTime);
-	void ResolveContactCoherent(float deltaTime);
+
+	// coherent
+	void ResolveContactsCoherent(float deltaTime);
+	void PrepareContactsCoherent(float deltaTime);
+	void ResolvePositionsCoherent(float deltaTime);
+	void ResolveVelocityCoherent(float deltaTime);
+
 	void ClearRecords();
 
 	CollisionData3* GetCollisionData() { return m_collision; }

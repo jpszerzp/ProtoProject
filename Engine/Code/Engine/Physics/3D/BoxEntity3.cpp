@@ -10,7 +10,7 @@ BoxEntity3::BoxEntity3(const OBB3& primitive, const Vector3& rot, eMoveStatus mo
 	m_linearVelocity = Vector3::ZERO;
 	m_center = primitive.m_center;
 
-	Vector3 scale = m_primitive.GetHalfExt() * 2.f;
+	Vector3 scale = primitive.GetHalfExt() * 2.f;
 	m_entityTransform = Transform(m_center, rot, scale);
 
 	if (m_moveStatus != MOVE_STATIC)
@@ -21,7 +21,7 @@ BoxEntity3::BoxEntity3(const OBB3& primitive, const Vector3& rot, eMoveStatus mo
 	else
 		m_massData.m_invMass = 0.f;
 
-	float diagonal = m_primitive.GetDiagonalRadius();
+	float diagonal = primitive.GetDiagonalRadius();
 	m_boundSphere = BoundingSphere(m_center, diagonal);
 	m_boundSphere.m_boundMesh = Mesh::CreateUVSphere(VERT_PCU, 18, 36);
 	m_boundSphere.m_transform = Transform(m_center, rot, Vector3(diagonal));
@@ -50,6 +50,7 @@ Vector3 BoxEntity3::GetFeaturedPoint(eContactFeature feature)
 	case V8: return m_primitive.GetBTR(); break;
 	default: break;
 	}
+	return Vector3::INVALID;
 }
 
 LineSegment3 BoxEntity3::GetFeaturedEdge(eContactFeature feature)
@@ -71,10 +72,14 @@ LineSegment3 BoxEntity3::GetFeaturedEdge(eContactFeature feature)
 	case UNKNOWN: break;
 	default: break;
 	}
+	return LineSegment3(Vector3::INVALID, Vector3::INVALID);
 }
 
-void BoxEntity3::UpdateEntityPrimitive()
+void BoxEntity3::UpdatePrimitives()
 {
+	m_boundSphere.SetCenter(m_center);
+	m_boundBox.SetCenter(m_center);
+
 	m_primitive.SetCenter(m_center);
 }
 
@@ -83,6 +88,7 @@ void BoxEntity3::Render(Renderer* renderer)
 	if (m_drawBoundSphere)
 		m_boundSphere.DrawBound(renderer);
 }
+
 
 void BoxEntity3::SetEntityForPrimitive()
 {

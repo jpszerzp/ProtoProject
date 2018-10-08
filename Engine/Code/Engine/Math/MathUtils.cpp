@@ -432,7 +432,7 @@ void RightShiftLostBit(std::vector<uint8_t>& bits, size_t* num, int shiftNum)
 void RightShiftRemainedBit(std::vector<uint8_t>& remained, size_t* num, int shiftNum)
 {
 	std::vector<uint8_t> bits = BinaryFromDecimal(*num);
-	int bits_num = bits.size();
+	int bits_num = (int)bits.size();
 	int bits_remained = bits_num - shiftNum;
 
 	while (bits_num > 0)
@@ -534,48 +534,30 @@ std::vector<uint8_t> BinaryFromDecimal16(size_t decimal)
 
 uint16_t BufferSizeHardCode16(std::string str)
 {
-	if (str == "\x0")
-		return 0;
-	if (str == "\x1")
-		return 1;
-	if (str == "\x2")
-		return 2;
-	if (str == "\x3")
-		return 3;
-	if (str == "\x4")
-		return 4;
-	if (str == "\x5")
-		return 5;
-	if (str == "\x6")
-		return 6;
-	if (str == "\x7")
-		return 7;
-	if (str == "\x8")
-		return 8;
-	if (str == "\x9")
-		return 9;
-	if (str == "\x10")
-		return 10;
-	if (str == "\x11")
-		return 11;
-	if (str == "\x12")
-		return 12;
-	if (str == "\x13")
-		return 13;
-	if (str == "\x14")
-		return 14;
-	if (str == "\x15")
-		return 15;
-	if (str == "\x16")
-		return 16;
-	if (str == "\x17")
-		return 17;
-	if (str == "\x18")
-		return 18;
-	if (str == "\x19")
-		return 19;
-	if (str == "\x20")
-		return 20;
+	uint16_t code = 65535U;
+
+	if (str == "\x0") code = 0;
+	if (str == "\x1") code = 1;
+	if (str == "\x2") code = 2;
+	if (str == "\x3") code = 3;
+	if (str == "\x4") code = 4;
+	if (str == "\x5") code = 5;
+	if (str == "\x6") code = 6;
+	if (str == "\x7") code = 7;
+	if (str == "\x8") code = 8;
+	if (str == "\x9") code = 9;
+	if (str == "\x10") code = 10;
+	if (str == "\x11") code = 11;
+	if (str == "\x12") code = 12;
+	if (str == "\x13") code = 13;
+	if (str == "\x14") code = 14;
+	if (str == "\x15") code = 15;
+	if (str == "\x16") code = 16;
+	if (str == "\x17") code = 17;
+	if (str == "\x18") code = 18;
+	if (str == "\x19") code = 19;
+	if (str == "\x20") code = 20;
+	return code;
 }
 
 float	SmoothStart2( float t )
@@ -746,16 +728,19 @@ void MakeOrthonormalBasis(const Vector3& x, Vector3& y, Vector3& z)
 void MakeOrthonormalBasisOpt(const Vector3& x, Vector3& y, Vector3& z)
 {
 	const float s = 1.f / sqrtf(x.z * x.z + x.x * x.x);
-
+	
+	// z
 	z.x = x.z * s;
 	z.y = 0.f;
 	z.z = -x.x * s;
 
+	// y
 	y.x = x.y * z.x;
 	y.y = x.z * z.x - x.x * z.z;
 	y.z = -x.y * z.x;
 }
 
+/*
 void MakeOrthonormalBasisStable(const Vector3& x)
 {
 	if (abs(x.x) > abs(x.y))
@@ -773,6 +758,7 @@ void MakeOrthonormalBasisStable(const Vector3& x)
 		MakeOrthonormalBasisOpt(x, y, z);
 	}
 }
+*/
 
 bool ProjectPlaneToSphere(Vector2 pos, float r, Vector3& out_pos)
 {

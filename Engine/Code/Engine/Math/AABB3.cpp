@@ -40,7 +40,7 @@ void AABB3::GetVertices(Vector3* out_vertices) const
 	out_vertices[7] = center + halfdim;
 }
 
-void AABB3::GetEdges(Vector3* out_edges) const
+void AABB3::GetEdges(Vector3*) const
 {
 
 }
@@ -51,7 +51,7 @@ void AABB3::Translate(Vector3 translation)
 	m_max += translation;
 }
 
-void AABB3::SetCenter(Vector3 center)
+void AABB3::SetCenter(const Vector3& center)
 {
 	Vector3 halfDim = (m_max - m_min) / 2.f;
 

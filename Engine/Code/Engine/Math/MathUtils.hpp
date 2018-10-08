@@ -106,7 +106,7 @@ Vector3 PolarToCartesian( Vector3 spherical );
 Vector3 CartesianToPolar( Vector3 position );
 void MakeOrthonormalBasis(const Vector3& x, Vector3& y, Vector3& z);
 void MakeOrthonormalBasisOpt(const Vector3& x, Vector3& y, Vector3& z);
-void MakeOrthonormalBasisStable(const Vector3& x);
+//void MakeOrthonormalBasisStable(const Vector3& x);
 bool ProjectPlaneToSphere(Vector2 pos, float r, Vector3& out_pos);	// a spherical coord operation
 
 bool  Quadratic(Vector2& out, float a, float b, float c);

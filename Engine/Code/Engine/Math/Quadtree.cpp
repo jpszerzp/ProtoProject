@@ -279,8 +279,8 @@ void Quadtree3::InsertTree(Entity3* ent)
 
 		for (int entIdx = (int)(m_entities.size()- 1U); entIdx >= 0; --entIdx)
 		{
-			Entity3* ent = m_entities[entIdx];
-			int quadIndex = GetQuadrant(ent);
+			Entity3* theEnt = m_entities[entIdx];
+			int quadIndex = GetQuadrant(theEnt);
 			if (quadIndex != -1)
 			{
 				Quadtree3* tree = m_nodes[quadIndex];
@@ -288,7 +288,7 @@ void Quadtree3::InsertTree(Entity3* ent)
 				// remove in old, insert in new
 				m_entities[entIdx] = m_entities[m_entities.size() - 1U];
 				m_entities.pop_back();
-				tree->InsertTree(ent);
+				tree->InsertTree(theEnt);
 			}
 			// else the entity does not COMPLETELY fall in any of the quadrants, hence remain in current level
 		}

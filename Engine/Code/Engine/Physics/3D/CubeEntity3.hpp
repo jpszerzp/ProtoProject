@@ -5,19 +5,19 @@
 
 class CubeEntity3 : public Entity3
 {
-private:
+public:
 	AABB3 m_primitive;
 
 public:
 	CubeEntity3(const AABB3& primitive, eMoveStatus moveStat);
 	~CubeEntity3();
 
-	void UpdateEntityPrimitive() override;
+	void UpdatePrimitives() override;
 	void Render(Renderer* renderer) override;
 
 	void Translate(Vector3 translation) override;
 
-	const AABB3& GetCubePrimitive() const { return m_primitive; }
+	AABB3 GetCubePrimitive() { return m_primitive; }
 
 	void SetEntityForPrimitive() override;
 };

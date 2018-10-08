@@ -12,7 +12,7 @@ BoxRB3::BoxRB3(float mass, const OBB3& primitive, const Vector3& euler, eMoveSta
 	m_linearVelocity = Vector3::ZERO;
 	m_center = primitive.m_center;
 
-	Vector3 scale = m_primitive.GetHalfExt() * 2.f;
+	Vector3 scale = primitive.GetHalfExt() * 2.f;
 	m_entityTransform = Transform(m_center, euler, scale);
 
 	if (m_moveStatus != MOVE_STATIC)
@@ -22,14 +22,14 @@ BoxRB3::BoxRB3(float mass, const OBB3& primitive, const Vector3& euler, eMoveSta
 
 		// initialize sphere inertia tensor as needed
 		float factor_i = (1.f / 12.f) * GetMass3() * 
-			(m_primitive.GetFullExtY() * m_primitive.GetFullExtY()
-				+ m_primitive.GetFullExtZ() * m_primitive.GetFullExtZ());
+			(primitive.GetFullExtY() * primitive.GetFullExtY()
+				+ primitive.GetFullExtZ() * primitive.GetFullExtZ());
 		float factor_j = (1.f / 12.f) * GetMass3() * 
-			(m_primitive.GetFullExtX() * m_primitive.GetFullExtX()
-				+ m_primitive.GetFullExtZ() * m_primitive.GetFullExtZ());
+			(primitive.GetFullExtX() * primitive.GetFullExtX()
+				+ primitive.GetFullExtZ() * primitive.GetFullExtZ());
 		float factor_k = (1.f / 12.f) * GetMass3() * 
-			(m_primitive.GetFullExtX() * m_primitive.GetFullExtX()
-				+ m_primitive.GetFullExtY() * m_primitive.GetFullExtY());
+			(primitive.GetFullExtX() * primitive.GetFullExtX()
+				+ primitive.GetFullExtY() * primitive.GetFullExtY());
 		Vector3 tensor_i = Vector3(factor_i, 0.f, 0.f);
 		Vector3 tensor_j = Vector3(0.f, factor_j, 0.f);
 		Vector3 tensor_k = Vector3(0.f, 0.f, factor_k);
@@ -50,7 +50,7 @@ BoxRB3::BoxRB3(float mass, const OBB3& primitive, const Vector3& euler, eMoveSta
 		m_massData.m_invTensor = Matrix33::ZERO;
 	}
 
-	float diagonal = m_primitive.GetDiagonalRadius();
+	float diagonal = primitive.GetDiagonalRadius();
 	m_boundSphere = BoundingSphere(m_center, diagonal);
 	m_boundSphere.m_boundMesh = Mesh::CreateUVSphere(VERT_PCU, 18, 36);
 	m_boundSphere.m_transform = Transform(m_center, euler, Vector3(diagonal));
@@ -66,14 +66,16 @@ void BoxRB3::SetEntityForPrimitive()
 	m_primitive.SetEntity(this);
 }
 
-void BoxRB3::UpdateEntityPrimitive()
+void BoxRB3::UpdatePrimitives()
 {
-	m_primitive.m_center = m_center;
+	m_boundSphere.SetCenter(m_center);
+	m_boundBox.SetCenter(m_center);
 
+	m_primitive.SetCenter(m_center);
 	TODO("Update rot for primitive, otherwise visual will look off");
 }
 
-void BoxRB3::UpdateInput(float deltaTime)
+void BoxRB3::UpdateInput(float)
 {
 	InputSystem* input = InputSystem::GetInstance();
 	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_P)
@@ -81,7 +83,7 @@ void BoxRB3::UpdateInput(float deltaTime)
 		m_frozen = !m_frozen;
 }
 
-void BoxRB3::UpdateEntitiesTransforms()
+void BoxRB3::UpdateTransforms()
 {
 	m_entityTransform.SetLocalPosition(m_center);
 
@@ -103,6 +105,7 @@ void BoxRB3::Integrate(float deltaTime)
 	if (m_frozen)
 	{
 		// acc
+		m_lastAcc = m_linearAcceleration;
 		m_linearAcceleration = m_netforce * m_massData.m_invMass;
 		Vector3 angularAcc = m_inverseInertiaTensorWorld * m_torqueAcc;
 

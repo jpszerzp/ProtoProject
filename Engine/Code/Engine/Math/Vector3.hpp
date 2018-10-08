@@ -55,6 +55,7 @@ public:
 	static const Vector3 UP;
 	static const Vector3 GRAVITY;
 	static const Vector3 HIGH_GRAVITY;
+	static const Vector3 INVALID;
 };
 
 const Vector3 GetProjectedVector( const Vector3& vectorToProject, const Vector3& projectOnto );

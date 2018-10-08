@@ -20,13 +20,9 @@ Cube::Cube(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint,
 	// Set renderable
 	Material* material;
 	if (!multipass)
-	{
 		material = renderer->CreateOrGetMaterial(materialName);
-	}
 	else
-	{
 		material = renderer->CreateOrGetStagedMaterial(materialName);
-	}
 
 	Mesh* mesh = renderer->CreateOrGetMesh(meshName);
 	Transform transform = Transform(pos, rot, scale);
@@ -64,9 +60,8 @@ void Cube::Update(float deltaTime)
 	if (m_physDriven)
 	{
 		m_physEntity->Integrate(deltaTime);
-		m_physEntity->UpdateEntitiesTransforms();
-		m_physEntity->UpdateEntityPrimitive();
-		m_physEntity->UpdateBoundPrimitives();
+		m_physEntity->UpdateTransforms();
+		m_physEntity->UpdatePrimitives();
 
 		m_renderable->m_transform = m_physEntity->GetEntityTransform();
 	}

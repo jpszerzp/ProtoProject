@@ -39,7 +39,7 @@ const sNetAddress& Socket::GetAddr() const
 	return m_addr;
 }
 
-bool UDPSocket::Bind(const sNetAddress& saddr, uint16_t port_range /*= 0U */)
+bool UDPSocket::Bind(const sNetAddress& saddr, uint16_t)
 {
 	SOCKET my_sock = ::socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	ASSERT_OR_DIE(my_sock != INVALID_SOCKET, "UDP socket is invalid");
@@ -69,12 +69,12 @@ size_t UDPSocket::SendTo(const sNetAddress& saddr, const void* buffer, const siz
 	saddr.ToSockAddr((sockaddr*)&addr_storage, &addr_len);
 
 	SOCKET sock = (SOCKET)m_handle;
-	int sent = ::sendto(sock, (const char*)buffer, (int)byte_count, 0, (sockaddr*)&addr_storage, addr_len);
+	size_t sent = ::sendto(sock, (const char*)buffer, (int)byte_count, 0, (sockaddr*)&addr_storage, (int)addr_len);
 
-	if (sent > 0)
+	if (sent > 0U)
 	{
 		ASSERT_OR_DIE(sent == byte_count, "Send size not match");
-		return (size_t)sent;
+		return sent;
 	}
 	else
 	{
@@ -115,7 +115,7 @@ size_t UDPSocket::ReceiveFrom(sNetAddress* out_addr, void* out_buffer, const siz
 	}
 }
 
-bool IsFatalSocketError(int errCode)
+bool IsFatalSocketError(int)
 {
 	return false;
 }
@@ -187,7 +187,7 @@ void UDPTest::Update()
 
 	if (read > 0U)
 	{
-		uint max_bytes = min(read, 128);
+		uint max_bytes = (uint)min(read, 128);
 
 		uint string_size = max_bytes * 2U + 3U;
 		char* new_buff = new char[string_size];

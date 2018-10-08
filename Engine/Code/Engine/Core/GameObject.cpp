@@ -26,8 +26,8 @@ GameObject::~GameObject()
 	delete m_rightBasisMesh;
 	m_rightBasisMesh = nullptr;
 
-	delete m_physEntity;
-	m_physEntity = nullptr;
+	//delete m_physEntity;
+	//m_physEntity = nullptr;
 }
 
 void GameObject::UpdateBasis()
@@ -194,17 +194,12 @@ void GameObject::ToggleBoundBoxDebugDraw()
 /*
  * Entity driven movement of game object
  */
-void GameObject::EntityDriveTranslate(Vector3 translation)
+void GameObject::EntityDrivePosition(Vector3 translation)
 {
 	m_physEntity->Translate(translation);								// first update entity
 	m_renderable->m_transform = m_physEntity->GetEntityTransform();		// then drive gameobject
 }
 
-
-void GameObject::ObjectDrivePosition(Vector3 pos)
-{
-
-}
 
 Vector3 GameObject::GetWorldPosition()
 {

@@ -20,11 +20,6 @@ void Rigidbody3::InitializeRigid()
 	m_angularDamp = 0.f;
 }
 
-//void Rigidbody3::SetInverseInertiaTensor(const Matrix33& inertiaTensor)
-//{
-//	m_inverseInertiaTensor.SetInverse(inertiaTensor);
-//}
-
 
 void Rigidbody3::SetQuaternionIdentity()
 {
@@ -168,6 +163,7 @@ void Rigidbody3::Integrate(float deltaTime)
 	if (!m_frozen)
 	{
 		// acc
+		m_lastAcc = m_linearAcceleration;
 		m_linearAcceleration = m_netforce * m_massData.m_invMass;
 		Vector3 angularAcc = m_inverseInertiaTensorWorld * m_torqueAcc;
 

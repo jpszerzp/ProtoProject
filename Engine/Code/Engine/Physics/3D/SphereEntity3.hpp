@@ -5,18 +5,18 @@
 
 class SphereEntity3 : public Entity3
 {
-private:
+public:
 	Sphere3 m_primitive;
 
 public:
 	SphereEntity3(const Sphere3& primitive, eMoveStatus moveStat);
 	~SphereEntity3();
 
-	void UpdateEntityPrimitive() override;
+	void UpdatePrimitives() override;
 	void Render(Renderer* renderer) override;
 	void Translate(Vector3 translation) override;
 
-	const Sphere3& GetSpherePrimitive() const { return m_primitive; }
+	Sphere3 GetSpherePrimitive() { return m_primitive; };
 
 	void SetEntityForPrimitive() override;
 };

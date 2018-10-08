@@ -8,7 +8,7 @@
 #include "Engine/Core/ErrorWarningAssert.hpp"
 
 #define MAX_CONTACTS 200
-#define COHERENT_THRESHOLD -0.01f
+#define COHERENT_THRESHOLD 0.f
 
 enum eContactFeature
 {
@@ -48,6 +48,12 @@ public:
 
 	float m_restitution;
 
+	// transformation convenience properties
+	Matrix33 m_toWorld;
+	Vector3 m_closingVel;
+	float m_desiredVelDelta;
+	Vector3 m_relativePosWorld[2];
+
 public:
 	Contact3();
 	Contact3(Entity3* e1, Entity3* e2);
@@ -56,11 +62,30 @@ public:
 
 	float ComputeSeparatingVelocity() const;
 	void ResolveContact(float deltaTime);
-	//void ResolveContactNaive();		// navie: positional change only
-
-private:
 	void ResolveVelocity(float deltaTime);
 	void ResolvePenetration(float deltaTime);
+	void MakeContactCoord(Matrix33& contactToWorldRot);
+
+	// vel change
+	float GetVelPerImpulseContact();
+	float GetDeltaVel();
+	Vector3 ComputeContactImpulse();
+	Vector3 ComputeWorldImpulse();
+
+	// pos change
+	void SolveNonlinearProjection(
+		float angularInertia[2], float linearInertia[2],
+		float angularMove[2], float linearMove[2]);
+
+	void ApplyImpulse();
+	void ResolveVelocityCoherent(Vector3 linearChange[2], Vector3 angularChange[2]);
+	void ResolvePositionCoherent(Vector3 linearChange[2], Vector3 angularChange[2]);
+
+	// coherent
+	void PrepareInternal(float deltaTime);
+	void SwapEntities();
+	Vector3 ComputeLocalVelocity(int idx, Entity3* ent, float deltaTime);
+	void ComputeDesiredVelDeltaCoherent(float deltaTime);
 };
 
 /**
@@ -79,6 +104,8 @@ struct CollisionData3
 	void ClearCoherent();
 
 	bool HasAndUpdateContact(const Contact3& contact);
+	bool FeatureMatchAndUpdate(const Contact3& comparer, Contact3& comparee);
+	bool EntityMatchAndUpdate(const Contact3& comparer, Contact3& comparee);
 
 	std::vector<Contact3>& GetContacts() { return m_contacts; }
 };
@@ -92,45 +119,52 @@ public:
 	CollisionDetector();
 	~CollisionDetector();
 
+	// sphere vs sphere
 	static uint Sphere3VsSphere3(const Sphere3& s1, 
 		const Sphere3& s2, CollisionData3* data);
-	static uint Sphere3VsPlane3(const Sphere3& sph,
+
+	// sphere vs plane
+	static bool Sphere3VsPlane3Core(const Sphere3& sph,
+		const Plane& pl, Contact3& contact);
+	static uint Sphere3VsPlane3Single(const Sphere3& sph,
 		const Plane& pl, CollisionData3* data);
+	static uint Sphere3VsPlane3Coherent(const Sphere3& sph,
+		const Plane& pl, CollisionData3* data);
+
+	// sphere vs aabb3
 	static uint Sphere3VsAABB3(const Sphere3& sph,
 		const AABB3& aabb3, CollisionData3* data);
-	static uint AABB3VsPlane3(const AABB3& aabb,
-		const Plane& plane, CollisionData3* data);
+
+	// aabb3 vs plane
 	static uint AABB3VsPlane3Single(const AABB3& aabb,
 		const Plane& plane, CollisionData3* data);
+	static uint AABB3VsPlane3Coherent(const AABB3& aabb,
+		const Plane& plane, CollisionData3* data);
 
-	static uint AABB3VsAABB3(const AABB3& aabb3_1,
-		const AABB3& aabb3_2, CollisionData3* data);
+	// aabb3 vs aabb3
 	static uint AABB3VsAABB3Single(const AABB3& aabb3_1,
 		const AABB3& aabb3_2, CollisionData3* data);
-	//static uint NonCoherentProcessingAABB3VsAABB3(const AABB3& aabb3_1,
-	//	const AABB3& aabb3_2, CollisionData3* data);
-	//static uint CoherentProcessingAABB3VsAABB3(const AABB3& aabb_1,
-	//	const AABB3& aabb3_2, CollisionData3* data);
+	static uint AABB3VsAABB3Coherent(const AABB3& aabb3_1,
+		const AABB3& aabb3_2, CollisionData3* data);
 
+	// obb3 vs plane
 	static uint OBB3VsPlane3(const OBB3& obb,
 		const Plane& plane, CollisionData3* data);
+
+	// obb3 vs sphere3
 	static uint OBB3VsSphere3(const OBB3& obb,
 		const Sphere3& sphere, CollisionData3* data);
-	static uint OBB3VsOBB3Shallow(const OBB3& obb1,
+
+	// obb3 vs obb3: single and coherent do not share same core 
+	static uint OBB3VsOBB3Single(const OBB3& obb1,
 		const OBB3& obb2, CollisionData3* data);
-	static uint OBB3VsOBB3Deep(const OBB3& obb1,
+	static uint OBB3VsOBB3Coherent(const OBB3& obb1,
 		const OBB3& obb2, CollisionData3* data);
+
+	// obb3 vs point
 	static uint OBB3VsPoint(const OBB3& obb, const Vector3& p, Contact3& contact, bool reverse);
 	
 	// general entity detection
 	static uint Entity3VsEntity3(Entity3* e1, Entity3* e2, CollisionData3* data);
-
-	// TODO
-	//static void BoxAndPointPenetration(const AABB3& aabb, const Vector3& point, float* out_penetration);
-	//static void BoxAndEdgePenetration(const AABB3& aabb, const Vector3& edge, float* out_penetration);
-	//static void EdgeAndEdgePenetration(const Vector3& e1, const Vector3& e2, float* out_penetration);
-	//static uint BoxAndPointContact(const AABB3& aabb, const Vector3& point, CollisionData3* data);
-	//static uint BoxAndEdgeContact(const AABB3& aabb, const Vector3& edge, CollisionData3* data);
-	//static uint EdgeAndEdgeContact(const Vector3& edge1, const Vector3& edge2, CollisionData3* data);
 };
 

@@ -21,6 +21,11 @@ public:
 
 	float GetDeterminant() const;
 
+	void SetRight(Vector3 right);
+	void SetUp(Vector3 up);
+	void SetForward(Vector3 forward);
+	void SetBasis(Vector3 right, Vector3 up, Vector3 forward);
+
 	// inverse
 	Matrix33 Invert() const;
 	void SetInverse(const Matrix33& mat);
