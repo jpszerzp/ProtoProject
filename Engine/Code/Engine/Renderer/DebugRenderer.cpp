@@ -389,13 +389,9 @@ void DebugRenderTaskPoint::Update(float deltaTime)
 void DebugRenderTaskPoint::Render(Renderer* renderer)
 {
 	if (!m_2D)
-	{
 		renderer->SetCamera(g_3DCamera);
-	}
 	else
-	{
 		renderer->SetCamera(g_2DCamera);
-	}
 
 	m_debugObj->Render(renderer);
 }

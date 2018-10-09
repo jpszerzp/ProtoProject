@@ -24,7 +24,8 @@ public:
 	static Mesh* CreatePointImmediate(eVertexType type, Vector2 pos, Rgba color);
 	static Mesh* CreateLineImmediate(eVertexType type, const Vector3& startPos, const Vector3& endPos, const Rgba& color);
 	static Mesh* CreateQuad(eVertexType type);
-	static Mesh* CreateQuadImmediate(eVertexType type, Vector3& bl, Vector3& br, Vector3& tl, Vector3& tr, const Rgba& tint);
+	static Mesh* CreateQuadImmediate(eVertexType type, const Vector3& bl, const Vector3& br, 
+		const Vector3& tl, const Vector3& tr, const Rgba& tint);
 	static Mesh* CreateQuadTextured(eVertexType, Vector2 uvBL, Vector2 uvBR, Vector2 uvTL, Vector2 uvTR);
 	static Mesh* CreateQuadTexturedImmediate(eVertexType type, Vector3 drawmin, Vector3 up, Vector3 right, AABB2 glphybound, float cellHeight, float cellWidth);
 	static Mesh* CreatePolygonImmedidate(eVertexType type, const Vector2& bl, const Vector2& br, const Vector2& tl, const Vector2& tr, Rgba color);
@@ -35,6 +36,8 @@ public:
 		float cellHeight, float asepctScale, std::string text, eVertexType type);
 	static Mesh* CreateTerrainImmediateFromSurfacePatch(SurfacePatch* patch, eVertexType type);
 	static Mesh* CreateTerrainImmediateFromChunk(MapChunk* chunk, eVertexType type);
+	static Mesh* CreateTriangleImmediate(eVertexType type, const Rgba& color,
+		const Vector3& v1, const Vector3& v2, const Vector3& v3);
 
 	// 2D
 	static Mesh* CreateQuad2D(eVertexType type, Rgba color = Rgba::WHITE);

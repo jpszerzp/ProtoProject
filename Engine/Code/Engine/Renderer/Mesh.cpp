@@ -188,14 +188,15 @@ Mesh* Mesh::CreateQuadTextured(eVertexType type, Vector2 uvBL, Vector2 uvBR, Vec
 }
 
 
-Mesh* Mesh::CreateQuadImmediate(eVertexType type, Vector3& bl, Vector3& br, Vector3& tl, Vector3& tr, const Rgba& tint)
+Mesh* Mesh::CreateQuadImmediate(eVertexType type, const Vector3& bl, const Vector3& br, 
+	const Vector3& tl, const Vector3& tr, const Rgba& tint)
 {
 	MeshBuilder mb;
 
 	mb.Begin(DRAW_TRIANGLE, true);
 	mb.SetColor(tint);
 
-	mb.SetUV(Vector2(0.f, 0.f));
+	mb.SetUV(Vector2::ZERO);
 	uint idx = mb.PushVertex(bl);
 
 	mb.SetUV(Vector2(1.f, 0.f));
@@ -207,7 +208,7 @@ Mesh* Mesh::CreateQuadImmediate(eVertexType type, Vector3& bl, Vector3& br, Vect
 	mb.SetUV(Vector2(1.f, 1.f));
 	mb.PushVertex(tr);
 
-	mb.AddQuad(idx + 0, idx + 1, idx + 2, idx + 3);
+	mb.AddQuad(idx, idx + 1, idx + 2, idx + 3);
 
 	mb.End();
 
@@ -648,6 +649,32 @@ Mesh* Mesh::CreateTerrainImmediateFromChunk(MapChunk* chunk, eVertexType type)
 	return mesh;
 }
 
+
+Mesh* Mesh::CreateTriangleImmediate(eVertexType type, const Rgba& color,
+	const Vector3& v1, const Vector3& v2, const Vector3& v3)
+{
+	MeshBuilder mb;
+
+	mb.Begin(DRAW_TRIANGLE, true);
+	mb.SetColor(color);
+
+	mb.SetUV(Vector2::ZERO);
+	uint idx = mb.PushVertex(v1);
+
+	mb.SetUV(Vector2(1.f, 0.f));
+	mb.PushVertex(v2);
+
+	mb.SetUV(Vector2(0.f, 1.f));
+	mb.PushVertex(v3);
+
+	mb.AddTriangle(idx, idx + 1, idx + 2);
+
+	mb.End();
+
+	Mesh* mesh = mb.CreateMesh(type, DRAW_TRIANGLE);
+	mesh->m_immediate = true;
+	return mesh;
+}
 
 Mesh* Mesh::CreateQuad2D(eVertexType type, Rgba color /*= Rgba::WHITE*/)
 {

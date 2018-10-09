@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Engine/Math/QuickHull.hpp"
 #include "Engine/Physics/3D/CollisionDetection.hpp"
 #include "Engine/Physics/3D/ContactResolver.hpp"
 #include "Engine/Physics/3D/Rigidbody3.hpp"
@@ -97,4 +98,6 @@ public:
 	std::vector<BVHContact> m_bvhContacts;
 	BVHNode<BoundingSphere>* m_node;
 	int m_nodeCount = 0;			// temp: later will flush all GO into tree at once
+
+	QuickHull* m_qh = nullptr;
 };

@@ -514,6 +514,9 @@
     <ClCompile Include="Math\Line3.cpp">
       <Filter>General</Filter>
     </ClCompile>
+    <ClCompile Include="Math\QuickHull.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -891,5 +894,6 @@
     <ClInclude Include="Physics\3D\BoxRB3.hpp" />
     <ClInclude Include="Physics\3D\BoxEntity3.hpp" />
     <ClInclude Include="Math\Line3.hpp" />
+    <ClInclude Include="Math\QuickHull.hpp" />
   </ItemGroup>
 </Project>

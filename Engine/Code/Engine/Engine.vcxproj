@@ -328,6 +328,7 @@
     <ClCompile Include="Math\Plane.cpp" />
     <ClCompile Include="Math\Primitive3.cpp" />
     <ClCompile Include="Math\Quadtree.cpp" />
+    <ClCompile Include="Math\QuickHull.cpp" />
     <ClCompile Include="Math\RawNoise.cpp" />
     <ClCompile Include="Math\SmoothNoise.cpp" />
     <ClCompile Include="Math\Sphere3.cpp" />
@@ -487,6 +488,7 @@
     <ClInclude Include="Math\Plane.hpp" />
     <ClInclude Include="Math\Primitive3.hpp" />
     <ClInclude Include="Math\Quadtree.hpp" />
+    <ClInclude Include="Math\QuickHull.hpp" />
     <ClInclude Include="Math\RawNoise.hpp" />
     <ClInclude Include="Math\SmoothNoise.hpp" />
     <ClInclude Include="Math\Sphere3.hpp" />

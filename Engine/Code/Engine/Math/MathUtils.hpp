@@ -129,5 +129,8 @@ bool IsIdenticalVector3(Vector3 v1, Vector3 v2);
 // minkowski
 AABB2 MinkowskiAABBVsAABB(const AABB2& aabb1, const AABB2& aabb2);
 
-// more shape test
+// collisions
 bool IsPointInCircle(Vector2 pos, float r);
+float DistPointToEdge(const Vector3& pt, const Vector3& vert1, const Vector3& vert2);
+float DistPointToPlaneSigned(const Vector3 pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3);
+float DistPointToPlaneUnsigned(const Vector3 pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3);

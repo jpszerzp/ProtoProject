@@ -1221,3 +1221,32 @@ bool IsPointInCircle(Vector2 pos, float r)
 	return (pos.GetLength() <= r);
 }
 
+float DistPointToEdge(const Vector3& pt, const Vector3& vert1, const Vector3& vert2)
+{
+	Vector3 numerator = (pt - vert1).Cross(pt - vert2);
+	Vector3 denominator = vert2 - vert1;
+
+	float numeratorF = numerator.GetLength();
+	float denominatorF = denominator.GetLength();
+
+	return (numeratorF / denominatorF);
+}
+
+float DistPointToPlaneSigned(const Vector3 pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3)
+{
+	// use Hessian normal form, see http://mathworld.wolfram.com/Point-PlaneDistance.html
+	Vector3 norm_numerator = (vert2 - vert1).Cross(vert3 - vert1);
+	float norm_denom = norm_numerator.GetLength();
+	Vector3 unit_norm = norm_numerator / norm_denom;
+
+	// vert1/vert2/ver3 is fine here
+	float signed_dist = DotProduct(unit_norm, pt - vert1);
+	
+	return signed_dist;
+}
+
+float DistPointToPlaneUnsigned(const Vector3 pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3)
+{
+	return abs(DistPointToPlaneSigned(pt, vert1, vert2, vert3));
+}
+

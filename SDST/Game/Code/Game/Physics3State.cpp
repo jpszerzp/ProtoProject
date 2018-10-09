@@ -63,6 +63,8 @@ Physics3State::Physics3State()
 	m_g0 = InitializePhysSphere(Vector3(15.f, -1.5f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_KINEMATIC, BODY_PARTICLE);
 	m_g1 = InitializePhysSphere(Vector3(0.f, 40.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID);
 	m_g1->m_physEntity->SetFrozen(true);
+	Rigidbody3* rigid_g1 = static_cast<Rigidbody3*>(m_g1->GetEntity());
+	m_rigidRegistry->Register(rigid_g1, grg);
 
 	//////////////////////////////// For rigid spring ////////////////////////////////
 	// the rigid ball
@@ -158,6 +160,11 @@ Physics3State::Physics3State()
 	m_iterResolver = new ContactResolver(2);
 	m_allResolver = new ContactResolver();
 	m_coherentResolver = new ContactResolver(RESOLVE_COHERENT);
+
+	// quick hull
+	Vector3 qhMin = Vector3(-100.f, 10.f, 0.f);
+	Vector3 qhMax = Vector3(-50.f, 60.f, 50.f);
+	m_qh = new QuickHull(5, qhMin, qhMax);
 
 	// debug
 	DebugRenderSet3DCamera(m_camera);
@@ -319,10 +326,10 @@ Rod* Physics3State::SetupRod(float length, Point* p1, Point* p2)
 
 void Physics3State::Update(float deltaTime)
 {
-	m_broadPhase = g_broadphase;	// hacky...
-	UpdateInput(deltaTime);			// update input
-	UpdateGameobjects(deltaTime);	// update gameobjects
-	UpdateDebugDraw(deltaTime);		// update debug draw
+	m_broadPhase = g_broadphase;		// hacky...
+	UpdateInput(deltaTime);				// update input
+	UpdateGameobjects(deltaTime);		// update gameobjects
+	UpdateDebugDraw(deltaTime);			// update debug draw
 }
 
 void Physics3State::UpdateMouse(float deltaTime)
@@ -375,27 +382,27 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	}
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_A))
 	{
-		leftRight = -10.f;
+		leftRight = -50.f;
 	}
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_D))
 	{
-		leftRight = 10.f;
+		leftRight = 50.f;
 	}
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_W))
 	{
-		forwardBack = 10.f;
+		forwardBack = 50.f;
 	}
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_S))
 	{
-		forwardBack = -10.f;
+		forwardBack = -50.f;
 	}
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_Q))
 	{
-		upDown = 10.f;
+		upDown = 50.f;
 	}
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_E))
 	{
-		upDown = -10.f;
+		upDown = -50.f;
 	}
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_Z))
 	{
@@ -764,7 +771,8 @@ void Physics3State::UpdateCore()
 					Sphere3 sph = srb->GetSpherePrimitive();
 					Plane pl = qe->GetPlanePrimitive();
 
-					CollisionDetector::Sphere3VsPlane3Single(sph, pl, m_allResolver->GetCollisionData());
+					//CollisionDetector::Sphere3VsPlane3Single(sph, pl, m_allResolver->GetCollisionData());
+					CollisionDetector::Sphere3VsPlane3Coherent(sph, pl, m_allResolver->GetCollisionData());
 				}
 			}
 			else 
@@ -961,6 +969,8 @@ void Physics3State::Render(Renderer* renderer)
 {
 	renderer->SetCamera(m_camera);
 	renderer->ClearScreen(Rgba::BLACK);
+
+	m_qh->RenderHull(renderer);
 
 	RenderGameobjects(renderer);
 	m_forwardPath->RenderScene(m_sceneGraph);
