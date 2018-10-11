@@ -5,8 +5,8 @@
 
 #include <vector>
 
-#define COHERENT_POS_ITER 2
-#define COHERENT_VEL_ITER 2
+#define COHERENT_POS_ITER 1
+#define COHERENT_VEL_ITER 1
 #define COHERENT_POS_EPSILON 0
 #define COHERENT_VEL_EPSILON 0
 

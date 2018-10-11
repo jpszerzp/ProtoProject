@@ -38,42 +38,6 @@ Contact3::~Contact3()
 
 }
 
-/*
-void Contact3::ResolveContactNaive()
-{
-	// normal is toward first entity
-	GameObject* g1 = m_e1->GetGameobject();
-	GameObject* g2 = m_e2->GetGameobject();
-
-	// calculate proportions for entities in correcting positions
-	if (!m_e1->IsConst() && !m_e2->IsConst())
-	{
-		float mass1 = m_e1->GetMassData3().m_mass;
-		float mass2 = m_e2->GetMassData3().m_mass;
-		Vector3 correction1 = m_normal * (m_penetration * (mass2 / (mass1 + mass2)));
-		Vector3 correction2 = -m_normal * (m_penetration * (mass1 / (mass1 + mass2)));
-
-		// game object position changed, driven by entity
-		g1->EntityDriveTranslate(correction1);
-		g2->EntityDriveTranslate(correction2);
-	}
-	else if (m_e1->IsConst() && !m_e2->IsConst())
-	{
-		Vector3 correction2 = -m_normal * m_penetration;
-		g2->EntityDriveTranslate(correction2);
-	}
-	else if (!m_e1->IsConst() && m_e2->IsConst())
-	{
-		Vector3 correction1 = m_normal * m_penetration;
-		g1->EntityDriveTranslate(correction1);
-	}
-	else 
-	{
-		// no correction of positions if both entities are const
-
-	}
-}
-*/
 
 void Contact3::ResolveContact(float deltaTime)
 {
@@ -220,7 +184,7 @@ void Contact3::ResolveVelocityCoherent(Vector3 linearChange[2], Vector3 angularC
 	Rigidbody3* rigid1 = dynamic_cast<Rigidbody3*>(m_e1);
 	Vector3 impulse = ComputeWorldImpulse();
 
-	if (rigid1 != nullptr)
+	if (rigid1 != nullptr && !rigid1->IsEntityStatic() && !rigid1->IsEntityKinematic())
 	{
 		Vector3 linear = impulse * rigid1->GetMassData3().m_invMass;
 
@@ -235,9 +199,14 @@ void Contact3::ResolveVelocityCoherent(Vector3 linearChange[2], Vector3 angularC
 		linearChange[0] = linear;
 		angularChange[0] = rotation;
 	}
+	else
+	{
+		linearChange[0] = Vector3::ZERO;
+		angularChange[0] = Vector3::ZERO;
+	}
 
 	Rigidbody3* rigid2 = dynamic_cast<Rigidbody3*>(m_e2);
-	if (rigid2 != nullptr)
+	if (rigid2 != nullptr && !rigid2->IsEntityStatic() && !rigid2->IsEntityKinematic())
 	{
 		impulse *= -1.f;
 
@@ -253,19 +222,26 @@ void Contact3::ResolveVelocityCoherent(Vector3 linearChange[2], Vector3 angularC
 		linearChange[1] = linear;
 		angularChange[1] = rotation;
 	}
+	else
+	{
+		linearChange[1] = Vector3::ZERO;
+		angularChange[1] = Vector3::ZERO;
+	}
 }
 
 void Contact3::ResolvePositionCoherent(Vector3 linearChange[2], Vector3 angularChange[2])
 {
+	TODO("Can I NOT assume rigidbody here?");
 	Rigidbody3* rigid1 = dynamic_cast<Rigidbody3*>(m_e1);
 	Rigidbody3* rigid2 = dynamic_cast<Rigidbody3*>(m_e2);
 
 	// apply position change
 	float angularInertia[2]; float linearInertia[2];
-	float angularMove[2]; float linearMove[2];
+	float angularMove[2];	 float linearMove[2];
 
 	SolveNonlinearProjection(angularInertia, linearInertia, angularMove, linearMove);
 
+	// if static, all change arrays have Vector3::ZERO
 	if (rigid1 != nullptr)
 	{
 		const Vector3& pos1 = rigid1->GetEntityCenter();
@@ -278,8 +254,12 @@ void Contact3::ResolvePositionCoherent(Vector3 linearChange[2], Vector3 angularC
 		// angular
 		Vector3 impulsiveTorque = relPos1.Cross(m_normal);
 		Vector3 impulsePerMove = rigid1->m_inverseInertiaTensorWorld * impulsiveTorque;
-		Vector3 rotationPerMove = impulsePerMove * (1.f / angularInertia[0]);
-		Vector3 rotation = rotationPerMove * angularMove[0];		// angular change
+		Vector3 rotation = Vector3::ZERO;
+		if (angularInertia[0] != 0.f)
+		{
+			Vector3 rotationPerMove = impulsePerMove * (1.f / angularInertia[0]);
+			rotation = rotationPerMove * angularMove[0];		// angular change
+		}
 		Quaternion q = rigid1->GetQuaternion();
 		q.AddScaledVector(rotation, 1.f);
 		rigid1->SetQuaternion(q);		// auto normalized
@@ -300,8 +280,12 @@ void Contact3::ResolvePositionCoherent(Vector3 linearChange[2], Vector3 angularC
 		// angular
 		Vector3 impulsiveTorque = relPos2.Cross(m_normal);
 		Vector3 impulsePerMove = rigid2->m_inverseInertiaTensorWorld * impulsiveTorque;
-		Vector3 rotationPerMove = impulsePerMove * (1.f / angularInertia[1]);
-		Vector3 rotation = rotationPerMove * angularMove[1];
+		Vector3 rotation = Vector3::ZERO;
+		if (angularInertia[1] != 0.f)
+		{
+			Vector3 rotationPerMove = impulsePerMove * (1.f / angularInertia[1]);
+			rotation = rotationPerMove * angularMove[1];		// angular change
+		}
 		Quaternion q = rigid2->GetQuaternion();
 		q.AddScaledVector(rotation, 1.f);
 		rigid2->SetQuaternion(q);		// auto normalized
@@ -433,13 +417,30 @@ void Contact3::SolveNonlinearProjection(
 	}
 
 	float contact_ii = 1.f / totalInertia;
+	if (!rigid1->IsEntityStatic())
+	{
+		linearMove[0] = m_penetration * linearInertia[0] * contact_ii;
+		angularMove[0] = m_penetration * angularInertia[0] * contact_ii;
+	}
+	else
+	{
+		linearMove[0] = 0.f;
+		angularMove[0] = 0.f;
+	}
 
-	linearMove[0] = m_penetration * linearInertia[0] * contact_ii;
-	linearMove[1] = -m_penetration * linearInertia[1] * contact_ii;
-	angularMove[0] = m_penetration * angularInertia[0] * contact_ii;
-	angularMove[1] = -m_penetration * angularInertia[1] * contact_ii;
+	if (!rigid2->IsEntityStatic())
+	{
+		linearMove[1] = -m_penetration * linearInertia[1] * contact_ii;
+		angularMove[1] = -m_penetration * angularInertia[1] * contact_ii;
+	}
+	else
+	{
+		linearMove[1] = 0.f;
+		angularMove[1] = 0.f;
+	}
 
 	// limit angular movement 
+	// does not affect static objects
 	const float angularLimit = .2f;
 	float limit1 = angularLimit * relPos1.GetLength();
 	if (abs(angularMove[0]) >= limit1)
@@ -523,7 +524,6 @@ void Contact3::ResolveVelocity(float deltaTime)
 	float impulse_amount = delta_vel / total_inv_mass;
 	// Find the amount of impulse per unit of inverse mass.
 	Vector3 impulse_per_inv_mass = m_normal * impulse_amount;
-
 
 	// Apply impulses: they are applied in the direction of the contact,
 	// and are proportional to the inverse mass.
@@ -702,6 +702,7 @@ bool CollisionDetector::Sphere3VsPlane3Core(const Sphere3& sph, const Plane& pl,
 	Vector3 planeNormal = pl.GetNormal().GetNormalized();			// guarantee to be normalized
 	float sphereToOriginAlongPlaneDir = DotProduct(planeNormal, spherePos);
 	float signedDistToPlane = sphereToOriginAlongPlaneDir - pl.GetOffset();
+	TODO("All core updates should allow a penetration value smaller than threshold, see line 11 CollisionDetection.hpp");
 	if (abs(signedDistToPlane) >= sphereRad)
 		return false;
 
@@ -719,7 +720,7 @@ bool CollisionDetector::Sphere3VsPlane3Core(const Sphere3& sph, const Plane& pl,
 
 	Vector3 contactPoint = spherePos - planeNormal * signedDistToPlane;
 	Contact3 theContact = Contact3(sph.GetEntity(), pl.GetEntity(),
-		usedNormal, contactPoint, penetration);
+		usedNormal.GetNormalized(), contactPoint, penetration);
 	contact = theContact;
 
 	return true;

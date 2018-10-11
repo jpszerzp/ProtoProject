@@ -10,6 +10,7 @@
 #include "Engine/Physics/3D/CubeEntity3.hpp"
 #include "Engine/Physics/3D/BoxEntity3.hpp"
 #include "Engine/Physics/3D/BoxRB3.hpp"
+#include "Engine/Physics/3D/QuadRB3.hpp"
 #include <algorithm>
 
 bool IsGameobjectDead(GameObject* go) { return go->m_dead; }
@@ -60,23 +61,24 @@ Physics3State::Physics3State()
 	GravityRigidForceGenerator* grg = new GravityRigidForceGenerator(Vector3::GRAVITY);
 
 	// or, initialize into other shapes (cube, etc)
-	m_g0 = InitializePhysSphere(Vector3(15.f, -1.5f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_KINEMATIC, BODY_PARTICLE);
+	//m_g0 = InitializePhysSphere(Vector3(15.f, -1.5f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_KINEMATIC, BODY_PARTICLE);
 	m_g1 = InitializePhysSphere(Vector3(0.f, 40.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID);
 	m_g1->m_physEntity->SetFrozen(true);
 	Rigidbody3* rigid_g1 = static_cast<Rigidbody3*>(m_g1->GetEntity());
 	m_rigidRegistry->Register(rigid_g1, grg);
 
+	/*
 	//////////////////////////////// For rigid spring ////////////////////////////////
 	// the rigid ball
 	m_r1 = InitializePhysSphere(
-		Vector3(30.f, 30.f, 5.f),
+		Vector3(30.f, 40.f, 5.f),
 		Vector3::ZERO, Vector3::ONE, Rgba::MEGENTA,
 		MOVE_DYNAMIC, BODY_RIGID);
 	m_r1->m_physEntity->SetFrozen(true);
 
 	// anchor
 	Point* theAnchor = InitializePhysPoint(
-		Vector3(30.f, 33.f, 5.f),
+		Vector3(30.f, 44.f, 5.f),
 		Vector3::ZERO, 10.f, Rgba::MEGENTA,
 		MOVE_STATIC, BODY_PARTICLE);
 
@@ -90,7 +92,7 @@ Physics3State::Physics3State()
 	// force generator
 	Vector3 attachLocal = Vector3::ZERO;
 	Sphere* theSphere = static_cast<Sphere*>(m_r1);
-	ProjectPlaneToSphere(Vector2(.1f, .1f), theSphere->GetRadius(), attachLocal);
+	ProjectPlaneToSphere(Vector2(.01f, .01f), theSphere->GetRadius(), attachLocal);
 	AnchorSpringRigidForceGenerator* asrfg = new AnchorSpringRigidForceGenerator(
 		theAnchor->GetWorldPosition(), other_rigid, attachLocal, 3.f, 5.f);
 
@@ -98,11 +100,14 @@ Physics3State::Physics3State()
 	m_rigidRegistry->Register(other_rigid, asrfg);
 	m_rigidRegistry->Register(other_rigid, grg);
 	//////////////////////////////////////////////////////////////////////////////////
+	*/
 
-	//InitializePhysCube(Vector3(0.f, 0.f, 2.f), Vector3::ZERO, Vector3::ONE, Rgba::BLUE, MOVE_KINEMATIC, BODY_PARTICLE);
-	m_g2 = InitializePhysQuad(Vector3(20.f, -2.f, 0.f), Vector3(90.f, 0.f, 0.f), Vector3(200.f, 200.f, 1.f), Rgba::GREEN, MOVE_STATIC, BODY_PARTICLE);
-	m_g3 = InitializePhysPoint(Vector3(25.f, 0.f, 0.f), Vector3::ZERO, 10.f, Rgba::WHITE, MOVE_STATIC, BODY_PARTICLE);
+	//InitializePhysQuad(Vector3(0.f, 20.f, 0.f), Vector3(90.f, 0.f, -45.f), Vector3(20.f, 20.f, 1.f), Rgba::BLUE, MOVE_STATIC, BODY_PARTICLE);
+	InitializePhysQuad(Vector3(0.f, 20.f, 0.f), Vector3(90.f, 0.f, 0.f), Vector3(20.f, 20.f, 1.f), Rgba::GREEN, MOVE_STATIC, BODY_RIGID);
+	//m_g2 = InitializePhysQuad(Vector3(20.f, -2.f, 0.f), Vector3(90.f, 0.f, 0.f), Vector3(800.f, 800.f, 1.f), Rgba::GREEN, MOVE_STATIC, BODY_PARTICLE);
+	//m_g3 = InitializePhysPoint(Vector3(25.f, 0.f, 0.f), Vector3::ZERO, 10.f, Rgba::WHITE, MOVE_STATIC, BODY_PARTICLE);
 	
+	/*
 	// more customized game objects
 	m_ballistics = SetupBallistics(ARTILLERY, Vector3(26.f, 0.f, 0.f), true, Rgba::GREEN);
 	SetupBallistics(PISTOL, Vector3(27.f, 0.f, 0.f), true, Rgba::WHITE);
@@ -112,7 +117,9 @@ Physics3State::Physics3State()
 
 	// generate one particle for firework
 	SetupFireworks(5.f, Vector3(20.f, 0.f, 5.f), Vector3::ZERO, Vector3(0.f, 4.f, 0.f), Vector3(0.f, 4.f, 0.f), false);
+	*/
 
+	/*
 	// points for springs
 	Point* sp_point_0 = InitializePhysPoint(Vector3(20.f, 10.f, 5.f), Vector3::ZERO, 10.f, Rgba::RED, MOVE_DYNAMIC, BODY_PARTICLE);
 	Point* sp_point_1 = InitializePhysPoint(Vector3(20.f, 5.f, 5.f), Vector3::ZERO, 10.f, Rgba::CYAN, MOVE_DYNAMIC, BODY_PARTICLE);
@@ -135,7 +142,9 @@ Physics3State::Physics3State()
 	Point* rod_point_1 = InitializePhysPoint(Vector3(5.f, 8.f, 5.f), Vector3::ZERO, 10.f, Rgba::GREEN, MOVE_DYNAMIC, BODY_PARTICLE);
 	float dist = (rod_point_0->GetWorldPosition() - rod_point_1->GetWorldPosition()).GetLength();
 	m_rod = SetupRod(dist, rod_point_0, rod_point_1);
+	*/
 
+	/*
 	// verlet
 	Ballistics* verlet_basic_ballistics = SetupBallistics(FREEFALL, Vector3(27.f, 0.f, -.5f), true, Rgba::MEGENTA);
 	verlet_basic_ballistics->m_physEntity->SetVerlet(true);
@@ -145,12 +154,7 @@ Physics3State::Physics3State()
 	Ballistics* verlet_vel_ballistics = SetupBallistics(FREEFALL, Vector3(28.f, 0.f, -.5f), true, Rgba::PINK);
 	verlet_vel_ballistics->m_physEntity->SetVerlet(true);
 	verlet_vel_ballistics->m_physEntity->SetVerletScheme(VELOCITY_VERLET);
-
-	//// rigid bodies and force registry
-	//m_r0 = InitializePhysSphere(Vector3(5.f, 0.f, 5.f), Vector3::ZERO, Vector3::ONE, Rgba::GREEN, MOVE_DYNAMIC, BODY_RIGID);
-	//m_r0->m_physEntity->SetFrozen(true);
-	//Rigidbody3* body = dynamic_cast<Rigidbody3*>(m_r0->m_physEntity);
-	//m_rigidRegistry->Register(body, grg);
+	*/
 
 	m_g4 = InitializePhysBox(Vector3(25.f, 0.f, 10.f), Vector3(45.f), Vector3(1.f), Rgba::CYAN, MOVE_KINEMATIC, BODY_PARTICLE);
 	m_g5 = InitializePhysBox(Vector3(30.f, 0.f, 10.f), 
@@ -173,9 +177,6 @@ Physics3State::Physics3State()
 
 Physics3State::~Physics3State()
 {
-	//delete m_collisionData;
-	//m_collisionData = nullptr;
-
 	m_spheres.clear();
 	m_cubes.clear();
 	m_quads.clear();
@@ -228,7 +229,8 @@ Quad* Physics3State::InitializePhysQuad(Vector3 pos, Vector3 rot, Vector3 scale,
 	return q;
 }
 
-Box* Physics3State::InitializePhysBox(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint, eMoveStatus moveStat, eBodyIdentity bid)
+Box* Physics3State::InitializePhysBox(Vector3 pos, Vector3 rot, Vector3 scale,
+	Rgba tint, eMoveStatus moveStat, eBodyIdentity bid)
 {
 	Box* b = new Box(pos, rot, scale, tint, "cube_pcu", "default", moveStat, bid);
 	b->m_physDriven = true;
@@ -526,26 +528,26 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	}
 
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_UP_ARROW))
-		m_g0->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, 5.f));
-		//m_g5->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, 5.f));
+		//m_g0->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, 5.f));
+		m_g5->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, 5.f));
 	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_DOWN_ARROW))
-		m_g0->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, -5.f));
-		//m_g5->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, -5.f));
+		//m_g0->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, -5.f));
+		m_g5->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, -5.f));
 	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_LEFT_ARROW))
-		m_g0->GetEntity()->SetLinearVelocity(Vector3(-5.f, 0.f, 0.f));
-		//m_g5->GetEntity()->SetLinearVelocity(Vector3(-5.f, 0.f, 0.f));
+		//m_g0->GetEntity()->SetLinearVelocity(Vector3(-5.f, 0.f, 0.f));
+		m_g5->GetEntity()->SetLinearVelocity(Vector3(-5.f, 0.f, 0.f));
 	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_RIGHT_ARROW))
-		m_g0->GetEntity()->SetLinearVelocity(Vector3(5.f, 0.f, 0.f));
-		//m_g5->GetEntity()->SetLinearVelocity(Vector3(5.f, 0.f, 0.f));
+		//m_g0->GetEntity()->SetLinearVelocity(Vector3(5.f, 0.f, 0.f));
+		m_g5->GetEntity()->SetLinearVelocity(Vector3(5.f, 0.f, 0.f));
 	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEUP))
-		m_g0->GetEntity()->SetLinearVelocity(Vector3(0.f, 5.f, 0.f));
-		//m_g5->GetEntity()->SetLinearVelocity(Vector3(0.f, 5.f, 0.f));
+		//m_g0->GetEntity()->SetLinearVelocity(Vector3(0.f, 5.f, 0.f));
+		m_g5->GetEntity()->SetLinearVelocity(Vector3(0.f, 5.f, 0.f));
 	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEDOWN))
-		m_g0->GetEntity()->SetLinearVelocity(Vector3(0.f, -5.f, 0.f));
-		//m_g5->GetEntity()->SetLinearVelocity(Vector3(0.f, -5.f, 0.f));
+		//m_g0->GetEntity()->SetLinearVelocity(Vector3(0.f, -5.f, 0.f));
+		m_g5->GetEntity()->SetLinearVelocity(Vector3(0.f, -5.f, 0.f));
 	else
-		m_g0->GetEntity()->SetLinearVelocity(Vector3::ZERO);
-		//m_g5->GetEntity()->SetLinearVelocity(Vector3::ZERO);
+		//m_g0->GetEntity()->SetLinearVelocity(Vector3::ZERO);
+		m_g5->GetEntity()->SetLinearVelocity(Vector3::ZERO);
 
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_I))
 		//m_g1->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, 5.f));
@@ -627,7 +629,7 @@ void Physics3State::UpdateDebugDraw(float deltaTime)
 
 		Vector3 point = contact.m_point;
 		Vector3 end = point + contact.m_normal * contact.m_penetration;
-		DebugRenderLine(0.f, point, end, 5.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
+		DebugRenderLine(0.1f, point, end, 5.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
 	}
 }
 
@@ -666,7 +668,7 @@ void Physics3State::UpdateContactGeneration()
 
 		///////////////////////////////////////////// Fill Resolver ////////////////////////////////////////////
 		// hard constraints use iterative solver
-		m_rod->FillContact(m_iterResolver->GetCollisionData()->m_contacts);
+		//m_rod->FillContact(m_iterResolver->GetCollisionData()->m_contacts);
 
 		UpdateCore();
 	}
@@ -771,8 +773,17 @@ void Physics3State::UpdateCore()
 					Sphere3 sph = srb->GetSpherePrimitive();
 					Plane pl = qe->GetPlanePrimitive();
 
-					//CollisionDetector::Sphere3VsPlane3Single(sph, pl, m_allResolver->GetCollisionData());
 					CollisionDetector::Sphere3VsPlane3Coherent(sph, pl, m_allResolver->GetCollisionData());
+				}
+				else 
+				{
+					SphereRB3* srb = dynamic_cast<SphereRB3*>(sphere->m_physEntity);
+					QuadRB3* qrb = dynamic_cast<QuadRB3*>(quad->m_physEntity);
+
+					Sphere3 sph = srb->GetSpherePrimitive();
+					Plane pl = qrb->GetPlanePrimitive();
+
+					CollisionDetector::Sphere3VsPlane3Coherent(sph, pl, m_coherentResolver->GetCollisionData());
 				}
 			}
 			else 
@@ -784,6 +795,16 @@ void Physics3State::UpdateCore()
 
 					Sphere3 sph = se->GetSpherePrimitive();
 					Plane pl = qe->GetPlanePrimitive();
+
+					CollisionDetector::Sphere3VsPlane3Single(sph, pl, m_allResolver->GetCollisionData());
+				}
+				else 
+				{
+					SphereEntity3* se = dynamic_cast<SphereEntity3*>(sphere->m_physEntity);
+					QuadRB3* qrb = dynamic_cast<QuadRB3*>(quad->m_physEntity);
+
+					Sphere3 sph = se->GetSpherePrimitive();
+					Plane pl = qrb->GetPlanePrimitive();
 
 					CollisionDetector::Sphere3VsPlane3Single(sph, pl, m_allResolver->GetCollisionData());
 				}
@@ -864,7 +885,8 @@ void Physics3State::UpdateCore()
 					OBB3 obb1 = be1->GetBoxPrimitive();
 					OBB3 obb2 = be2->GetBoxPrimitive();
 
-					CollisionDetector::OBB3VsOBB3Single(obb1, obb2, m_allResolver->GetCollisionData());
+					//CollisionDetector::OBB3VsOBB3Single(obb1, obb2, m_allResolver->GetCollisionData());
+					CollisionDetector::OBB3VsOBB3Coherent(obb1, obb2, m_coherentResolver->GetCollisionData());
 				}
 				else
 				{
@@ -875,6 +897,7 @@ void Physics3State::UpdateCore()
 					OBB3 obb2 = brb->GetBoxPrimitive();
 
 					CollisionDetector::OBB3VsOBB3Single(obb1, obb2, m_allResolver->GetCollisionData());
+					//CollisionDetector::OBB3VsOBB3Coherent(obb1, obb2, m_coherentResolver->GetCollisionData());
 				}
 			}
 			else
@@ -888,6 +911,7 @@ void Physics3State::UpdateCore()
 					OBB3 obb2 = be->GetBoxPrimitive();
 
 					CollisionDetector::OBB3VsOBB3Single(obb1, obb2, m_allResolver->GetCollisionData());
+					//CollisionDetector::OBB3VsOBB3Coherent(obb1, obb2, m_coherentResolver->GetCollisionData());
 				}
 				else
 				{
@@ -897,7 +921,8 @@ void Physics3State::UpdateCore()
 					OBB3 obb1 = brb1->GetBoxPrimitive();
 					OBB3 obb2 = brb2->GetBoxPrimitive();
 					
-					CollisionDetector::OBB3VsOBB3Single(obb1, obb2, m_allResolver->GetCollisionData());
+					//CollisionDetector::OBB3VsOBB3Single(obb1, obb2, m_allResolver->GetCollisionData());
+					CollisionDetector::OBB3VsOBB3Coherent(obb1, obb2, m_coherentResolver->GetCollisionData());
 				}
 			}
 		}

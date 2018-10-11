@@ -360,6 +360,7 @@
     <ClCompile Include="Physics\3D\PointEntity3.cpp" />
     <ClCompile Include="Physics\3D\PointRB3.cpp" />
     <ClCompile Include="Physics\3D\QuadEntity3.cpp" />
+    <ClCompile Include="Physics\3D\QuadRB3.cpp" />
     <ClCompile Include="Physics\3D\Rigidbody3.cpp" />
     <ClCompile Include="Physics\3D\RigidForceGenerator.cpp" />
     <ClCompile Include="Physics\3D\SphereEntity3.cpp" />
@@ -520,6 +521,7 @@
     <ClInclude Include="Physics\3D\PointEntity3.hpp" />
     <ClInclude Include="Physics\3D\PointRB3.hpp" />
     <ClInclude Include="Physics\3D\QuadEntity3.hpp" />
+    <ClInclude Include="Physics\3D\QuadRB3.hpp" />
     <ClInclude Include="Physics\3D\Rigidbody3.hpp" />
     <ClInclude Include="Physics\3D\RigidForceGenerator.hpp" />
     <ClInclude Include="Physics\3D\SphereEntity3.hpp" />

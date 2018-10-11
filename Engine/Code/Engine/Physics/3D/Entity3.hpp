@@ -125,13 +125,13 @@ public:
 	Transform GetEntityTransform() const { return m_entityTransform; }
 	GameObject* GetGameobject() const { return m_goRef; }
 	MassData3 GetMassData3() const { return m_massData; }
-	float GetMass3() const { return GetMassData3().m_mass; }
+	float GetMass3() const { return m_massData.m_mass; }
 	Vector3 GetLinearVelocity() const { return m_linearVelocity; }
 	Vector3 GetLinearAcceleration() const { return m_linearAcceleration; }
 	eMoveStatus GetEntityMoveStatus() const { return m_moveStatus; }
-	bool IsEntityStatic() const { return (GetEntityMoveStatus() == MOVE_STATIC); }
-	bool IsEntityKinematic() const { return (GetEntityMoveStatus() == MOVE_KINEMATIC); }
-	bool IsEntityDynamic() const { return (GetEntityMoveStatus() == MOVE_DYNAMIC); }
+	bool IsEntityStatic() const { return (m_moveStatus == MOVE_STATIC); }
+	bool IsEntityKinematic() const { return (m_moveStatus == MOVE_KINEMATIC); }
+	bool IsEntityDynamic() const { return (m_moveStatus == MOVE_DYNAMIC); }
 	bool IsFrozen() const { return m_frozen; }
 	eBodyIdentity GetEntityBodyID() const { return m_bodyID; }
 	BoundingSphere GetBoundingSphere() const { return m_boundSphere; }

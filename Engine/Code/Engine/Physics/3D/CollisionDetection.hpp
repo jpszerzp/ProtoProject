@@ -8,7 +8,8 @@
 #include "Engine/Core/ErrorWarningAssert.hpp"
 
 #define MAX_CONTACTS 200
-#define COHERENT_THRESHOLD 0.f
+TODO("This threshold should have negative value");
+#define COHERENT_THRESHOLD 0.05f
 
 enum eContactFeature
 {

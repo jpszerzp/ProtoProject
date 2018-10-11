@@ -93,7 +93,7 @@ void BoxRB3::UpdateTransforms()
 	Vector3 euler = Matrix44::DecomposeMatrixIntoEuler(transMat);
 	m_entityTransform.SetLocalRotation(euler);
 
-	// assume scale is unchanged
+	TODO("Assume scale unchanged. Safe?");
 
 	m_boundSphere.m_transform.SetLocalPosition(m_center);
 }

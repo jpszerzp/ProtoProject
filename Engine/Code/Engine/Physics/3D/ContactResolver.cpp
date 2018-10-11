@@ -3,12 +3,14 @@
 ContactResolver::ContactResolver(uint iterations)
 	: m_iterations(iterations)
 {
+	// assuming iterative resolver in this case
 	m_scheme = RESOLVE_ITERATIVE;
 	m_collision = new CollisionData3(MAX_CONTACTS);
 }
 
 ContactResolver::ContactResolver()
 {
+	// by default, all resolver
 	m_iterations = 0;
 	m_iterationsUsed = 0;
 	m_scheme = RESOLVE_ALL;
@@ -19,6 +21,7 @@ ContactResolver::ContactResolver()
 ContactResolver::ContactResolver(eResolveScheme scheme)
 	: m_scheme(scheme)
 {
+	// intialize requested resolver
 	m_iterations = 0;
 	m_iterationsUsed = 0;
 	m_collision = new CollisionData3(MAX_CONTACTS);
@@ -71,10 +74,9 @@ void ContactResolver::ResolveContactsAll(float deltaTime)
 	}
 }
 
-void ContactResolver::ResolveContactsCoherent(float)
+void ContactResolver::ResolveContactsCoherent(float deltaTime)
 {
-	/*
-	if (!m_collision->m_contacts.empty())
+	if (m_collision->m_contacts.empty())
 		return;
 
 	// prepare internal data for each contact
@@ -84,8 +86,7 @@ void ContactResolver::ResolveContactsCoherent(float)
 	ResolvePositionsCoherent(deltaTime);
 
 	// resolve velocity
-	ResolveVelocityCoherent(deltaTime);
-	*/
+	//ResolveVelocityCoherent(deltaTime);
 }
 
 void ContactResolver::PrepareContactsCoherent(float deltaTime)
@@ -127,11 +128,12 @@ void ContactResolver::ResolvePositionsCoherent(float)
 		Contact3& maxContact = m_collision->m_contacts[idx];
 		maxContact.ResolvePositionCoherent(linearChange, angularChange);
 
+		/*
+		// other contacts may be reordered, update all
 		for (i = 0; i < numContacts; ++i)
 		{
 			Contact3& thisContact = m_collision->m_contacts[i];
 
-			// other contacts may be reordered, update all
 			Entity3* ent1 = thisContact.m_e1;
 			Entity3* ent2 = thisContact.m_e2;
 
@@ -173,6 +175,7 @@ void ContactResolver::ResolvePositionsCoherent(float)
 				}
 			}
 		}
+		*/
 
 		currentIter++;
 	}
@@ -206,6 +209,8 @@ void ContactResolver::ResolveVelocityCoherent(float deltaTime)
 		Contact3& maxContact = m_collision->m_contacts[idx];
 		maxContact.ResolveVelocityCoherent(linearChange, angularChange);
 
+		/*
+		TODO("Need to consider the case where thisContact IS maxContact?");
 		for (uint i = 0; i < numContacts; ++i)
 		{
 			Contact3& thisContact = m_collision->m_contacts[i];
@@ -259,6 +264,7 @@ void ContactResolver::ResolveVelocityCoherent(float deltaTime)
 				}
 			}
 		}
+		*/
 
 		iter++;
 	}

@@ -4,6 +4,7 @@
 #include "Engine/Math/MathUtils.hpp"
 #include "Engine/Math/Plane.hpp"
 #include "Engine/Physics/3D/QuadEntity3.hpp"
+#include "Engine/Physics/3D/QuadRB3.hpp"
 
 Quad::Quad()
 {
@@ -41,7 +42,8 @@ Quad::Quad(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint, std::string meshN
 	Plane plane = Plane(worldForward, offset);
 	if (bid == BODY_PARTICLE)
 		m_physEntity = new QuadEntity3(plane, moveStat, pos, rot, scale);
-	TODO("quad rigid body");
+	else
+		m_physEntity = new QuadRB3(4.9f, plane, pos, rot, scale, moveStat);
 	m_physEntity->SetEntityForPrimitive();
 }
 
@@ -75,7 +77,8 @@ Quad::Quad(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint, std::string meshN
 	Plane plane = Plane(worldForward, offset);
 	if (bid == BODY_PARTICLE)
 		m_physEntity = new QuadEntity3(plane, moveStat, pos, rot, scale);
-	TODO("quad rigid body");
+	else
+		m_physEntity = new QuadRB3(4.9f, plane, pos, rot, scale, moveStat);
 	m_physEntity->SetEntityForPrimitive();
 }
 
@@ -91,11 +94,14 @@ void Quad::Update(float deltaTime)
 {
 	if (m_physDriven)
 	{
-		m_physEntity->Integrate(deltaTime);
-		m_physEntity->UpdateTransforms();
-		m_physEntity->UpdatePrimitives();
+		if (m_physEntity->GetEntityMoveStatus() != MOVE_STATIC)
+		{
+			m_physEntity->Integrate(deltaTime);
+			m_physEntity->UpdateTransforms();
+			m_physEntity->UpdatePrimitives();
 
-		m_renderable->m_transform = m_physEntity->GetEntityTransform();
+			m_renderable->m_transform = m_physEntity->GetEntityTransform();
+		}
 	}
 
 	UpdateBasis();
