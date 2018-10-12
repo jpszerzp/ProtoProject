@@ -10,6 +10,7 @@
 #include "Engine/Net/TCPSocket.hpp"
 #include "Engine/Net/RemoteCommandService.hpp"
 #include "Engine/Net/Socket.hpp"
+#include "Engine/Math/QuickHull.hpp"
 
 #include <limits.h>
 #include <stdexcept>      // std::invalid_argument
@@ -803,6 +804,24 @@ void BroadPhaseCommand(Command& cmd)
 		ConsolePrintfUnit(Rgba::RED, "Unknown arg!");
 }
 
+
+void QHNormalDrawCommand(Command& cmd)
+{
+	std::string subStr = cmd.GetNextString();
+
+	if (subStr == "true")
+	{
+		g_hull->CreateNormalMeshes();
+		ConsolePrintfUnit(Rgba::GREEN, "QH normal meshes generated!");
+	}
+	else if (subStr == "false")
+	{
+		
+		g_hull->FlushNormalMeshes();
+		ConsolePrintfUnit(Rgba::YELLOW, "QH normal meshes flushed!");
+	}
+}
+
 void EncounterCommand(Command&)
 {
 	g_rcs->m_echo = 2;
@@ -937,9 +956,10 @@ void CommandStartup()
 	CommandRegister("udp_start", UDPStartCommand, "{}", "Starting UDP test");
 	CommandRegister("udp_stop", UDPStopCommand, "{}", "Stopping UDP test");
 	CommandRegister("udp_send", UDPSendCommand, "{}", "Sending with UDP");
-
+	
 	// physics
 	CommandRegister("broadphase", BroadPhaseCommand, "{bool}", "Turn on/off broadphase");
+	CommandRegister("qh_draw_normal", QHNormalDrawCommand, "{true}", "Draw face normal of a convex hull");
 }
 
 

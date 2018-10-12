@@ -49,6 +49,7 @@ public:
 	static const Rgba MEGENTA_HALF_OPACITY;
 };
 
+const Rgba GetRandomColor();
 const Rgba Interpolate( const Rgba& start, const Rgba& end, float fractionTowardEnd );
 Vector3 RGBToHSL(Vector3 rgb);
 Vector3 HSLToRGB(Vector3 hsl);

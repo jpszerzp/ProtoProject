@@ -1321,7 +1321,7 @@ void Renderer::Draw(const Drawcall& dc)
 }
 
 // Not using forward path or material - for example, see the use of SetObjectColorUBO
-void Renderer::DrawMesh(Mesh* mesh)
+void Renderer::DrawMesh(Mesh* mesh, bool culling)
 {
 	//PROFILE_LOG_SCOPED_FUNCTION();
 	GLuint programHandle = m_currentShader->GetShaderProgram()->GetHandle();
@@ -1333,7 +1333,7 @@ void Renderer::DrawMesh(Mesh* mesh)
 	SetDebugModeUBO(programHandle);
 	//SetGameTimeUBO(programHandle);
 
-	BindRenderState(m_currentShader->m_state);
+	BindRenderState(m_currentShader->m_state, culling);
 	glBindBuffer(GL_ARRAY_BUFFER, mesh->m_vbo.GetHandle());
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->m_ibo.GetHandle());
 	BindLayoutToProgram( programHandle, mesh->GetLayout() ); 
@@ -1386,13 +1386,10 @@ void Renderer::DrawMeshImmediate()
 }
 
 
-void Renderer::BindRenderState(const sRenderState& state)
+void Renderer::BindRenderState(const sRenderState& state, bool culling)
 {
 	// blend mode
 	glEnable( GL_BLEND ); 
-	//glBlendEquationSeparate(ToGLBlendOp(state.m_colorBlendOp), ToGLBlendOp(state.m_alphaBlendOp));
-	//glBlendFuncSeparate(ToGLBlendFactor(state.m_colorSrcFactor), ToGLBlendFactor(state.m_colorDstFactor),
-	//	ToGLBlendFactor(state.m_alphaSrcFactor), ToGLBlendFactor(state.m_alphaDstFactor));
 	glBlendEquation(ToGLBlendOp(state.m_colorBlendOp));
 	glBlendFunc( ToGLBlendFactor(state.m_colorSrcFactor),
 		ToGLBlendFactor(state.m_colorDstFactor) ); 
@@ -1406,19 +1403,17 @@ void Renderer::BindRenderState(const sRenderState& state)
 	glDepthMask(state.m_depthWrite);
 
 	// Fill mode
-	glPolygonMode(GL_FRONT_AND_BACK,
-		ToGLFillMode(state.m_fillMode));
-	GL_CHECK_ERROR();
+	glPolygonMode(GL_FRONT_AND_BACK, ToGLFillMode(state.m_fillMode));
 
 	// Cull mode
-	glEnable(GL_CULL_FACE);
-	GL_CHECK_ERROR();
+	if (culling)
+		glEnable(GL_CULL_FACE);
+	else
+		glDisable(GL_CULL_FACE);
 	glCullFace(ToGLCullMode(state.m_cullMode));
-	GL_CHECK_ERROR();
 
 	// Winding Order
 	glFrontFace(ToGLWindOrder(state.m_windOrder));
-	GL_CHECK_ERROR();
 }
 
 

@@ -423,6 +423,7 @@
     <ClInclude Include="Core\AssimpLoader.hpp" />
     <ClInclude Include="Core\Blackboard.hpp" />
     <ClInclude Include="Core\Delegate.hpp" />
+    <ClInclude Include="Core\GameInstance.hpp" />
     <ClInclude Include="Core\Log\FileUtils.hpp" />
     <ClInclude Include="Core\Log\LogSystem.hpp" />
     <ClInclude Include="Core\MapChunk.hpp" />

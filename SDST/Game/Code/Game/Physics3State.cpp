@@ -169,6 +169,7 @@ Physics3State::Physics3State()
 	Vector3 qhMin = Vector3(-100.f, 10.f, 0.f);
 	Vector3 qhMax = Vector3(-50.f, 60.f, 50.f);
 	m_qh = new QuickHull(5, qhMin, qhMax);
+	g_hull = m_qh;
 
 	// debug
 	DebugRenderSet3DCamera(m_camera);

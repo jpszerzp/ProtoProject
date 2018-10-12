@@ -13,10 +13,12 @@
 class Blackboard;
 class Clock;
 class RCS;
+class QuickHull;
 
 extern Blackboard*		g_gameConfigBlackboard;
 extern Clock*			g_masterClock;
 extern RCS*				g_rcs;
 extern bool				g_broadphase;
+extern QuickHull*		g_hull;
 
 typedef unsigned int uint;

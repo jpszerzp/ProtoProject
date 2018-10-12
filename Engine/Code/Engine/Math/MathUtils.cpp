@@ -826,7 +826,7 @@ float ComputeTriangleArea(Vector3 v1, Vector3 v2, Vector3 v3)
 
 
 // v1, v2 and v3 in CCW order
-Vector3 ComputeTriangleCenter(Vector3 v1, Vector3 v2, Vector3 v3)
+Vector3 ComputeTriangleCenter(const Vector3& v1, const Vector3& v2, const Vector3& v3)
 {
 	Vector3 center;
 

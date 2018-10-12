@@ -100,7 +100,7 @@ Mesh* Mesh::CreateLineImmediate(eVertexType type, const Vector3& startPos,
 	mb.SetUV(Vector2(1.f, 1.f));
 	mb.PushVertex(endPos);
 
-	mb.AddLine(idx + 0, idx + 1);
+	mb.AddLine(idx, idx + 1);
 
 	mb.End();
 

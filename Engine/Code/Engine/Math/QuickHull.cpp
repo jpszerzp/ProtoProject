@@ -20,6 +20,19 @@ QHFace::QHFace(int num, Vector3* sample)
 }
 
 
+Vector3 QHFace::GetFaceCentroid() const
+{
+	return ComputeTriangleCenter(verts[0], verts[1], verts[2]);
+}
+
+Mesh* QHFace::CreateFaceNormalMesh() const
+{
+	Vector3 start = GetFaceCentroid();
+	Vector3 end = start + normal;
+	Rgba randColor = GetRandomColor();
+	return Mesh::CreateLineImmediate(VERT_PCU, start, end, randColor);
+}
+
 QuickHull::QuickHull(uint num, const Vector3& min, const Vector3& max)
 {
 	GeneratePointSet(num, min, max);
@@ -157,7 +170,6 @@ void QuickHull::GenerateInitialFace()
 	Vector3 verts[3] = {v1, v2, v3};
 	QHFace face = QHFace(3, verts);
 	m_faces.push_back(face);
-	m_initial = face;
 
 	// delete these points from effective point set
 	RemovePoint(v1);
@@ -172,11 +184,10 @@ void QuickHull::GenerateInitialFace()
 void QuickHull::GenerateInitialHull()
 {
 	// first triangle
-	//GenerateInitialFace();
-	assert(m_initial.vert_num == 3);
-	Vector3 v1 = m_initial.verts[0];
-	Vector3 v2 = m_initial.verts[1];
-	Vector3 v3 = m_initial.verts[2];
+	assert(m_faces[0].vert_num == 3);
+	Vector3 v1 = m_faces[0].verts[0];
+	Vector3 v2 = m_faces[0].verts[1];
+	Vector3 v3 = m_faces[0].verts[2];
 
 	// say triangle has v1, v2, v3, now in verts there are no such points
 	// to have initial hull, we need a v4
@@ -193,6 +204,10 @@ void QuickHull::GenerateInitialHull()
 		}
 	}
 
+	// get a temp normal for initial face,
+	// regardless of direction of normal (in or outward)
+	GenerateOutboundNorm(v4, m_faces[0]);
+
 	// build new faces
 	Vector3 verts124[3] = {v1, v2, v4};
 	Vector3 verts134[3] = {v1, v3, v4};
@@ -200,6 +215,14 @@ void QuickHull::GenerateInitialHull()
 	QHFace face124 = QHFace(3, verts124);
 	QHFace face134 = QHFace(3, verts134);
 	QHFace face234 = QHFace(3, verts234);
+
+	// given a face and an external point, calculate the outbound normal 
+	// outbound means opposite direction from the face to that external point
+	GenerateOutboundNorm(v3, face124);
+	GenerateOutboundNorm(v2, face134);
+	GenerateOutboundNorm(v1, face234);
+
+	// store faces
 	m_faces.push_back(face124);
 	m_faces.push_back(face134);
 	m_faces.push_back(face234);
@@ -215,6 +238,35 @@ void QuickHull::GenerateInitialHull()
 }
 
 
+void QuickHull::GenerateFaceNorms(Vector3& norm1, Vector3& norm2, const QHFace& face)
+{
+	const Vector3& v1 = face.verts[0];
+	const Vector3& v2 = face.verts[1];
+	const Vector3& v3 = face.verts[2];
+
+	const Vector3& side1 = v2 - v1;
+	const Vector3& side2 = v3 - v1;
+
+	norm1 = side1.Cross(side2).GetNormalized();
+	norm2 = side2.Cross(side1).GetNormalized();
+}
+
+void QuickHull::GenerateOutboundNorm(const Vector3& external, QHFace& face)
+{
+	// get a temp normal for initial face,
+	// regardless of direction of normal (in or outward)
+	Vector3 norm1;
+	Vector3 norm2;
+	GenerateFaceNorms(norm1, norm2, face);
+
+	// decide on initial face normal based on v4
+	Vector3 towardExternal = external - face.verts[0];
+	float ext1 = DotProduct(towardExternal, norm1);
+	float ext2 = DotProduct(towardExternal, norm2);
+	Vector3 norm = (ext1 < 0.f) ? norm1 : norm2;
+	face.normal = norm;
+}
+
 void QuickHull::RemovePoint(const Vector3& pt)
 {
 	for (std::vector<Vector3>::size_type idx = 0; idx < m_verts.size(); ++idx)
@@ -229,6 +281,23 @@ void QuickHull::RemovePoint(const Vector3& pt)
 	}
 }
 
+
+void QuickHull::CreateNormalMeshes()
+{
+	for (const QHFace& face : m_faces)
+	{
+		Mesh* normalMesh = face.CreateFaceNormalMesh();
+		m_normalMeshes.push_back(normalMesh);
+	}
+}
+
+void QuickHull::FlushNormalMeshes()
+{
+	for (Mesh* mesh : m_normalMeshes)
+		delete mesh;
+
+	m_normalMeshes.clear();
+}
 
 void QuickHull::RenderHull(Renderer* renderer)
 {
@@ -247,8 +316,17 @@ void QuickHull::RenderHull(Renderer* renderer)
 		renderer->m_currentShader->m_state.m_depthCompare = COMPARE_LESS;
 		renderer->m_currentShader->m_state.m_cullMode = CULLMODE_BACK;
 		renderer->m_currentShader->m_state.m_windOrder = WIND_COUNTER_CLOCKWISE;
-		renderer->DrawMesh(mesh);
+
+		renderer->DrawMesh(mesh, false);	// not culling 
 	}
+
+	RenderNormals(renderer);
+}
+
+void QuickHull::RenderNormals(Renderer* renderer)
+{
+	for (Mesh* mesh : m_normalMeshes)
+		renderer->DrawMesh(mesh);
 }
 
 void QuickHull::CreateFaceMesh(const QHFace& face)

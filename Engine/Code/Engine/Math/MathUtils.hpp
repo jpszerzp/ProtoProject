@@ -115,7 +115,7 @@ float ComputeManhattanDistanceFloat(Vector2 v1, Vector2 v2);
 
 // barycentric coord
 float   ComputeTriangleArea(Vector3 v1, Vector3 v2, Vector3 v3);
-Vector3 ComputeTriangleCenter(Vector3 v1, Vector3 v2, Vector3 v3);
+Vector3 ComputeTriangleCenter(const Vector3& v1, const Vector3& v2, const Vector3& v3);
 
 // lerp transform
 Matrix44 LerpTransform(const Matrix44& m1, const Matrix44& m2, float fraction);

@@ -130,6 +130,14 @@ bool Rgba::operator==( const Rgba& compare ) const
 }
 
 
+const Rgba GetRandomColor()
+{
+	unsigned char r = (unsigned char)GetRandomIntInRange(0, 255);
+	unsigned char g = (unsigned char)GetRandomIntInRange(0, 255);
+	unsigned char b = (unsigned char)GetRandomIntInRange(0, 255);
+	return Rgba(r, g, b, 255);
+}
+
 const Rgba Interpolate( const Rgba& start, const Rgba& end, float fractionTowardEnd )
 {
 	//unsigned char r = Interpolate(start.r, end.r, fractionTowardEnd);
