@@ -65,7 +65,7 @@ Mesh* Mesh::CreatePoint(eVertexType type)
 }
 
 
-Mesh* Mesh::CreatePointImmediate(eVertexType type, Vector2 pos, Rgba color)
+Mesh* Mesh::CreatePointImmediate2D(eVertexType type, Vector2 pos, Rgba color)
 {
 	Vector3 position = pos.ToVector3(0.f);
 
@@ -109,6 +109,25 @@ Mesh* Mesh::CreateLineImmediate(eVertexType type, const Vector3& startPos,
 	return mesh;
 }
 
+
+Mesh* Mesh::CreatePointImmediate(eVertexType type, const Vector3& pos, const Rgba& color)
+{
+	MeshBuilder mb;
+
+	mb.Begin(DRAW_POINT, true);
+	mb.SetColor(color);
+
+	mb.SetUV(Vector2::ZERO);
+	uint idx = mb.PushVertex(pos);
+
+	mb.AddPoint(idx);
+
+	mb.End();
+
+	Mesh* mesh = mb.CreateMesh(type, DRAW_POINT);
+	mesh->m_immediate = true;
+	return mesh;
+}
 
 Mesh* Mesh::CreateQuad(eVertexType type)
 {

@@ -2,6 +2,8 @@
 
 #include "Engine/Math/Vector3.hpp"
 
+#define COLOR_LIST_SIZE 1024
+
 class Rgba 
 {
 public:
@@ -53,3 +55,5 @@ const Rgba GetRandomColor();
 const Rgba Interpolate( const Rgba& start, const Rgba& end, float fractionTowardEnd );
 Vector3 RGBToHSL(Vector3 rgb);
 Vector3 HSLToRGB(Vector3 hsl);
+
+extern Rgba color_list[COLOR_LIST_SIZE];

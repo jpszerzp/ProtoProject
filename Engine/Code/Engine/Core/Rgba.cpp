@@ -23,6 +23,7 @@ const Rgba Rgba::YELLOW_HALF_OPACITY = Rgba(255, 255, 0, 127);
 const Rgba Rgba::RED_HALF_OPACITY = Rgba(255, 0, 0, 127);
 const Rgba Rgba::CYAN_HALF_OPACITY = Rgba(0, 255, 255, 127);
 const Rgba Rgba::MEGENTA_HALF_OPACITY = Rgba(255, 0, 255, 127);
+Rgba color_list[COLOR_LIST_SIZE] = {Rgba::RED, Rgba::GREEN, Rgba::BLUE, Rgba::YELLOW};
 
 Rgba::Rgba()
 {
@@ -176,8 +177,8 @@ const Rgba Interpolate( const Rgba& start, const Rgba& end, float fractionToward
 
 Vector3 RGBToHSL(Vector3 rgb)
 {
-	float mx = std::max( rgb.x, std::max( rgb.y, rgb.z ));
-	float mn = std::min( rgb.x, std::min( rgb.y, rgb.z ));
+	float mx = max( rgb.x, max( rgb.y, rgb.z ));
+	float mn = min( rgb.x, min( rgb.y, rgb.z ));
 
 	float lum = (mx + mn) / 2.0f;
 	float hue = 0.0f;

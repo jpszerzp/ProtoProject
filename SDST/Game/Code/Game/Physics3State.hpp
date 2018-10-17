@@ -100,4 +100,6 @@ public:
 	int m_nodeCount = 0;			// temp: later will flush all GO into tree at once
 
 	QuickHull* m_qh = nullptr;
+	uint m_debug_vert_count = 0;
+	bool m_debug_vert_complete = false;
 };

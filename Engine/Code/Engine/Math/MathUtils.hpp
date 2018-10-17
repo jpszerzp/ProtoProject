@@ -11,6 +11,7 @@
 #include "Engine/Math/Sphere3.hpp"
 #include "Engine/Math/OBB3.hpp"
 #include "Engine/Math/Plane.hpp"
+#include "Engine/Math/QuickHull.hpp"
 
 #define PI 3.14159265359f
 #define SLERP_ANGLE_THRESHOLD 0.05f
@@ -132,5 +133,9 @@ AABB2 MinkowskiAABBVsAABB(const AABB2& aabb1, const AABB2& aabb2);
 // collisions
 bool IsPointInCircle(Vector2 pos, float r);
 float DistPointToEdge(const Vector3& pt, const Vector3& vert1, const Vector3& vert2);
-float DistPointToPlaneSigned(const Vector3 pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3);
-float DistPointToPlaneUnsigned(const Vector3 pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3);
+float DistPointToPlaneSigned(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3);
+float DistPointToPlaneUnsigned(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3);
+
+// qh
+QHFeature* DistPointToTriangleHull(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3, float& dist, Vector3& closest);
+QHFeature* DistPointToQuadHull(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3, const Vector3& vert4, float& dist, Vector3& closest);

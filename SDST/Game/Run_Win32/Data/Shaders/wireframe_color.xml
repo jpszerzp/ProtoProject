@@ -1,0 +1,22 @@
+<shader name="wireframe">
+	<program>
+		<vertex file="Shaders/glsl/default_color.vs" />
+		<fragment file="Shaders/glsl/default_color.fs" />
+	</program>
+
+	<blend>
+		<color op="add" src="blend_one" dest="blend_zero" />
+	</blend>
+
+	<depth compare="less" write="true" />
+	
+	<fill mode="wireframe" />
+	
+	<wind order="ccw" />
+	
+	<cull face="back" />
+
+	<texture bind="0" name="gTexDiffuse" value="white.png" />
+
+	<color bind="TINT" value="255,255,255,255" />
+</shader>

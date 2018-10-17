@@ -4,18 +4,112 @@
 #include "Engine/Math/Vector3.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
-struct QHFace
+enum eQHFeature
 {
+	QH_FACE,
+	QH_EDGE,
+	QH_VERT,
+	QH_NONE
+};
+
+class QHFeature
+{
+private:
+	eQHFeature m_id;
+
+public:
+	QHFeature(){}
+	virtual ~QHFeature(){}
+
+	eQHFeature GetFeatureID() const { return m_id; }
+	void SetFeatureID(eQHFeature id) { m_id = id; }
+	virtual void ConstructFeatureID(){};
+};
+
+class QHVert : public QHFeature
+{
+public:
+	Vector3 vert;
+	Mesh* vertMesh = nullptr;
+	Rgba color;
+
+public:
+	QHVert() { ConstructFeatureID(); }
+	explicit QHVert(const Vector3& pt);
+	QHVert(const Vector3& pt, const Rgba& color);
+	~QHVert();
+
+	// effectively changing the mesh
+	void ChangeColor(const Rgba& color);
+	
+	const Vector3& GetVertRef() const { return vert; }
+	void ConstructFeatureID() override;
+
+	void DrawVert(Renderer* renderer) const;
+};
+
+class QHEdge : public QHFeature
+{
+public:
+	Vector3 v1;
+	Vector3 v2;
+
+	Mesh* edgeMesh = nullptr;
+
+	Rgba color;
+
+public:
+	QHEdge() { ConstructFeatureID(); }
+	QHEdge(const Vector3& vert1, const Vector3& vert2);
+	QHEdge(const Vector3& v1, const Vector3& v2, Rgba color);
+	~QHEdge();
+
+	const Vector3& GetVert1Edge() const { return v1; }
+	const Vector3& GetVert2Edge() const { return v2; }
+
+	void ConstructFeatureID() override;
+};
+
+
+class QHFace : public QHFeature
+{
+public:
 	int vert_num;
-	std::vector<Vector3> verts;
+	std::vector<Vector3> verts;			// size of 3 or 4 size, vertices of face (triangle or quad)
+	std::vector<QHVert*> conflicts;		// conflicting point list of the face		
+	//std::vector<QHEdge*> edges;
+
+	// normal
 	Vector3 normal;
+	Mesh* normMesh = nullptr;
+	Rgba normColor;
 
-	QHFace(){}
+	Mesh* faceMesh = nullptr;
+
+public:
+	QHFace(){ ConstructFeatureID(); }
+	QHFace(const Vector3& v1, const Vector3& v2, const Vector3& v3);
 	QHFace(int num, Vector3* sample);
-	~QHFace(){}
+	//QHFace(int num, Vector3* sample, const Rgba& color);
+	~QHFace();
 
+	void AddConflictPoint(QHVert* pt);
+
+	const Vector3& GetVert1() const { return verts[0]; }
+	const Vector3& GetVert2() const { return verts[1]; }
+	const Vector3& GetVert3() const { return verts[2]; }
+	const Vector3& GetVert4() const;
 	Vector3 GetFaceCentroid() const;
-	Mesh* CreateFaceNormalMesh() const;
+	void CreateFaceNormalMesh(const Rgba& color);
+	void FlushFaceNormalMesh();
+	void GenerateEdges();
+
+	bool IsTriangle() const { return vert_num == 3; }
+	bool IsPolygon() const { return vert_num == 4; }
+
+	void ConstructFeatureID() override;
+
+	void DrawFace(Renderer* renderer);
 };
 
 class QuickHull
@@ -25,27 +119,36 @@ public:
 	QuickHull(uint num, const Vector3& min, const Vector3& max);
 	~QuickHull();
 
-	// verts
-	std::vector<Vector3> m_verts;
+	// global list of verts that have a chance to sit on surface of hull
+	// INVARIANT: m_verts = sum_of(face.conflicts)
+	std::vector<QHVert*> m_verts;
 
 	// face
-	std::vector<QHFace> m_faces;
-	std::vector<Mesh*> m_faceMeshes;
-	std::vector<Mesh*> m_normalMeshes;
+	std::vector<QHFace*> m_faces;
 
 public:
+	bool AddConflictPoint(QHVert* vert);
+
 	void GeneratePointSet(uint num, const Vector3& min, const Vector3& max);
 	void GenerateInitialFace();
 	void GenerateInitialHull();
 	void GenerateFaceNorms(Vector3& norm1, Vector3& norm2, const QHFace& face);
 	void GenerateOutboundNorm(const Vector3& external, QHFace& face);
 
-	void RemovePoint(const Vector3& pt);			// remove point from verts collection
+	void RemovePointGlobal(const Vector3& pt);			// remove point from verts collection
+	bool PointOutBoundFace(const Vector3& pt, const QHFace& face);
+	QHFeature* FindClosestFeatureInitial(const Vector3& pt, float& dist, Vector3& closest);
+	QHFace* FindFaceGivenPts(const Vector3& v1, const Vector3& v2, const Vector3& v3, bool& found);
+	const std::vector<QHFace*> FindFaceGivenSharedEdge(const QHEdge& edge, bool& found);
+	const std::vector<QHFace*> FindFaceGivenSharedVert(const QHVert& vert, bool& found);
+	QHVert* GetVert(int idx) { return m_verts[idx]; }
+	size_t GetVertNum() const { return m_verts.size(); }
 
 	void RenderHull(Renderer* renderer);
-	void RenderNormals(Renderer* renderer);
+	void RenderFaces(Renderer* renderer);
+	void RenderVerts(Renderer* renderer);
 
 	void CreateNormalMeshes();
 	void FlushNormalMeshes();
-	void CreateFaceMesh(const QHFace& face);
+	void CreateFaceMesh(QHFace& face);
 };

@@ -21,8 +21,8 @@ public:
 	void SetLayout(VertexLayout layout) { m_layout = layout; }
 
 	static Mesh* CreatePoint(eVertexType type);
-	static Mesh* CreatePointImmediate(eVertexType type, Vector2 pos, Rgba color);
 	static Mesh* CreateLineImmediate(eVertexType type, const Vector3& startPos, const Vector3& endPos, const Rgba& color);
+	static Mesh* CreatePointImmediate(eVertexType type, const Vector3& pos, const Rgba& color);
 	static Mesh* CreateQuad(eVertexType type);
 	static Mesh* CreateQuadImmediate(eVertexType type, const Vector3& bl, const Vector3& br, 
 		const Vector3& tl, const Vector3& tr, const Rgba& tint);
@@ -45,6 +45,7 @@ public:
 	//static Mesh* CreateCapsule2D(eVertexType type, Rgba color = Rgba::WHITE);
 	static Mesh* CreateDiscImmediate2D(Vector2 center, Rgba tint, float radius, int lineSegNum);
 	static Mesh* CreateLineImmediate2D(const Vector2& start, const Vector2& end, const Rgba& tint, eVertexType type);
+	static Mesh* CreatePointImmediate2D(eVertexType type, Vector2 pos, Rgba color);
 
 	VertexLayout*		GetLayout() { return &m_layout; }
 	sDrawInstruction&	GetDrawInstruction() { return m_instruction; }

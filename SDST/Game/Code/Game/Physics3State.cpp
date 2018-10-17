@@ -168,7 +168,7 @@ Physics3State::Physics3State()
 	// quick hull
 	Vector3 qhMin = Vector3(-100.f, 10.f, 0.f);
 	Vector3 qhMax = Vector3(-50.f, 60.f, 50.f);
-	m_qh = new QuickHull(5, qhMin, qhMax);
+	m_qh = new QuickHull(50, qhMin, qhMax);
 	g_hull = m_qh;
 
 	// debug
@@ -571,6 +571,23 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	else
 		//m_g1->GetEntity()->SetLinearVelocity(Vector3::ZERO);
 		m_g4->GetEntity()->SetLinearVelocity(Vector3::ZERO);
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_0))
+	{
+		if (!m_debug_vert_complete)
+		{
+			QHVert* vert = g_hull->GetVert((int)m_debug_vert_count);
+			bool removed = g_hull->AddConflictPoint(vert);
+
+			if (!removed)
+				m_debug_vert_count++;
+
+			if (m_debug_vert_count == g_hull->GetVertNum())
+				m_debug_vert_complete = true;
+		}
+		//else
+		//	ASSERT_RECOVERABLE(false, "Hull verts are all added to conflict lists");
+	}
 
 	// camera update from input
 	Vector3 camForward = m_camera->GetLocalForward(); 

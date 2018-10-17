@@ -816,7 +816,6 @@ void QHNormalDrawCommand(Command& cmd)
 	}
 	else if (subStr == "false")
 	{
-		
 		g_hull->FlushNormalMeshes();
 		ConsolePrintfUnit(Rgba::YELLOW, "QH normal meshes flushed!");
 	}

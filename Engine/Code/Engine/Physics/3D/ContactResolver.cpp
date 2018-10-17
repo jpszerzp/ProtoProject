@@ -181,7 +181,7 @@ void ContactResolver::ResolvePositionsCoherent(float)
 	}
 }
 
-void ContactResolver::ResolveVelocityCoherent(float deltaTime)
+void ContactResolver::ResolveVelocityCoherent(float)
 {
 	Vector3 linearChange[2];
 	Vector3 angularChange[2];

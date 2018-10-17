@@ -882,7 +882,7 @@ void Renderer::DrawPoint2D(const Vector2& point, const Rgba& color, eVertexType 
 
 	DetachMeshImmediate();
 
-	m_immediateMesh = Mesh::CreatePointImmediate(type, point, color);
+	m_immediateMesh = Mesh::CreatePointImmediate2D(type, point, color);
 	UseShader(CreateOrGetShader("2d_direct_opague"));
 
 	glPointSize(size);
