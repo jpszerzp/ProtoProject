@@ -117,7 +117,7 @@ void SphereRB3::Integrate(float deltaTime)
 	if (!m_frozen)
 	{
 		// acc
-		m_lastAcc = m_linearAcceleration;
+		//m_lastAcc = m_linearAcceleration;
 		m_linearAcceleration = m_netforce * m_massData.m_invMass;
 		Vector3 angularAcc = m_inverseInertiaTensorWorld * m_torqueAcc;
 

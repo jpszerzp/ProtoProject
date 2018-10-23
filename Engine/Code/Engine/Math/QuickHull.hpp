@@ -2,7 +2,12 @@
 
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Math/Vector3.hpp"
+#include "Engine/Math/HalfEdge.hpp"
 #include "Engine/Renderer/Renderer.hpp"
+
+#include <stack> 
+#include <deque>
+
 
 enum eQHFeature
 {
@@ -11,6 +16,7 @@ enum eQHFeature
 	QH_VERT,
 	QH_NONE
 };
+
 
 class QHFeature
 {
@@ -70,7 +76,6 @@ public:
 	void ConstructFeatureID() override;
 };
 
-
 class QHFace : public QHFeature
 {
 public:
@@ -86,14 +91,21 @@ public:
 
 	Mesh* faceMesh = nullptr;
 
+	// half edge structure
+	HalfEdge* m_entry = nullptr;		// linked list entry for half edges
+
 public:
 	QHFace(){ ConstructFeatureID(); }
 	QHFace(const Vector3& v1, const Vector3& v2, const Vector3& v3);
 	QHFace(int num, Vector3* sample);
-	//QHFace(int num, Vector3* sample, const Rgba& color);
 	~QHFace();
 
 	void AddConflictPoint(QHVert* pt);
+	QHVert* GetFarthestConflictPoint(float& dist) const;
+	bool FindTwinAgainstFace(QHFace* face);
+	bool FindEdgeTwinAgainstFace(QHFace* face, HalfEdge* entry);
+
+	void SetParentHalfEdge();
 
 	const Vector3& GetVert1() const { return verts[0]; }
 	const Vector3& GetVert2() const { return verts[1]; }
@@ -126,6 +138,12 @@ public:
 	// face
 	std::vector<QHFace*> m_faces;
 
+	std::tuple<QHFace*, QHVert*> m_eyePair;
+
+	std::deque<QHFace*> m_visibleFaces;
+	std::deque<HalfEdge*> m_floodedEdges;
+	std::deque<HalfEdge*> m_horizon;
+
 public:
 	bool AddConflictPoint(QHVert* vert);
 
@@ -143,6 +161,7 @@ public:
 	const std::vector<QHFace*> FindFaceGivenSharedVert(const QHVert& vert, bool& found);
 	QHVert* GetVert(int idx) { return m_verts[idx]; }
 	size_t GetVertNum() const { return m_verts.size(); }
+	std::tuple<QHFace*, QHVert*> GetFarthestConflictPair(float& dist) const;
 
 	void RenderHull(Renderer* renderer);
 	void RenderFaces(Renderer* renderer);

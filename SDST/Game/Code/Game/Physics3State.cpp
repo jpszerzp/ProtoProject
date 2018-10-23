@@ -574,6 +574,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_0))
 	{
+		/*
 		if (!m_debug_vert_complete)
 		{
 			QHVert* vert = g_hull->GetVert((int)m_debug_vert_count);
@@ -585,8 +586,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 			if (m_debug_vert_count == g_hull->GetVertNum())
 				m_debug_vert_complete = true;
 		}
-		//else
-		//	ASSERT_RECOVERABLE(false, "Hull verts are all added to conflict lists");
+		*/
 	}
 
 	// camera update from input

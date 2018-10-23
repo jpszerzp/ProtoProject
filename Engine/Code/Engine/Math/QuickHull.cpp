@@ -1,4 +1,4 @@
-#include "Engine/Math/QuickHull.hpp"
+﻿#include "Engine/Math/QuickHull.hpp"
 #include "Engine/Math/MathUtils.hpp"
 #include "Engine/Core/Rgba.hpp"
 #include "Engine/Core/Util/DataUtils.hpp"
@@ -7,6 +7,7 @@
 #include "Engine/Renderer/Renderable.hpp"
 
 #include <cassert>
+
 
 QHFace::QHFace(int num, Vector3* sample)
 {
@@ -21,6 +22,15 @@ QHFace::QHFace(int num, Vector3* sample)
 	}
 
 	ConstructFeatureID();
+
+	// half edge
+	HalfEdge* he1 = new HalfEdge(verts[0]);
+	HalfEdge* he2 = new HalfEdge(verts[1]);
+	HalfEdge* he3 = new HalfEdge(verts[2]);
+	he1->m_prev = he3; he1->m_next = he2;
+	he2->m_prev = he1; he2->m_next = he3;
+	he3->m_prev = he2; he3->m_next = he1;
+	m_entry = he1;
 }
 
 // Note: This constructor is ONLY for book keeping purpose, to record
@@ -36,26 +46,15 @@ QHFace::QHFace(const Vector3& v1, const Vector3& v2, const Vector3& v3)
 	ConstructFeatureID();
 }
 
-/*
-QHFace::QHFace(int num, Vector3* sample, const Rgba& color)
-{
-	vert_num = num;
-	normColor = color;
-
-	for (int i = 0; i < num; ++i)
-	{
-		Vector3 vertex = *sample;
-		verts.push_back(vertex);
-		sample++;
-	}
-
-	ConstructFeatureID();
-}
-*/
-
 QHFace::~QHFace()
 {
 	FlushFaceNormalMesh();
+
+	if (faceMesh != nullptr)
+	{
+		delete faceMesh;
+		faceMesh = nullptr;
+	}
 }
 
 
@@ -66,9 +65,104 @@ void QHFace::AddConflictPoint(QHVert* pt)
 	ASSERT_RECOVERABLE(outbound, "Conflict point must be outbound to the face it belongs to");
 
 	conflicts.push_back(pt);
-	pt->ChangeColor(normColor);
+	//pt->ChangeColor(normColor);
 }
 
+
+QHVert* QHFace::GetFarthestConflictPoint(float& dist) const
+{
+	dist = -INFINITY;
+	QHVert* res = nullptr;
+
+	for (QHVert* pt : conflicts)
+	{
+		float pt_dist = DistPointToPlaneSigned(pt->vert, verts[0], verts[1], verts[2]);
+		if (pt_dist > dist)
+		{
+			dist = pt_dist;
+			res = pt;
+		}
+	}
+
+	return res;
+}
+
+bool QHFace::FindTwinAgainstFace(QHFace* face)
+{
+	HalfEdge* it_he = m_entry;
+	bool he1_found = FindEdgeTwinAgainstFace(face, it_he);
+
+	it_he = it_he->m_next;
+	bool he2_found = FindEdgeTwinAgainstFace(face, it_he);
+
+	it_he = it_he->m_next;
+	bool he3_found = FindEdgeTwinAgainstFace(face, it_he);
+
+	if (!IsTriangle())
+	{
+		//it_he = it_he->m_next;
+		//bool he4_found = FindEdgeTwinAgainstFace(face, it_he);
+		ASSERT_OR_DIE(false, "Polygon face now well supported");
+	}
+
+	if (he1_found || he2_found || he3_found)
+		return true;
+
+	ASSERT_RECOVERABLE(false, "Failed to find twin edge for this face pair, check if they are neighbor");
+	return false;
+}
+
+/*
+ * @PRE: entry is one of the half edge of this face.
+ * Find the twin of specified half edge in the given face.
+ * If found, set the twin of entry and return true. If not, return false.
+ * @face: QHface we use to inspect half edge candidates with.
+ * @entry: the half edge which we need to find twin for.
+ * @return: bool indicating whether or not we found the twin.
+ */
+bool QHFace::FindEdgeTwinAgainstFace(QHFace* face, HalfEdge* entry)
+{
+	HalfEdge* otherEntry = face->m_entry;
+	HalfEdge* it_he = otherEntry;
+
+	if (entry->IsTwin(it_he))
+	{
+		entry->SetTwin(it_he);
+		return true;
+	}
+
+	it_he = it_he->m_next;
+	while (it_he != otherEntry)
+	{
+		if (entry->IsTwin(it_he))
+		{
+			entry->SetTwin(it_he);
+			return true;
+		}
+
+		it_he = it_he->m_next;
+	}
+
+	return false;
+}
+
+void QHFace::SetParentHalfEdge()
+{
+	HalfEdge* myEntry = m_entry;
+	HalfEdge* it_he = myEntry;
+
+	if (it_he->m_parentFace == nullptr)
+		it_he->m_parentFace = this;
+
+	it_he = it_he->m_next;
+	while (it_he != myEntry)
+	{
+		if (it_he->m_parentFace == nullptr)
+			it_he->m_parentFace = this;
+
+		it_he = it_he->m_next;
+	}
+}
 
 const Vector3& QHFace::GetVert4() const
 {
@@ -157,10 +251,150 @@ QuickHull::QuickHull(uint num, const Vector3& min, const Vector3& max)
 	GenerateInitialFace();
 	GenerateInitialHull();
 
-	/*
 	for (QHVert* vert : m_verts)
 		AddConflictPoint(vert);
-		*/
+
+	// get the farthest conflict point 
+	float farthest;
+	m_eyePair = GetFarthestConflictPair(farthest);
+
+	QHFace* conflict_face = std::get<0>(m_eyePair);
+	QHVert* conflict_pt = std::get<1>(m_eyePair);
+	m_visibleFaces.push_back(conflict_face);
+
+	// pick a edge to cross, and hence a face to stepped on
+	bool reminiscent;
+	HalfEdge* he = conflict_face->m_entry;
+	HalfEdge* he_twin = he->m_twin;
+	QHFace* otherFace = he_twin->m_parentFace;
+	//m_floodedEdges.push_back(he);
+
+	while (!m_visibleFaces.empty())
+	{
+		bool visited = std::find(m_visibleFaces.begin(), m_visibleFaces.end(), otherFace) != m_visibleFaces.end();
+		if (!visited)
+		{
+			if (PointOutBoundFace(conflict_pt->vert, *otherFace))
+			{
+				m_visibleFaces.push_back(otherFace);
+
+				he = he_twin->m_next;
+				he_twin = he->m_twin;
+				otherFace = he_twin->m_parentFace;
+			}
+			else
+			{
+				m_horizon.push_back(he);
+				he = he->m_next;
+				he_twin = he->m_twin;
+				otherFace = he_twin->m_parentFace;
+			}
+		}
+		else
+		{
+			size_t size = m_visibleFaces.size();
+			QHFace* second = m_visibleFaces[size - 2U];
+
+			if (second == otherFace)
+			{
+				he = he_twin->m_next;
+				he_twin = he->m_twin;
+				otherFace = he_twin->m_parentFace;
+				m_visibleFaces.pop_back();
+			}
+			else
+			{
+				he = he->m_next;
+				he_twin = he->m_twin;
+				otherFace = he_twin->m_parentFace;
+			}
+		}
+	}
+
+	/*
+	while (!m_floodedEdges.empty())
+	{
+		bool visited = std::find(m_visibleFaces.begin(), m_visibleFaces.end(), otherFace) != m_visibleFaces.end();
+		if (!visited)
+		{
+			if (PointOutBoundFace(conflict_pt->vert, *otherFace))
+			{
+				// this face is visible to conflict point
+				// continue to next face...
+				m_visibleFaces.push_back(otherFace);
+				//bridge = he;
+
+				he = he_twin->m_next;					// update current half edge we step on
+				he_twin = he->m_twin;					// update twin of current he
+				otherFace = he_twin->m_parentFace;		// update pointer to the other face considering the new current he
+				m_floodedEdges.push_back(he);
+			}
+			else
+			{
+				// this face is invisible to conflict point
+				// go back to previous face
+				m_horizon.push_back(he);
+				m_floodedEdges.pop_back();
+				he = he->m_next;
+				he_twin = he->m_twin;
+				otherFace = he_twin->m_parentFace;
+				m_floodedEdges.push_back(he);
+
+				//bool reminiscent = std::find(m_floodedEdges.begin(), m_floodedEdges.end(), he_twin) != m_floodedEdges.end();
+				//reminiscent = (m_floodedEdges.back() == he_twin);
+				size_t size = m_floodedEdges.size();
+				HalfEdge* top = m_floodedEdges[size - 1U];
+				HalfEdge* second = m_floodedEdges[size - 2U];
+				reminiscent = top->IsTwin(second);
+			}
+		}
+		else
+		{
+			// if we came from this face directly
+			if (reminiscent)
+			{
+				m_floodedEdges.pop_back();		// from-and-to HE: ignoring the to HE
+				m_floodedEdges.pop_back();		// from-and-to HE: ignoring the from HE
+				he = he_twin->m_next;
+				he_twin = he->m_twin;
+				otherFace = he_twin->m_parentFace;
+				m_floodedEdges.push_back(he);
+
+				m_visibleFaces.pop_back();
+				
+				if (m_visibleFaces.size() == 1)
+				{
+					// if back to initial face, stop
+					he = he_twin;
+					he_twin = nullptr;
+					otherFace = nullptr;
+					reminiscent = false;
+					break;
+				}
+				else
+				{
+					size_t size = m_floodedEdges.size();
+					HalfEdge* top = m_floodedEdges[size - 1U];
+					HalfEdge* second = m_floodedEdges[size - 2U];
+					reminiscent = top->IsTwin(second);
+				}
+			}
+			else
+			{
+				m_floodedEdges.pop_back();
+
+				he = he->m_next;
+				he_twin = he->m_twin;
+				otherFace = he_twin->m_parentFace;
+
+				size_t size = m_floodedEdges.size();
+				HalfEdge* top = m_floodedEdges[size - 1U];
+				HalfEdge* second = m_floodedEdges[size - 2U];
+				reminiscent = top->IsTwin(second);
+			}
+		}
+	}
+	*/
 }
 
 QuickHull::~QuickHull()
@@ -230,21 +464,6 @@ bool QuickHull::AddConflictPoint(QHVert* vert)
 				{
 					ASSERT_OR_DIE(false, "Point inbound to both faces, this should NOT happen");
 				}
-
-				/*
-				// if inbound to a plane, use the other directly
-				if (dist1 <= 0.f)
-					theFace2->AddConflictPoint(vert);
-				else if (dist2 <= 0.f)
-					theFace1->AddConflictPoint(vert);
-				else
-				{
-					if (dist1 < dist2)
-						theFace1->AddConflictPoint(vert);
-					else
-						theFace2->AddConflictPoint(vert);
-				}
-				*/
 			}
 			else
 				ASSERT_RECOVERABLE(found, "No faces for shared edge feature is found");
@@ -312,66 +531,6 @@ bool QuickHull::AddConflictPoint(QHVert* vert)
 					theFace3->AddConflictPoint(vert);
 				else
 					ASSERT_OR_DIE(false, "Point inbound to triple faces, this should NOT happen");
-
-
-				/*
-				if (dist1 <= 0.f)
-				{
-					if (dist2 <= 0.f)
-						// 3
-						theFace3->AddConflictPoint(vert);
-					else if (dist3 <= 0.f)
-						// 2
-						theFace2->AddConflictPoint(vert);
-					else
-					{
-						// 2 and 3 possible
-						if (dist2 < dist3)
-							theFace2->AddConflictPoint(vert);
-						else
-							theFace3->AddConflictPoint(vert);
-					}
-				}
-				else
-				{
-					if (dist2 <= 0.f)
-					{
-						if (dist3 <= 0.f)
-							// 1
-							theFace1->AddConflictPoint(vert);
-						else
-						{
-							// 1 and 3 are both possible
-							if (dist1 < dist3)
-								theFace1->AddConflictPoint(vert);
-							else
-								theFace3->AddConflictPoint(vert);
-						}
-					}
-					else
-					{
-						// 1 and 2 possible
-						if (dist3 <= 0.f)
-						{
-							if (dist1 < dist2)
-								theFace1->AddConflictPoint(vert);
-							else
-								theFace2->AddConflictPoint(vert);
-						}
-						else
-						{
-							// 1, 2 and 3 all possible
-							float minDist = min(min(dist1, dist2), dist3);
-							if (minDist == dist1)
-								theFace1->AddConflictPoint(vert);
-							else if (minDist == dist2)
-								theFace2->AddConflictPoint(vert);
-							else if (minDist == dist3)
-								theFace3->AddConflictPoint(vert);
-						}
-					}
-				}
-				*/
 			}
 			else
 				ASSERT_RECOVERABLE(found, "Faces of shared vert not found");
@@ -516,9 +675,8 @@ void QuickHull::GenerateInitialFace()
 
 	// generate triangle face 
 	Vector3 verts[3] = {v1, v2, v3};
-	//Rgba randColor = GetRandomColor();
 	QHFace* face = new QHFace(3, verts);
-	//face->GenerateEdges();
+	face->SetParentHalfEdge();
 	m_faces.push_back(face);
 
 	// delete these points from effective point set
@@ -560,34 +718,51 @@ void QuickHull::GenerateInitialHull()
 	GenerateOutboundNorm(v4, *m_faces[0]);
 
 	// build new faces
-	Vector3 verts124[3] = {v1, v2, v4};
-	//Rgba randColor124 = GetRandomColor();
+	Vector3 verts214[3] = {v2, v1, v4};
 	Vector3 verts134[3] = {v1, v3, v4};
-	//Rgba randColor134 = GetRandomColor();
-	Vector3 verts234[3] = {v2, v3, v4};
-	//Rgba randColor234 = GetRandomColor();
-	QHFace* face124 = new QHFace(3, verts124);
-	QHFace* face134 = new QHFace(3, verts134);
-	QHFace* face234 = new QHFace(3, verts234);
+	Vector3 verts243[3] = {v2, v4, v3};
+	QHFace* face214 = new QHFace(3, verts214); face214->SetParentHalfEdge();
+	QHFace* face134 = new QHFace(3, verts134); face134->SetParentHalfEdge();
+	QHFace* face243 = new QHFace(3, verts243); face243->SetParentHalfEdge();
+
+	// fill twin for 123
+	bool found = m_faces[0]->FindTwinAgainstFace(face214);	assert(found, "123 failed to find twin with 214");
+	found = m_faces[0]->FindTwinAgainstFace(face134);		assert(found, "123 failed to find twin with 134");
+	found = m_faces[0]->FindTwinAgainstFace(face243);		assert(found, "123 failed to find twin with 243");
+
+	// fill twin for 214
+	face214->FindTwinAgainstFace(m_faces[0]);	assert(found, "214 failed to find twin with 123");
+	face214->FindTwinAgainstFace(face134);		assert(found, "214 failed to find twin with 134");
+	face214->FindTwinAgainstFace(face243);		assert(found, "214 failed to find twin with 243");
+
+	// fill twin for 134
+	face134->FindTwinAgainstFace(m_faces[0]); assert(found, "134 failed to find twin with 123");
+	face134->FindTwinAgainstFace(face214);	  assert(found, "134 failed to find twin with 214");
+	face134->FindTwinAgainstFace(face243);	  assert(found, "134 failed to find twin with 243");
+
+	// fill twin for 243
+	face243->FindTwinAgainstFace(m_faces[0]); assert(found, "243 failed to find twin with 123");
+	face243->FindTwinAgainstFace(face214);	  assert(found, "243 failed to find twin with 214");
+	face243->FindTwinAgainstFace(face134);	  assert(found, "243 failed to find twin with 134");
 
 	// given a face and an external point, calculate the outbound normal 
 	// outbound means opposite direction from the face to that external point
-	GenerateOutboundNorm(v3, *face124);
+	GenerateOutboundNorm(v3, *face214);
 	GenerateOutboundNorm(v2, *face134);
-	GenerateOutboundNorm(v1, *face234);
+	GenerateOutboundNorm(v1, *face243);
 
 	// store faces
-	m_faces.push_back(face124);
+	m_faces.push_back(face214);
 	m_faces.push_back(face134);
-	m_faces.push_back(face234);
+	m_faces.push_back(face243);
 
 	// remove v4 from verts
 	RemovePointGlobal(v4);
 
 	// create mesh
-	CreateFaceMesh(*face124);
+	CreateFaceMesh(*face214);
 	CreateFaceMesh(*face134);
-	CreateFaceMesh(*face234);
+	CreateFaceMesh(*face243);
 	// done
 }
 
@@ -866,6 +1041,29 @@ const std::vector<QHFace*> QuickHull::FindFaceGivenSharedVert(const QHVert& theV
 	found = found1 && found2 && found3;
 
 	return share_faces;
+}
+
+std::tuple<QHFace*, QHVert*> QuickHull::GetFarthestConflictPair(float& dist) const
+{
+	std::tuple<QHFace*, QHVert*> vert_pair;
+	QHVert* winner_vert;
+	QHFace* winner_face;
+	dist = -INFINITY;
+
+	for (QHFace* face : m_faces)
+	{
+		float conflict_dist;
+		QHVert* conflict = face->GetFarthestConflictPoint(conflict_dist);
+		if (conflict_dist > dist)
+		{
+			dist = conflict_dist;
+			winner_vert = conflict;
+			winner_face = face;
+		}
+	}
+
+	vert_pair = std::make_tuple(winner_face, winner_vert);
+	return vert_pair;
 }
 
 void QuickHull::RenderHull(Renderer* renderer)

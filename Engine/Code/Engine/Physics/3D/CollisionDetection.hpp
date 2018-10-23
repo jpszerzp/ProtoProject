@@ -44,8 +44,8 @@ public:
 	Vector3 m_normal;
 	Vector3 m_point;
 
-	Vector3 m_start;
-	Vector3 m_end;
+	//Vector3 m_start;
+	//Vector3 m_end;
 
 	float m_restitution;
 
@@ -58,14 +58,14 @@ public:
 public:
 	Contact3();
 	Contact3(Entity3* e1, Entity3* e2);
-	Contact3(Entity3* e1, Entity3* e2, Vector3 normal, Vector3 point, float penetration);
+	Contact3(Entity3* e1, Entity3* e2, Vector3 normal, Vector3 point, float penetration, float res = 1.f);
 	~Contact3();
 
 	float ComputeSeparatingVelocity() const;
 	void ResolveContact(float deltaTime);
 	void ResolveVelocity(float deltaTime);
 	void ResolvePenetration(float deltaTime);
-	void MakeContactCoord(Matrix33& contactToWorldRot);
+	void MakeToWorld(Matrix33& contactToWorldRot);
 
 	// vel change
 	float GetVelPerImpulseContact();
@@ -85,7 +85,7 @@ public:
 	// coherent
 	void PrepareInternal(float deltaTime);
 	void SwapEntities();
-	Vector3 ComputeLocalVelocity(int idx, Entity3* ent, float deltaTime);
+	Vector3 ComputeContactVelocity(int idx, Entity3* ent, float deltaTime);
 	void ComputeDesiredVelDeltaCoherent(float deltaTime);
 };
 

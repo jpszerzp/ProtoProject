@@ -81,7 +81,8 @@ float Matrix33::GetDeterminant() const
 
 void Matrix33::SetRight(Vector3 right)
 {
-	Kx = right.x; Ky = right.y; Kz = right.z;
+	//Kx = right.x; Ky = right.y; Kz = right.z;
+	Ix = right.x; Iy = right.y; Iz = right.z;
 }
 
 void Matrix33::SetUp(Vector3 up)
@@ -91,7 +92,8 @@ void Matrix33::SetUp(Vector3 up)
 
 void Matrix33::SetForward(Vector3 forward)
 {
-	Ix = forward.x; Iy = forward.y; Iz = forward.z;
+	//Ix = forward.x; Iy = forward.y; Iz = forward.z;
+	Kx = forward.x; Ky = forward.y; Kz = forward.z;
 }
 
 void Matrix33::SetBasis(Vector3 right, Vector3 up, Vector3 forward)

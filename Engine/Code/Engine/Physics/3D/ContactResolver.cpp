@@ -86,7 +86,7 @@ void ContactResolver::ResolveContactsCoherent(float deltaTime)
 	ResolvePositionsCoherent(deltaTime);
 
 	// resolve velocity
-	//ResolveVelocityCoherent(deltaTime);
+	ResolveVelocityCoherent(deltaTime);
 }
 
 void ContactResolver::PrepareContactsCoherent(float deltaTime)
@@ -101,7 +101,6 @@ void ContactResolver::ResolvePositionsCoherent(float)
 	uint i, idx;
 	Vector3 linearChange[2];
 	Vector3 angularChange[2];
-	//float angularAmount[2];
 	float max;
 	Vector3 deltaPos;
 	uint numContacts = (uint)m_collision->m_contacts.size();
@@ -128,8 +127,7 @@ void ContactResolver::ResolvePositionsCoherent(float)
 		Contact3& maxContact = m_collision->m_contacts[idx];
 		maxContact.ResolvePositionCoherent(linearChange, angularChange);
 
-		/*
-		// other contacts may be reordered, update all
+		// update other contact penetrations
 		for (i = 0; i < numContacts; ++i)
 		{
 			Contact3& thisContact = m_collision->m_contacts[i];
@@ -175,13 +173,12 @@ void ContactResolver::ResolvePositionsCoherent(float)
 				}
 			}
 		}
-		*/
 
 		currentIter++;
 	}
 }
 
-void ContactResolver::ResolveVelocityCoherent(float)
+void ContactResolver::ResolveVelocityCoherent(float deltaTime)
 {
 	Vector3 linearChange[2];
 	Vector3 angularChange[2];
@@ -209,7 +206,6 @@ void ContactResolver::ResolveVelocityCoherent(float)
 		Contact3& maxContact = m_collision->m_contacts[idx];
 		maxContact.ResolveVelocityCoherent(linearChange, angularChange);
 
-		/*
 		TODO("Need to consider the case where thisContact IS maxContact?");
 		for (uint i = 0; i < numContacts; ++i)
 		{
@@ -227,6 +223,7 @@ void ContactResolver::ResolveVelocityCoherent(float)
 					delVel = angularChange[0].Cross(thisContact.m_relativePosWorld[0]);
 					delVel += linearChange[0];
 
+					//thisContact.m_closingVel -= toContact * delVel;
 					thisContact.m_closingVel += toContact * delVel;
 
 					thisContact.ComputeDesiredVelDeltaCoherent(deltaTime);
@@ -236,6 +233,7 @@ void ContactResolver::ResolveVelocityCoherent(float)
 					delVel = angularChange[1].Cross(thisContact.m_relativePosWorld[0]);
 					delVel += linearChange[1];
 
+					//thisContact.m_closingVel -= toContact * delVel;
 					thisContact.m_closingVel += toContact * delVel;
 					
 					thisContact.ComputeDesiredVelDeltaCoherent(deltaTime);
@@ -264,7 +262,6 @@ void ContactResolver::ResolveVelocityCoherent(float)
 				}
 			}
 		}
-		*/
 
 		iter++;
 	}

@@ -24,13 +24,14 @@ Contact3::Contact3(Entity3* e1, Entity3* e2)
 	m_e2 = e2;
 }
 
-Contact3::Contact3(Entity3* e1, Entity3* e2, Vector3 normal, Vector3 point, float penetration)
+Contact3::Contact3(Entity3* e1, Entity3* e2, Vector3 normal, Vector3 point, float penetration, float res)
 {
 	m_e1 = e1;
 	m_e2 = e2;
 	m_normal = normal;
 	m_point = point;
 	m_penetration = penetration;
+	m_restitution = res;
 }
 
 Contact3::~Contact3()
@@ -45,7 +46,7 @@ void Contact3::ResolveContact(float deltaTime)
 	ResolvePenetration(deltaTime);
 }
 
-void Contact3::MakeContactCoord(Matrix33& contactToWorldRot)
+void Contact3::MakeToWorld(Matrix33& contactToWorldRot)
 {
 	Vector3 tangent[2];		// tangent[0] is y and the other z
 
@@ -79,50 +80,31 @@ void Contact3::MakeContactCoord(Matrix33& contactToWorldRot)
 
 float Contact3::GetVelPerImpulseContact()
 {
-	Vector3 relativePos1 = m_point - m_e1->GetEntityCenter();
-	Vector3 velWorld = relativePos1.Cross(m_normal);
-
 	Rigidbody3* rigid1 = dynamic_cast<Rigidbody3*>(m_e1);
-	Matrix33 iit;
-	if (rigid1 != nullptr)
-		iit = rigid1->m_inverseInertiaTensorWorld;
 
-	velWorld = iit * velWorld;
-	velWorld = velWorld.Cross(relativePos1);
+	Vector3 velWorld = m_relativePosWorld[0].Cross(m_normal);
+	velWorld = rigid1->m_inverseInertiaTensorWorld * velWorld;
+	velWorld = velWorld.Cross(m_relativePosWorld[0]);
 
 	// orthonormal basis means we can use transpose for inverse
-	Matrix33 contactToWorld;
-	MakeContactCoord(contactToWorld);
-	Matrix33 worldToContact = contactToWorld.Transpose();
-	Vector3 velContact = worldToContact * velWorld;
-	float deltaVel = velContact.x;		// angular contribution
-
-	// linear contribution
-	deltaVel += rigid1->GetMassData3().m_invMass;
+	// get velocity in contact coord - the shortcut, see p317 of GPED
+	float velContact = DotProduct(velWorld, m_normal);	// angular
+	velContact += rigid1->GetMassData3().m_invMass;		// linear
 
 	// second body
 	if (m_e2 != nullptr)
 	{
-		Vector3 relativePos2 = m_point - m_e2->GetEntityCenter();
-		velWorld = relativePos2.Cross(m_normal);
-
 		Rigidbody3* rigid2 = dynamic_cast<Rigidbody3*>(m_e2);
-		if (rigid2 != nullptr)
-			iit = rigid2->m_inverseInertiaTensorWorld;
 
-		velWorld = iit * velWorld;
-		velWorld = velWorld.Cross(relativePos2);
+		velWorld = m_relativePosWorld[1].Cross(m_normal);
+		velWorld = rigid2->m_inverseInertiaTensorWorld * velWorld;
+		velWorld = velWorld.Cross(m_relativePosWorld[1]);
 
-		velContact = worldToContact * velWorld;
-
-		// angular contrib from 2
-		deltaVel += velContact.x;
-
-		// linear contrib from 2
-		deltaVel += rigid2->GetMassData3().m_invMass;
+		velContact += DotProduct(velWorld, m_normal);
+		velContact += rigid2->GetMassData3().m_invMass;
 	}
 
-	return deltaVel;
+	return velContact;
 }
 
 float Contact3::GetDeltaVel()
@@ -146,7 +128,7 @@ float Contact3::GetDeltaVel()
 	}
 
 	Matrix33 contactToWorld;
-	MakeContactCoord(contactToWorld);
+	MakeToWorld(contactToWorld);
 	Matrix33 worldToContact = contactToWorld.Transpose();
 	Vector3 contactVel = worldToContact * vel;
 
@@ -158,16 +140,16 @@ float Contact3::GetDeltaVel()
 
 Vector3 Contact3::ComputeContactImpulse()
 {
-	float desired = GetDeltaVel();
+	//float desired = GetDeltaVel();
 	float delta = GetVelPerImpulseContact();
-	return Vector3(desired / delta, 0.f, 0.f);
+	return Vector3(m_desiredVelDelta / delta, 0.f, 0.f);
 }
 
 Vector3 Contact3::ComputeWorldImpulse()
 {
-	Matrix33 contactToWorld;
-	MakeContactCoord(contactToWorld);
-	return contactToWorld * ComputeContactImpulse();
+	//Matrix33 contactToWorld;
+	//MakeToWorld(contactToWorld);
+	return m_toWorld * ComputeContactImpulse();
 }
 
 void Contact3::ApplyImpulse()
@@ -188,8 +170,9 @@ void Contact3::ResolveVelocityCoherent(Vector3 linearChange[2], Vector3 angularC
 	{
 		Vector3 linear = impulse * rigid1->GetMassData3().m_invMass;
 
-		Vector3 relPos1 = m_point - rigid1->GetEntityCenter();
-		Vector3 torque = impulse.Cross(relPos1);
+		//Vector3 relPos1 = m_point - rigid1->GetEntityCenter();
+		//Vector3 torque = impulse.Cross(relPos1);
+		Vector3 torque = m_relativePosWorld[0].Cross(impulse);
 		Vector3 rotation = rigid1->m_inverseInertiaTensorWorld * torque;
 
 		// apply change 
@@ -212,8 +195,9 @@ void Contact3::ResolveVelocityCoherent(Vector3 linearChange[2], Vector3 angularC
 
 		Vector3 linear = impulse * rigid2->GetMassData3().m_invMass;
 
-		Vector3 relPos2 = m_point - rigid2->GetEntityCenter();
-		Vector3 torque = impulse.Cross(relPos2);
+		//Vector3 relPos2 = m_point - rigid2->GetEntityCenter();
+		//Vector3 torque = relPos2.Cross(impulse);
+		Vector3 torque = m_relativePosWorld[1].Cross(impulse);
 		Vector3 rotation = rigid2->m_inverseInertiaTensorWorld * torque;
 
 		rigid2->IncrementVelocity(linear);
@@ -245,14 +229,14 @@ void Contact3::ResolvePositionCoherent(Vector3 linearChange[2], Vector3 angularC
 	if (rigid1 != nullptr)
 	{
 		const Vector3& pos1 = rigid1->GetEntityCenter();
-		const Vector3& relPos1 = m_point - pos1;
+		//const Vector3& relPos1 = m_point - pos1;
 
 		// linear
 		Vector3 translation = m_normal * linearMove[0];
 		rigid1->SetEntityCenter(pos1 + translation);	// linear change: may want to store this
 
 		// angular
-		Vector3 impulsiveTorque = relPos1.Cross(m_normal);
+		Vector3 impulsiveTorque = m_relativePosWorld[0].Cross(m_normal);
 		Vector3 impulsePerMove = rigid1->m_inverseInertiaTensorWorld * impulsiveTorque;
 		Vector3 rotation = Vector3::ZERO;
 		if (angularInertia[0] != 0.f)
@@ -271,14 +255,14 @@ void Contact3::ResolvePositionCoherent(Vector3 linearChange[2], Vector3 angularC
 	if (rigid2 != nullptr)
 	{
 		const Vector3& pos2 = rigid2->GetEntityCenter();
-		const Vector3& relPos2 = m_point - pos2;
+		//const Vector3& relPos2 = m_point - pos2;
 
 		// linear
 		Vector3 translation = m_normal * linearMove[1];
 		rigid2->SetEntityCenter(pos2 + translation);
 
 		// angular
-		Vector3 impulsiveTorque = relPos2.Cross(m_normal);
+		Vector3 impulsiveTorque = m_relativePosWorld[1].Cross(m_normal);
 		Vector3 impulsePerMove = rigid2->m_inverseInertiaTensorWorld * impulsiveTorque;
 		Vector3 rotation = Vector3::ZERO;
 		if (angularInertia[1] != 0.f)
@@ -302,15 +286,15 @@ void Contact3::PrepareInternal(float deltaTime)
 	ASSERT_OR_DIE(m_e1 != nullptr, "Swapped body should not be null");
 
 	// contact matrix
-	MakeContactCoord(m_toWorld);
+	MakeToWorld(m_toWorld);
 
 	m_relativePosWorld[0] = m_point - m_e1->GetEntityCenter();
 	if (m_e2 != nullptr)
 		m_relativePosWorld[1] = m_point - m_e2->GetEntityCenter();
 
-	m_closingVel = ComputeLocalVelocity(0, m_e1, deltaTime);
+	m_closingVel = ComputeContactVelocity(0, m_e1, deltaTime);
 	if (m_e2 != nullptr)
-		m_closingVel -= ComputeLocalVelocity(1, m_e2, deltaTime);
+		m_closingVel -= ComputeContactVelocity(1, m_e2, deltaTime);
 
 	// desired change in vel as resolving coherent contacts
 	ComputeDesiredVelDeltaCoherent(deltaTime);
@@ -330,13 +314,12 @@ void Contact3::SwapEntities()
 	m_f2 = tempFeature;
 }
 
-Vector3 Contact3::ComputeLocalVelocity(int idx, Entity3* ent, float)
+Vector3 Contact3::ComputeContactVelocity(int idx, Entity3* ent, float)
 {
 	Rigidbody3* rigid = static_cast<Rigidbody3*>(ent);
 	Vector3 vel = rigid->GetAngularVelocity().Cross(m_relativePosWorld[idx]);
 	vel += rigid->GetLinearVelocity();
 	const Matrix33& toContact = m_toWorld.Transpose();
-
 	Vector3 contactVel = toContact * vel;	// to contact coord
 
 	//Vector3 acc = rigid->GetLastAcc() * deltaTime;
@@ -349,24 +332,30 @@ Vector3 Contact3::ComputeLocalVelocity(int idx, Entity3* ent, float)
 
 void Contact3::ComputeDesiredVelDeltaCoherent(float deltaTime)
 {
-	static const float velLimit = .25f;
+	////static const float velLimit = .25f;
 
-	float velAcc = 0.f;
+	//float velAcc = 0.f;
 
-	Rigidbody3* rb1 = static_cast<Rigidbody3*>(m_e1);
-	Rigidbody3* rb2 = static_cast<Rigidbody3*>(m_e2);
-	
-	if (rb1 != nullptr)
-		velAcc += DotProduct(rb1->GetLastAcc() * deltaTime, m_normal);
+	//Rigidbody3* rb1 = static_cast<Rigidbody3*>(m_e1);
+	//Rigidbody3* rb2 = static_cast<Rigidbody3*>(m_e2);
+	//
+	//if (rb1 != nullptr)
+	//	velAcc += DotProduct(rb1->GetLinearAcceleration() * deltaTime, m_normal);
 
-	if (rb2 != nullptr)
-		velAcc -= DotProduct(rb2->GetLastAcc() * deltaTime, m_normal);
+	//if (rb2 != nullptr)
+	//	velAcc -= DotProduct(rb2->GetLinearAcceleration() * deltaTime, m_normal);
 
-	float r = m_restitution;
-	if (abs(m_closingVel.x) < velLimit)
-		r = 0.f;
+	///*
+	//float r = m_restitution;
+	//if (abs(m_closingVel.x) < velLimit)
+	//	r = 0.f;
+	//	*/
 
-	m_desiredVelDelta = -m_closingVel.x - r * (m_closingVel.x - velAcc);
+	////m_desiredVelDelta = -m_closingVel.x - r * (m_closingVel.x - velAcc);
+	//m_desiredVelDelta = -m_closingVel.x - m_restitution * (m_closingVel.x - velAcc);
+
+	// closing vel should be in contact coord
+	m_desiredVelDelta = -m_closingVel.x * (1 + m_restitution);
 }
 
 void Contact3::SolveNonlinearProjection(		
@@ -376,25 +365,29 @@ void Contact3::SolveNonlinearProjection(
 	float totalInertia = 0.f;
 	Rigidbody3* rigid1 = dynamic_cast<Rigidbody3*>(m_e1);
 	Rigidbody3* rigid2 = dynamic_cast<Rigidbody3*>(m_e2);
-	Vector3 relPos1 = m_point - rigid1->GetEntityCenter();
-	Vector3 relPos2 = m_point - rigid2->GetEntityCenter();
+	//Vector3 relPos1 = m_point - rigid1->GetEntityCenter();
+	//Vector3 relPos2 = m_point - rigid2->GetEntityCenter();
 
-	Matrix33 contactToWorld;
-	MakeContactCoord(contactToWorld);
-	Matrix33 worldToContact = contactToWorld.Transpose();
+	//Matrix33 contactToWorld;
+	//MakeToWorld(contactToWorld);
+	//Matrix33 worldToContact = contactToWorld.Transpose();
 
 	if (rigid1 != nullptr)
 	{
 		const Matrix33& iitWorld = rigid1->m_inverseInertiaTensorWorld;
 
-		Vector3 angInertiaWorld = relPos1.Cross(m_normal);
+		//Vector3 angInertiaWorld = relPos1.Cross(m_normal);
+		Vector3 angInertiaWorld = m_relativePosWorld[0].Cross(m_normal);
 		angInertiaWorld = iitWorld * angInertiaWorld;
-		angInertiaWorld = angInertiaWorld.Cross(relPos1);
+		angInertiaWorld = angInertiaWorld.Cross(m_relativePosWorld[0]);
+		//angInertiaWorld = angInertiaWorld.Cross(relPos1);
+		
+		//Vector3 angInertiaContact = worldToContact * angInertiaWorld;
+		//float angComponent = angInertiaContact.x;
 
-		Vector3 angInertiaContact = worldToContact * angInertiaWorld;
-		float angComponent = angInertiaContact.x;
+		//angularInertia[0] = angComponent;
 
-		angularInertia[0] = angComponent;
+		angularInertia[0] = DotProduct(angInertiaWorld, m_normal);
 		linearInertia[0] = rigid1->GetMassData3().m_invMass;
 
 		totalInertia += (angularInertia[0] + linearInertia[0]);
@@ -403,14 +396,18 @@ void Contact3::SolveNonlinearProjection(
 	{
 		const Matrix33& iitWorld = rigid2->m_inverseInertiaTensorWorld;
 
-		Vector3 angInertiaWorld = relPos2.Cross(m_normal);
+		//Vector3 angInertiaWorld = relPos2.Cross(m_normal);
+		Vector3 angInertiaWorld = m_relativePosWorld[1].Cross(m_normal);
 		angInertiaWorld = iitWorld * angInertiaWorld;
-		angInertiaWorld = angInertiaWorld.Cross(relPos2);
+		angInertiaWorld = angInertiaWorld.Cross(m_relativePosWorld[1]);
+		//angInertiaWorld = angInertiaWorld.Cross(relPos2);
 
-		Vector3 angInertiaContact = worldToContact * angInertiaWorld;
-		float angComponent = angInertiaContact.x;
+		//Vector3 angInertiaContact = worldToContact * angInertiaWorld;
+		//float angComponent = angInertiaContact.x;
 
-		angularInertia[1] = angComponent;
+		//angularInertia[1] = angComponent;
+
+		angularInertia[1] = DotProduct(angInertiaWorld, m_normal);
 		linearInertia[1] = rigid2->GetMassData3().m_invMass;
 
 		totalInertia += (angularInertia[1] + linearInertia[1]);
@@ -442,8 +439,9 @@ void Contact3::SolveNonlinearProjection(
 	// limit angular movement 
 	// does not affect static objects
 	const float angularLimit = .2f;
-	float limit1 = angularLimit * relPos1.GetLength();
-	if (abs(angularMove[0]) >= limit1)
+	float limit1 = angularLimit * m_relativePosWorld[0].GetLength();
+	//if (abs(angularMove[0]) >= limit1)
+	if (abs(angularMove[0]) > limit1)
 	{
 		float totalMove1 = linearMove[0] + angularMove[0];
 
@@ -455,7 +453,7 @@ void Contact3::SolveNonlinearProjection(
 		linearMove[0] = totalMove1 - angularMove[0];
 	}
 
-	float limit2 = angularLimit * relPos2.GetLength();
+	float limit2 = angularLimit * m_relativePosWorld[1].GetLength();
 	if (abs(angularMove[1]) > limit2)
 	{
 		float totalMove2 = linearMove[1] + angularMove[1];
