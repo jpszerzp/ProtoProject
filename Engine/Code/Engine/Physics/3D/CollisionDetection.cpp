@@ -88,8 +88,12 @@ float Contact3::GetVelPerImpulseContact()
 
 	// orthonormal basis means we can use transpose for inverse
 	// get velocity in contact coord - the shortcut, see p317 of GPED
-	float velContact = DotProduct(velWorld, m_normal);	// angular
-	velContact += rigid1->GetMassData3().m_invMass;		// linear
+	float velContact;
+	if (!rigid1->IsEntityStatic() && !rigid1->IsEntityKinematic())
+	{
+		velContact = DotProduct(velWorld, m_normal);	// angular
+		velContact += rigid1->GetMassData3().m_invMass;		// linear
+	}
 
 	// second body
 	if (m_e2 != nullptr)
@@ -100,8 +104,11 @@ float Contact3::GetVelPerImpulseContact()
 		velWorld = rigid2->m_inverseInertiaTensorWorld * velWorld;
 		velWorld = velWorld.Cross(m_relativePosWorld[1]);
 
-		velContact += DotProduct(velWorld, m_normal);
-		velContact += rigid2->GetMassData3().m_invMass;
+		if (!rigid2->IsEntityStatic() && !rigid2->IsEntityKinematic())
+		{
+			velContact += DotProduct(velWorld, m_normal);
+			velContact += rigid2->GetMassData3().m_invMass;
+		}
 	}
 
 	return velContact;
@@ -142,7 +149,8 @@ Vector3 Contact3::ComputeContactImpulse()
 {
 	//float desired = GetDeltaVel();
 	float delta = GetVelPerImpulseContact();
-	return Vector3(m_desiredVelDelta / delta, 0.f, 0.f);
+	float imp = m_desiredVelDelta / delta;
+	return Vector3(imp, 0.f, 0.f);
 }
 
 Vector3 Contact3::ComputeWorldImpulse()

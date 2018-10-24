@@ -65,7 +65,7 @@ void QHFace::AddConflictPoint(QHVert* pt)
 	ASSERT_RECOVERABLE(outbound, "Conflict point must be outbound to the face it belongs to");
 
 	conflicts.push_back(pt);
-	//pt->ChangeColor(normColor);
+	pt->ChangeColor(normColor);
 }
 
 
@@ -251,6 +251,7 @@ QuickHull::QuickHull(uint num, const Vector3& min, const Vector3& max)
 	GenerateInitialFace();
 	GenerateInitialHull();
 
+	/*
 	for (QHVert* vert : m_verts)
 		AddConflictPoint(vert);
 
@@ -258,25 +259,27 @@ QuickHull::QuickHull(uint num, const Vector3& min, const Vector3& max)
 	float farthest;
 	m_eyePair = GetFarthestConflictPair(farthest);
 
+	std::deque<QHFace*> allFaces; 
 	QHFace* conflict_face = std::get<0>(m_eyePair);
 	QHVert* conflict_pt = std::get<1>(m_eyePair);
 	m_visibleFaces.push_back(conflict_face);
+	allFaces.push_back(conflict_face);
 
 	// pick a edge to cross, and hence a face to stepped on
-	bool reminiscent;
 	HalfEdge* he = conflict_face->m_entry;
 	HalfEdge* he_twin = he->m_twin;
 	QHFace* otherFace = he_twin->m_parentFace;
-	//m_floodedEdges.push_back(he);
+	HalfEdge* startEdge = he;
 
 	while (!m_visibleFaces.empty())
 	{
-		bool visited = std::find(m_visibleFaces.begin(), m_visibleFaces.end(), otherFace) != m_visibleFaces.end();
+		bool visited = std::find(allFaces.begin(), allFaces.end(), otherFace) != allFaces.end();
 		if (!visited)
 		{
 			if (PointOutBoundFace(conflict_pt->vert, *otherFace))
 			{
 				m_visibleFaces.push_back(otherFace);
+				allFaces.push_back(otherFace);
 
 				he = he_twin->m_next;
 				he_twin = he->m_twin;
@@ -292,106 +295,58 @@ QuickHull::QuickHull(uint num, const Vector3& min, const Vector3& max)
 		}
 		else
 		{
-			size_t size = m_visibleFaces.size();
-			QHFace* second = m_visibleFaces[size - 2U];
-
-			if (second == otherFace)
+			if (otherFace == conflict_face && m_visibleFaces.size() == 1U)
 			{
-				he = he_twin->m_next;
-				he_twin = he->m_twin;
-				otherFace = he_twin->m_parentFace;
+				// we arrived at initial conflicting face
+				he = he->m_next;
 				m_visibleFaces.pop_back();
 			}
 			else
 			{
-				he = he->m_next;
-				he_twin = he->m_twin;
-				otherFace = he_twin->m_parentFace;
+				size_t size = m_visibleFaces.size();
+				QHFace* second = m_visibleFaces[size - 2U];
+
+				if (second == otherFace)
+				{
+					if (otherFace == conflict_face)
+					{
+						he = he_twin;
+						he_twin = nullptr;
+						otherFace = nullptr;
+						m_visibleFaces.pop_back();
+						// we just reached back the initial conflicting face
+						// right now the only face in visibles should be the initial one
+					}
+					else
+					{
+						he = he_twin->m_next;
+						he_twin = he->m_twin;
+						otherFace = he_twin->m_parentFace;
+						m_visibleFaces.pop_back();
+					}
+				}
+				else
+				{
+					he = he->m_next;
+					he_twin = he->m_twin;
+					otherFace = he_twin->m_parentFace;
+				}
 			}
 		}
 	}
 
-	/*
-	while (!m_floodedEdges.empty())
+	// but we still want to check remaining edges until we loop back to the "startEdge"
+	while (he != startEdge)
 	{
-		bool visited = std::find(m_visibleFaces.begin(), m_visibleFaces.end(), otherFace) != m_visibleFaces.end();
-		if (!visited)
-		{
-			if (PointOutBoundFace(conflict_pt->vert, *otherFace))
-			{
-				// this face is visible to conflict point
-				// continue to next face...
-				m_visibleFaces.push_back(otherFace);
-				//bridge = he;
+		he_twin = he->m_twin;
+		otherFace = he_twin->m_parentFace;
 
-				he = he_twin->m_next;					// update current half edge we step on
-				he_twin = he->m_twin;					// update twin of current he
-				otherFace = he_twin->m_parentFace;		// update pointer to the other face considering the new current he
-				m_floodedEdges.push_back(he);
-			}
-			else
-			{
-				// this face is invisible to conflict point
-				// go back to previous face
-				m_horizon.push_back(he);
-				m_floodedEdges.pop_back();
-				he = he->m_next;
-				he_twin = he->m_twin;
-				otherFace = he_twin->m_parentFace;
-				m_floodedEdges.push_back(he);
-
-				//bool reminiscent = std::find(m_floodedEdges.begin(), m_floodedEdges.end(), he_twin) != m_floodedEdges.end();
-				//reminiscent = (m_floodedEdges.back() == he_twin);
-				size_t size = m_floodedEdges.size();
-				HalfEdge* top = m_floodedEdges[size - 1U];
-				HalfEdge* second = m_floodedEdges[size - 2U];
-				reminiscent = top->IsTwin(second);
-			}
-		}
+		bool visited = std::find(allFaces.begin(), allFaces.end(), otherFace) != allFaces.end();
+		if (visited)
+			he = he->m_next;
 		else
 		{
-			// if we came from this face directly
-			if (reminiscent)
-			{
-				m_floodedEdges.pop_back();		// from-and-to HE: ignoring the to HE
-				m_floodedEdges.pop_back();		// from-and-to HE: ignoring the from HE
-				he = he_twin->m_next;
-				he_twin = he->m_twin;
-				otherFace = he_twin->m_parentFace;
-				m_floodedEdges.push_back(he);
-
-				m_visibleFaces.pop_back();
-				
-				if (m_visibleFaces.size() == 1)
-				{
-					// if back to initial face, stop
-					he = he_twin;
-					he_twin = nullptr;
-					otherFace = nullptr;
-					reminiscent = false;
-					break;
-				}
-				else
-				{
-					size_t size = m_floodedEdges.size();
-					HalfEdge* top = m_floodedEdges[size - 1U];
-					HalfEdge* second = m_floodedEdges[size - 2U];
-					reminiscent = top->IsTwin(second);
-				}
-			}
-			else
-			{
-				m_floodedEdges.pop_back();
-
-				he = he->m_next;
-				he_twin = he->m_twin;
-				otherFace = he_twin->m_parentFace;
-
-				size_t size = m_floodedEdges.size();
-				HalfEdge* top = m_floodedEdges[size - 1U];
-				HalfEdge* second = m_floodedEdges[size - 2U];
-				reminiscent = top->IsTwin(second);
-			}
+			ASSERT_OR_DIE(false, "Should not have unvisited neighbor at this stage");
 		}
 	}
 	*/
@@ -544,6 +499,14 @@ bool QuickHull::AddConflictPoint(QHVert* vert)
 		RemovePointGlobal(globalPt);
 		return true;			// this point IS removed
 	}
+}
+
+void QuickHull::AddHorizonMesh(HalfEdge* horizon)
+{
+	Vector3 start = horizon->m_tail;
+	Vector3 end = horizon->m_next->m_tail;
+	Mesh* mesh = Mesh::CreateLineImmediate(VERT_PCU, start, end, Rgba::CYAN);
+	m_horizon_mesh.push_back(mesh);
 }
 
 void QuickHull::GeneratePointSet(uint num, const Vector3& min, const Vector3& max)
@@ -827,6 +790,28 @@ bool QuickHull::PointOutBoundFace(const Vector3& pt, const QHFace& face)
 	return outbound;
 }
 
+void QuickHull::RenderCurrentHalfEdge(Renderer* renderer)
+{
+	if (m_test_he_mesh != nullptr)
+	{
+		Shader* shader = renderer->CreateOrGetShader("wireframe_color");
+		renderer->UseShader(shader);
+
+		Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
+		renderer->SetTexture2D(0, texture);
+		renderer->SetSampler2D(0, texture->GetSampler());
+		glLineWidth(10.f);
+
+		renderer->m_objectData.model = Matrix44::IDENTITY;
+
+		renderer->m_currentShader->m_state.m_depthCompare = COMPARE_LESS;
+		renderer->m_currentShader->m_state.m_cullMode = CULLMODE_BACK;
+		renderer->m_currentShader->m_state.m_windOrder = WIND_COUNTER_CLOCKWISE;
+
+		renderer->DrawMesh(m_test_he_mesh);
+	}
+}
+
 void QuickHull::CreateNormalMeshes()
 {
 	for (std::vector<QHFace*>::size_type idx = 0; idx < m_faces.size(); ++idx)
@@ -1066,10 +1051,30 @@ std::tuple<QHFace*, QHVert*> QuickHull::GetFarthestConflictPair(float& dist) con
 	return vert_pair;
 }
 
+void QuickHull::ChangeCurrentHalfEdge()
+{
+	if (m_test_he_mesh != nullptr)
+	{
+		delete m_test_he_mesh;
+		m_test_he_mesh = nullptr;
+	}
+
+	if (test_he != nullptr)
+	{
+		Vector3 start = test_he->m_tail;
+		Vector3 end = test_he->m_twin->m_tail;
+		m_test_he_mesh = Mesh::CreateLineImmediate(VERT_PCU, start, end, Rgba::MEGENTA);
+	}
+	else 
+		ASSERT_OR_DIE(false, "Half edge is null, cannot generate mesh for it");
+}
+
 void QuickHull::RenderHull(Renderer* renderer)
 {
 	RenderFaces(renderer);
 	RenderVerts(renderer);
+	RenderCurrentHalfEdge(renderer);
+	RenderHorizon(renderer);
 }
 
 void QuickHull::RenderFaces(Renderer* renderer)
@@ -1083,6 +1088,31 @@ void QuickHull::RenderVerts(Renderer* renderer)
 {
 	for (QHVert* vert : m_verts)
 		vert->DrawVert(renderer);
+}
+
+void QuickHull::RenderHorizon(Renderer* renderer)
+{
+	for (Mesh* mesh : m_horizon_mesh)
+	{
+		if (mesh != nullptr)
+		{
+			Shader* shader = renderer->CreateOrGetShader("wireframe_color");
+			renderer->UseShader(shader);
+
+			Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
+			renderer->SetTexture2D(0, texture);
+			renderer->SetSampler2D(0, texture->GetSampler());
+			glLineWidth(10.f);
+
+			renderer->m_objectData.model = Matrix44::IDENTITY;
+
+			renderer->m_currentShader->m_state.m_depthCompare = COMPARE_LESS;
+			renderer->m_currentShader->m_state.m_cullMode = CULLMODE_BACK;
+			renderer->m_currentShader->m_state.m_windOrder = WIND_COUNTER_CLOCKWISE;
+
+			renderer->DrawMesh(mesh);
+		}
+	}
 }
 
 void QuickHull::CreateFaceMesh(QHFace& face)

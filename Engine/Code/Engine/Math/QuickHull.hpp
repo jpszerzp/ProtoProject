@@ -141,11 +141,19 @@ public:
 	std::tuple<QHFace*, QHVert*> m_eyePair;
 
 	std::deque<QHFace*> m_visibleFaces;
-	std::deque<HalfEdge*> m_floodedEdges;
-	std::deque<HalfEdge*> m_horizon;
+	std::deque<QHFace*> m_allFaces;
+	std::deque<HalfEdge*> m_horizon;		std::vector<Mesh*> m_horizon_mesh;
+	//std::deque<HalfEdge*> m_floodedEdges;
+
+	// test
+	HalfEdge* test_start_he = nullptr;
+	HalfEdge* test_he = nullptr;			Mesh* m_test_he_mesh = nullptr;
+	HalfEdge* test_he_twin = nullptr;		
+	QHFace* test_otherFace = nullptr;
 
 public:
 	bool AddConflictPoint(QHVert* vert);
+	void AddHorizonMesh(HalfEdge* horizon);
 
 	void GeneratePointSet(uint num, const Vector3& min, const Vector3& max);
 	void GenerateInitialFace();
@@ -163,9 +171,13 @@ public:
 	size_t GetVertNum() const { return m_verts.size(); }
 	std::tuple<QHFace*, QHVert*> GetFarthestConflictPair(float& dist) const;
 
+	void ChangeCurrentHalfEdge();
+
 	void RenderHull(Renderer* renderer);
 	void RenderFaces(Renderer* renderer);
 	void RenderVerts(Renderer* renderer);
+	void RenderHorizon(Renderer* renderer);
+	void RenderCurrentHalfEdge(Renderer* renderer);
 
 	void CreateNormalMeshes();
 	void FlushNormalMeshes();

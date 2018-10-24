@@ -62,10 +62,16 @@ Physics3State::Physics3State()
 
 	// or, initialize into other shapes (cube, etc)
 	//m_g0 = InitializePhysSphere(Vector3(15.f, -1.5f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_KINEMATIC, BODY_PARTICLE);
-	m_g1 = InitializePhysSphere(Vector3(0.f, 40.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID);
-	m_g1->m_physEntity->SetFrozen(true);
-	Rigidbody3* rigid_g1 = static_cast<Rigidbody3*>(m_g1->GetEntity());
-	m_rigidRegistry->Register(rigid_g1, grg);
+	//m_g1 = InitializePhysSphere(Vector3(0.f, 40.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID);
+	//m_g1->m_physEntity->SetFrozen(true);
+	//Rigidbody3* rigid_g1 = static_cast<Rigidbody3*>(m_g1->GetEntity());
+	//m_rigidRegistry->Register(rigid_g1, grg);
+
+	Sphere* s2 = InitializePhysSphere(Vector3(10.f, 40.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID);
+	s2->m_physEntity->SetFrozen(true);
+	Rigidbody3* rigid_s1 = static_cast<Rigidbody3*>(s2->GetEntity());
+	m_rigidRegistry->Register(rigid_s1, grg);
+	rigid_s1->m_angularVelocity = Vector3(0.f, 0.f, 5.f);
 
 	/*
 	//////////////////////////////// For rigid spring ////////////////////////////////
@@ -103,7 +109,8 @@ Physics3State::Physics3State()
 	*/
 
 	//InitializePhysQuad(Vector3(0.f, 20.f, 0.f), Vector3(90.f, 0.f, -45.f), Vector3(20.f, 20.f, 1.f), Rgba::BLUE, MOVE_STATIC, BODY_PARTICLE);
-	InitializePhysQuad(Vector3(0.f, 20.f, 0.f), Vector3(90.f, 0.f, 0.f), Vector3(20.f, 20.f, 1.f), Rgba::GREEN, MOVE_STATIC, BODY_RIGID);
+	InitializePhysQuad(Vector3(0.f, 20.f, 0.f), Vector3(90.f, 0.f, -10.f), Vector3(2000.f, 2000.f, 1.f), Rgba::GREEN, MOVE_STATIC, BODY_RIGID);
+	InitializePhysQuad(Vector3(0.f, 20.f, 0.f), Vector3(90.f, 0.f, 10.f), Vector3(2000.f, 2000.f, 1.f), Rgba::GREEN, MOVE_STATIC, BODY_RIGID);
 	//m_g2 = InitializePhysQuad(Vector3(20.f, -2.f, 0.f), Vector3(90.f, 0.f, 0.f), Vector3(800.f, 800.f, 1.f), Rgba::GREEN, MOVE_STATIC, BODY_PARTICLE);
 	//m_g3 = InitializePhysPoint(Vector3(25.f, 0.f, 0.f), Vector3::ZERO, 10.f, Rgba::WHITE, MOVE_STATIC, BODY_PARTICLE);
 	
@@ -166,9 +173,9 @@ Physics3State::Physics3State()
 	m_coherentResolver = new ContactResolver(RESOLVE_COHERENT);
 
 	// quick hull
-	Vector3 qhMin = Vector3(-100.f, 10.f, 0.f);
-	Vector3 qhMax = Vector3(-50.f, 60.f, 50.f);
-	m_qh = new QuickHull(50, qhMin, qhMax);
+	Vector3 qhMin = Vector3(-100.f, 110.f, 0.f);
+	Vector3 qhMax = Vector3(-50.f, 160.f, 50.f);
+	m_qh = new QuickHull(5, qhMin, qhMax);
 	g_hull = m_qh;
 
 	// debug
@@ -574,7 +581,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_0))
 	{
-		/*
+		// add a conflict point
 		if (!m_debug_vert_complete)
 		{
 			QHVert* vert = g_hull->GetVert((int)m_debug_vert_count);
@@ -586,7 +593,137 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 			if (m_debug_vert_count == g_hull->GetVertNum())
 				m_debug_vert_complete = true;
 		}
-		*/
+
+		// get the farthest conflict point
+		float farthest;
+		g_hull->m_eyePair = g_hull->GetFarthestConflictPair(farthest);
+		QHFace* conflict_face = std::get<0>(g_hull->m_eyePair);
+		QHVert* conflict_pt = std::get<1>(g_hull->m_eyePair);
+
+		g_hull->m_visibleFaces.push_back(std::get<0>(g_hull->m_eyePair));
+		g_hull->m_allFaces.push_back(std::get<0>(g_hull->m_eyePair));
+		g_hull->test_he = conflict_face->m_entry;
+		g_hull->test_he_twin = g_hull->test_he->m_twin;
+		g_hull->test_otherFace = g_hull->test_he_twin->m_parentFace;
+		g_hull->test_start_he = g_hull->test_he;
+
+		g_hull->ChangeCurrentHalfEdge();
+	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_1))
+	{
+		QHFace* conflict_face = std::get<0>(g_hull->m_eyePair);
+		QHVert* conflict_pt = std::get<1>(g_hull->m_eyePair);
+
+		if (!g_hull->m_visibleFaces.empty())
+		{
+			bool visited = std::find(g_hull->m_allFaces.begin(), 
+				g_hull->m_allFaces.end(), g_hull->test_otherFace) != g_hull->m_allFaces.end();
+			if (!visited)
+			{
+				if (g_hull->PointOutBoundFace(conflict_pt->vert, *g_hull->test_otherFace))
+				{
+					// visible 
+					g_hull->m_visibleFaces.push_back(g_hull->test_otherFace);
+					g_hull->m_allFaces.push_back(g_hull->test_otherFace);
+
+					g_hull->test_he = g_hull->test_he_twin->m_next;
+					g_hull->test_he_twin = g_hull->test_he->m_twin;
+					g_hull->test_otherFace = g_hull->test_he_twin->m_parentFace;
+				}
+				else
+				{
+					// invisible
+					bool explored = std::find(g_hull->m_horizon.begin(), 
+						g_hull->m_horizon.end(), g_hull->test_he) != g_hull->m_horizon.end();
+					bool twin_explored = std::find(g_hull->m_horizon.begin(), 
+						g_hull->m_horizon.end(), g_hull->test_he->m_twin) != g_hull->m_horizon.end();
+					if (!explored && !twin_explored)
+					{
+						g_hull->m_horizon.push_back(g_hull->test_he);
+						g_hull->AddHorizonMesh(g_hull->test_he);
+					}
+
+					g_hull->test_he = g_hull->test_he->m_next;
+					g_hull->test_he_twin = g_hull->test_he->m_twin;
+					g_hull->test_otherFace = g_hull->test_he_twin->m_parentFace;
+
+					// Situation 1 - we are still on this face, there is a chance this is the finish step
+					if (g_hull->test_he == g_hull->test_start_he)
+					{
+						g_hull->m_visibleFaces.pop_back();
+					}
+				}
+			}
+			else
+			{
+				if (g_hull->m_visibleFaces.size() == 1U)
+				{
+					// Situation 2 - we know we are back on initial conflict face
+					g_hull->test_he = g_hull->test_he->m_next;
+					g_hull->m_visibleFaces.pop_back();
+				}
+				else
+				{
+					size_t size = g_hull->m_visibleFaces.size();
+					QHFace* second = g_hull->m_visibleFaces[size - 2U];
+
+					if (second == g_hull->test_otherFace)
+					{
+						if (g_hull->test_otherFace == conflict_face)
+						{
+							g_hull->test_he = g_hull->test_he_twin;
+							g_hull->test_he_twin = g_hull->test_he->m_twin;
+							g_hull->test_otherFace = conflict_face;				// force stay on initial face
+							g_hull->m_visibleFaces.pop_back();
+						}
+						else
+						{
+							g_hull->test_he = g_hull->test_he_twin->m_next;
+							g_hull->test_he_twin = g_hull->test_he->m_twin;
+							g_hull->test_otherFace = g_hull->test_he_twin->m_parentFace;
+							g_hull->m_visibleFaces.pop_back();
+						}
+					}
+					else
+					{
+						g_hull->test_he = g_hull->test_he->m_next;
+						g_hull->test_he_twin = g_hull->test_he->m_twin;
+						g_hull->test_otherFace = g_hull->test_he_twin->m_parentFace;
+
+						//// Situation 1 - we are still on this face, there is a chance this is the finish step - NOT FOR THIS ONE SINCE WE ARE NOT ON INITIAL FACE
+						//if (g_hull->test_he == g_hull->test_start_he)
+						//{
+						//	g_hull->m_visibleFaces.pop_back();
+						//}
+					}
+				}
+			}
+		}
+
+		if (g_hull->m_visibleFaces.empty())
+		{
+			if (g_hull->test_he != g_hull->test_start_he)
+			{
+				// we may miss other half edges for the initial face, so we added it back and continue processing
+				if (g_hull->m_visibleFaces.empty())
+					g_hull->m_visibleFaces.push_back(conflict_face);
+
+				g_hull->test_he_twin = g_hull->test_he->m_twin;
+				g_hull->test_otherFace = g_hull->test_he_twin->m_parentFace;
+
+				//bool visited = std::find(g_hull->m_allFaces.begin(), g_hull->m_allFaces.end(),
+				//	g_hull->test_otherFace) != g_hull->m_allFaces.end();
+				//if (visited)
+				//	g_hull->test_he = g_hull->test_he->m_next;
+				//else
+				//	ASSERT_OR_DIE(false, "Should not have unvisited neighbor at this stage");
+			}
+			//else
+			//	ASSERT_RECOVERABLE(false, "Looped back to initial edge, do nothing");
+		}
+
+		g_hull->ChangeCurrentHalfEdge();
 	}
 
 	// camera update from input
