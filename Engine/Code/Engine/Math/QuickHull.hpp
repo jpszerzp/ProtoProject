@@ -7,6 +7,7 @@
 
 #include <stack> 
 #include <deque>
+#include <algorithm>
 
 
 enum eQHFeature
@@ -38,6 +39,7 @@ public:
 	Vector3 vert;
 	Mesh* vertMesh = nullptr;
 	Rgba color;
+	std::vector<QHFace*> visibleFaces;
 
 public:
 	QHVert() { ConstructFeatureID(); }
@@ -97,8 +99,21 @@ public:
 public:
 	QHFace(){ ConstructFeatureID(); }
 	QHFace(const Vector3& v1, const Vector3& v2, const Vector3& v3);
+	QHFace(HalfEdge* he, const Vector3& pt);
 	QHFace(int num, Vector3* sample);
-	~QHFace();
+	~QHFace()
+	{
+		FlushFaceNormalMesh();
+
+		if (faceMesh != nullptr)
+		{
+			delete faceMesh;
+			faceMesh = nullptr;
+		}
+
+		// conflict points are usually orphaned points that will be adopted
+		// so we DO NOT delete them here
+	}
 
 	void AddConflictPoint(QHVert* pt);
 	QHVert* GetFarthestConflictPoint(float& dist) const;
@@ -118,6 +133,9 @@ public:
 
 	bool IsTriangle() const { return vert_num == 3; }
 	bool IsPolygon() const { return vert_num == 4; }
+
+	bool ShareEdge(QHFace* other);
+	bool IsEdgeShared(HalfEdge* he);
 
 	void ConstructFeatureID() override;
 
@@ -143,7 +161,6 @@ public:
 	std::deque<QHFace*> m_visibleFaces;
 	std::deque<QHFace*> m_allFaces;
 	std::deque<HalfEdge*> m_horizon;		std::vector<Mesh*> m_horizon_mesh;
-	//std::deque<HalfEdge*> m_floodedEdges;
 
 	// test
 	HalfEdge* test_start_he = nullptr;
@@ -151,9 +168,15 @@ public:
 	HalfEdge* test_he_twin = nullptr;		
 	QHFace* test_otherFace = nullptr;
 
+	// orphans
+	std::vector<QHVert*> m_orphans;
+	QHVert* m_candidate = nullptr;
+
 public:
-	bool AddConflictPoint(QHVert* vert);
+	bool AddConflictPointInitial(QHVert* vert);
+	bool AddConflictPointGeneral(QHVert* vert, std::vector<QHFace*>& faces);
 	void AddHorizonMesh(HalfEdge* horizon);
+	bool AddToFinalizedFace(QHFeature* feature, const Vector3& closest, QHVert* vert);
 
 	void GeneratePointSet(uint num, const Vector3& min, const Vector3& max);
 	void GenerateInitialFace();
@@ -164,6 +187,7 @@ public:
 	void RemovePointGlobal(const Vector3& pt);			// remove point from verts collection
 	bool PointOutBoundFace(const Vector3& pt, const QHFace& face);
 	QHFeature* FindClosestFeatureInitial(const Vector3& pt, float& dist, Vector3& closest);
+	QHFeature* FindClosestFeatureGeneral(const Vector3& pt, float& dist, Vector3& closest, std::vector<QHFace*>& faces);
 	QHFace* FindFaceGivenPts(const Vector3& v1, const Vector3& v2, const Vector3& v3, bool& found);
 	const std::vector<QHFace*> FindFaceGivenSharedEdge(const QHEdge& edge, bool& found);
 	const std::vector<QHFace*> FindFaceGivenSharedVert(const QHVert& vert, bool& found);

@@ -12,7 +12,6 @@
 QHFace::QHFace(int num, Vector3* sample)
 {
 	vert_num = num;
-	//normColor = Rgba::WHITE;
 
 	for (int i = 0; i < num; ++i)
 	{
@@ -46,15 +45,29 @@ QHFace::QHFace(const Vector3& v1, const Vector3& v2, const Vector3& v3)
 	ConstructFeatureID();
 }
 
-QHFace::~QHFace()
+QHFace::QHFace(HalfEdge* he, const Vector3& pt)
 {
-	FlushFaceNormalMesh();
+	// 3 vert for sure in this case
+	vert_num = 3;
 
-	if (faceMesh != nullptr)
-	{
-		delete faceMesh;
-		faceMesh = nullptr;
-	}
+	// record vertices
+	Vector3 vert1 = he->m_tail;
+	Vector3 vert2 = he->m_next->m_tail;
+	verts.push_back(vert1);
+	verts.push_back(vert2);
+	verts.push_back(pt);
+
+	ConstructFeatureID();
+
+	// set up tail, prev and next for half edges
+	// twin and parent face NOT set up yet, EXCEPT for half edge 1
+	//HalfEdge* he1 = new HalfEdge(vert1); he1->m_twin = he.m_twin;
+	HalfEdge* he2 = new HalfEdge(vert2);
+	HalfEdge* he3 = new HalfEdge(pt);
+	he->m_prev  = he3; he->m_next  = he2;	// rearrange next and prev of horizon
+	he2->m_prev = he; he2->m_next  = he3;
+	he3->m_prev = he2; he3->m_next = he;
+	m_entry = he;
 }
 
 
@@ -159,7 +172,6 @@ void QHFace::SetParentHalfEdge()
 	{
 		if (it_he->m_parentFace == nullptr)
 			it_he->m_parentFace = this;
-
 		it_he = it_he->m_next;
 	}
 }
@@ -196,6 +208,51 @@ void QHFace::FlushFaceNormalMesh()
 void QHFace::GenerateEdges()
 {
 
+}
+
+bool QHFace::ShareEdge(QHFace* other)
+{
+	// NOTE: Assuming there is only one shared edge between two faces
+	HalfEdge* otherEntry = other->m_entry;
+	HalfEdge* it_he_other = otherEntry;
+
+	if (IsEdgeShared(it_he_other))
+		return true;
+	it_he_other = it_he_other->m_next;
+
+	while (it_he_other != otherEntry)
+	{
+		if (IsEdgeShared(it_he_other))
+			return true;
+		it_he_other = it_he_other->m_next;
+	}
+
+	return false;
+}
+
+bool QHFace::IsEdgeShared(HalfEdge* he)
+{
+	HalfEdge* myEntry = m_entry;
+	HalfEdge* it_he_my = m_entry;
+
+	if (it_he_my->IsTwin(he))
+	{
+		it_he_my->m_twin = he;
+		return true;
+	}
+	it_he_my = it_he_my->m_next;
+
+	while (it_he_my != myEntry)
+	{
+		if (it_he_my->IsTwin(he))
+		{
+			it_he_my->m_twin = he;
+			return true;
+		}
+		it_he_my = it_he_my->m_next;
+	}
+
+	return false;
 }
 
 void QHFace::ConstructFeatureID()
@@ -358,13 +415,48 @@ QuickHull::~QuickHull()
 	DeleteVector(m_verts);
 }
 
-bool QuickHull::AddConflictPoint(QHVert* vert)
+bool QuickHull::AddConflictPointInitial(QHVert* vert)
 {
 	const Vector3& globalPt = vert->GetVertRef();
 	float dist;
 	Vector3 closest = Vector3::INVALID;
 
 	QHFeature* closest_feature = FindClosestFeatureInitial(globalPt, dist, closest);
+
+	bool pointRemoved = AddToFinalizedFace(closest_feature, closest, vert);
+	return pointRemoved;
+}
+
+bool QuickHull::AddConflictPointGeneral(QHVert* vert, std::vector<QHFace*>& faces)
+{
+	const Vector3& globalPt = vert->GetVertRef();
+	float dist;
+	Vector3 closest = Vector3::INVALID;
+
+	QHFeature* closest_feature = FindClosestFeatureGeneral(globalPt, dist, closest, faces);
+
+	bool pointRemoved = AddToFinalizedFace(closest_feature, closest, vert);
+	return pointRemoved;
+}
+
+void QuickHull::AddHorizonMesh(HalfEdge* horizon)
+{
+	Vector3 start = horizon->m_tail;
+	Vector3 end = horizon->m_next->m_tail;
+	Mesh* mesh = Mesh::CreateLineImmediate(VERT_PCU, start, end, Rgba::CYAN);
+	m_horizon_mesh.push_back(mesh);
+}
+
+/*
+ * Add point to a face based on closest feature info
+ * @param, closest_feature: the closest feature the vert is to this geometry
+ * @param, closest: the closest point the vert is to this geometry
+ * @param, vert: the vert we wish to add to a conflict list
+ * @return: if the point is removed from global list of this hull
+ */
+bool QuickHull::AddToFinalizedFace(QHFeature* closest_feature, const Vector3& closest, QHVert* vert)
+{
+	const Vector3& globalPt = vert->GetVertRef();
 
 	// point is not inside the hull
 	if (closest_feature != nullptr && closest != Vector3::INVALID)
@@ -383,7 +475,6 @@ bool QuickHull::AddConflictPoint(QHVert* vert)
 			QHFace* theFace = FindFaceGivenPts(candidate1, candidate2, candidate3, found);
 			if (found)
 				theFace->AddConflictPoint(vert);
-				//theFace.ChangeConflictColor(vert);
 		}
 		else if (edge != nullptr)
 		{
@@ -398,8 +489,6 @@ bool QuickHull::AddConflictPoint(QHVert* vert)
 				// see which face is closer to the point
 				float dist1 = DistPointToPlaneUnsigned(globalPt, theFace1->GetVert1(), theFace1->GetVert2(), theFace1->GetVert3());
 				float dist2 = DistPointToPlaneUnsigned(globalPt, theFace2->GetVert1(), theFace2->GetVert2(), theFace2->GetVert3());
-				//float dist1 = DistPointToPlaneSigned(globalPt, theFace1->GetVert1(), theFace1->GetVert2(), theFace1->GetVert3());
-				//float dist2 = DistPointToPlaneSigned(globalPt, theFace2->GetVert1(), theFace2->GetVert2(), theFace2->GetVert3());
 
 				bool out1 = PointOutBoundFace(globalPt, *theFace1);
 				bool out2 = PointOutBoundFace(globalPt, *theFace2);
@@ -435,9 +524,6 @@ bool QuickHull::AddConflictPoint(QHVert* vert)
 				QHFace* theFace3 = faces[2];
 
 				// see which face is closer to the point
-				//float dist1 = DistPointToPlaneSigned(globalPt, theFace1->GetVert1(), theFace1->GetVert2(), theFace1->GetVert3());
-				//float dist2 = DistPointToPlaneSigned(globalPt, theFace2->GetVert1(), theFace2->GetVert2(), theFace2->GetVert3());
-				//float dist3 = DistPointToPlaneSigned(globalPt, theFace3->GetVert1(), theFace3->GetVert2(), theFace3->GetVert3());
 				float dist1 = DistPointToPlaneUnsigned(globalPt, theFace1->GetVert1(), theFace1->GetVert2(), theFace1->GetVert3());
 				float dist2 = DistPointToPlaneUnsigned(globalPt, theFace2->GetVert1(), theFace2->GetVert2(), theFace2->GetVert3());
 				float dist3 = DistPointToPlaneUnsigned(globalPt, theFace3->GetVert1(), theFace3->GetVert2(), theFace3->GetVert3());
@@ -499,14 +585,6 @@ bool QuickHull::AddConflictPoint(QHVert* vert)
 		RemovePointGlobal(globalPt);
 		return true;			// this point IS removed
 	}
-}
-
-void QuickHull::AddHorizonMesh(HalfEdge* horizon)
-{
-	Vector3 start = horizon->m_tail;
-	Vector3 end = horizon->m_next->m_tail;
-	Mesh* mesh = Mesh::CreateLineImmediate(VERT_PCU, start, end, Rgba::CYAN);
-	m_horizon_mesh.push_back(mesh);
 }
 
 void QuickHull::GeneratePointSet(uint num, const Vector3& min, const Vector3& max)
@@ -938,6 +1016,38 @@ QHFeature* QuickHull::FindClosestFeatureInitial(const Vector3& pt, float& theDis
 	return res;
 }
 
+QHFeature* QuickHull::FindClosestFeatureGeneral(const Vector3& pt, float& dist, Vector3& closest, std::vector<QHFace*>& faces)
+{
+	float minDist = INFINITY;
+	QHFeature* res = nullptr;
+
+	for (QHFace* face : faces)
+	{
+		if (PointOutBoundFace(pt, *face))
+		{
+			Vector3 closest_f;
+			float dist_f = 0.f;
+			QHFeature* closest_feature_f = nullptr;
+
+			if (face->IsTriangle())
+				closest_feature_f = DistPointToTriangleHull(pt, face->GetVert1(),
+					face->GetVert2(), face->GetVert3(), dist_f, closest_f);
+			else
+				ASSERT_RECOVERABLE(false, "Initial hull should not have a quad face");
+
+			if (dist_f < minDist)
+			{
+				minDist = dist_f;	
+				dist = dist_f;
+				closest = closest_f;
+				res = closest_feature_f;
+			}
+		}
+	}
+
+	return res;
+}
+
 QHFace* QuickHull::FindFaceGivenPts(const Vector3& v1, const Vector3& v2, const Vector3& v3, bool& found)
 {
 	QHFace* theFace = nullptr;
@@ -1031,8 +1141,8 @@ const std::vector<QHFace*> QuickHull::FindFaceGivenSharedVert(const QHVert& theV
 std::tuple<QHFace*, QHVert*> QuickHull::GetFarthestConflictPair(float& dist) const
 {
 	std::tuple<QHFace*, QHVert*> vert_pair;
-	QHVert* winner_vert;
-	QHFace* winner_face;
+	QHVert* winner_vert = nullptr;
+	QHFace* winner_face = nullptr;
 	dist = -INFINITY;
 
 	for (QHFace* face : m_faces)
@@ -1102,7 +1212,7 @@ void QuickHull::RenderHorizon(Renderer* renderer)
 			Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
 			renderer->SetTexture2D(0, texture);
 			renderer->SetSampler2D(0, texture->GetSampler());
-			glLineWidth(10.f);
+			glLineWidth(20.f);
 
 			renderer->m_objectData.model = Matrix44::IDENTITY;
 

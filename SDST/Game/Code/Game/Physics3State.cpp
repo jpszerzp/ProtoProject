@@ -13,6 +13,7 @@
 #include "Engine/Physics/3D/QuadRB3.hpp"
 #include <algorithm>
 
+
 bool IsGameobjectDead(GameObject* go) { return go->m_dead; }
 
 Physics3State::Physics3State()
@@ -582,10 +583,11 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_0))
 	{
 		// add a conflict point
+		bool removed = false;
 		if (!m_debug_vert_complete)
 		{
 			QHVert* vert = g_hull->GetVert((int)m_debug_vert_count);
-			bool removed = g_hull->AddConflictPoint(vert);
+			removed = g_hull->AddConflictPointInitial(vert);
 
 			if (!removed)
 				m_debug_vert_count++;
@@ -600,14 +602,17 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		QHFace* conflict_face = std::get<0>(g_hull->m_eyePair);
 		QHVert* conflict_pt = std::get<1>(g_hull->m_eyePair);
 
-		g_hull->m_visibleFaces.push_back(std::get<0>(g_hull->m_eyePair));
-		g_hull->m_allFaces.push_back(std::get<0>(g_hull->m_eyePair));
-		g_hull->test_he = conflict_face->m_entry;
-		g_hull->test_he_twin = g_hull->test_he->m_twin;
-		g_hull->test_otherFace = g_hull->test_he_twin->m_parentFace;
-		g_hull->test_start_he = g_hull->test_he;
+		if (conflict_face != nullptr && conflict_pt != nullptr)
+		{
+			g_hull->m_visibleFaces.push_back(conflict_face);
+			g_hull->m_allFaces.push_back(conflict_face);
+			g_hull->test_he = conflict_face->m_entry;
+			g_hull->test_he_twin = g_hull->test_he->m_twin;
+			g_hull->test_otherFace = g_hull->test_he_twin->m_parentFace;
+			g_hull->test_start_he = g_hull->test_he;
 
-		g_hull->ChangeCurrentHalfEdge();
+			g_hull->ChangeCurrentHalfEdge();
+		}
 	}
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_1))
@@ -724,6 +729,121 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		}
 
 		g_hull->ChangeCurrentHalfEdge();
+	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_2))
+	{
+		// horizon list is complete, form faces with conflicting point
+		// NOTE: since this he is on the visible side when pushed, we keep the direction
+		
+		// get reference to new faces
+		std::vector<QHFace*> faces;
+		QHVert* eye = std::get<1>(g_hull->m_eyePair);
+
+		for (HalfEdge* he : g_hull->m_horizon)
+		{
+			Vector3 eyePos = eye->vert;
+			QHFace* face = new QHFace(he, eyePos);
+
+			face->SetParentHalfEdge();
+
+			faces.push_back(face);
+		}
+
+		// fully set all twin relations
+		for (std::vector<QHFace*>::size_type i1 = 0; i1 < faces.size(); ++i1)
+		{
+			QHFace* subject = faces[i1];
+
+			for (std::vector<QHFace*>::size_type i2 = 0; i2 <faces.size(); ++i2)
+			{
+				QHFace* object = faces[i2];
+				if (subject != object)
+					subject->ShareEdge(object);		// set twins along the way
+			}
+		}
+		// all set for HE: tail, prev, next, twin, parent face
+
+		// delete outdated faces that cannot lie on hull
+		std::vector<QHVert*> orphaned;							// need to take the orphans		
+		std::vector<QHFace*>& eyeVisibles = eye->visibleFaces;
+		for (std::vector<QHFace*>::size_type idx1 = 0; idx1 < eyeVisibles.size(); ++idx1)
+		{
+			QHFace* oldFace = eyeVisibles[idx1];
+
+			for (std::vector<QHFace*>::size_type idx2 = 0; idx2 < g_hull->m_faces.size(); ++idx2)
+			{
+				QHFace* hullFace = g_hull->m_faces[idx2];
+				if (oldFace == hullFace)
+				{
+					std::vector<QHFace*>::iterator it = g_hull->m_faces.begin() + idx2;
+					g_hull->m_faces.erase(it);
+
+					// before deleting record orphans
+					for (QHVert* v : oldFace->conflicts)
+					{
+						if (v == eye)
+							g_hull->m_candidate = v;
+						else
+							g_hull->m_orphans.push_back(v);
+					}
+
+					// delete
+					HalfEdge* it_he = hullFace->m_entry;
+					HalfEdge* prev = it_he->m_prev;
+					HalfEdge* next = it_he->m_next;
+					// assuming triangle face
+					if (std::find(g_hull->m_horizon.begin(), g_hull->m_horizon.end(), it_he) == g_hull->m_horizon.end())
+						// in other words, delete the entry if we cannot find it as part of horizon
+						delete it_he;
+
+					if (std::find(g_hull->m_horizon.begin(), g_hull->m_horizon.end(), prev) == g_hull->m_horizon.end())
+						delete prev;
+
+					if (std::find(g_hull->m_horizon.begin(), g_hull->m_horizon.end(), next) == g_hull->m_horizon.end())
+						delete next;
+
+					delete hullFace;
+					idx2--;
+				}
+			}
+
+			std::vector<QHFace*>::iterator it = eyeVisibles.begin() + idx1;
+			eyeVisibles.erase(it);
+
+			idx1--;
+		}
+		// faces are deleted in both global hull and eye visibles
+		// orphans are stored and waiting to be distributed
+		// candidate is ready to be added to the vert list of hull
+
+		// add faces and point to hull
+		for (QHFace* addedFace : faces)
+			g_hull->m_faces.push_back(addedFace);
+		g_hull->m_verts.push_back(g_hull->m_candidate);
+
+		// after new faces are added, distributed orphans from abandoned faces
+		for (QHVert* orphan : g_hull->m_orphans)
+			g_hull->AddConflictPointGeneral(orphan, faces);
+
+		// clean up temporaries for next round of adding points
+		std::get<0>(g_hull->m_eyePair) = nullptr;
+		std::get<1>(g_hull->m_eyePair) = nullptr;
+		if (!g_hull->m_visibleFaces.empty())
+			g_hull->m_visibleFaces.clear();
+		if (!g_hull->m_allFaces.empty())
+			g_hull->m_allFaces.clear();
+		if (!g_hull->m_horizon.empty())
+			g_hull->m_horizon.clear();
+		for (Mesh* tempMesh : g_hull->m_horizon_mesh)
+			delete tempMesh;
+		g_hull->test_start_he = nullptr;
+		g_hull->test_he = nullptr;
+		g_hull->test_he_twin = nullptr;
+		g_hull->test_otherFace = nullptr;
+		if (!g_hull->m_orphans.empty())
+			g_hull->m_orphans.clear();
+		g_hull->m_candidate = nullptr;
 	}
 
 	// camera update from input

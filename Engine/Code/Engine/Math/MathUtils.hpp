@@ -13,6 +13,8 @@
 #include "Engine/Math/Plane.hpp"
 #include "Engine/Math/QuickHull.hpp"
 
+#include <set>
+
 #define PI 3.14159265359f
 #define SLERP_ANGLE_THRESHOLD 0.05f
 
@@ -129,6 +131,8 @@ bool IsIdenticalVector3(Vector3 v1, Vector3 v2);
 
 // minkowski
 AABB2 MinkowskiAABBVsAABB(const AABB2& aabb1, const AABB2& aabb2);
+std::set<Vector3> MinkowskiDifferenceHull(const std::set<Vector3>& hull_0, const std::set<Vector3>& hull_1);
+std::set<Vector3> MinkowskiSumHull(const std::set<Vector3>& hull_0, const std::set<Vector3>& hull_1);
 
 // collisions
 bool IsPointInCircle(Vector2 pos, float r);

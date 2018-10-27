@@ -83,6 +83,38 @@ const Vector3 Vector3::operator/( float inverseScale ) const
 }
 
 
+const bool Vector3::operator<(const Vector3& compared) const
+{
+	float myLengthSqr = GetLengthSquared();
+	float otherLengthSqr = compared.GetLengthSquared();
+	bool comparison = (myLengthSqr < otherLengthSqr);
+	return comparison;
+}
+
+const bool Vector3::operator<=(const Vector3& compared) const
+{
+	float myLengthSqr = GetLengthSquared();
+	float otherLengthSqr = compared.GetLengthSquared();
+	bool comparison = (myLengthSqr <= otherLengthSqr);
+	return comparison;
+}
+
+const bool Vector3::operator>(const Vector3& compared) const
+{
+	float myLengthSqr = GetLengthSquared();
+	float otherLengthSqr = compared.GetLengthSquared();
+	bool comparison = (myLengthSqr > otherLengthSqr);
+	return comparison;
+}
+
+const bool Vector3::operator>=(const Vector3& compared) const
+{
+	float myLengthSqr = GetLengthSquared();
+	float otherLengthSqr = compared.GetLengthSquared();
+	bool comparison = (myLengthSqr >= otherLengthSqr);
+	return comparison;
+}
+
 //-----------------------------------------------------------------------------------------------
 void Vector3::operator+=( const Vector3& vecToAdd )
 {

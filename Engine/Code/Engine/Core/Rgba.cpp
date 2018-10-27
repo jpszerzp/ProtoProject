@@ -23,7 +23,8 @@ const Rgba Rgba::YELLOW_HALF_OPACITY = Rgba(255, 255, 0, 127);
 const Rgba Rgba::RED_HALF_OPACITY = Rgba(255, 0, 0, 127);
 const Rgba Rgba::CYAN_HALF_OPACITY = Rgba(0, 255, 255, 127);
 const Rgba Rgba::MEGENTA_HALF_OPACITY = Rgba(255, 0, 255, 127);
-Rgba color_list[COLOR_LIST_SIZE] = {Rgba::RED, Rgba::GREEN, Rgba::BLUE, Rgba::YELLOW};
+Rgba color_list[COLOR_LIST_SIZE] = {Rgba::RED, Rgba::GREEN, Rgba::BLUE, Rgba::YELLOW,
+	Rgba::GREY, Rgba::CYAN, Rgba::MEGENTA, Rgba::DARK_BROWN, Rgba::TEAL, Rgba::PINK};
 
 Rgba::Rgba()
 {

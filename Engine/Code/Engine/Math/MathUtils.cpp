@@ -1216,6 +1216,35 @@ AABB2 MinkowskiAABBVsAABB(const AABB2& aabb1, const AABB2& aabb2)
 	return AABB2(bottomLeft, topRight);
 }
 
+
+std::set<Vector3> MinkowskiDifferenceHull(const std::set<Vector3>& hull_0, const std::set<Vector3>& hull_1)
+{
+	// A - B == A + (-B)
+	std::set<Vector3> reversed_hull_1;
+	for (const Vector3& from_1 : hull_1)
+		reversed_hull_1.emplace(-from_1);
+
+	return MinkowskiSumHull(hull_0, reversed_hull_1);
+}
+
+
+std::set<Vector3> MinkowskiSumHull(const std::set<Vector3>& hull_0, const std::set<Vector3>& hull_1)
+{
+	std::set<Vector3> sums;
+
+	for (const Vector3& from_0 : hull_0)
+	{
+		for (const Vector3& from_1 : hull_1)
+		{
+			Vector3 sum = from_0 + from_1;
+			sums.emplace(sum);
+		}
+	}
+
+	return sums;
+}
+
+
 bool IsPointInCircle(Vector2 pos, float r)
 {
 	return (pos.GetLength() <= r);
