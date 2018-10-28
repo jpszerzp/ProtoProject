@@ -133,7 +133,7 @@ void Rigidbody3::AddForcePointWorldCoord(const Vector3& force, const Vector3 poi
 	pt -= m_center;
 
 	m_netforce += force;
-	m_torqueAcc += pt.Cross(force);
+	m_torqueAcc += pt.Cross(force);			// impulse causes torque
 }
 
 Vector3 Rigidbody3::GetPointInWorld(const Vector3& pt_local)

@@ -16,6 +16,7 @@
 #include "Game/Fireworks.hpp"
 #include "Game/Spring.hpp"
 #include "Game/Links.hpp"
+#include "Game/WrapAround3.hpp"
 
 class Physics3State : public GameState
 {
@@ -79,6 +80,7 @@ public:
 	AnchorSpring* m_anchorSpring;
 	Rod* m_rod;
 	GeneralRigidAnchorSpring* m_rigidAnchorSpring;
+	GravityRigidForceGenerator* m_gravity;
 
 	// entities
 	std::vector<Sphere*> m_spheres;
@@ -102,4 +104,8 @@ public:
 	QuickHull* m_qh = nullptr;
 	uint m_debug_vert_count = 0;
 	bool m_debug_vert_complete = false;
+	
+	WrapAround* m_wraparound;
+	int m_wrapPosIterator = 0;
+	Sphere* m_physBall = nullptr;
 };

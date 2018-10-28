@@ -32,7 +32,7 @@ class GameObject;
 
 class Entity3
 {
-protected:
+public:
 	Mesh* m_colliderMesh = nullptr;
 	//Mesh* m_sphereBoundMesh = nullptr;
 	Mesh* m_boxBoundMesh = nullptr;

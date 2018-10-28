@@ -29,8 +29,9 @@ float GetRandomFloatInRange(float min, float max);
 float GetRandomFloatZeroToOne();
 int	  GetRandomIntInRange(int minInclusive, int maxInclusive);
 int	  GetRandomIntLessThan(int maxNotInclusive);
-Vector3 GetRandomVector3(const Vector3& v1, const Vector3& v2);
 bool  CheckRandomChance( float chanceForSuccess );	
+Vector3 GetRandomVector3(const Vector3& v1, const Vector3& v2);
+Vector3 GetRandomVector3();
 
 // physics
 float GetDistance(const Vector2& a, const Vector2& b);

@@ -88,7 +88,7 @@ float Contact3::GetVelPerImpulseContact()
 
 	// orthonormal basis means we can use transpose for inverse
 	// get velocity in contact coord - the shortcut, see p317 of GPED
-	float velContact;
+	float velContact = 0.f;
 	if (!rigid1->IsEntityStatic() && !rigid1->IsEntityKinematic())
 	{
 		velContact = DotProduct(velWorld, m_normal);	// angular
@@ -338,7 +338,7 @@ Vector3 Contact3::ComputeContactVelocity(int idx, Entity3* ent, float)
 	return contactVel;
 }
 
-void Contact3::ComputeDesiredVelDeltaCoherent(float deltaTime)
+void Contact3::ComputeDesiredVelDeltaCoherent(float)
 {
 	////static const float velLimit = .25f;
 
@@ -666,14 +666,8 @@ CollisionDetector::~CollisionDetector()
 
 }
 
-uint CollisionDetector::Sphere3VsSphere3(const Sphere3& s1, const Sphere3& s2, CollisionData3* data)
+bool CollisionDetector::Sphere3VsSphere3Core(const Sphere3& s1, const Sphere3& s2, Contact3& contact)
 {
-	if (data->m_contacts.size() > data->m_maxContacts)
-	{
-		// no contacts amount left, return directly
-		return 0;
-	}
-
 	Vector3 s1Pos = s1.m_center;
 	Vector3 s2Pos = s2.m_center;
 	float s1Rad = s1.m_radius;
@@ -686,7 +680,7 @@ uint CollisionDetector::Sphere3VsSphere3(const Sphere3& s1, const Sphere3& s2, C
 	{
 		// if mid line length is invalid
 		// or, larger than radius threshold, return directly
-		return 0;
+		return false;
 	}
 
 	// get normal
@@ -696,7 +690,46 @@ uint CollisionDetector::Sphere3VsSphere3(const Sphere3& s1, const Sphere3& s2, C
 
 	Contact3 theContact = Contact3(s1.GetEntity(), s2.GetEntity(),
 		normal, point, penetration);
+	contact = theContact;
+
+	return true;
+}
+
+uint CollisionDetector::Sphere3VsSphere3Single(const Sphere3& s1, const Sphere3& s2, CollisionData3* data)
+{
+	if (data->m_contacts.size() > data->m_maxContacts)
+	{
+		// no contacts amount left, return directly
+		return 0;
+	}
+
+	Contact3 theContact;
+	bool contactGenerated = Sphere3VsSphere3Core(s1, s2, theContact);
+
+	if (!contactGenerated)
+		return 0;
+
 	data->m_contacts.push_back(theContact);
+
+	return 1;
+}
+
+uint CollisionDetector::Sphere3VsSphere3Coherent(const Sphere3& s1, const Sphere3& s2, CollisionData3* data)
+{
+	if (data->m_contacts.size() >= data->m_maxContacts)
+		// no contacts amount left, return directly
+		return 0;
+
+	Contact3 theContact;
+	bool contactGenerated = Sphere3VsSphere3Core(s1, s2, theContact);
+
+	if (!contactGenerated)
+		return 0;
+
+	bool existed = data->HasAndUpdateContact(theContact);
+
+	if (!existed)
+		data->m_contacts.push_back(theContact);
 
 	return 1;
 }
@@ -1536,14 +1569,14 @@ uint CollisionDetector::Entity3VsEntity3(Entity3* e1, Entity3* e2, CollisionData
 			Sphere3 sph1 = s1->GetSpherePrimitive();
 			Sphere3 sph2 = s2->GetSpherePrimitive();
 
-			res = Sphere3VsSphere3(sph1, sph2, data);
+			res = Sphere3VsSphere3Single(sph1, sph2, data);
 		}
 		else if (srb2 != nullptr)
 		{
 			Sphere3 sph1 = s1->GetSpherePrimitive();
 			Sphere3 sph2 = srb2->GetSpherePrimitive();
 
-			res = Sphere3VsSphere3(sph1, sph2, data);
+			res = Sphere3VsSphere3Single(sph1, sph2, data);
 		}
 		else if (c2 != nullptr)
 		{
@@ -1567,14 +1600,14 @@ uint CollisionDetector::Entity3VsEntity3(Entity3* e1, Entity3* e2, CollisionData
 			Sphere3 sph1 = srb1->GetSpherePrimitive();
 			Sphere3 sph2 = s2->GetSpherePrimitive();
 
-			res = Sphere3VsSphere3(sph1, sph2, data);
+			res = Sphere3VsSphere3Single(sph1, sph2, data);
 		}
 		else if (srb2 != nullptr)
 		{
 			Sphere3 sph1 = srb1->GetSpherePrimitive();
 			Sphere3 sph2 = srb2->GetSpherePrimitive();
 
-			res = Sphere3VsSphere3(sph1, sph2, data);
+			res = Sphere3VsSphere3Single(sph1, sph2, data);
 		}
 		else if (c2 != nullptr)
 		{

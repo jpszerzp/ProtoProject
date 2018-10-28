@@ -126,7 +126,7 @@ void SphereRB3::Integrate(float deltaTime)
 		m_angularVelocity += angularAcc * deltaTime;
 
 		// damp on vel
-		m_linearVelocity *= powf(m_linearDamp, deltaTime);	// damp 1 means no damp	
+		m_linearVelocity *= powf(m_linearDamp, deltaTime);	// damp: 1 means no damp	
 		m_angularVelocity *= powf(m_angularDamp, deltaTime);
 
 		// pos

@@ -71,6 +71,20 @@ QHFace::QHFace(HalfEdge* he, const Vector3& pt)
 }
 
 
+QHFace::~QHFace()
+{
+	FlushFaceNormalMesh();
+
+	if (faceMesh != nullptr)
+	{
+		delete faceMesh;
+		faceMesh = nullptr;
+	}
+
+	// conflict points are usually orphaned points that will be adopted
+	// so we DO NOT delete them here
+}
+
 void QHFace::AddConflictPoint(QHVert* pt)
 {
 	// check out/inwardness
@@ -767,24 +781,24 @@ void QuickHull::GenerateInitialHull()
 	QHFace* face243 = new QHFace(3, verts243); face243->SetParentHalfEdge();
 
 	// fill twin for 123
-	bool found = m_faces[0]->FindTwinAgainstFace(face214);	assert(found, "123 failed to find twin with 214");
-	found = m_faces[0]->FindTwinAgainstFace(face134);		assert(found, "123 failed to find twin with 134");
-	found = m_faces[0]->FindTwinAgainstFace(face243);		assert(found, "123 failed to find twin with 243");
+	bool found = m_faces[0]->FindTwinAgainstFace(face214);	
+	found = m_faces[0]->FindTwinAgainstFace(face134);		
+	found = m_faces[0]->FindTwinAgainstFace(face243);		
 
 	// fill twin for 214
-	face214->FindTwinAgainstFace(m_faces[0]);	assert(found, "214 failed to find twin with 123");
-	face214->FindTwinAgainstFace(face134);		assert(found, "214 failed to find twin with 134");
-	face214->FindTwinAgainstFace(face243);		assert(found, "214 failed to find twin with 243");
+	face214->FindTwinAgainstFace(m_faces[0]);	
+	face214->FindTwinAgainstFace(face134);		
+	face214->FindTwinAgainstFace(face243);		
 
 	// fill twin for 134
-	face134->FindTwinAgainstFace(m_faces[0]); assert(found, "134 failed to find twin with 123");
-	face134->FindTwinAgainstFace(face214);	  assert(found, "134 failed to find twin with 214");
-	face134->FindTwinAgainstFace(face243);	  assert(found, "134 failed to find twin with 243");
+	face134->FindTwinAgainstFace(m_faces[0]); 
+	face134->FindTwinAgainstFace(face214);	  
+	face134->FindTwinAgainstFace(face243);	  
 
 	// fill twin for 243
-	face243->FindTwinAgainstFace(m_faces[0]); assert(found, "243 failed to find twin with 123");
-	face243->FindTwinAgainstFace(face214);	  assert(found, "243 failed to find twin with 214");
-	face243->FindTwinAgainstFace(face134);	  assert(found, "243 failed to find twin with 134");
+	face243->FindTwinAgainstFace(m_faces[0]);
+	face243->FindTwinAgainstFace(face214);	 
+	face243->FindTwinAgainstFace(face134);	 
 
 	// given a face and an external point, calculate the outbound normal 
 	// outbound means opposite direction from the face to that external point
@@ -832,7 +846,7 @@ void QuickHull::GenerateOutboundNorm(const Vector3& external, QHFace& face)
 	// decide on initial face normal based on v4
 	Vector3 towardExternal = external - face.verts[0];
 	float ext1 = DotProduct(towardExternal, norm1);
-	float ext2 = DotProduct(towardExternal, norm2);
+	//float ext2 = DotProduct(towardExternal, norm2);
 	Vector3 norm = (ext1 < 0.f) ? norm1 : norm2;
 	face.normal = norm;
 }

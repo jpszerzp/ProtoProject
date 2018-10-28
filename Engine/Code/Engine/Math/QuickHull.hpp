@@ -101,19 +101,7 @@ public:
 	QHFace(const Vector3& v1, const Vector3& v2, const Vector3& v3);
 	QHFace(HalfEdge* he, const Vector3& pt);
 	QHFace(int num, Vector3* sample);
-	~QHFace()
-	{
-		FlushFaceNormalMesh();
-
-		if (faceMesh != nullptr)
-		{
-			delete faceMesh;
-			faceMesh = nullptr;
-		}
-
-		// conflict points are usually orphaned points that will be adopted
-		// so we DO NOT delete them here
-	}
+	~QHFace();
 
 	void AddConflictPoint(QHVert* pt);
 	QHVert* GetFarthestConflictPoint(float& dist) const;

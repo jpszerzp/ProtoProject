@@ -121,7 +121,11 @@ public:
 	~CollisionDetector();
 
 	// sphere vs sphere
-	static uint Sphere3VsSphere3(const Sphere3& s1, 
+	static bool Sphere3VsSphere3Core(const Sphere3& s1,
+		const Sphere3& s2, Contact3& contact);
+	static uint Sphere3VsSphere3Single(const Sphere3& s1, 
+		const Sphere3& s2, CollisionData3* data);
+	static uint Sphere3VsSphere3Coherent(const Sphere3& s1,
 		const Sphere3& s2, CollisionData3* data);
 
 	// sphere vs plane

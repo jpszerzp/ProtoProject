@@ -39,7 +39,7 @@ Sphere::Sphere(Vector3 pos, Vector3 rot, Vector3 scale,
 	if (bid == BODY_PARTICLE)
 		m_physEntity = new SphereEntity3(sphere3, moveStat);
 	else
-		m_physEntity = new SphereRB3(4.9f, sphere3, moveStat);
+		m_physEntity = new SphereRB3(1.f, sphere3, moveStat);
 	m_physEntity->SetEntityForPrimitive();
 }
 

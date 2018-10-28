@@ -59,8 +59,8 @@ Physics3State::Physics3State()
 	m_particleRegistry = new ParticleForceRegistry();
 	m_rigidRegistry = new RigidForceRegistry();
 
-	GravityRigidForceGenerator* grg = new GravityRigidForceGenerator(Vector3::GRAVITY);
-
+	m_gravity = new GravityRigidForceGenerator(Vector3::GRAVITY);
+	
 	// or, initialize into other shapes (cube, etc)
 	//m_g0 = InitializePhysSphere(Vector3(15.f, -1.5f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_KINEMATIC, BODY_PARTICLE);
 	//m_g1 = InitializePhysSphere(Vector3(0.f, 40.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID);
@@ -71,8 +71,8 @@ Physics3State::Physics3State()
 	Sphere* s2 = InitializePhysSphere(Vector3(10.f, 40.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID);
 	s2->m_physEntity->SetFrozen(true);
 	Rigidbody3* rigid_s1 = static_cast<Rigidbody3*>(s2->GetEntity());
-	m_rigidRegistry->Register(rigid_s1, grg);
-	rigid_s1->m_angularVelocity = Vector3(0.f, 0.f, 5.f);
+	m_rigidRegistry->Register(rigid_s1, m_gravity);
+	//rigid_s1->m_angularVelocity = Vector3(0.f, 0.f, 5.f);
 
 	/*
 	//////////////////////////////// For rigid spring ////////////////////////////////
@@ -179,6 +179,11 @@ Physics3State::Physics3State()
 	m_qh = new QuickHull(5, qhMin, qhMax);
 	g_hull = m_qh;
 
+	// wrap around field
+	Vector3 wraparoundMin = Vector3(0.f, 110.f, 0.f);
+	Vector3 wraparoundMax = Vector3(20.f, 140.f, 30.f);
+	m_wraparound = new WrapAround(wraparoundMin, wraparoundMax);
+
 	// debug
 	DebugRenderSet3DCamera(m_camera);
 	DebugRenderSet2DCamera(m_UICamera);
@@ -199,6 +204,9 @@ Physics3State::~Physics3State()
 
 	delete m_anchorSpring;
 	m_anchorSpring = nullptr;
+
+	delete m_wraparound;
+	m_wraparound = nullptr;
 }
 
 
@@ -846,6 +854,43 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		g_hull->m_candidate = nullptr;
 	}
 
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_SPACE))
+	{
+		/*
+		Vector3 camPos = m_camera->GetWorldPosition();
+		Vector3 camForward = m_camera->GetWorldForward().GetNormalized();
+		Vector3 pos = camPos + camForward * 2.f;
+
+		Sphere* s = InitializePhysSphere(pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID);
+		Rigidbody3* rigid_s = static_cast<Rigidbody3*>(s->GetEntity());
+		m_rigidRegistry->Register(rigid_s, m_gravity);
+		rigid_s->SetLinearVelocity(camForward * 10.f);
+		*/
+
+		Vector3 positions[8] = {Vector3(10.f, 120.f, 10.f), Vector3(10.f, 120.f, 20.f), 
+			Vector3(20.f, 120.f, 10.f), Vector3(20.f, 120.f, 20.f),
+			Vector3(10.f, 130.f, 10.f), Vector3(10.f, 130.f, 20.f),
+			Vector3(20.f, 130.f, 10.f), Vector3(20.f, 130.f, 20.f)};
+		Vector3 pos = positions[m_wrapPosIterator];
+		if (m_physBall == nullptr)
+		{
+			m_physBall = InitializePhysSphere(pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID);
+			Rigidbody3* rigid_s = static_cast<Rigidbody3*>(m_physBall->GetEntity());
+			rigid_s->SetLinearVelocity(GetRandomVector3() * 20.f);
+			m_wraparound->m_gos.push_back(m_physBall);
+		}
+		else
+		{
+			Sphere* s = InitializePhysSphere(pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID);
+			Rigidbody3* rigid_s = static_cast<Rigidbody3*>(s->GetEntity());
+			rigid_s->SetLinearVelocity(GetRandomVector3() * 20.f);
+			m_wraparound->m_gos.push_back(s);
+		}
+
+		m_wrapPosIterator += 1;
+		m_wrapPosIterator %= 8;
+	}
+
 	// camera update from input
 	Vector3 camForward = m_camera->GetLocalForward(); 
 	Vector3 camUp = m_camera->GetLocalUp(); 
@@ -930,6 +975,18 @@ void Physics3State::UpdateGameobjectsCore(float deltaTime)
 			idx--;
 		}
 	}
+
+	// teleport for wraparound
+	m_wraparound->Update();
+	
+	if (m_physBall != nullptr)
+	{
+		Rigidbody3* rigid_s = static_cast<Rigidbody3*>(m_physBall->GetEntity());
+		Vector3 angVel = rigid_s->GetAngularVelocity();
+		Quaternion orient = rigid_s->GetQuaternion();
+		DebuggerPrintf("angular velocity: %f, %f, %f\n", angVel.x, angVel.y, angVel.z);
+		DebuggerPrintf("orientation: %f, %f, %f; real: %f\n", orient.m_imaginary.x, orient.m_imaginary.y, orient.m_imaginary.z, orient.m_real);
+	}
 }
 
 void Physics3State::UpdateContactGeneration()
@@ -994,7 +1051,7 @@ void Physics3State::UpdateCore()
 					Sphere3 sph1 = se1->GetSpherePrimitive();
 					Sphere3 sph2 = se2->GetSpherePrimitive();
 
-					CollisionDetector::Sphere3VsSphere3(sph1, sph2, m_allResolver->GetCollisionData());
+					CollisionDetector::Sphere3VsSphere3Single(sph1, sph2, m_allResolver->GetCollisionData());
 				}
 				else
 				{
@@ -1004,7 +1061,7 @@ void Physics3State::UpdateCore()
 					Sphere3 sph1 = se->GetSpherePrimitive();
 					Sphere3 sph2 = srb->GetSpherePrimitive();
 
-					CollisionDetector::Sphere3VsSphere3(sph1, sph2, m_allResolver->GetCollisionData());
+					CollisionDetector::Sphere3VsSphere3Single(sph1, sph2, m_allResolver->GetCollisionData());
 				}
 			}
 			else
@@ -1017,7 +1074,7 @@ void Physics3State::UpdateCore()
 					Sphere3 sph1 = srb->GetSpherePrimitive();
 					Sphere3 sph2 = se->GetSpherePrimitive();
 
-					CollisionDetector::Sphere3VsSphere3(sph1, sph2, m_allResolver->GetCollisionData());
+					CollisionDetector::Sphere3VsSphere3Single(sph1, sph2, m_allResolver->GetCollisionData());
 				}
 				else
 				{
@@ -1027,7 +1084,8 @@ void Physics3State::UpdateCore()
 					Sphere3 sph1 = srb1->GetSpherePrimitive();
 					Sphere3 sph2 = srb2->GetSpherePrimitive();
 
-					CollisionDetector::Sphere3VsSphere3(sph1, sph2, m_allResolver->GetCollisionData());
+					//CollisionDetector::Sphere3VsSphere3(sph1, sph2, m_allResolver->GetCollisionData());
+					CollisionDetector::Sphere3VsSphere3Coherent(sph1, sph2, m_coherentResolver->GetCollisionData());
 				}
 			}
 		}
@@ -1048,7 +1106,7 @@ void Physics3State::UpdateCore()
 					Sphere3 sph = srb->GetSpherePrimitive();
 					Plane pl = qe->GetPlanePrimitive();
 
-					CollisionDetector::Sphere3VsPlane3Coherent(sph, pl, m_allResolver->GetCollisionData());
+					CollisionDetector::Sphere3VsPlane3Single(sph, pl, m_allResolver->GetCollisionData());
 				}
 				else 
 				{

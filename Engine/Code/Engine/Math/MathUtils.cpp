@@ -57,6 +57,15 @@ Vector3 GetRandomVector3(const Vector3& v1, const Vector3& v2)
 	return Vector3(rand_x, rand_y, rand_z);
 }
 
+Vector3 GetRandomVector3()
+{
+	float rand_x = GetRandomFloatInRange(-1.f, 1.f);
+	float rand_y = GetRandomFloatInRange(-1.f, 1.f);
+	float rand_z = GetRandomFloatInRange(-1.f, 1.f);
+	Vector3 res = Vector3(rand_x, rand_y, rand_z);
+	return res.GetNormalized();
+}
+
 float GetDistance(const Vector2& a, const Vector2& b)
 {
 	float newX = b.x - a.x;

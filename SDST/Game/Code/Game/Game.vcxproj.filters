@@ -94,6 +94,9 @@
     <ClCompile Include="Links.cpp">
       <Filter>General\Units</Filter>
     </ClCompile>
+    <ClCompile Include="WrapAround3.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameCommon.hpp">
@@ -162,6 +165,7 @@
     <ClInclude Include="Links.hpp">
       <Filter>General\Units</Filter>
     </ClInclude>
+    <ClInclude Include="WrapAround3.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="..\..\Run_Win32\Data\Definitions\IsoSprite.xml" />
