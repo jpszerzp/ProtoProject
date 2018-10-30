@@ -10,7 +10,7 @@ public:
 	Vector3 m_angularVelocity;
 	Vector3 m_torqueAcc;
 	float m_angularDamp;
-	//Vector3 m_lastAcc;
+	Vector3 m_lastFrameLinearAcc;
 
 	Matrix44 m_cachedTransform;
 	Matrix33 m_inverseInertiaTensorWorld;	// in world space

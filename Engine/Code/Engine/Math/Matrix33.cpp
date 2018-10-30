@@ -34,6 +34,13 @@ Matrix33::Matrix33(float entry)
 	Iz = entry;	Jz = entry;	Kz = entry;	
 }
 
+void Matrix33::operator+=(const Matrix33& rhs)
+{
+	Ix += rhs.Ix; Jx += rhs.Jx; Kx += rhs.Kx;
+	Iy += rhs.Iy; Jy += rhs.Jy; Ky += rhs.Ky;
+	Iz += rhs.Iz; Jz += rhs.Jz; Kz += rhs.Kz;
+}
+
 Vector3 Matrix33::operator*(const Vector3& rhs) const
 {
 	Vector3 row1 = Vector3(Ix, Jx, Kx);
@@ -53,6 +60,60 @@ void Matrix33::operator*(const float rhs)
 	Iy *= rhs;		Jy *= rhs;		Ky *= rhs;
 	Iz *= rhs;		Jz *= rhs;		Kz *= rhs;
 }
+
+Matrix33 Matrix33::operator*(const Matrix33& rhs) const
+{
+	Matrix33 res;
+
+	Vector3 my_row1 = Vector3(Ix, Jx, Kx);
+	Vector3 my_row2 = Vector3(Iy, Jy, Ky);
+	Vector3 my_row3 = Vector3(Iz, Jz, Kz);
+
+	Vector3 other_col1 = Vector3(rhs.Ix, rhs.Iy, rhs.Iz);
+	Vector3 other_col2 = Vector3(rhs.Jx, rhs.Jy, rhs.Jz);
+	Vector3 other_col3 = Vector3(rhs.Kx, rhs.Ky, rhs.Kz);
+
+	res.Ix = DotProduct(my_row1, other_col1);
+	res.Iy = DotProduct(my_row2, other_col1);
+	res.Iz = DotProduct(my_row3, other_col1);
+	res.Jx = DotProduct(my_row1, other_col2);
+	res.Jy = DotProduct(my_row2, other_col2);
+	res.Jz = DotProduct(my_row3, other_col2);
+	res.Kx = DotProduct(my_row1, other_col3);
+	res.Ky = DotProduct(my_row2, other_col3);
+	res.Kz = DotProduct(my_row3, other_col3);
+
+	return res;
+}
+
+void Matrix33::operator*=(const Matrix33& rhs)
+{
+	Vector3 my_row1 = Vector3(Ix, Jx, Kx);
+	Vector3 my_row2 = Vector3(Iy, Jy, Ky);
+	Vector3 my_row3 = Vector3(Iz, Jz, Kz);
+
+	Vector3 other_col1 = Vector3(rhs.Ix, rhs.Iy, rhs.Iz);
+	Vector3 other_col2 = Vector3(rhs.Jx, rhs.Jy, rhs.Jz);
+	Vector3 other_col3 = Vector3(rhs.Kx, rhs.Ky, rhs.Kz);
+
+	Ix = DotProduct(my_row1, other_col1);
+	Iy = DotProduct(my_row2, other_col1);
+	Iz = DotProduct(my_row3, other_col1);
+	Jx = DotProduct(my_row1, other_col2);
+	Jy = DotProduct(my_row2, other_col2);
+	Jz = DotProduct(my_row3, other_col2);
+	Kx = DotProduct(my_row1, other_col3);
+	Ky = DotProduct(my_row2, other_col3);
+	Kz = DotProduct(my_row3, other_col3);
+}
+
+void Matrix33::operator*=(const float scale)
+{
+	Ix *= scale; Jx *= scale; Kx *= scale;
+	Iy *= scale; Jy *= scale; Ky *= scale;
+	Iz *= scale; Jz *= scale; Kz *= scale;
+}
+
 
 const float Matrix33::operator[](const int idx) const
 {
@@ -81,7 +142,6 @@ float Matrix33::GetDeterminant() const
 
 void Matrix33::SetRight(Vector3 right)
 {
-	//Kx = right.x; Ky = right.y; Kz = right.z;
 	Ix = right.x; Iy = right.y; Iz = right.z;
 }
 
@@ -92,7 +152,6 @@ void Matrix33::SetUp(Vector3 up)
 
 void Matrix33::SetForward(Vector3 forward)
 {
-	//Ix = forward.x; Iy = forward.y; Iz = forward.z;
 	Kx = forward.x; Ky = forward.y; Kz = forward.z;
 }
 
@@ -101,6 +160,13 @@ void Matrix33::SetBasis(Vector3 right, Vector3 up, Vector3 forward)
 	SetRight(right);
 	SetUp(up);
 	SetForward(forward);
+}
+
+void Matrix33::SetSkewSymmetric(const Vector3& v)
+{
+	Ix = 0.f;    Jx = -v.z;   Kx = v.y;
+	Iy = v.z;    Jy = 0.f;    Ky = -v.x;
+	Iz = -v.y;   Jz = v.x;    Kz = 0.f;
 }
 
 Matrix33 Matrix33::Invert() const

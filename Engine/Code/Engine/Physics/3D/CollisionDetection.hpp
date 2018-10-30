@@ -44,10 +44,8 @@ public:
 	Vector3 m_normal;
 	Vector3 m_point;
 
-	//Vector3 m_start;
-	//Vector3 m_end;
-
 	float m_restitution;
+	float m_friction;
 
 	// transformation convenience properties
 	Matrix33 m_toWorld;
@@ -58,7 +56,7 @@ public:
 public:
 	Contact3();
 	Contact3(Entity3* e1, Entity3* e2);
-	Contact3(Entity3* e1, Entity3* e2, Vector3 normal, Vector3 point, float penetration, float res = 1.f);
+	Contact3(Entity3* e1, Entity3* e2, Vector3 normal, Vector3 point, float penetration, float res = 1.f, float friction = 0.f);
 	~Contact3();
 
 	float ComputeSeparatingVelocity() const;
@@ -71,6 +69,7 @@ public:
 	float GetVelPerImpulseContact();
 	float GetDeltaVel();
 	Vector3 ComputeContactImpulse();
+	Vector3 ComputeContactImpulseFriction();
 	Vector3 ComputeWorldImpulse();
 
 	// pos change
@@ -86,7 +85,10 @@ public:
 	void PrepareInternal(float deltaTime);
 	void SwapEntities();
 	Vector3 ComputeContactVelocity(int idx, Entity3* ent, float deltaTime);
-	void ComputeDesiredVelDeltaCoherent(float deltaTime);
+	void ComputeDesiredVelDeltaCoherent();
+
+	// resting
+	void ComputeDesiredVelDeltaResting();
 };
 
 /**

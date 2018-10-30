@@ -15,6 +15,10 @@ public:
 	explicit Matrix33(const float* entries);
 	explicit Matrix33(const Vector3& i, const Vector3& j, const Vector3& k);
 
+	Matrix33 operator*(const Matrix33& rhs) const;
+	void operator*=(const Matrix33& rhs);
+	void operator*=(const float scale);
+	void operator+=(const Matrix33& rhs);
 	Vector3 operator*(const Vector3& rhs) const;
 	void operator*(const float rhs);
 	const float operator[](const int idx) const;
@@ -25,6 +29,7 @@ public:
 	void SetUp(Vector3 up);
 	void SetForward(Vector3 forward);
 	void SetBasis(Vector3 right, Vector3 up, Vector3 forward);
+	void SetSkewSymmetric(const Vector3& v);
 
 	// inverse
 	Matrix33 Invert() const;

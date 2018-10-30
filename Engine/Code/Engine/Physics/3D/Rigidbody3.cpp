@@ -145,8 +145,8 @@ Vector3 Rigidbody3::GetPointInWorld(const Vector3& pt_local)
 
 void Rigidbody3::ClearAccs()
 {
-	m_netforce = Vector3::ZERO;
-	m_torqueAcc = Vector3::ZERO;
+	m_netforce = Vector3::ZERO;			// linear force acc
+	m_torqueAcc = Vector3::ZERO;		// angular torque acc
 }
 
 void Rigidbody3::Render(Renderer* renderer)
@@ -163,7 +163,7 @@ void Rigidbody3::Integrate(float deltaTime)
 	if (!m_frozen)
 	{
 		// acc
-		//m_lastAcc = m_linearAcceleration;
+		m_lastFrameLinearAcc = m_linearAcceleration;
 		m_linearAcceleration = m_netforce * m_massData.m_invMass;
 		Vector3 angularAcc = m_inverseInertiaTensorWorld * m_torqueAcc;
 

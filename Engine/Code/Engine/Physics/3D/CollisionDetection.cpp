@@ -24,7 +24,7 @@ Contact3::Contact3(Entity3* e1, Entity3* e2)
 	m_e2 = e2;
 }
 
-Contact3::Contact3(Entity3* e1, Entity3* e2, Vector3 normal, Vector3 point, float penetration, float res)
+Contact3::Contact3(Entity3* e1, Entity3* e2, Vector3 normal, Vector3 point, float penetration, float res, float friction)
 {
 	m_e1 = e1;
 	m_e2 = e2;
@@ -32,6 +32,7 @@ Contact3::Contact3(Entity3* e1, Entity3* e2, Vector3 normal, Vector3 point, floa
 	m_point = point;
 	m_penetration = penetration;
 	m_restitution = res;
+	m_friction = friction;
 }
 
 Contact3::~Contact3()
@@ -91,7 +92,7 @@ float Contact3::GetVelPerImpulseContact()
 	float velContact = 0.f;
 	if (!rigid1->IsEntityStatic() && !rigid1->IsEntityKinematic())
 	{
-		velContact = DotProduct(velWorld, m_normal);	// angular
+		velContact = DotProduct(velWorld, m_normal);		// angular
 		velContact += rigid1->GetMassData3().m_invMass;		// linear
 	}
 
@@ -147,17 +148,84 @@ float Contact3::GetDeltaVel()
 
 Vector3 Contact3::ComputeContactImpulse()
 {
-	//float desired = GetDeltaVel();
+	TODO("This is frictionless version; need a friction version if we need to consider that.");
+
 	float delta = GetVelPerImpulseContact();
 	float imp = m_desiredVelDelta / delta;
 	return Vector3(imp, 0.f, 0.f);
 }
 
+Vector3 Contact3::ComputeContactImpulseFriction()
+{
+	Vector3 imp;
+	Rigidbody3* rigid1 = dynamic_cast<Rigidbody3*>(m_e1);
+	float invMass = rigid1->GetMassData3().m_invMass;
+
+	Matrix33 toTorque;
+	toTorque.SetSkewSymmetric(m_relativePosWorld[0]);
+
+	// in world coord
+	Matrix33 deltaVelWorld = toTorque;
+	deltaVelWorld *= rigid1->m_inverseInertiaTensorWorld;
+	deltaVelWorld *= toTorque;
+	deltaVelWorld *= -1.f;
+
+	if (m_e2 != nullptr)
+	{
+		Rigidbody3* rigid2 = dynamic_cast<Rigidbody3*>(m_e1);
+
+		// it was a cross product in the frictionless version
+		toTorque.SetSkewSymmetric(m_relativePosWorld[1]);
+
+		Matrix33 deltaVelWorld2 = toTorque;
+		deltaVelWorld2 *= rigid2->m_inverseInertiaTensorWorld;
+		deltaVelWorld2 *= toTorque;
+		deltaVelWorld2 *= -1.f;
+
+		deltaVelWorld += deltaVelWorld2;
+
+		invMass += rigid2->GetMassData3().m_invMass;
+	}
+
+	// convert to contact coord (change of basis)
+	Matrix33 deltaVelocity = m_toWorld.Transpose();
+	deltaVelocity *= deltaVelWorld;
+	deltaVelocity *= m_toWorld;
+	
+	// linear velocity change as a matrix
+	deltaVelocity.Ix += invMass;
+	deltaVelocity.Jy += invMass;
+	deltaVelocity.Kz += invMass;
+
+	// impulse per velocity
+	Matrix33 impulseMat = deltaVelocity.Invert();
+
+	// velocity to kill by friction
+	Vector3 toKill(m_desiredVelDelta, -m_closingVel.y, -m_closingVel.z);
+
+	// impulse needed for the kill
+	imp = impulseMat * toKill;
+
+	// should we use dynamic friction?
+	float planarImp = sqrtf(imp.y * imp.y + imp.z * imp.z);
+	if (planarImp > imp.x * m_friction)
+	{
+		imp.y /= planarImp;
+		imp.z /= planarImp;
+
+		imp.x = deltaVelocity.Ix + deltaVelocity.Jx * m_friction * imp.y + deltaVelocity.Kx * m_friction * imp.z;
+		imp.x = m_desiredVelDelta / imp.x;
+		imp.y *= m_friction * imp.x;
+		imp.z *= m_friction * imp.x;
+	}
+
+	return imp;
+}
+
 Vector3 Contact3::ComputeWorldImpulse()
 {
-	//Matrix33 contactToWorld;
-	//MakeToWorld(contactToWorld);
 	return m_toWorld * ComputeContactImpulse();
+	//return m_toWorld * ComputeContactImpulseFriction();
 }
 
 void Contact3::ApplyImpulse()
@@ -178,8 +246,6 @@ void Contact3::ResolveVelocityCoherent(Vector3 linearChange[2], Vector3 angularC
 	{
 		Vector3 linear = impulse * rigid1->GetMassData3().m_invMass;
 
-		//Vector3 relPos1 = m_point - rigid1->GetEntityCenter();
-		//Vector3 torque = impulse.Cross(relPos1);
 		Vector3 torque = m_relativePosWorld[0].Cross(impulse);
 		Vector3 rotation = rigid1->m_inverseInertiaTensorWorld * torque;
 
@@ -203,8 +269,6 @@ void Contact3::ResolveVelocityCoherent(Vector3 linearChange[2], Vector3 angularC
 
 		Vector3 linear = impulse * rigid2->GetMassData3().m_invMass;
 
-		//Vector3 relPos2 = m_point - rigid2->GetEntityCenter();
-		//Vector3 torque = relPos2.Cross(impulse);
 		Vector3 torque = m_relativePosWorld[1].Cross(impulse);
 		Vector3 rotation = rigid2->m_inverseInertiaTensorWorld * torque;
 
@@ -305,7 +369,8 @@ void Contact3::PrepareInternal(float deltaTime)
 		m_closingVel -= ComputeContactVelocity(1, m_e2, deltaTime);
 
 	// desired change in vel as resolving coherent contacts
-	ComputeDesiredVelDeltaCoherent(deltaTime);
+	ComputeDesiredVelDeltaCoherent();
+	//ComputeDesiredVelDeltaResting();
 }
 
 void Contact3::SwapEntities()
@@ -329,41 +394,32 @@ Vector3 Contact3::ComputeContactVelocity(int idx, Entity3* ent, float)
 	vel += rigid->GetLinearVelocity();
 	const Matrix33& toContact = m_toWorld.Transpose();
 	Vector3 contactVel = toContact * vel;	// to contact coord
-
-	//Vector3 acc = rigid->GetLastAcc() * deltaTime;
-	//acc = toContact * acc;
-	//acc.x = 0.f;
-	//contactVel += acc;
-
 	return contactVel;
 }
 
-void Contact3::ComputeDesiredVelDeltaCoherent(float)
+void Contact3::ComputeDesiredVelDeltaCoherent()
 {
-	////static const float velLimit = .25f;
-
-	//float velAcc = 0.f;
-
-	//Rigidbody3* rb1 = static_cast<Rigidbody3*>(m_e1);
-	//Rigidbody3* rb2 = static_cast<Rigidbody3*>(m_e2);
-	//
-	//if (rb1 != nullptr)
-	//	velAcc += DotProduct(rb1->GetLinearAcceleration() * deltaTime, m_normal);
-
-	//if (rb2 != nullptr)
-	//	velAcc -= DotProduct(rb2->GetLinearAcceleration() * deltaTime, m_normal);
-
-	///*
-	//float r = m_restitution;
-	//if (abs(m_closingVel.x) < velLimit)
-	//	r = 0.f;
-	//	*/
-
-	////m_desiredVelDelta = -m_closingVel.x - r * (m_closingVel.x - velAcc);
-	//m_desiredVelDelta = -m_closingVel.x - m_restitution * (m_closingVel.x - velAcc);
-
 	// closing vel should be in contact coord
 	m_desiredVelDelta = -m_closingVel.x * (1 + m_restitution);
+}
+
+// built on ComputeDesiredVelDeltaCoherent()
+void Contact3::ComputeDesiredVelDeltaResting()
+{
+	const static float velLimit = .25f;
+
+	Rigidbody3* r1 = static_cast<Rigidbody3*>(m_e1);
+	float velFromAcc = DotProduct(r1->m_lastFrameLinearAcc, m_normal);
+	
+	Rigidbody3* r2 = static_cast<Rigidbody3*>(m_e2);
+	if (r2 != nullptr)
+		velFromAcc -= DotProduct(r2->m_lastFrameLinearAcc, m_normal);
+
+	float r = m_restitution;
+	if (m_closingVel.GetLength() < velLimit)
+		r = 0.f;
+
+	m_desiredVelDelta = -m_closingVel.x - r * (m_closingVel.x - velFromAcc);
 }
 
 void Contact3::SolveNonlinearProjection(		
@@ -373,27 +429,14 @@ void Contact3::SolveNonlinearProjection(
 	float totalInertia = 0.f;
 	Rigidbody3* rigid1 = dynamic_cast<Rigidbody3*>(m_e1);
 	Rigidbody3* rigid2 = dynamic_cast<Rigidbody3*>(m_e2);
-	//Vector3 relPos1 = m_point - rigid1->GetEntityCenter();
-	//Vector3 relPos2 = m_point - rigid2->GetEntityCenter();
-
-	//Matrix33 contactToWorld;
-	//MakeToWorld(contactToWorld);
-	//Matrix33 worldToContact = contactToWorld.Transpose();
 
 	if (rigid1 != nullptr)
 	{
 		const Matrix33& iitWorld = rigid1->m_inverseInertiaTensorWorld;
 
-		//Vector3 angInertiaWorld = relPos1.Cross(m_normal);
 		Vector3 angInertiaWorld = m_relativePosWorld[0].Cross(m_normal);
 		angInertiaWorld = iitWorld * angInertiaWorld;
 		angInertiaWorld = angInertiaWorld.Cross(m_relativePosWorld[0]);
-		//angInertiaWorld = angInertiaWorld.Cross(relPos1);
-		
-		//Vector3 angInertiaContact = worldToContact * angInertiaWorld;
-		//float angComponent = angInertiaContact.x;
-
-		//angularInertia[0] = angComponent;
 
 		angularInertia[0] = DotProduct(angInertiaWorld, m_normal);
 		linearInertia[0] = rigid1->GetMassData3().m_invMass;
@@ -404,16 +447,9 @@ void Contact3::SolveNonlinearProjection(
 	{
 		const Matrix33& iitWorld = rigid2->m_inverseInertiaTensorWorld;
 
-		//Vector3 angInertiaWorld = relPos2.Cross(m_normal);
 		Vector3 angInertiaWorld = m_relativePosWorld[1].Cross(m_normal);
 		angInertiaWorld = iitWorld * angInertiaWorld;
 		angInertiaWorld = angInertiaWorld.Cross(m_relativePosWorld[1]);
-		//angInertiaWorld = angInertiaWorld.Cross(relPos2);
-
-		//Vector3 angInertiaContact = worldToContact * angInertiaWorld;
-		//float angComponent = angInertiaContact.x;
-
-		//angularInertia[1] = angComponent;
 
 		angularInertia[1] = DotProduct(angInertiaWorld, m_normal);
 		linearInertia[1] = rigid2->GetMassData3().m_invMass;
@@ -688,8 +724,7 @@ bool CollisionDetector::Sphere3VsSphere3Core(const Sphere3& s1, const Sphere3& s
 	Vector3 point = s2Pos + midLine * 0.5f;
 	float penetration = s1Rad + s2Rad - length;
 
-	Contact3 theContact = Contact3(s1.GetEntity(), s2.GetEntity(),
-		normal, point, penetration);
+	Contact3 theContact = Contact3(s1.GetEntity(), s2.GetEntity(), normal, point, penetration);
 	contact = theContact;
 
 	return true;

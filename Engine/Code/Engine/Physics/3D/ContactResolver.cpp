@@ -226,7 +226,8 @@ void ContactResolver::ResolveVelocityCoherent(float deltaTime)
 					//thisContact.m_closingVel -= toContact * delVel;
 					thisContact.m_closingVel += toContact * delVel;
 
-					thisContact.ComputeDesiredVelDeltaCoherent(deltaTime);
+					thisContact.ComputeDesiredVelDeltaCoherent();
+					//thisContact.ComputeDesiredVelDeltaResting();
 				}
 				else if (ent1 == maxContact.m_e2)
 				{
@@ -236,7 +237,8 @@ void ContactResolver::ResolveVelocityCoherent(float deltaTime)
 					//thisContact.m_closingVel -= toContact * delVel;
 					thisContact.m_closingVel += toContact * delVel;
 					
-					thisContact.ComputeDesiredVelDeltaCoherent(deltaTime);
+					thisContact.ComputeDesiredVelDeltaCoherent();
+					//thisContact.ComputeDesiredVelDeltaResting();
 				}
 			}
 
@@ -249,7 +251,8 @@ void ContactResolver::ResolveVelocityCoherent(float deltaTime)
 
 					thisContact.m_closingVel -= toContact * delVel;
 
-					thisContact.ComputeDesiredVelDeltaCoherent(deltaTime);
+					thisContact.ComputeDesiredVelDeltaCoherent();
+					//thisContact.ComputeDesiredVelDeltaResting();
 				}
 				else if (ent2 == maxContact.m_e2)
 				{
@@ -258,7 +261,8 @@ void ContactResolver::ResolveVelocityCoherent(float deltaTime)
 
 					thisContact.m_closingVel -= toContact * delVel;
 
-					thisContact.ComputeDesiredVelDeltaCoherent(deltaTime);
+					thisContact.ComputeDesiredVelDeltaCoherent();
+					//thisContact.ComputeDesiredVelDeltaResting();
 				}
 			}
 		}
