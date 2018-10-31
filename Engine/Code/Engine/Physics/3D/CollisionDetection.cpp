@@ -246,7 +246,9 @@ void Contact3::ResolveVelocityCoherent(Vector3 linearChange[2], Vector3 angularC
 	{
 		Vector3 linear = impulse * rigid1->GetMassData3().m_invMass;
 
-		Vector3 torque = m_relativePosWorld[0].Cross(impulse);
+		TODO("Expose this adjuster as input parameter");
+		float torqueAdjust = 50000.f;			
+		Vector3 torque = m_relativePosWorld[0].Cross(impulse) * torqueAdjust;
 		Vector3 rotation = rigid1->m_inverseInertiaTensorWorld * torque;
 
 		// apply change 
