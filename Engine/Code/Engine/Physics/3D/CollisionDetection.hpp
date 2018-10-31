@@ -71,6 +71,7 @@ public:
 	Vector3 ComputeContactImpulse();
 	Vector3 ComputeContactImpulseFriction();
 	Vector3 ComputeWorldImpulse();
+	Vector3 ComputeWorldImpulseFriction();
 
 	// pos change
 	void SolveNonlinearProjection(

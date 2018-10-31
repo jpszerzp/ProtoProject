@@ -8,6 +8,7 @@
 #include "Engine/Core/Util/DataUtils.hpp"
 #include "Engine/Math/MathUtils.hpp"
 #include "Engine/Math/Line3.hpp"
+#include "Engine/Renderer/DebugRenderer.hpp"
 
 #define INVALID_DEPTH_BOX_TO_POINT -1.f
 #define INVALID_DEPTH_EDGE_TO_EDGE -1.f
@@ -198,13 +199,13 @@ Vector3 Contact3::ComputeContactImpulseFriction()
 	deltaVelocity.Kz += invMass;
 
 	// impulse per velocity
-	Matrix33 impulseMat = deltaVelocity.Invert();
+	Matrix33 impulseMatrix = deltaVelocity.Invert();
 
 	// velocity to kill by friction
 	Vector3 toKill(m_desiredVelDelta, -m_closingVel.y, -m_closingVel.z);
 
 	// impulse needed for the kill
-	imp = impulseMat * toKill;
+	imp = impulseMatrix * toKill;
 
 	// should we use dynamic friction?
 	float planarImp = sqrtf(imp.y * imp.y + imp.z * imp.z);
@@ -225,7 +226,14 @@ Vector3 Contact3::ComputeContactImpulseFriction()
 Vector3 Contact3::ComputeWorldImpulse()
 {
 	return m_toWorld * ComputeContactImpulse();
-	//return m_toWorld * ComputeContactImpulseFriction();
+}
+
+Vector3 Contact3::ComputeWorldImpulseFriction()
+{
+	Vector3 worldImpulse = m_toWorld * ComputeContactImpulseFriction();
+	DebugRenderLine(0.2f, m_point, m_point + worldImpulse, 5.f, Rgba::CYAN, Rgba::CYAN, DEBUG_RENDER_USE_DEPTH);
+	return worldImpulse;
+
 }
 
 void Contact3::ApplyImpulse()
@@ -240,15 +248,19 @@ void Contact3::ResolveVelocityCoherent(Vector3 linearChange[2], Vector3 angularC
 {
 	// apply velocity change
 	Rigidbody3* rigid1 = dynamic_cast<Rigidbody3*>(m_e1);
-	Vector3 impulse = ComputeWorldImpulse();
+	Vector3 impulseWorld = Vector3::ZERO;
+	if (m_friction == 0.f)
+		impulseWorld = ComputeWorldImpulse();
+	else
+		impulseWorld = ComputeWorldImpulseFriction();
 
 	if (rigid1 != nullptr && !rigid1->IsEntityStatic() && !rigid1->IsEntityKinematic())
 	{
-		Vector3 linear = impulse * rigid1->GetMassData3().m_invMass;
+		Vector3 linear = impulseWorld * rigid1->GetMassData3().m_invMass;
 
 		TODO("Expose this adjuster as input parameter");
-		float torqueAdjust = 50000.f;			
-		Vector3 torque = m_relativePosWorld[0].Cross(impulse) * torqueAdjust;
+		float torqueAdjust = (m_friction == 0.f) ? 50000.f : 1.f;			
+		Vector3 torque = m_relativePosWorld[0].Cross(impulseWorld) * torqueAdjust;
 		Vector3 rotation = rigid1->m_inverseInertiaTensorWorld * torque;
 
 		// apply change 
@@ -267,11 +279,11 @@ void Contact3::ResolveVelocityCoherent(Vector3 linearChange[2], Vector3 angularC
 	Rigidbody3* rigid2 = dynamic_cast<Rigidbody3*>(m_e2);
 	if (rigid2 != nullptr && !rigid2->IsEntityStatic() && !rigid2->IsEntityKinematic())
 	{
-		impulse *= -1.f;
+		impulseWorld *= -1.f;
 
-		Vector3 linear = impulse * rigid2->GetMassData3().m_invMass;
+		Vector3 linear = impulseWorld * rigid2->GetMassData3().m_invMass;
 
-		Vector3 torque = m_relativePosWorld[1].Cross(impulse);
+		Vector3 torque = m_relativePosWorld[1].Cross(impulseWorld);
 		Vector3 rotation = rigid2->m_inverseInertiaTensorWorld * torque;
 
 		rigid2->IncrementVelocity(linear);
@@ -371,8 +383,8 @@ void Contact3::PrepareInternal(float deltaTime)
 		m_closingVel -= ComputeContactVelocity(1, m_e2, deltaTime);
 
 	// desired change in vel as resolving coherent contacts
-	ComputeDesiredVelDeltaCoherent();
-	//ComputeDesiredVelDeltaResting();
+	//ComputeDesiredVelDeltaCoherent();
+	ComputeDesiredVelDeltaResting();
 }
 
 void Contact3::SwapEntities()
@@ -726,7 +738,7 @@ bool CollisionDetector::Sphere3VsSphere3Core(const Sphere3& s1, const Sphere3& s
 	Vector3 point = s2Pos + midLine * 0.5f;
 	float penetration = s1Rad + s2Rad - length;
 
-	Contact3 theContact = Contact3(s1.GetEntity(), s2.GetEntity(), normal, point, penetration);
+	Contact3 theContact = Contact3(s1.GetEntity(), s2.GetEntity(), normal, point, penetration, 1.f, 0.05f);
 	contact = theContact;
 
 	return true;
