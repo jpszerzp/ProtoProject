@@ -105,6 +105,7 @@ struct Vertex_3DPCU
 		m_color = builder.m_color;
 		m_uv = builder.m_uv;
 	}
+	Vertex_3DPCU(){}
 	Vertex_3DPCU(Vector3 pos, Rgba color, Vector2 uv) : m_pos(pos), m_color(color), m_uv(uv) {}
 	~Vertex_3DPCU() {}
 };

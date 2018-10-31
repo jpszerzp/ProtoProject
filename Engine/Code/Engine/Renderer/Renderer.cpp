@@ -252,8 +252,6 @@ void BindLayoutToProgram( GLuint programHandle, VertexLayout *layout )
 				(GLvoid*)attrib->m_memberOffset ); 
 		}
 	}
-	
-	//GL_CHECK_ERROR();
 }
 
 
@@ -389,9 +387,6 @@ Renderer::~Renderer()
 
 	delete m_immediateMesh;
 	m_immediateMesh = nullptr;
-
-	delete m_assimpLoader;
-	m_assimpLoader = nullptr;
 }
 
 
@@ -450,9 +445,6 @@ void Renderer::PostStartup(float startupWidth, float startupHeight)
 
 	// set our default camera to be our current camera
 	SetCamera(nullptr); 
-
-	// initialize assimp
-	m_assimpLoader = new AssimpLoader();
 }
 
 
@@ -1333,6 +1325,8 @@ void Renderer::DrawMesh(Mesh* mesh, bool culling)
 	SetDebugModeUBO(programHandle);
 	//SetGameTimeUBO(programHandle);
 
+	TODO("VAO?");
+
 	BindRenderState(m_currentShader->m_state, culling);
 	glBindBuffer(GL_ARRAY_BUFFER, mesh->m_vbo.GetHandle());
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->m_ibo.GetHandle());
@@ -2079,53 +2073,10 @@ bool Renderer::SetupShadowTarget()
 	return true;
 }
 
-void Renderer::AssimpDraw()
+void Renderer::DrawModel(AssimpLoader* loader)
 {
-	if (m_assimpLoader != nullptr)
-	{
-		std::vector<Submesh*>& aiEntries = m_assimpLoader->GetEntries();
-		std::vector<Texture*>& aiTextures = m_assimpLoader->GetTextures();
-
-		for (uint i = 0; i < aiEntries.size(); ++i)
-		{
-			Submesh* subMesh = aiEntries[i];
-
-			GLuint programHandle = m_currentShader->GetShaderProgram()->GetHandle();
-			glUseProgram(programHandle);
-
-			SetObjectUBO(programHandle);
-			SetCameraUBO(programHandle);
-			SetLightsUBO(programHandle);
-			SetDebugModeUBO(programHandle);
-
-			BindRenderState(m_currentShader->m_state);
-			glBindBuffer(GL_ARRAY_BUFFER, subMesh->m_vbo.GetHandle());
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, subMesh->m_ibo.GetHandle());
-			BindLayoutToProgram( programHandle, subMesh->GetLayout() ); 
-
-			const uint matIndex = subMesh->GetMatIndex();
-
-			if (matIndex < aiTextures.size() && aiTextures[matIndex]) {
-				Texture* bindTex = aiTextures[matIndex];
-				SetTexture2D(0, bindTex);
-				SetSampler2D(0, bindTex->GetSampler());
-			}
-
-			// Now that it is described and bound, draw using our program
-			if ( subMesh->UseIndices() )
-			{
-				glDrawElements( ToGLPrimitiveType(subMesh->GetDrawInstruction().primitive_type), 
-					subMesh->GetIndexCount(), GL_UNSIGNED_INT, 0 );
-			}
-			else
-			{
-				glDrawArrays( ToGLPrimitiveType(subMesh->GetDrawInstruction().primitive_type),
-					0, subMesh->GetVertexCount() );
-			}
-
-			TODO("need glDisableVertexAttribArray(bind)?");
-		}
-	}
+	for (uint i = 0; i < loader->m_meshes.size(); ++i)
+		DrawMesh(loader->m_meshes[i]);
 }
 
 void Renderer::BindMaterial(const Drawcall& dc)

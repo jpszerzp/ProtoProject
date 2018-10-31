@@ -42,7 +42,6 @@ void Material::SetProperty(const char* name, void const* data, size_t dataSize)
 
 	ASSERT_RECOVERABLE(propInfo->size == dataSize, "Setting of property does not match in size.");
 
-	// Copy to GPU
 	block->UpdateCPU(propInfo->offset, data, dataSize);
 }
 

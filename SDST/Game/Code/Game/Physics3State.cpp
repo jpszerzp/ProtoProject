@@ -4,6 +4,7 @@
 #include "Engine/Renderer/DebugRenderer.hpp"
 #include "Engine/Core/Console/DevConsole.hpp"  
 #include "Engine/Core/Profiler/ProfileSystem.hpp"
+#include "Engine/Core/AssimpLoader.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/Math/MathUtils.hpp"
 #include "Engine/Physics/3D/QuadEntity3.hpp"
@@ -183,6 +184,9 @@ Physics3State::Physics3State()
 	Vector3 wraparoundMin = Vector3(0.f, 110.f, 0.f);
 	Vector3 wraparoundMax = Vector3(20.f, 140.f, 30.f);
 	m_wraparound = new WrapAround(wraparoundMin, wraparoundMax);
+
+	// temporary - assimp test
+	m_assimp_0 = new AssimpLoader("nanosuit/nanosuit.obj");
 
 	// debug
 	DebugRenderSet3DCamera(m_camera);
@@ -1329,6 +1333,7 @@ void Physics3State::Render(Renderer* renderer)
 	renderer->ClearScreen(Rgba::BLACK);
 
 	m_qh->RenderHull(renderer);
+	renderer->DrawModel(m_assimp_0);
 
 	RenderGameobjects(renderer);
 	m_forwardPath->RenderScene(m_sceneGraph);

@@ -13,20 +13,22 @@ class AssimpLoader
 {
 public:
 	AssimpLoader();
+	AssimpLoader(const char* path);
 	~AssimpLoader();
 
 	// assimp mesh load
-	bool LoadMeshAssimp(const char* fn);
+	bool LoadModel(const char* fn);
 
-	std::vector<Submesh*>& GetEntries() { return m_entries; }
-	std::vector<Texture*>& GetTextures() { return m_textures; }
-
-private:
-	bool InitFromAiScene(const aiScene* pScene);
-	void InitFromAiMesh(const aiMesh* mesh, unsigned int ind, eVertexType type = VERT_PCU);
-	bool InitMatFromAiScene(const aiScene* pScene);
+	std::vector<Mesh*>& GetEntries() { return m_meshes; }
+	//std::vector<Texture*>& GetTextures() { return m_textures; }
 
 private:
-	std::vector<Submesh*> m_entries;
-	std::vector<Texture*> m_textures;
+	void ProcessNode(aiNode* node, const aiScene* scene);
+	Mesh* ProessMesh(aiMesh* mesh, const aiScene* scene);
+	std::vector<Texture*> LoadMaterialTexture(aiMaterial* mat, aiTextureType type);
+
+public:
+	std::vector<Mesh*> m_meshes;
+	//std::vector<Texture*> m_textures;
+	std::string m_path;
 };

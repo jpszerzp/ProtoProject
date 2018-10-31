@@ -103,39 +103,6 @@ public:
 		return mesh; 
 	}
 
-	/*
-	* Adjust mesh properties of the given submesh.
-	*/
-	void AdjustSubmesh(Submesh* sm, eVertexType vertType, eDrawPrimitiveType drawType)
-	{
-		//Submesh* sm = new Submesh(); 
-
-		// set draw call
-		m_draw.primitive_type = drawType;
-		m_draw.start_index = 0;
-		m_draw.using_indices = (m_indices.size() != 0);
-		m_draw.elem_count = m_draw.using_indices ? (uint)m_indices.size() : (uint)m_vertices.size();
-
-		sm->SetDrawInstruction(m_draw.primitive_type, m_draw.using_indices,
-			m_draw.start_index, m_draw.elem_count);
-
-		if (vertType == VERT_PCU)
-		{
-			sm->SetLayout(Vertex_3DPCU::s_layout);
-			sm->FromBuilder<Vertex_3DPCU>(*this);
-			sm->SetVertices( (uint)(m_vertices.size()), sizeof(Vertex_3DPCU) );
-		}
-		else if (vertType == VERT_LIT)
-		{
-			sm->SetLayout(VertexLit::s_layout);
-			sm->FromBuilder<VertexLit>(*this);
-			sm->SetVertices( (uint)(m_vertices.size()), sizeof(VertexLit) );
-		}
-		sm->SetIndices( (uint)(m_indices.size()), sizeof(uint) ); 
-
-		//return sm; 
-	}
-
 	void AddTriangle(uint idx1, uint idx2, uint idx3)
 	{
 		m_indices.push_back(idx1);

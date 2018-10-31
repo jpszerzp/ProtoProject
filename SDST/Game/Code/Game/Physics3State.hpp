@@ -108,4 +108,7 @@ public:
 	WrapAround* m_wraparound;
 	int m_wrapPosIterator = 0;
 	Sphere* m_physBall = nullptr;
+
+	// assimp test
+	AssimpLoader* m_assimp_0 = nullptr;
 };

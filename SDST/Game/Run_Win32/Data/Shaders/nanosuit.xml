@@ -1,0 +1,16 @@
+<shader name="nanosuit">
+	<program>
+		<vertex file="Shaders/glsl/default.vs" />
+		<fragment file="Shaders/glsl/default.fs" />
+	</program>
+
+	<blend>
+		<color op="add" src="blend_one" dest="blend_zero" />
+	</blend>
+
+	<depth compare="less" write="true" />
+	
+	<wind order="ccw|cw" />
+	
+	<cull face="back|front" />
+</shader>

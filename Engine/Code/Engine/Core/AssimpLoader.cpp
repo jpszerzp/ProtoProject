@@ -8,20 +8,26 @@ AssimpLoader::AssimpLoader()
 
 }
 
+AssimpLoader::AssimpLoader(const char* path)
+{
+	if (!LoadModel(path))
+		ASSERT_RECOVERABLE(false, "Failed to import model %s with assimp", path);
+}
+
 AssimpLoader::~AssimpLoader()
 {
-	for each (Submesh* sm in m_entries)
+	for each (Mesh* sm in m_meshes)
 	{
 		delete sm;
 		sm = nullptr;
 	}
 
-	m_entries.clear();
+	m_meshes.clear();
 
 	// texture delete handled globally
 }
 
-bool AssimpLoader::LoadMeshAssimp(const char* fn)
+bool AssimpLoader::LoadModel(const char* fn)
 {
 	bool res = false;
 	Assimp::Importer importer;
@@ -32,141 +38,157 @@ bool AssimpLoader::LoadMeshAssimp(const char* fn)
 	const char* mp = modelPath.c_str();
 
 	const aiScene* pScene = importer.ReadFile(mp, aiProcess_Triangulate | 
-		aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices);
+		aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices |
+		aiProcess_GenUVCoords | aiProcess_CalcTangentSpace);
 
-	if (pScene) 
-	{
-		res = InitFromAiScene(pScene);
-	}
-	else 
-	{
+	if (!pScene || pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !pScene->mRootNode)
 		DebuggerPrintf("Error parsing '%s': '%s'\n", fn, importer.GetErrorString());
+	else
+	{
+		ProcessNode(pScene->mRootNode, pScene);
+		res = true;
 	}
 
 	return res;
 }
 
-bool AssimpLoader::InitFromAiScene(const aiScene* pScene)
+void AssimpLoader::ProcessNode(aiNode* node, const aiScene* scene)
 {
-	m_entries.resize(pScene->mNumMeshes);
-	m_textures.resize(pScene->mNumMaterials);
-
-	// initialize sub meshes
-	for (unsigned int i = 0; i < m_entries.size(); ++i)
+	for (uint i = 0; i < node->mNumMeshes; ++i)
 	{
-		// assimp encapsulates aiMesh for us
-		const aiMesh* pMesh = pScene->mMeshes[i];
-		InitFromAiMesh(pMesh, i);
+		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+		m_meshes.push_back(ProessMesh(mesh, scene));
 	}
 
-	return InitMatFromAiScene(pScene);
+	for (uint i = 0; i < node->mNumChildren; ++i)
+		ProcessNode(node->mChildren[i], scene);
 }
 
-void AssimpLoader::InitFromAiMesh(const aiMesh* mesh, unsigned int ind, eVertexType type)
+Mesh* AssimpLoader::ProessMesh(aiMesh* mesh, const aiScene* scene)
 {
-	MeshBuilder mb;
+	std::vector<sVertexBuilder> vertices;
+	std::vector<uint> indices;
+	//std::vector<Texture*> textures;
 
-	m_entries[ind]->m_materialIndex = mesh->mMaterialIndex;
+	for (uint i = 0; i < mesh->mNumVertices; ++i)
+	{
+		// vert pos
+		sVertexBuilder vertex;
+		Vector3 pos;
+		pos.x = mesh->mVertices[i].x;
+		pos.y = mesh->mVertices[i].y;
+		pos.z = mesh->mVertices[i].z;
+		vertex.m_position = pos;
 
-	const aiVector3D zero3(0.0f, 0.0f, 0.0f);
+		// normal
+		Vector3 n;
+		n.x = mesh->mNormals[i].x;
+		n.y = mesh->mNormals[i].y;
+		n.z = mesh->mNormals[i].z;
+		vertex.m_normal = n;
 
-	mb.Begin(DRAW_TRIANGLE, true);
-	mb.SetColor(Rgba::WHITE);
+		// color
+		if (mesh->HasVertexColors(0))
+		{
+			Rgba color;
+			color.r = (unsigned char)mesh->mColors[0]->r;
+			color.g = (unsigned char)mesh->mColors[0]->g;
+			color.b = (unsigned char)mesh->mColors[0]->b;
+			color.a = (unsigned char)mesh->mColors[0]->a;
+			vertex.m_color = color;
+		}
+		else
+			vertex.m_color = Rgba();		// 255, 255, 255, 255
 
-	for (unsigned int i = 0 ; i < mesh->mNumVertices ; i++) {
-		const aiVector3D* aiPos_0 = &(mesh->mVertices[i]);
-		const aiVector3D* aiPos_1 = &(mesh->mVertices[i + 1]);
-		const aiVector3D* aiPos_2 = &(mesh->mVertices[i + 2]);
+		if (mesh->mTextureCoords[0])
+		{
+			Vector2 uv;
+			uv.x = mesh->mTextureCoords[0][i].x;
+			uv.y = mesh->mTextureCoords[0][i].y;
+			vertex.m_uv = uv;
+		}
+		else
+			vertex.m_uv = Vector2(0.f, 0.f);
 
-		const aiVector3D* aiNormal_0 = (&(mesh->mNormals[i]) == nullptr ? &zero3 : &(mesh->mNormals[i]));
-		const aiVector3D* aiNormal_1 = (&(mesh->mNormals[i + 1]) == nullptr ? &zero3 : &(mesh->mNormals[i + 1]));
-		const aiVector3D* aiNormal_2 = (&(mesh->mNormals[i + 2]) == nullptr ? &zero3 : &(mesh->mNormals[i + 2]));
+		// tangent
+		Vector3 tangent;
+		tangent.x = mesh->mTangents[i].x;
+		tangent.y = mesh->mTangents[i].y;
+		tangent.z = mesh->mTangents[i].z;
+		vertex.m_tangent = Vector4(tangent, 1.f);
 
-		const aiVector3D* pTexCoord_0 = mesh->HasTextureCoords(0) ? &(mesh->mTextureCoords[0][i]) : &zero3;
-		const aiVector3D* pTexCoord_1 = mesh->HasTextureCoords(0) ? &(mesh->mTextureCoords[0][i + 1]) : &zero3;
-		const aiVector3D* pTexCoord_2 = mesh->HasTextureCoords(0) ? &(mesh->mTextureCoords[0][i + 2]) : &zero3;
+		// no bitangent either for vertex builder
 
-		Vector3 pos_0 = Vector3(aiPos_0->x, aiPos_0->y, aiPos_0->z);
-		Vector3 pos_1 = Vector3(aiPos_1->x, aiPos_1->y, aiPos_1->z);
-		Vector3 pos_2 = Vector3(aiPos_2->x, aiPos_2->y, aiPos_2->z);
-
-		Vector3 normal_0 = Vector3(aiNormal_0->x, aiNormal_0->y, aiNormal_0->z);
-		Vector3 normal_1 = Vector3(aiNormal_1->x, aiNormal_1->y, aiNormal_1->z);
-		Vector3 normal_2 = Vector3(aiNormal_2->x, aiNormal_2->y, aiNormal_2->z);
-
-		Vector2 texCoord_0 = Vector2(pTexCoord_0->x, pTexCoord_0->y);
-		Vector2 texCoord_1 = Vector2(pTexCoord_1->x, pTexCoord_1->y);
-		Vector2 texCoord_2 = Vector2(pTexCoord_2->x, pTexCoord_2->y);
-
-		Vector3 e1 = pos_0 - pos_2;
-		Vector3 e2 = pos_1 - pos_2;
-		Vector2 uv1 = texCoord_0 - texCoord_2;
-		Vector2 uv2 = texCoord_1 - texCoord_2;
-		Vector4 tan = mb.CalcTangent(e1, e2, uv1, uv2);
-		mb.SetTangent(tan);
-
-		mb.SetUV(texCoord_0);
-		mb.SetNormal(normal_0);
-		mb.PushVertex(pos_0);
-
-		mb.SetUV(texCoord_1);
-		mb.SetNormal(normal_1);
-		mb.PushVertex(pos_1);
-
-		mb.SetUV(texCoord_2);
-		mb.SetNormal(normal_2);
-		mb.PushVertex(pos_2);
-
-		mb.AddTriangle(i, i + 1, i + 2);
+		vertices.push_back(vertex);
 	}
 
-	mb.End();
+	for (uint i = 0; i < mesh->mNumFaces; ++i)
+	{
+		aiFace face = mesh->mFaces[i];
+		for (uint j = 0; j < face.mNumIndices; ++j)
+			indices.push_back(face.mIndices[j]);
+	}
 
-	mb.AdjustSubmesh(m_entries[ind], type, DRAW_TRIANGLE);
-	m_entries[ind]->m_immediate = true;
+	// create mesh
+	Mesh* theMesh = new Mesh();
+
+	// optional: directly read texture from material file
+	aiMaterial* mat = scene->mMaterials[mesh->mMaterialIndex];
+	std::vector<Texture*> diffuse = LoadMaterialTexture(mat, aiTextureType_DIFFUSE);
+	std::vector<Texture*> specular = LoadMaterialTexture(mat, aiTextureType_SPECULAR);
+	std::vector<Texture*> normal = LoadMaterialTexture(mat, aiTextureType_NORMALS);
+	std::vector<Texture*> height = LoadMaterialTexture(mat, aiTextureType_HEIGHT);
+	theMesh->m_texFromAssimp.insert(theMesh->m_texFromAssimp.end(), diffuse.begin(), diffuse.end());
+	theMesh->m_texFromAssimp.insert(theMesh->m_texFromAssimp.end(), specular.begin(), specular.end());
+	theMesh->m_texFromAssimp.insert(theMesh->m_texFromAssimp.end(), normal.begin(), normal.end());
+	theMesh->m_texFromAssimp.insert(theMesh->m_texFromAssimp.end(), height.begin(), height.end());
+
+	// configure draw call
+	eDrawPrimitiveType type = DRAW_TRIANGLE;		// we have enabled assimp triangulation
+	uint startIdx = 0;
+	uint usingIdx = true;			// we use IBO by default
+	uint eleCount = usingIdx ? (uint)(indices.size()) : (uint)(vertices.size());
+	theMesh->SetDrawInstruction(type, usingIdx, startIdx, eleCount);
+	
+	// our type is vert pcu 3d
+	theMesh->SetLayout(Vertex_3DPCU::s_layout);
+	
+	// given vertices and indices, pass them to GPU
+	size_t vsize = theMesh->m_layout.m_stride * vertices.size();
+	size_t isize = sizeof(uint) * indices.size();
+	std::vector<Vertex_3DPCU> pcu;
+	for (std::vector<sVertexBuilder>::size_type vbCount = 0; vbCount < vertices.size(); ++vbCount)
+	{
+		Vertex_3DPCU vt(vertices[vbCount]);
+		pcu.push_back(vt);
+	}
+	theMesh->m_vbo.CopyToGPU(vsize, &pcu[0]);
+	theMesh->m_ibo.CopyToGPU(isize, &indices[0]);
+	
+	// set buffer stride and count for book keeping
+	theMesh->SetVertices((uint)(vertices.size()), sizeof(Vertex_3DPCU));
+	theMesh->SetIndices((uint)(indices.size()), sizeof(uint));
+
+	return theMesh;
 }
 
-bool AssimpLoader::InitMatFromAiScene(const aiScene* pScene)
+/* This could be replaced by material system in this engine */
+std::vector<Texture*> AssimpLoader::LoadMaterialTexture(aiMaterial* mat, aiTextureType type)
 {
 	Renderer* renderer = Renderer::GetInstance();
-	bool res = false;
-
-	for (unsigned int i = 0; i < pScene->mNumMaterials; ++i)
+	std::vector<Texture*> textures;
+	for (uint i = 0; i < mat->GetTextureCount(type); ++i)
 	{
-		const aiMaterial* pMat = pScene->mMaterials[i];
-		m_textures[i] = nullptr;
-		if (pMat->GetTextureCount(aiTextureType_DIFFUSE) > 0)
-		{
-			aiString path;
-
-			if (pMat->GetTexture(aiTextureType_DIFFUSE, 0, &path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS)
-			{
-				char* relPath = path.data;
-				std::string rpStr(relPath);
-				std::string fp = "Data/Images/" + rpStr;
-				
-				m_textures[i] = renderer->CreateOrGetTexture(fp);
-
-				if (m_textures[i]->GetData() == nullptr)
-				{
-					DebuggerPrintf("Error loading texture '%s'\n", fp.c_str());
-					delete m_textures[i];
-					m_textures[i] = nullptr;
-					res = false;
-				}
-			}
-		}
-
-		// cannot load texture normally, load default white instead
-		if (m_textures[i] == nullptr)
-		{
-			std::string fp = "Data/Images/white.png";
-
-			m_textures[i] = renderer->CreateOrGetTexture(fp);
-			
-			res = (m_textures[i]->GetData() != nullptr);
-		}
+		// this will not be called if material file does not specify texture info
+		// Or, there is no such material file at all
+		aiString str;
+		mat->GetTexture(type, i, &str);
+		std::string dir = "Data/Images/";
+		std::string subDir(str.C_Str());
+		dir += subDir;
+		//Texture* texture = new Texture(dir);
+		Texture* texture = renderer->CreateOrGetTexture(dir);
+		textures.push_back(texture);
 	}
-
-	return res;
+	return textures;
 }

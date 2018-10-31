@@ -5,6 +5,7 @@
 #include "Engine/Core/Rgba.hpp"
 #include "Engine/Core/ModelLoader.hpp"
 #include "Engine/Core/MapChunk.hpp"
+#include "Engine/Core/Util/DataUtils.hpp"
 
 Mesh::Mesh()
 {
@@ -14,10 +15,7 @@ Mesh::Mesh()
 
 Mesh::~Mesh()
 {
-	/*
-	delete m_aiLoader;
-	m_aiLoader = nullptr;
-	*/
+	
 }
 
 
@@ -160,7 +158,7 @@ Mesh* Mesh::CreateQuad(eVertexType type)
 	mb.SetUV(Vector2(1.f, 1.f));
 	mb.PushVertex(tr);
 
-	mb.AddQuad(idx + 0, idx + 1, idx + 2, idx + 3);
+	mb.AddQuad(idx, idx + 1, idx + 2, idx + 3);
 
 	mb.End();
 

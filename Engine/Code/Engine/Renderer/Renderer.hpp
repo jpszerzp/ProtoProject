@@ -295,7 +295,7 @@ public:
 	bool SetupShadowTarget();
 
 	// assimp
-	void AssimpDraw();
+	void DrawModel(AssimpLoader* loader);
 
 public:
 	const static int DIFFUSE_MAP_BIND_IDX = 0;
@@ -357,6 +357,4 @@ public:
 	sFogInfo		m_fogData;
 
 	Light* m_lights[MAX_LIGHTS];
-
-	AssimpLoader* m_assimpLoader = nullptr;
 };

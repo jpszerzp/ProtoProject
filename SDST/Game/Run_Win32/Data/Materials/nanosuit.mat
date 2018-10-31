@@ -1,0 +1,5 @@
+<material id="nanosuit">
+   <shader id="nanosuit" />
+   <texture bind="0" name="gTexDiffuse" value="nanosuit/body_dif.png" />
+   <color bind="TINT" value="255,255,255,255" />
+</material>

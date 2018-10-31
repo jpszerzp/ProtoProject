@@ -76,13 +76,13 @@ public:
 
 	bool m_immediate = false;
 
-	//AssimpLoader* m_aiLoader = nullptr;
+	std::vector<Texture*> m_texFromAssimp;		// does not fall in the "create or get" pattern
 
 public:
 	// text mesh properties
 	bool m_textMesh = false;
 	Rgba m_textMeshColor;
-	Vector2 m_textMeshDrawmin2;
+	Vector2 m_textMeshDrawmin2;		// 2D
 };
 
 
