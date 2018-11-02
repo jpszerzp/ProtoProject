@@ -7,9 +7,9 @@
 #include "Engine/Physics/3D/SphereEntity3.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
 
-#define MAX_CONTACTS 200
+#define MAX_CONTACTS 2000
 TODO("This threshold should have negative value");
-#define COHERENT_THRESHOLD 0.05f
+#define COHERENT_THRESHOLD 0.01f
 
 enum eContactFeature
 {

@@ -223,22 +223,20 @@ void ContactResolver::ResolveVelocityCoherent(float deltaTime)
 					delVel = angularChange[0].Cross(thisContact.m_relativePosWorld[0]);
 					delVel += linearChange[0];
 
-					//thisContact.m_closingVel -= toContact * delVel;
 					thisContact.m_closingVel += toContact * delVel;
 
-					thisContact.ComputeDesiredVelDeltaCoherent();
-					//thisContact.ComputeDesiredVelDeltaResting();
+					//thisContact.ComputeDesiredVelDeltaCoherent();
+					thisContact.ComputeDesiredVelDeltaResting();
 				}
 				else if (ent1 == maxContact.m_e2)
 				{
 					delVel = angularChange[1].Cross(thisContact.m_relativePosWorld[0]);
 					delVel += linearChange[1];
 
-					//thisContact.m_closingVel -= toContact * delVel;
 					thisContact.m_closingVel += toContact * delVel;
 					
-					thisContact.ComputeDesiredVelDeltaCoherent();
-					//thisContact.ComputeDesiredVelDeltaResting();
+					//thisContact.ComputeDesiredVelDeltaCoherent();
+					thisContact.ComputeDesiredVelDeltaResting();
 				}
 			}
 
@@ -251,8 +249,8 @@ void ContactResolver::ResolveVelocityCoherent(float deltaTime)
 
 					thisContact.m_closingVel -= toContact * delVel;
 
-					thisContact.ComputeDesiredVelDeltaCoherent();
-					//thisContact.ComputeDesiredVelDeltaResting();
+					//thisContact.ComputeDesiredVelDeltaCoherent();
+					thisContact.ComputeDesiredVelDeltaResting();
 				}
 				else if (ent2 == maxContact.m_e2)
 				{
@@ -261,8 +259,8 @@ void ContactResolver::ResolveVelocityCoherent(float deltaTime)
 
 					thisContact.m_closingVel -= toContact * delVel;
 
-					thisContact.ComputeDesiredVelDeltaCoherent();
-					//thisContact.ComputeDesiredVelDeltaResting();
+					//thisContact.ComputeDesiredVelDeltaCoherent();
+					thisContact.ComputeDesiredVelDeltaResting();
 				}
 			}
 		}

@@ -735,7 +735,10 @@ bool CollisionDetector::Sphere3VsSphere3Core(const Sphere3& s1, const Sphere3& s
 	Vector3 midLine = s1Pos - s2Pos;
 	float length = midLine.GetLength();
 
-	if (length <= 0.f || length >= (s1Rad + s2Rad))
+	// allow pessimistic collision detection
+	TODO("Need to test this more with ALL cases, i.e. resting");
+	float pessimistic = 0.f;
+	if (length <= 0.f || length >= (s1Rad + s2Rad + pessimistic))
 	{
 		// if mid line length is invalid
 		// or, larger than radius threshold, return directly
@@ -744,7 +747,8 @@ bool CollisionDetector::Sphere3VsSphere3Core(const Sphere3& s1, const Sphere3& s
 
 	// get normal
 	Vector3 normal = midLine.GetNormalized();
-	Vector3 point = s2Pos + midLine * 0.5f;
+	//Vector3 point = s2Pos + midLine * 0.5f;
+	Vector3 point = s2Pos + normal * s2Rad;
 	float penetration = s1Rad + s2Rad - length;
 
 	TODO("Hook friction with physics material with both entities");
