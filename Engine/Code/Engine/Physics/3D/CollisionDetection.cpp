@@ -401,13 +401,22 @@ void Contact3::SwapEntities()
 	m_f2 = tempFeature;
 }
 
-Vector3 Contact3::ComputeContactVelocity(int idx, Entity3* ent, float)
+Vector3 Contact3::ComputeContactVelocity(int idx, Entity3* ent, float deltaTime)
 {
 	Rigidbody3* rigid = static_cast<Rigidbody3*>(ent);
 	Vector3 vel = rigid->GetAngularVelocity().Cross(m_relativePosWorld[idx]);
 	vel += rigid->GetLinearVelocity();
 	const Matrix33& toContact = m_toWorld.Transpose();
 	Vector3 contactVel = toContact * vel;	// to contact coord
+
+	TODO("Is adding the planar vel necessary? Need more test if we really do this.");
+	Vector3 accVel = rigid->m_lastFrameLinearAcc * deltaTime;
+	accVel = toContact * accVel;
+	accVel.x = 0.f;					// ignore acceleration along local normal direction
+
+	// if there is enough friction this will be removed during vel resolution
+	contactVel += accVel;
+
 	return contactVel;
 }
 
@@ -738,7 +747,8 @@ bool CollisionDetector::Sphere3VsSphere3Core(const Sphere3& s1, const Sphere3& s
 	Vector3 point = s2Pos + midLine * 0.5f;
 	float penetration = s1Rad + s2Rad - length;
 
-	Contact3 theContact = Contact3(s1.GetEntity(), s2.GetEntity(), normal, point, penetration, 1.f, 0.05f);
+	TODO("Hook friction with physics material with both entities");
+	Contact3 theContact = Contact3(s1.GetEntity(), s2.GetEntity(), normal, point, penetration, 1.f, 0.05f);	
 	contact = theContact;
 
 	return true;

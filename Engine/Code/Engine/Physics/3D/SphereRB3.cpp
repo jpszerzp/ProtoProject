@@ -112,8 +112,6 @@ void SphereRB3::Integrate(float deltaTime)
 {
 	UpdateInput(deltaTime);
 
-	CacheData();
-
 	if (!m_frozen)
 	{
 		// acc
@@ -129,9 +127,22 @@ void SphereRB3::Integrate(float deltaTime)
 		m_linearVelocity *= powf(m_linearDamp, deltaTime);	// damp: 1 means no damp	
 		m_angularVelocity *= powf(m_angularDamp, deltaTime);
 
-		// pos
-		m_center += m_linearVelocity * deltaTime;
-		m_orientation.AddScaledVector(m_angularVelocity, deltaTime);
+		// first-order Newton
+		if (m_linearAcceleration.GetLength() < ACC_LIMIT && angularAcc.GetLength() < ACC_LIMIT)
+		{
+			m_center += m_linearVelocity * deltaTime;							// pos
+			m_orientation.AddScaledVector(m_angularVelocity, deltaTime);		// rot
+		}
+		// second-order Newton
+		// used when either linear or angular acc goes too large - in this case use second-order is safer yet costly
+		else
+		{
+			m_center += (m_linearVelocity * deltaTime + m_linearAcceleration * deltaTime * deltaTime * .5f);
+			m_orientation.AddScaledVector(m_angularVelocity, deltaTime);
+			m_orientation.AddScaledVector(angularAcc, deltaTime * deltaTime * .5f);
+		}
+
+		CacheData();
 	}
 
 	ClearAccs();

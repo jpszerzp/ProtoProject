@@ -2,6 +2,8 @@
 
 #include "Engine/Physics/3D/Entity3.hpp"
 
+#define ACC_LIMIT 10000.f
+
 class Rigidbody3 : public Entity3
 {
 public:
