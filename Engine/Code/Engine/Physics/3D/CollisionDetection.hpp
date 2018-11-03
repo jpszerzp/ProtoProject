@@ -89,7 +89,10 @@ public:
 	void ComputeDesiredVelDeltaCoherent();
 
 	// resting
-	void ComputeDesiredVelDeltaResting();
+	void ComputeDesiredVelDeltaResting(float deltaTime);
+
+	// contact may wake entities up
+	void WakeUp();
 };
 
 /**

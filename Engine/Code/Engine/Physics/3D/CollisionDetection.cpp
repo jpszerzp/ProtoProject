@@ -336,6 +336,9 @@ void Contact3::ResolvePositionCoherent(Vector3 linearChange[2], Vector3 angularC
 
 		linearChange[0] = translation;
 		angularChange[0] = rotation;
+
+		if (!rigid1->IsAwake()) 
+			rigid1->CacheData();
 	}
 
 	if (rigid2 != nullptr)
@@ -362,6 +365,9 @@ void Contact3::ResolvePositionCoherent(Vector3 linearChange[2], Vector3 angularC
 
 		linearChange[1] = translation;
 		angularChange[1] = rotation;
+
+		if (!rigid2->IsAwake()) 
+			rigid2->CacheData();
 	}
 }
 
@@ -384,7 +390,7 @@ void Contact3::PrepareInternal(float deltaTime)
 
 	// desired change in vel as resolving coherent contacts
 	//ComputeDesiredVelDeltaCoherent();
-	ComputeDesiredVelDeltaResting();
+	ComputeDesiredVelDeltaResting(deltaTime);
 }
 
 void Contact3::SwapEntities()
@@ -420,6 +426,7 @@ Vector3 Contact3::ComputeContactVelocity(int idx, Entity3* ent, float deltaTime)
 	return contactVel;
 }
 
+// DEPRECATED
 void Contact3::ComputeDesiredVelDeltaCoherent()
 {
 	// closing vel should be in contact coord
@@ -427,22 +434,51 @@ void Contact3::ComputeDesiredVelDeltaCoherent()
 }
 
 // built on ComputeDesiredVelDeltaCoherent()
-void Contact3::ComputeDesiredVelDeltaResting()
+void Contact3::ComputeDesiredVelDeltaResting(float deltaTime)
 {
 	const static float velLimit = .25f;
 
+	float velFromAcc = 0.f;
+
 	Rigidbody3* r1 = static_cast<Rigidbody3*>(m_e1);
-	float velFromAcc = DotProduct(r1->m_lastFrameLinearAcc, m_normal);
+	if (r1 != nullptr && r1->IsAwake())
+		//velFromAcc += DotProduct(r1->m_lastFrameLinearAcc, m_normal);
+		velFromAcc += DotProduct(r1->m_lastFrameLinearAcc, m_normal) * deltaTime;
 	
 	Rigidbody3* r2 = static_cast<Rigidbody3*>(m_e2);
-	if (r2 != nullptr)
-		velFromAcc -= DotProduct(r2->m_lastFrameLinearAcc, m_normal);
+	if (r2 != nullptr && r2->IsAwake())
+		//velFromAcc -= DotProduct(r2->m_lastFrameLinearAcc, m_normal);
+		velFromAcc -= DotProduct(r2->m_lastFrameLinearAcc, m_normal) * deltaTime;
 
 	float r = m_restitution;
 	if (m_closingVel.GetLength() < velLimit)
 		r = 0.f;
 
 	m_desiredVelDelta = -m_closingVel.x - r * (m_closingVel.x - velFromAcc);
+}
+
+void Contact3::WakeUp()
+{
+	if (m_e2 == nullptr)
+		return;
+
+	// only rigid body binds up with sleep system
+	Rigidbody3* rigid1 = dynamic_cast<Rigidbody3*>(m_e1);
+	Rigidbody3* rigid2 = dynamic_cast<Rigidbody3*>(m_e2);
+
+	bool firstAwake = rigid1->IsAwake();
+	bool secondAwake = rigid2->IsAwake();
+
+	bool processing = firstAwake ^ secondAwake;
+
+	// there is one rigid body awake while the other is not, need to process
+	if (processing)
+	{
+		if (firstAwake)
+			rigid2->SetAwake(true);
+		else
+			rigid1->SetAwake(true);
+	}
 }
 
 void Contact3::SolveNonlinearProjection(		

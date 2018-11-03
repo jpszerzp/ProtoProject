@@ -32,6 +32,7 @@ void Entity3::SetNetForce(float f_x, float f_y, float f_z)
 	m_netforce = Vector3(f_x, f_y, f_z);
 }
 
+
 bool Entity3::HasInfiniteMass() const
 {
 	MassData3 data = GetMassData3();
@@ -116,4 +117,9 @@ void Entity3::VelocityIntegrate(float deltaTime)
 	m_linearVelocity += m_linearAcceleration * deltaTime;
 	if (m_considerDamp)
 		m_linearVelocity *= powf(m_linearDamp, deltaTime);		// damp
+}
+
+void Entity3::AddForce(Vector3 force)
+{
+	m_netforce += force;
 }

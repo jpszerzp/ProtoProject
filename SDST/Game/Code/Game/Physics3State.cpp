@@ -69,10 +69,12 @@ Physics3State::Physics3State()
 	//Rigidbody3* rigid_g1 = static_cast<Rigidbody3*>(m_g1->GetEntity());
 	//m_rigidRegistry->Register(rigid_g1, grg);
 
+	/*
 	Sphere* s2 = InitializePhysSphere(Vector3(10.f, 40.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID);
 	s2->m_physEntity->SetFrozen(true);
 	Rigidbody3* rigid_s1 = static_cast<Rigidbody3*>(s2->GetEntity());
 	m_rigidRegistry->Register(rigid_s1, m_gravity);
+	*/
 	//rigid_s1->m_angularVelocity = Vector3(0.f, 0.f, 5.f);
 
 	/*
@@ -860,6 +862,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_SPACE))
 	{
+		// shoot a ball from camera
 		/*
 		Vector3 camPos = m_camera->GetWorldPosition();
 		Vector3 camForward = m_camera->GetWorldForward().GetNormalized();
@@ -881,6 +884,8 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 			m_physBall = InitializePhysSphere(pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID);
 			Rigidbody3* rigid_s = static_cast<Rigidbody3*>(m_physBall->GetEntity());
 			rigid_s->SetLinearVelocity(GetRandomVector3() * 20.f);
+			rigid_s->SetAwake(true);
+			rigid_s->SetCanSleep(true);
 			m_wraparound->m_gos.push_back(m_physBall);
 		}
 		else
@@ -888,6 +893,8 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 			Sphere* s = InitializePhysSphere(pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID);
 			Rigidbody3* rigid_s = static_cast<Rigidbody3*>(s->GetEntity());
 			rigid_s->SetLinearVelocity(GetRandomVector3() * 20.f);
+			rigid_s->SetAwake(true);
+			rigid_s->SetCanSleep(true);
 			m_wraparound->m_gos.push_back(s);
 		}
 

@@ -265,6 +265,13 @@ void Vector3::Set(float newX, float newY, float newZ)
 }
 
 
+void Vector3::ToDefault()
+{
+	x = 0.f;
+	y = 0.f;
+	z = 0.f;
+}
+
 Vector3 Vector3::RotateAboutAxisWithAngle(float angle, Vector3 axis)
 {
 	// pure quaternion for rotated vector - zero scalar

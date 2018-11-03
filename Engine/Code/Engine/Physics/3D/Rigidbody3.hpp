@@ -17,6 +17,12 @@ public:
 	Matrix44 m_cachedTransform;
 	Matrix33 m_inverseInertiaTensorWorld;	// in world space
 
+	// sleep system
+	float m_motion;
+	bool m_canSleep;
+	float m_sleepThreshold = .3f;
+	bool m_awake;
+
 public:
 	Rigidbody3();
 	virtual ~Rigidbody3();
@@ -26,6 +32,8 @@ public:
 	void SetQuaternionIdentity();
 	void SetQuaternion(const Quaternion& orientation);
 	void SetQuaternion(const float r, const float x, const float y, const float z);
+	void SetAwake(bool awake);
+	void SetCanSleep(bool value);
 
 	// just before integration
 	void CacheData();
@@ -37,6 +45,7 @@ public:
 		const Matrix44& rot_mat);
 
 	// only to torqueacc
+	void AddForce(Vector3 force) override;
 	void AddTorque(Vector3 torque);
 	// to force and torque acc
 	void AddForcePointObjectCoord(const Vector3& force, const Vector3& point_local);		
@@ -49,6 +58,7 @@ public:
 	virtual void Integrate(float deltaTime) override;
 
 	Vector3 GetAngularVelocity() const { return m_angularVelocity; }
-	//Vector3 GetLastAcc() const { return m_lastAcc; }
 	Quaternion GetQuaternion() const { return m_orientation; }
+	bool CanSleep() const { return m_canSleep; }
+	bool IsAwake() const { return m_awake; }
 };

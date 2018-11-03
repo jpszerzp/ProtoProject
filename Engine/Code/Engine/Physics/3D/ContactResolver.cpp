@@ -121,10 +121,12 @@ void ContactResolver::ResolvePositionsCoherent(float)
 		if (idx == numContacts)
 			break;
 
-		TODO("Awake state match");
+		Contact3& maxContact = m_collision->m_contacts[idx];
+		
+		// sleep update
+		maxContact.WakeUp();
 
 		// resolve max-penetration contact
-		Contact3& maxContact = m_collision->m_contacts[idx];
 		maxContact.ResolvePositionCoherent(linearChange, angularChange);
 
 		// update other contact penetrations
@@ -201,9 +203,10 @@ void ContactResolver::ResolveVelocityCoherent(float deltaTime)
 		if (idx == numContacts)
 			break;
 
-		TODO("Awake state match");
-
 		Contact3& maxContact = m_collision->m_contacts[idx];
+		
+		maxContact.WakeUp();
+
 		maxContact.ResolveVelocityCoherent(linearChange, angularChange);
 
 		TODO("Need to consider the case where thisContact IS maxContact?");
@@ -226,7 +229,7 @@ void ContactResolver::ResolveVelocityCoherent(float deltaTime)
 					thisContact.m_closingVel += toContact * delVel;
 
 					//thisContact.ComputeDesiredVelDeltaCoherent();
-					thisContact.ComputeDesiredVelDeltaResting();
+					thisContact.ComputeDesiredVelDeltaResting(deltaTime);
 				}
 				else if (ent1 == maxContact.m_e2)
 				{
@@ -236,7 +239,7 @@ void ContactResolver::ResolveVelocityCoherent(float deltaTime)
 					thisContact.m_closingVel += toContact * delVel;
 					
 					//thisContact.ComputeDesiredVelDeltaCoherent();
-					thisContact.ComputeDesiredVelDeltaResting();
+					thisContact.ComputeDesiredVelDeltaResting(deltaTime);
 				}
 			}
 
@@ -250,7 +253,7 @@ void ContactResolver::ResolveVelocityCoherent(float deltaTime)
 					thisContact.m_closingVel -= toContact * delVel;
 
 					//thisContact.ComputeDesiredVelDeltaCoherent();
-					thisContact.ComputeDesiredVelDeltaResting();
+					thisContact.ComputeDesiredVelDeltaResting(deltaTime);
 				}
 				else if (ent2 == maxContact.m_e2)
 				{
@@ -260,7 +263,7 @@ void ContactResolver::ResolveVelocityCoherent(float deltaTime)
 					thisContact.m_closingVel -= toContact * delVel;
 
 					//thisContact.ComputeDesiredVelDeltaCoherent();
-					thisContact.ComputeDesiredVelDeltaResting();
+					thisContact.ComputeDesiredVelDeltaResting(deltaTime);
 				}
 			}
 		}

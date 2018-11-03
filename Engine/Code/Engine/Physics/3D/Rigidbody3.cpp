@@ -38,6 +38,31 @@ void Rigidbody3::SetQuaternion(const float r, const float x, const float y, cons
 	m_orientation.Normalize();
 }
 
+void Rigidbody3::SetAwake(bool awake)
+{
+	if (awake)
+	{
+		m_awake = true;
+		m_motion = m_sleepThreshold * 2.f;		// so that this rigidbody will not fall asleep too fast
+	}
+	else
+	{
+		m_awake = false;
+		m_linearVelocity.ToDefault();
+		m_angularVelocity.ToDefault();
+		// keep acceleration - this is optional and is more like a design choice
+	}
+}
+
+void Rigidbody3::SetCanSleep(bool value)
+{
+	m_canSleep = value;
+	
+	// rigid body cannot sleep, yet is not awake either: wake it up
+	if (!m_canSleep && !m_awake)
+		SetAwake(true);
+}
+
 void Rigidbody3::CacheData()
 {
 	m_orientation.Normalize();
@@ -114,9 +139,18 @@ void Rigidbody3::CacheInverseInertiaTensorWorld(Matrix33& inv_inertia_tensor_wor
 }
 
 
+void Rigidbody3::AddForce(Vector3 force)
+{
+	m_netforce += force;
+
+	m_awake = true;
+}
+
 void Rigidbody3::AddTorque(Vector3 torque)
 {
 	m_torqueAcc += torque;
+
+	m_awake = true;
 }
 
 void Rigidbody3::AddForcePointObjectCoord(const Vector3& force, const Vector3& point)
@@ -134,6 +168,8 @@ void Rigidbody3::AddForcePointWorldCoord(const Vector3& force, const Vector3 poi
 
 	m_netforce += force;
 	m_torqueAcc += pt.Cross(force);			// impulse causes torque
+
+	m_awake = true;
 }
 
 Vector3 Rigidbody3::GetPointInWorld(const Vector3& pt_local)

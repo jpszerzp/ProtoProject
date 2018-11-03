@@ -88,8 +88,6 @@ public:
 
 	bool m_frozen = false;
 
-	//Primitive3 m_primitive;
-
 public:
 	virtual ~Entity3(){}
 
@@ -149,5 +147,5 @@ public:
 	void PositionIntegrate(float deltaTime);
 	void VelocityIntegrate(float deltaTime);
 	void ClearForce() { SetNetForce(Vector3::ZERO); }
-	void AddForce(Vector3 force) { m_netforce += force; }	// all forces need to be added/updated before integration step
+	virtual void AddForce(Vector3 force);	// all forces need to be added/updated before integration step
 };

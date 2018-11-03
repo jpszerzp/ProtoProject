@@ -47,6 +47,7 @@ public:
 	Vector4 ToVector4(float w) const;
 
 	void Set(float newX, float newY, float newZ);
+	void ToDefault();
 
 	Vector3 RotateAboutAxisWithAngle(float angle, Vector3 axis);
 
