@@ -7,8 +7,8 @@
 
 #define COHERENT_POS_ITER 2
 #define COHERENT_VEL_ITER 2
-#define COHERENT_POS_EPSILON 0.f
-#define COHERENT_VEL_EPSILON 0.f
+#define COHERENT_POS_EPSILON 0.01f
+#define COHERENT_VEL_EPSILON 0.01f
 
 enum eResolveScheme
 {
