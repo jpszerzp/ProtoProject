@@ -25,7 +25,6 @@ public:
 	RenderSceneGraph*  m_sceneGraph;
 
 	std::vector<GameObject*> m_gameObjects;
-	//std::vector<GameObject*> m_rigidBodyObjects;
 
 	ePrimitiveControl m_control;
 
