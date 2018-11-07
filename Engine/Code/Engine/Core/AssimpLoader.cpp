@@ -120,6 +120,8 @@ Mesh* AssimpLoader::ProessMesh(aiMesh* mesh, const aiScene* scene)
 		// no bitangent either for vertex builder
 
 		vertices.push_back(vertex);
+
+		m_vertPos.emplace(vertex.m_position);
 	}
 
 	for (uint i = 0; i < mesh->mNumFaces; ++i)

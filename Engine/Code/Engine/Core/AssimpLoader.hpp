@@ -8,6 +8,7 @@
 #include <assimp/postprocess.h>     // Post processing flags
 
 #include <vector>
+#include <set>
 
 class AssimpLoader
 {
@@ -20,7 +21,6 @@ public:
 	bool LoadModel(const char* fn);
 
 	std::vector<Mesh*>& GetEntries() { return m_meshes; }
-	//std::vector<Texture*>& GetTextures() { return m_textures; }
 
 private:
 	void ProcessNode(aiNode* node, const aiScene* scene);
@@ -29,6 +29,6 @@ private:
 
 public:
 	std::vector<Mesh*> m_meshes;
-	//std::vector<Texture*> m_textures;
 	std::string m_path;
+	std::set<Vector3> m_vertPos;
 };

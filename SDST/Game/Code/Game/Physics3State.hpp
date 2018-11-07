@@ -18,6 +18,8 @@
 #include "Game/Links.hpp"
 #include "Game/WrapAround3.hpp"
 
+#include <set>
+
 class Physics3State : public GameState
 {
 public:
@@ -61,6 +63,7 @@ public:
 	void Render(Renderer* renderer) override;
 	void RenderGameobjects(Renderer* renderer);
 	void RenderBVH(Renderer* renderer);
+	void RenderModelSamples(Renderer* renderer);
 
 public:
 	// entity
@@ -114,4 +117,6 @@ public:
 
 	// assimp test
 	AssimpLoader* m_assimp_0 = nullptr;
+	std::set<Vector3> m_modelPoints;
+	std::vector<Mesh*> m_modelPointMeshes;
 };

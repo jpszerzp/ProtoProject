@@ -205,6 +205,22 @@ Physics3State::Physics3State()
 
 	// temporary - assimp test
 	m_assimp_0 = new AssimpLoader("nanosuit/nanosuit.obj");
+	int limit = 0;
+	for (std::set<Vector3>::iterator it = m_assimp_0->m_vertPos.begin();
+		it != m_assimp_0->m_vertPos.end(); ++it)
+	{
+		if (limit == 100)
+		{
+			m_modelPoints.emplace(*it);
+			limit = 0;
+
+			// also generate a mesh for this point
+			Mesh* ptMesh = Mesh::CreatePointImmediate(VERT_PCU, *it, Rgba::RED);
+			m_modelPointMeshes.push_back(ptMesh);
+		}
+
+		limit++;
+	}
 
 	// debug
 	DebugRenderSet3DCamera(m_camera);
@@ -1372,6 +1388,8 @@ void Physics3State::Render(Renderer* renderer)
 	m_qh->RenderHull(renderer);
 	renderer->DrawModel(m_assimp_0);
 
+	RenderModelSamples(renderer);
+
 	RenderGameobjects(renderer);
 	m_forwardPath->RenderScene(m_sceneGraph);
 
@@ -1392,4 +1410,27 @@ void Physics3State::RenderBVH(Renderer* renderer)
 	// traverse the BVH
 	if (m_node != nullptr && m_broadPhase)
 		m_node->DrawNode(renderer);
+}
+
+void Physics3State::RenderModelSamples(Renderer* renderer)
+{
+	Shader* shader = renderer->CreateOrGetShader("wireframe_color");
+	renderer->UseShader(shader);
+
+	Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
+	renderer->SetTexture2D(0, texture);
+	renderer->SetSampler2D(0, texture->GetSampler());
+	glPointSize(10.f);
+
+	renderer->m_objectData.model = Matrix44::IDENTITY;
+
+	renderer->m_currentShader->m_state.m_depthCompare = COMPARE_LESS;
+	renderer->m_currentShader->m_state.m_cullMode = CULLMODE_BACK;
+	renderer->m_currentShader->m_state.m_windOrder = WIND_COUNTER_CLOCKWISE;
+
+	for (int i = 0; i < m_modelPointMeshes.size(); ++i)
+	{
+		Mesh* mesh = m_modelPointMeshes[i];
+		renderer->DrawMesh(mesh);
+	}
 }
