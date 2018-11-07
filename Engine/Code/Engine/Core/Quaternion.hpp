@@ -39,4 +39,6 @@ public:
 
 	static Matrix44 GetMatrixRotation(const Quaternion& q);
 	static Matrix44 GetMatrixWithPosition(const Quaternion& q, const Vector3& pos);
+
+	static Quaternion FromEuler(const Vector3& euler);
 };

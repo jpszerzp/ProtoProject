@@ -248,3 +248,23 @@ Matrix44 Quaternion::GetMatrixWithPosition(const Quaternion& q, const Vector3& p
 
 	return res;
 }
+
+Quaternion Quaternion::FromEuler(const Vector3& euler)
+{
+	// in our system, euler.x is pitch, euler.y is yaw, euler.z is roll
+
+	float c1 = cosf(euler.y * .5f);
+	float c2 = cosf(euler.x * .5f);
+	float c3 = cosf(euler.z * .5f);
+	float s1 = sinf(euler.y * .5f);
+	float s2 = sinf(euler.x * .5f);
+	float s3 = sinf(euler.z * .5f);
+
+	Quaternion res;
+	res.m_real = c1 * c2 * c3 - s1 * s2 * s3;
+	res.m_imaginary.x = s1 * s2 * c3 + c1 * c2 * s3;
+	res.m_imaginary.y = s1 * c2 * c3 + c1 * s2 * s3;
+	res.m_imaginary.z = c1 * s2 * c3 - s1 * c2 * s3;
+
+	return res;
+}

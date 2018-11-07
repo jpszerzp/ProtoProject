@@ -8,6 +8,7 @@
 #include <stack> 
 #include <deque>
 #include <algorithm>
+#include <set>
 
 
 enum eQHFeature
@@ -148,11 +149,13 @@ public:
 
 	std::deque<QHFace*> m_visibleFaces;
 	std::deque<QHFace*> m_allFaces;
-	std::deque<HalfEdge*> m_horizon;		std::vector<Mesh*> m_horizon_mesh;
+	std::deque<HalfEdge*> m_horizon;		
+	std::vector<Mesh*> m_horizon_mesh;
 
 	// test
 	HalfEdge* test_start_he = nullptr;
-	HalfEdge* test_he = nullptr;			Mesh* m_test_he_mesh = nullptr;
+	HalfEdge* test_he = nullptr;			
+	Mesh* m_test_he_mesh = nullptr;
 	HalfEdge* test_he_twin = nullptr;		
 	QHFace* test_otherFace = nullptr;
 
@@ -182,6 +185,7 @@ public:
 	QHVert* GetVert(int idx) { return m_verts[idx]; }
 	size_t GetVertNum() const { return m_verts.size(); }
 	std::tuple<QHFace*, QHVert*> GetFarthestConflictPair(float& dist) const;
+	std::set<Vector3> GetPointSet() const;
 
 	void ChangeCurrentHalfEdge();
 

@@ -65,4 +65,3 @@ void Box::Update(float deltaTime)
 
 	UpdateBasis();
 }
-

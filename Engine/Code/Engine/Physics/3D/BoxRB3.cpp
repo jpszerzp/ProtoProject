@@ -2,6 +2,7 @@
 #include "Engine/Core/ErrorWarningAssert.hpp"
 #include "Engine/Core/Console/DevConsole.hpp"
 #include "Engine/Input/InputSystem.hpp"
+#include "Engine/Math/MathUtils.hpp"
 
 BoxRB3::BoxRB3(float mass, const OBB3& primitive, const Vector3& euler, eMoveStatus status)
 {
@@ -14,6 +15,10 @@ BoxRB3::BoxRB3(float mass, const OBB3& primitive, const Vector3& euler, eMoveSta
 
 	Vector3 scale = primitive.GetHalfExt() * 2.f;
 	m_entityTransform = Transform(m_center, euler, scale);
+
+	m_orientation = Quaternion::FromEuler(euler);
+	
+	// ignore bounding box for this, use bounding sphere
 
 	if (m_moveStatus != MOVE_STATIC)
 	{
@@ -50,12 +55,10 @@ BoxRB3::BoxRB3(float mass, const OBB3& primitive, const Vector3& euler, eMoveSta
 		m_massData.m_invTensor = Matrix33::ZERO;
 	}
 
-	float diagonal = primitive.GetDiagonalRadius();
+	float diagonal = primitive.GetDiagonalHalf();
 	m_boundSphere = BoundingSphere(m_center, diagonal);
 	m_boundSphere.m_boundMesh = Mesh::CreateUVSphere(VERT_PCU, 18, 36);
 	m_boundSphere.m_transform = Transform(m_center, euler, Vector3(diagonal));
-
-	TODO("AABB3 BV later if necessary");
 
 	m_linearDamp = 1.f;
 	m_angularDamp = 1.f;
@@ -69,17 +72,19 @@ void BoxRB3::SetEntityForPrimitive()
 void BoxRB3::UpdatePrimitives()
 {
 	m_boundSphere.SetCenter(m_center);
-	m_boundBox.SetCenter(m_center);
 
+	// update the box primitive itself
+	// what needs to update in obb3: center, forward, up, right
 	m_primitive.SetCenter(m_center);
-	TODO("Update rot for primitive, otherwise visual will look off");
+	m_primitive.SetForward(m_entityTransform.GetWorldForward());
+	m_primitive.SetUp(m_entityTransform.GetWorldUp());
+	m_primitive.SetRight(m_entityTransform.GetWorldRight());
 }
 
 void BoxRB3::UpdateInput(float)
 {
 	InputSystem* input = InputSystem::GetInstance();
-	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_P)
-		&& !DevConsoleIsOpen())
+	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_P) && !DevConsoleIsOpen())
 		m_frozen = !m_frozen;
 }
 
@@ -93,19 +98,21 @@ void BoxRB3::UpdateTransforms()
 	Vector3 euler = Matrix44::DecomposeMatrixIntoEuler(transMat);
 	m_entityTransform.SetLocalRotation(euler);
 
-	TODO("Assume scale unchanged. Safe?");
+	// assume scale is unchanged
 
 	m_boundSphere.m_transform.SetLocalPosition(m_center);
 }
 
 void BoxRB3::Integrate(float deltaTime)
 {
-	CacheData();
+	if (!m_awake) return;
 
-	if (m_frozen)
+	UpdateInput(deltaTime);
+
+	if (!m_frozen)
 	{
 		// acc
-		//m_lastAcc = m_linearAcceleration;
+		m_lastFrameLinearAcc = m_linearAcceleration;
 		m_linearAcceleration = m_netforce * m_massData.m_invMass;
 		Vector3 angularAcc = m_inverseInertiaTensorWorld * m_torqueAcc;
 
@@ -117,10 +124,38 @@ void BoxRB3::Integrate(float deltaTime)
 		m_linearVelocity *= powf(m_linearDamp, deltaTime);	// damp 1 means no damp	
 		m_angularVelocity *= powf(m_angularDamp, deltaTime);
 
-		// pos
-		m_center += m_linearVelocity * deltaTime;
-		m_orientation.AddScaledVector(m_angularVelocity, deltaTime);
+		// first-order Newton
+		if (m_linearAcceleration.GetLength() < ACC_LIMIT && angularAcc.GetLength() < ACC_LIMIT)
+		{
+			m_center += m_linearVelocity * deltaTime;							// pos
+			m_orientation.AddScaledVector(m_angularVelocity, deltaTime);		// rot
+		}
+		// second-order Newton
+		// used when either linear or angular acc goes too large - in this case use second-order is safer yet costly
+		else
+		{
+			m_center += (m_linearVelocity * deltaTime + m_linearAcceleration * deltaTime * deltaTime * .5f);
+			m_orientation.AddScaledVector(m_angularVelocity, deltaTime);
+			m_orientation.AddScaledVector(angularAcc, deltaTime * deltaTime * .5f);
+		}
+
+		CacheData();
 	}
 
 	ClearAccs();
+
+	// updating sleep system
+	if (m_canSleep)
+	{
+		float currentMotion = DotProduct(m_linearVelocity, m_linearVelocity) + DotProduct(m_angularVelocity, m_angularVelocity);
+
+		float bias = powf(.5f, deltaTime);
+		m_motion = bias * m_motion + (1.f - bias) * currentMotion;
+
+		float clampMax = 10.f * m_sleepThreshold;
+		if (m_motion < m_sleepThreshold) 
+			SetAwake(false);
+		else if (m_motion > clampMax) 
+			m_motion = clampMax;		// clamp up to 10 times of threshold
+	}
 }

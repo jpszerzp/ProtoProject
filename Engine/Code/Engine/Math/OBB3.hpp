@@ -25,7 +25,7 @@ public:
 		: m_center(center), m_forward(forward), m_up(up), m_right(right), m_halfExt(halfExt){}
 	~OBB3(){}
 
-	float GetDiagonalRadius() const { return m_halfExt.GetLength(); }
+	float GetDiagonalHalf() const { return m_halfExt.GetLength(); }
 	float GetFullExtX() const { return m_halfExt.x * 2.f; }
 	float GetFullExtY() const { return m_halfExt.y * 2.f; }
 	float GetFullExtZ() const { return m_halfExt.z * 2.f; }
@@ -47,4 +47,7 @@ public:
 
 	void SetCenter(const Vector3& center);
 	void SetEntity(Entity3* ent) { m_entity = ent; }
+	void SetForward(const Vector3& forward) { m_forward = forward; }
+	void SetUp(const Vector3& up) { m_up = up; }
+	void SetRight(const Vector3& right) { m_right = right; }
 };

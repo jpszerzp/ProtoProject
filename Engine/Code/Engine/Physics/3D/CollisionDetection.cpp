@@ -689,10 +689,10 @@ bool CollisionData3::HasAndUpdateContact(const Contact3& contact)
 
 	for (Contact3& c : m_contacts)
 	{
-		found = FeatureMatchAndUpdate(contact, c);		// obb3 vs obb3, obb3 vs plane
+		//found = FeatureMatchAndUpdate(contact, c);		
 
 		if (!found)
-			found = EntityMatchAndUpdate(contact, c);	// sphere vs plane, sphere vs sphere
+			found = EntityMatchAndUpdate(contact, c);	
 
 		if (found)
 			break;
@@ -1171,11 +1171,6 @@ uint CollisionDetector::OBB3VsOBB3Single(const OBB3& obb1, const OBB3& obb2, Col
 		else
 		{
 			float overlap = (r1 + r2) - abs(t[i]);
-			//if (overlap > deepest)
-			//{
-			//	deepest = overlap;
-			//	axis_pair = IntVector2(i, -1);	// means the i axis of obb1, no axis from obb2
-			//}
 			if (overlap < shallowest)
 			{
 				shallowest = overlap;
@@ -1197,11 +1192,6 @@ uint CollisionDetector::OBB3VsOBB3Single(const OBB3& obb1, const OBB3& obb2, Col
 		else
 		{
 			float overlap = (r1 + r2) - dist;
-			//if (overlap > deepest)
-			//{
-			//	deepest = overlap;
-			//	axis_pair = IntVector2(-1, i);	// means no axis from obb1, and i axis from obb2
-			//}
 			if (overlap < shallowest)
 			{
 				shallowest = overlap;
@@ -1219,11 +1209,6 @@ uint CollisionDetector::OBB3VsOBB3Single(const OBB3& obb1, const OBB3& obb2, Col
 	else
 	{
 		float overlap = (r1 + r2) - dist;
-		//if (overlap > deepest)
-		//{
-		//	deepest = overlap;
-		//	axis_pair = IntVector2(0, 0);	// x axis from both
-		//}
 		if (overlap < shallowest)
 		{
 			shallowest = overlap;
@@ -1240,11 +1225,6 @@ uint CollisionDetector::OBB3VsOBB3Single(const OBB3& obb1, const OBB3& obb2, Col
 	else
 	{
 		float overlap = (r1 + r2) - dist;
-		//if (overlap > deepest)
-		//{
-		//	deepest = overlap;
-		//	axis_pair = IntVector2(0, 1);	// x from 1, y from 2
-		//}
 		if (overlap < shallowest)
 		{
 			shallowest = overlap;
@@ -1261,11 +1241,6 @@ uint CollisionDetector::OBB3VsOBB3Single(const OBB3& obb1, const OBB3& obb2, Col
 	else
 	{
 		float overlap = (r1 + r2) - dist;
-		//if (overlap > deepest)
-		//{
-		//	deepest = overlap;
-		//	axis_pair = IntVector2(0, 2);	// x from 1, z from 2
-		//}
 		if (overlap < shallowest)
 		{
 			shallowest = overlap;
@@ -1282,11 +1257,6 @@ uint CollisionDetector::OBB3VsOBB3Single(const OBB3& obb1, const OBB3& obb2, Col
 	else
 	{
 		float overlap = (r1 + r2) - dist;
-		//if (overlap > deepest)
-		//{
-		//	deepest = overlap;
-		//	axis_pair = IntVector2(1, 0);	// y from 1, x from 2
-		//}
 		if (overlap < shallowest)
 		{
 			shallowest = overlap;
@@ -1303,11 +1273,7 @@ uint CollisionDetector::OBB3VsOBB3Single(const OBB3& obb1, const OBB3& obb2, Col
 	else
 	{
 		float overlap = (r1 + r2) - dist;
-		//if (overlap > deepest)
-		//{
-		//	deepest = overlap;
-		//	axis_pair = IntVector2(1, 1);	// y from 1, y from 2
-		//}
+
 		if (overlap < shallowest)
 		{
 			shallowest = overlap;
@@ -1324,11 +1290,6 @@ uint CollisionDetector::OBB3VsOBB3Single(const OBB3& obb1, const OBB3& obb2, Col
 	else
 	{
 		float overlap = (r1 + r2) - dist;
-		//if (overlap > deepest)
-		//{
-		//	deepest = overlap;
-		//	axis_pair = IntVector2(1, 2);	// y from 1, z from 2
-		//}
 		if (overlap < shallowest)
 		{
 			shallowest = overlap;
@@ -1345,11 +1306,6 @@ uint CollisionDetector::OBB3VsOBB3Single(const OBB3& obb1, const OBB3& obb2, Col
 	else
 	{
 		float overlap = (r1 + r2) - dist;
-		//if (overlap > deepest)
-		//{
-		//	deepest = overlap;
-		//	axis_pair = IntVector2(2, 0);	// z from 1, x from 2
-		//}
 		if (overlap < shallowest)
 		{
 			shallowest = overlap;
@@ -1366,11 +1322,6 @@ uint CollisionDetector::OBB3VsOBB3Single(const OBB3& obb1, const OBB3& obb2, Col
 	else
 	{
 		float overlap = (r1 + r2) - dist;
-		//if (overlap > deepest)
-		//{
-		//	deepest = overlap;
-		//	axis_pair = IntVector2(2, 1);	// z from 1, y from 2
-		//}
 		if (overlap < shallowest)
 		{
 			shallowest = overlap;
@@ -1387,11 +1338,6 @@ uint CollisionDetector::OBB3VsOBB3Single(const OBB3& obb1, const OBB3& obb2, Col
 	else
 	{
 		float overlap = (r1 + r2) - dist;
-		//if (overlap > deepest)
-		//{
-		//	deepest = overlap;
-		//	axis_pair = IntVector2(2, 2);	// z from 1, z from 2
-		//}
 		if (overlap < shallowest)
 		{
 			shallowest = overlap;
@@ -1445,6 +1391,7 @@ uint CollisionDetector::OBB3VsOBB3Single(const OBB3& obb1, const OBB3& obb2, Col
 
 uint CollisionDetector::OBB3VsOBB3Coherent(const OBB3& obb1, const OBB3& obb2, CollisionData3* data)
 {
+	/*
 	if (data->m_contacts.size() >= data->m_maxContacts)
 		// no contacts amount left, return directly
 		return 0;
@@ -1587,7 +1534,7 @@ uint CollisionDetector::OBB3VsOBB3Coherent(const OBB3& obb1, const OBB3& obb2, C
 			// meaning that there is no valid contact
 			return 0;
 	}
-
+	
 	// 11 - if the winner contact already exists, update it
 	bool existed = data->HasAndUpdateContact(winner);
 
@@ -1598,6 +1545,282 @@ uint CollisionDetector::OBB3VsOBB3Coherent(const OBB3& obb1, const OBB3& obb2, C
 	return 1;		
 	// in this case, 1 does not necessarily mean that we have 1 more collision,
 	// but also could mean that we "updated" 1 collision
+	*/
+
+	if (data->m_contacts.size() >= data->m_maxContacts)
+	// no contacts amount left, return directly
+	return 0;
+
+	Vector3 obb1_local[3] = {obb1.m_right, obb1.m_up, obb1.m_forward};	// x y z
+	Vector3 obb2_local[3] = {obb2.m_right, obb2.m_up, obb2.m_forward};
+
+	// SAT, if fails, no collision
+	// 1 - rotation matrix where obb2 is expressed with obb1 coord (obb2 -> obb1)
+	float entries[9];
+	for (int i = 0; i < 3; ++i)
+	{
+		for (int j = 0; j < 3; ++j)
+		{
+			int idx = 3 * j + i;
+			entries[idx] = DotProduct(obb1_local[i], obb2_local[j]);
+		}
+	}
+	Matrix33 rotation = Matrix33(entries);
+
+	// 2 - find translation t from obb1 to obb2, and use that to translate to obb1's frame
+	Vector3 t = obb2.m_center - obb1.m_center;
+	t = Vector3(DotProduct(t, obb1.m_right), 
+		DotProduct(t, obb1.m_up),
+		DotProduct(t, obb1.m_forward));
+
+	// 3 - robust SAT
+	float abs_entries[9];
+	for (int i = 0; i < 3; ++i)
+	{
+		for (int j = 0; j < 3; ++j)
+		{
+			int idx = 3 * j + i;
+			abs_entries[idx] = abs(entries[idx]) + .0f;		// offset to prevent parallel axis but cause representation accuracy issue
+		}
+	}
+	Matrix33 abs_rotation = Matrix33(abs_entries);
+	// axis record 
+	IntVector2 axis_pair;
+	//float deepest = -INFINITY;
+	float shallowest = INFINITY;
+
+	// 4 - test obb1 basis
+	float r1, r2;
+	for (int i = 0; i < 3; ++i)
+	{
+		r1 = obb1.GetHalfExtCopy()[i];
+		r2 = obb2.GetHalfExtCopy()[0] * abs_rotation[i] +
+			obb2.GetHalfExtCopy()[1] * abs_rotation[3 + i] +
+			obb2.GetHalfExtCopy()[2] * abs_rotation[6 + i];
+		if (abs(t[i]) > (r1 + r2))
+			return 0;
+		else
+		{
+			float overlap = (r1 + r2) - abs(t[i]);
+			if (overlap < shallowest)
+			{
+				shallowest = overlap;
+				axis_pair = IntVector2(i, -1);
+			}
+		}
+	}
+
+	// 5 - test obb2 basis
+	for (int i = 0; i < 3; ++i)
+	{
+		r1 = obb1.GetHalfExtCopy()[0] * abs_rotation[3 * i] +
+			obb1.GetHalfExtCopy()[1] * abs_rotation[3 * i + 1] +
+			obb1.GetHalfExtCopy()[2] * abs_rotation[3 * i + 2];
+		r2 = obb2.GetHalfExtCopy()[i];
+		float dist = abs(t[0] * rotation[3*i] + t[1] * rotation[3*i+1] + t[2] * rotation[3*i+2]); 
+		if (dist > (r1 + r2))
+			return 0;
+		else
+		{
+			float overlap = (r1 + r2) - dist;
+			if (overlap < shallowest)
+			{
+				shallowest = overlap;
+				axis_pair = IntVector2(-1, i);
+			}
+		}
+	}
+
+	// 6 - test axis obb1x cross obb2x
+	r1 = obb1.m_halfExt[1] * abs_rotation[2] + obb1.m_halfExt[2] * abs_rotation[1];
+	r2 = obb2.m_halfExt[1] * abs_rotation[6] + obb2.m_halfExt[2] * abs_rotation[3];
+	float dist = abs(t[2] * rotation[1] - t[1] * rotation[2]);
+	if (dist > (r1 + r2))
+	return 0;
+	else
+	{
+		float overlap = (r1 + r2) - dist;
+		if (overlap < shallowest)
+		{
+			shallowest = overlap;
+			axis_pair = IntVector2(0, 0);
+		}
+	}
+
+	// 7 - test axis obb1x cross obb2y
+	r1 = obb1.m_halfExt[1] * abs_rotation[5] + obb1.m_halfExt[2] * abs_rotation[4];
+	r2 = obb2.m_halfExt[0] * abs_rotation[6] + obb2.m_halfExt[2] * abs_rotation[0];
+	dist = abs(t[2] * rotation[4] - t[1] * rotation[5]);
+	if (dist > (r1 + r2))
+	return 0;
+	else
+	{
+		float overlap = (r1 + r2) - dist;
+		if (overlap < shallowest)
+		{
+			shallowest = overlap;
+			axis_pair = IntVector2(0, 1);
+		}
+	}
+
+	// 8 - test axis obb1x cross obb2z
+	r1 = obb1.m_halfExt[1] * abs_rotation[8] + obb1.m_halfExt[2] * abs_rotation[7];
+	r2 = obb2.m_halfExt[0] * abs_rotation[3] + obb2.m_halfExt[1] * abs_rotation[0];
+	dist = abs(t[2] * rotation[7] - t[1] * rotation[8]);
+	if (dist > (r1 + r2))
+	return 0;
+	else
+	{
+		float overlap = (r1 + r2) - dist;
+		if (overlap < shallowest)
+		{
+			shallowest = overlap;
+			axis_pair = IntVector2(0, 2);
+		}
+	}
+
+	// 9 - test axis obb1y cross obb2x
+	r1 = obb1.m_halfExt[0] * abs_rotation[2] + obb1.m_halfExt[2] * abs_rotation[0];
+	r2 = obb2.m_halfExt[1] * abs_rotation[7] + obb2.m_halfExt[2] * abs_rotation[4];
+	dist = abs(t[0] * rotation[2] - t[2] * rotation[0]);
+	if (dist > (r1 + r2))
+	return 0;
+	else
+	{
+		float overlap = (r1 + r2) - dist;
+		if (overlap < shallowest)
+		{
+			shallowest = overlap;
+			axis_pair = IntVector2(1, 0);
+		}
+	}
+
+	// 10 - test axis obb1y cross obb2y
+	r1 = obb1.m_halfExt[0] * abs_rotation[5] + obb1.m_halfExt[2] * abs_rotation[3];
+	r2 = obb2.m_halfExt[0] * abs_rotation[7] + obb2.m_halfExt[2] * abs_rotation[1];
+	dist = abs(t[0] * rotation[5] - t[2] * rotation[3]);
+	if (dist > (r1 + r2))
+	return 0;
+	else
+	{
+		float overlap = (r1 + r2) - dist;
+
+		if (overlap < shallowest)
+		{
+			shallowest = overlap;
+			axis_pair = IntVector2(1, 1);
+		}
+	}
+
+	// 11 - test axis obb1y cross obb2z
+	r1 = obb1.m_halfExt[0] * abs_rotation[8] + obb1.m_halfExt[2] * abs_rotation[6];
+	r2 = obb2.m_halfExt[0] * abs_rotation[4] + obb2.m_halfExt[1] * abs_rotation[1];
+	dist = abs(t[0] * rotation[8] - t[2] * rotation[6]);
+	if (dist > (r1 + r2))
+	return 0;
+	else
+	{
+		float overlap = (r1 + r2) - dist;
+		if (overlap < shallowest)
+		{
+			shallowest = overlap;
+			axis_pair = IntVector2(1, 2);
+		}
+	}
+
+	// 12 - test axis obb1z cross obb2x
+	r1 = obb1.m_halfExt[0] * abs_rotation[1] + obb1.m_halfExt[1] * abs_rotation[0];
+	r2 = obb2.m_halfExt[1] * abs_rotation[8] + obb2.m_halfExt[2] * abs_rotation[5];
+	dist = abs(t[1] * rotation[0] - t[0] * rotation[1]);
+	if (dist > (r1 + r2))
+	return 0;
+	else
+	{
+		float overlap = (r1 + r2) - dist;
+		if (overlap < shallowest)
+		{
+			shallowest = overlap;
+			axis_pair = IntVector2(2, 0);
+		}
+	}
+
+	// 13 - test axis obb1z cross obb2y
+	r1 = obb1.m_halfExt[0] * abs_rotation[4] + obb1.m_halfExt[1] * abs_rotation[3];
+	r2 = obb2.m_halfExt[0] * abs_rotation[8] + obb2.m_halfExt[2] * abs_rotation[2];
+	dist = abs(t[1] * rotation[3] - t[0] * rotation[4]);
+	if (dist > (r1 + r2))
+	return 0;
+	else
+	{
+		float overlap = (r1 + r2) - dist;
+		if (overlap < shallowest)
+		{
+			shallowest = overlap;
+			axis_pair = IntVector2(2, 1);
+		}
+	}
+
+	// 14 - test axis obb1z cross obb2z
+	r1 = obb1.m_halfExt[0] * abs_rotation[7] + obb1.m_halfExt[1] * abs_rotation[6];
+	r2 = obb2.m_halfExt[0] * abs_rotation[5] + obb2.m_halfExt[1] * abs_rotation[2];
+	dist = abs(t[1] * rotation[6] - t[0] * rotation[7]);
+	if (dist > (r1 + r2))
+	return 0;
+	else
+	{
+		float overlap = (r1 + r2) - dist;
+		if (overlap < shallowest)
+		{
+			shallowest = overlap;
+			axis_pair = IntVector2(2, 2);
+		}
+	}
+
+	// 15 - restore axis and hence find normal
+	Vector3 usedNormal;
+	Vector3 a1 = ISA;
+	Vector3 a2 = ISA;
+	int basis1 = axis_pair.x;
+	int basis2 = axis_pair.y;
+	switch (basis1)
+	{
+	case -1: break;
+	case 0: a1 = obb1.m_right; break;
+	case 1: a1 = obb1.m_up; break;
+	case 2: a1 = obb1.m_forward; break;
+	default: break;
+	}
+	switch (basis2)
+	{
+	case -1: break;
+	case 0: a2 = obb2.m_right; break;
+	case 1: a2 = obb2.m_up; break;
+	case 2: a2 = obb2.m_forward; break;
+	default: break;
+	}
+	if(a1 == ISA)
+	// valid subject axis is a2
+	usedNormal = a2;
+	else if (a2 == ISA)
+	usedNormal = a1;
+	else
+	usedNormal = a1.Cross(a2);
+	if (DotProduct(usedNormal, obb2.m_center - obb1.m_center) > 0.f)	// should not equal 0
+	usedNormal *= -1.f;
+
+	// 16 - generate contact
+	usedNormal.NormalizeAndGetLength();
+	Vector3 contactPoint = obb1.m_center;
+	float penetration = shallowest;
+	Contact3 theContact = Contact3(obb1.GetEntity(), obb2.GetEntity(),
+		usedNormal, contactPoint, penetration);
+
+	bool existed = data->HasAndUpdateContact(theContact);
+
+	if (!existed)
+		data->m_contacts.push_back(theContact);
+
+	return 1;		
 }
 
 uint CollisionDetector::OBB3VsPoint(const OBB3& obb, const Vector3& p, Contact3& contact, bool reverse)

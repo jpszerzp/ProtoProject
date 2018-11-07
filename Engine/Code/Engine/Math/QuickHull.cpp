@@ -1175,6 +1175,20 @@ std::tuple<QHFace*, QHVert*> QuickHull::GetFarthestConflictPair(float& dist) con
 	return vert_pair;
 }
 
+std::set<Vector3> QuickHull::GetPointSet() const
+{
+	std::set<Vector3> point_set;
+
+	// for every qhvert, get its position, and put it into the point set 
+	for (QHVert* vert : m_verts)
+	{
+		const Vector3& pos = vert->GetVertRef();
+		point_set.emplace(pos);
+	}
+
+	return point_set;
+}
+
 void QuickHull::ChangeCurrentHalfEdge()
 {
 	if (m_test_he_mesh != nullptr)

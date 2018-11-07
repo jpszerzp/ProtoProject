@@ -21,7 +21,7 @@ BoxEntity3::BoxEntity3(const OBB3& primitive, const Vector3& rot, eMoveStatus mo
 	else
 		m_massData.m_invMass = 0.f;
 
-	float diagonal = primitive.GetDiagonalRadius();
+	float diagonal = primitive.GetDiagonalHalf();
 	m_boundSphere = BoundingSphere(m_center, diagonal);
 	m_boundSphere.m_boundMesh = Mesh::CreateUVSphere(VERT_PCU, 18, 36);
 	m_boundSphere.m_transform = Transform(m_center, rot, Vector3(diagonal));

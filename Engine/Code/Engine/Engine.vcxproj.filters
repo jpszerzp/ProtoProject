@@ -520,6 +520,9 @@
     <ClCompile Include="Physics\3D\QuadRB3.cpp">
       <Filter>General</Filter>
     </ClCompile>
+    <ClCompile Include="Physics\3D\GJK3.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -901,5 +904,6 @@
     <ClInclude Include="Physics\3D\QuadRB3.hpp" />
     <ClInclude Include="Core\GameInstance.hpp" />
     <ClInclude Include="Math\HalfEdge.hpp" />
+    <ClInclude Include="Physics\3D\GJK3.hpp" />
   </ItemGroup>
 </Project>

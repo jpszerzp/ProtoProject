@@ -106,8 +106,11 @@ public:
 	bool m_debug_vert_complete = false;
 	
 	WrapAround* m_wraparound;
+	WrapAround* m_wraparound_0;
 	int m_wrapPosIterator = 0;
+	int m_wrapPosIterator_0 = 0;
 	Sphere* m_physBall = nullptr;
+	Box* m_physBox = nullptr;
 
 	// assimp test
 	AssimpLoader* m_assimp_0 = nullptr;
