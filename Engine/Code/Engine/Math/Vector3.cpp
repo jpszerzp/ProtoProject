@@ -320,6 +320,12 @@ bool Vector3::AreVectorsNearlyIdentical(const Vector3& v1, const Vector3& v2)
 	return (dist < VEC3_IDENTITY_THRESHOLD);
 }
 
+bool Vector3::EqualByTolerance(const float& tolerance, const Vector3& v1, const Vector3& v2)
+{
+	if ((v1 - v2).GetLengthSquared() <= (tolerance * tolerance))
+		return true;
+}
+
 Vector3 GetMiddlePoint(const Vector3& min, const Vector3& max)
 {
 	float middleX = (min.x + max.x) / 2.f;

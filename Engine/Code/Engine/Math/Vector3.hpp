@@ -54,6 +54,7 @@ public:
 	void Print();
 
 	static bool AreVectorsNearlyIdentical(const Vector3& v1, const Vector3& v2);
+	static bool EqualByTolerance(const float& tolerance, const Vector3& v1, const Vector3& v2);
 
 	static const Vector3 ZERO;
 	static const Vector3 ONE;

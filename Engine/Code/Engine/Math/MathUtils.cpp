@@ -1289,7 +1289,7 @@ float DistPointToPlaneUnsigned(const Vector3& pt, const Vector3& vert1, const Ve
 }
 
 /*
-* Return the closest feature on convex hull regarding a point.
+* Return the closest feature on TRIANGLE hull regarding a point.
 * @param pt: position of point of interest
 * @param a: a vertex of the triangle
 * @param b: b vertex of the triangle

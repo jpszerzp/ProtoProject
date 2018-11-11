@@ -65,6 +65,11 @@ public:
 	void RenderBVH(Renderer* renderer);
 	void RenderModelSamples(Renderer* renderer);
 
+	// scene tests
+	void WrapAroundTestBall();
+	void WrapAroundTestBox();
+	void ShootBallFromCamera();
+
 public:
 	// entity
 	GameObject* m_g0;
@@ -107,6 +112,7 @@ public:
 	QuickHull* m_qh = nullptr;
 	uint m_debug_vert_count = 0;
 	bool m_debug_vert_complete = false;
+	bool m_eye_found = false;
 	
 	WrapAround* m_wraparound;
 	WrapAround* m_wraparound_0;

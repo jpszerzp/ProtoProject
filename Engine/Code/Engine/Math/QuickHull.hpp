@@ -40,7 +40,7 @@ public:
 	Vector3 vert;
 	Mesh* vertMesh = nullptr;
 	Rgba color;
-	std::vector<QHFace*> visibleFaces;
+	//std::vector<QHFace*> visibleFaces;
 
 public:
 	QHVert() { ConstructFeatureID(); }
@@ -118,13 +118,14 @@ public:
 	Vector3 GetFaceCentroid() const;
 	void CreateFaceNormalMesh(const Rgba& color);
 	void FlushFaceNormalMesh();
+	void FlushFaceMesh();
 	void GenerateEdges();
 
 	bool IsTriangle() const { return vert_num == 3; }
 	bool IsPolygon() const { return vert_num == 4; }
 
-	bool ShareEdge(QHFace* other);
-	bool IsEdgeShared(HalfEdge* he);
+	bool UpdateSharedEdge(QHFace* other);
+	bool CheckAndSetEdgeShared(HalfEdge* he);
 
 	void ConstructFeatureID() override;
 
@@ -161,13 +162,18 @@ public:
 
 	// orphans
 	std::vector<QHVert*> m_orphans;
-	QHVert* m_candidate = nullptr;
+	//QHVert* m_candidate = nullptr;
+
+	// anchor point that is "inside" the hull generated in future rounds
+	// always valid for use to generate normals of new faces
+	Vector3 m_anchor = Vector3::INVALID;
 
 public:
 	bool AddConflictPointInitial(QHVert* vert);
 	bool AddConflictPointGeneral(QHVert* vert, std::vector<QHFace*>& faces);
 	void AddHorizonMesh(HalfEdge* horizon);
-	bool AddToFinalizedFace(QHFeature* feature, const Vector3& closest, QHVert* vert);
+	bool AddToFinalizedFaceInitial(QHFeature* feature, const Vector3& closest, QHVert* vert);
+	bool AddToFinalizedFaceGeneral(QHFeature* feature, const Vector3& closest, QHVert* vert, std::vector<QHFace*>& faces);
 
 	void GeneratePointSet(uint num, const Vector3& min, const Vector3& max);
 	void GenerateInitialFace();
@@ -179,15 +185,17 @@ public:
 	bool PointOutBoundFace(const Vector3& pt, const QHFace& face);
 	QHFeature* FindClosestFeatureInitial(const Vector3& pt, float& dist, Vector3& closest);
 	QHFeature* FindClosestFeatureGeneral(const Vector3& pt, float& dist, Vector3& closest, std::vector<QHFace*>& faces);
-	QHFace* FindFaceGivenPts(const Vector3& v1, const Vector3& v2, const Vector3& v3, bool& found);
-	const std::vector<QHFace*> FindFaceGivenSharedEdge(const QHEdge& edge, bool& found);
-	const std::vector<QHFace*> FindFaceGivenSharedVert(const QHVert& vert, bool& found);
+	QHFace* FindFaceGivenPtsInitial(const Vector3& v1, const Vector3& v2, const Vector3& v3, bool& found);
+	QHFace* FindFaceGivenPtsGeneral(const Vector3& v1, const Vector3& v2, const Vector3& v3, bool& found, const std::vector<QHFace*>& new_faces);
+	const std::vector<QHFace*> FindFaceGivenSharedEdgeInitial(const QHEdge& edge, bool& found);
+	const std::vector<QHFace*> FindFaceGivenSharedEdgeGeneral(const QHEdge& edge, bool& found, const std::vector<QHFace*>& new_faces);
+	const std::vector<QHFace*> FindFaceGivenSharedVertInitial(const QHVert& vert, bool& found);
 	QHVert* GetVert(int idx) { return m_verts[idx]; }
 	size_t GetVertNum() const { return m_verts.size(); }
 	std::tuple<QHFace*, QHVert*> GetFarthestConflictPair(float& dist) const;
 	std::set<Vector3> GetPointSet() const;
 
-	void ChangeCurrentHalfEdge();
+	void ChangeCurrentHalfEdgeMesh();
 
 	void RenderHull(Renderer* renderer);
 	void RenderFaces(Renderer* renderer);

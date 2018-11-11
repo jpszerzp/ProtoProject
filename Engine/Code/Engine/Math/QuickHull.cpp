@@ -57,11 +57,13 @@ QHFace::QHFace(HalfEdge* he, const Vector3& pt)
 	verts.push_back(vert2);
 	verts.push_back(pt);
 
+	// set feature as "face"
 	ConstructFeatureID();
 
 	// set up tail, prev and next for half edges
-	// twin and parent face NOT set up yet, EXCEPT for half edge 1
-	//HalfEdge* he1 = new HalfEdge(vert1); he1->m_twin = he.m_twin;
+	// twin and parent face NOT set up yet, EXCEPT for the twin of half edge 1
+	// for HE1, twin is set already, parent face however, is the wrong one 
+	// (the one that is already deleted), and so still needs to be set correctly later
 	HalfEdge* he2 = new HalfEdge(vert2);
 	HalfEdge* he3 = new HalfEdge(pt);
 	he->m_prev  = he3; he->m_next  = he2;	// rearrange next and prev of horizon
@@ -73,13 +75,11 @@ QHFace::QHFace(HalfEdge* he, const Vector3& pt)
 
 QHFace::~QHFace()
 {
+	// delete face normal mesh
 	FlushFaceNormalMesh();
 
-	if (faceMesh != nullptr)
-	{
-		delete faceMesh;
-		faceMesh = nullptr;
-	}
+	// delete face mesh
+	FlushFaceMesh();
 
 	// conflict points are usually orphaned points that will be adopted
 	// so we DO NOT delete them here
@@ -95,7 +95,7 @@ void QHFace::AddConflictPoint(QHVert* pt)
 	pt->ChangeColor(normColor);
 }
 
-
+// Get farthest point of the FACE
 QHVert* QHFace::GetFarthestConflictPoint(float& dist) const
 {
 	dist = -INFINITY;
@@ -175,6 +175,7 @@ bool QHFace::FindEdgeTwinAgainstFace(QHFace* face, HalfEdge* entry)
 
 void QHFace::SetParentHalfEdge()
 {
+	/*
 	HalfEdge* myEntry = m_entry;
 	HalfEdge* it_he = myEntry;
 
@@ -186,6 +187,19 @@ void QHFace::SetParentHalfEdge()
 	{
 		if (it_he->m_parentFace == nullptr)
 			it_he->m_parentFace = this;
+		it_he = it_he->m_next;
+	}
+	*/
+
+	HalfEdge* myEntry = m_entry;
+	HalfEdge* it_he = myEntry;
+
+	it_he->m_parentFace = this;
+	it_he = it_he->m_next;
+
+	while (it_he != myEntry)
+	{
+		it_he->m_parentFace = this;
 		it_he = it_he->m_next;
 	}
 }
@@ -219,24 +233,36 @@ void QHFace::FlushFaceNormalMesh()
 	}
 }
 
+void QHFace::FlushFaceMesh()
+{
+	if (faceMesh != nullptr)
+	{
+		delete faceMesh;
+		faceMesh = nullptr;
+	}
+}
+
 void QHFace::GenerateEdges()
 {
 
 }
 
-bool QHFace::ShareEdge(QHFace* other)
+bool QHFace::UpdateSharedEdge(QHFace* other)
 {
 	// NOTE: Assuming there is only one shared edge between two faces
 	HalfEdge* otherEntry = other->m_entry;
 	HalfEdge* it_he_other = otherEntry;
 
-	if (IsEdgeShared(it_he_other))
+	// we need to check if the given half edge could be a twin of any one edge of this face
+	// if it could be, then we set the twin relation along the way and return true
+	// if no, we do not set relation ofc, and the program should ultimately return false
+	if (CheckAndSetEdgeShared(it_he_other))
 		return true;
 	it_he_other = it_he_other->m_next;
 
 	while (it_he_other != otherEntry)
 	{
-		if (IsEdgeShared(it_he_other))
+		if (CheckAndSetEdgeShared(it_he_other))
 			return true;
 		it_he_other = it_he_other->m_next;
 	}
@@ -244,11 +270,14 @@ bool QHFace::ShareEdge(QHFace* other)
 	return false;
 }
 
-bool QHFace::IsEdgeShared(HalfEdge* he)
+bool QHFace::CheckAndSetEdgeShared(HalfEdge* he)
 {
 	HalfEdge* myEntry = m_entry;
 	HalfEdge* it_he_my = m_entry;
 
+	// geometrically, the condition of being a twin is:
+	// 1. my tail is the tail of next half edge of the twin
+	// 2. the tail of my next half edge is twin's tail
 	if (it_he_my->IsTwin(he))
 	{
 		it_he_my->m_twin = he;
@@ -318,8 +347,14 @@ void QHFace::DrawFace(Renderer* renderer)
 QuickHull::QuickHull(uint num, const Vector3& min, const Vector3& max)
 {
 	// initial set up
+	// point sets of this hull
 	GeneratePointSet(num, min, max);
+
+	// Generate the initial face of the hull, which is a triangle
+	// NOTE: when a point is considered part of the hull, it is REMOVED from m_verts
 	GenerateInitialFace();
+
+	// initial hull (tetrahedron)
 	GenerateInitialHull();
 
 	/*
@@ -429,6 +464,13 @@ QuickHull::~QuickHull()
 	DeleteVector(m_verts);
 }
 
+/* Add vert to conflict list of one of the INITIAL tetrahedron hull.
+ * First find the closest feature, and then use that feature to generate the face it belongs to.
+ * @param, vert: point we wish to add to the conflict list of one of the faces of initial hull.
+ * @return: if the point is inside the hull and hence is removed from hull's point list.
+ * Remember, adding to conflict list does not mean the point becomes part of hull, it only 
+ * means that the point is a candidate. So we do not remove things from point list as we add conflict point.
+ */
 bool QuickHull::AddConflictPointInitial(QHVert* vert)
 {
 	const Vector3& globalPt = vert->GetVertRef();
@@ -437,7 +479,7 @@ bool QuickHull::AddConflictPointInitial(QHVert* vert)
 
 	QHFeature* closest_feature = FindClosestFeatureInitial(globalPt, dist, closest);
 
-	bool pointRemoved = AddToFinalizedFace(closest_feature, closest, vert);
+	bool pointRemoved = AddToFinalizedFaceInitial(closest_feature, closest, vert);
 	return pointRemoved;
 }
 
@@ -449,7 +491,13 @@ bool QuickHull::AddConflictPointGeneral(QHVert* vert, std::vector<QHFace*>& face
 
 	QHFeature* closest_feature = FindClosestFeatureGeneral(globalPt, dist, closest, faces);
 
-	bool pointRemoved = AddToFinalizedFace(closest_feature, closest, vert);
+	int numFace = (int)(faces.size());
+	// after this operation, the point is either deleted because it will sit INSIDE the hull
+	// or, set as the conflict point of one of the new faces and is kept in the m_verts of hull
+	// Note that either way we do not bother altering content of orphan, because each vert in m_orphans,
+	// if survives, will find its reference and will not cause leaks.
+	// Therefore we can always clear the m_orphans when we are done with operations.
+	bool pointRemoved = AddToFinalizedFaceGeneral(closest_feature, closest, vert, faces);
 	return pointRemoved;
 }
 
@@ -468,7 +516,7 @@ void QuickHull::AddHorizonMesh(HalfEdge* horizon)
  * @param, vert: the vert we wish to add to a conflict list
  * @return: if the point is removed from global list of this hull
  */
-bool QuickHull::AddToFinalizedFace(QHFeature* closest_feature, const Vector3& closest, QHVert* vert)
+bool QuickHull::AddToFinalizedFaceInitial(QHFeature* closest_feature, const Vector3& closest, QHVert* vert)
 {
 	const Vector3& globalPt = vert->GetVertRef();
 
@@ -486,14 +534,14 @@ bool QuickHull::AddToFinalizedFace(QHFeature* closest_feature, const Vector3& cl
 			const Vector3& candidate3 = face->GetVert3();
 
 			bool found = false;
-			QHFace* theFace = FindFaceGivenPts(candidate1, candidate2, candidate3, found);
+			QHFace* theFace = FindFaceGivenPtsInitial(candidate1, candidate2, candidate3, found);
 			if (found)
 				theFace->AddConflictPoint(vert);
 		}
 		else if (edge != nullptr)
 		{
 			bool found = false;
-			const std::vector<QHFace*>& faces = FindFaceGivenSharedEdge(*edge, found);
+			const std::vector<QHFace*>& faces = FindFaceGivenSharedEdgeInitial(*edge, found);
 
 			if (found)
 			{
@@ -529,7 +577,7 @@ bool QuickHull::AddToFinalizedFace(QHFeature* closest_feature, const Vector3& cl
 		else if (shared_vert != nullptr)
 		{
 			bool found = false;
-			const std::vector<QHFace*>& faces = FindFaceGivenSharedVert(*shared_vert, found);
+			const std::vector<QHFace*>& faces = FindFaceGivenSharedVertInitial(*shared_vert, found);
 
 			if (found)
 			{
@@ -596,6 +644,117 @@ bool QuickHull::AddToFinalizedFace(QHFeature* closest_feature, const Vector3& cl
 	// point is inside the hull
 	else
 	{
+		RemovePointGlobal(globalPt);
+		return true;			// this point IS removed
+	}
+}
+
+bool QuickHull::AddToFinalizedFaceGeneral(QHFeature* feature, const Vector3& closest, QHVert* vert, std::vector<QHFace*>& faces)
+{
+	const Vector3& globalPt = vert->GetVertRef();
+
+	// point is not inside the hull that is also consisted of the given new faces
+	if (feature != nullptr && closest != Vector3::INVALID)
+	{
+		QHFace* face = dynamic_cast<QHFace*>(feature);
+		QHEdge* edge = dynamic_cast<QHEdge*>(feature);
+		QHVert* shared_vert = dynamic_cast<QHVert*>(feature);
+
+		if (face != nullptr)
+		{
+			const Vector3& candidate1 = face->GetVert1();
+			const Vector3& candidate2 = face->GetVert2();
+			const Vector3& candidate3 = face->GetVert3();
+
+			bool found = false;
+			// to find the face, for the general version, we do NOT find among ALL faces of hull,
+			// instead we only find it among new faces
+			QHFace* theFace = FindFaceGivenPtsGeneral(candidate1, candidate2, candidate3, found, faces);
+			if (found)
+				theFace->AddConflictPoint(vert);
+		}
+		else if (edge != nullptr)
+		{
+			bool found = false;
+			const std::vector<QHFace*>& theFaces = FindFaceGivenSharedEdgeGeneral(*edge, found, faces);
+
+			if (found)
+			{
+				QHFace* theFace1 = theFaces[0];
+				QHFace* theFace2 = theFaces[1];
+
+				// see which face is closer to the point
+				float dist1 = DistPointToPlaneUnsigned(globalPt, theFace1->GetVert1(), theFace1->GetVert2(), theFace1->GetVert3());
+				float dist2 = DistPointToPlaneUnsigned(globalPt, theFace2->GetVert1(), theFace2->GetVert2(), theFace2->GetVert3());
+
+				bool out1 = PointOutBoundFace(globalPt, *theFace1);
+				bool out2 = PointOutBoundFace(globalPt, *theFace2);
+
+				if (!out1 && out2)
+					theFace2->AddConflictPoint(vert);
+				else if (!out2 && out1)
+					theFace1->AddConflictPoint(vert);
+				else if (out1 && out2)
+				{
+					if (dist1 < dist2)
+						theFace1->AddConflictPoint(vert);
+					else
+						theFace2->AddConflictPoint(vert);
+				}
+				else
+				{
+					ASSERT_OR_DIE(false, "Point inbound to both faces, this should NOT happen");
+				}
+			}
+			else
+				ASSERT_RECOVERABLE(found, "No faces for shared edge feature is found");
+		}
+		else if (shared_vert != nullptr)
+		{
+			// in this case, the closest feature is a point (the shared point of all new faces)
+			// hence all new faces are candidates of conflict faces for this point (orphan)
+			// we need to iterate thru all new faces, retrieve the one with shortest distance to this point
+			// and add the point as a conflict point of that face
+			float dist = INFINITY;
+			QHFace* winner = nullptr;
+			for (QHFace* theFace : faces)
+			{
+				float toFaceDist = DistPointToPlaneUnsigned(globalPt, theFace->GetVert1(), theFace->GetVert2(), theFace->GetVert3());
+				bool outward = PointOutBoundFace(globalPt, *theFace);
+
+				if (outward)
+				{
+					// point is outward considering this face, face is hence a candidate
+					
+					if (toFaceDist < dist)
+					{
+						// distance to this face is the shorter than the distance on record,
+						// therefore update the record and the winning face
+						dist = toFaceDist;
+						winner = theFace;
+					}
+
+					// distance is larger than record, ignore this face
+				}
+				
+				// if point is inbound to the face, the face is ignored
+				// ALTHOUGH this should not happen in this situation because
+				// if this is possible we shouldn't have ended up having a shared vertex
+			}
+
+			// up to this point, the winner is the face we should use, as long as it is not null (we actually found such a face)
+			ASSERT_OR_DIE(winner != nullptr, "Cannot find winning face for shared vertex case. This should NOT happen!");
+			winner->AddConflictPoint(vert);
+		}
+
+		return false;			// there is NO point removed (because it will NOT be inside the hull)
+	}
+	// point is inside the hull
+	else
+	{
+		// if we find the point as inside future hull
+		// (remember the new faces are not yet added to the hull, so strictly speaking that is a future hull)
+		// we remove it from m_verts of hull (remember the invariant: m_verts is sum of all conflicting points)
 		RemovePointGlobal(globalPt);
 		return true;			// this point IS removed
 	}
@@ -1062,7 +1221,7 @@ QHFeature* QuickHull::FindClosestFeatureGeneral(const Vector3& pt, float& dist, 
 	return res;
 }
 
-QHFace* QuickHull::FindFaceGivenPts(const Vector3& v1, const Vector3& v2, const Vector3& v3, bool& found)
+QHFace* QuickHull::FindFaceGivenPtsInitial(const Vector3& v1, const Vector3& v2, const Vector3& v3, bool& found)
 {
 	QHFace* theFace = nullptr;
 
@@ -1083,7 +1242,28 @@ QHFace* QuickHull::FindFaceGivenPts(const Vector3& v1, const Vector3& v2, const 
 	return theFace;
 }
 
-const std::vector<QHFace*> QuickHull::FindFaceGivenSharedEdge(const QHEdge& edge, bool& found)
+QHFace* QuickHull::FindFaceGivenPtsGeneral(const Vector3& v1, const Vector3& v2, const Vector3& v3, bool& found, const std::vector<QHFace*>& new_faces)
+{
+	QHFace* theFace = nullptr;
+
+	for ( QHFace* face : new_faces )
+	{
+		bool has1 = (std::find(face->verts.begin(), face->verts.end(), v1) != face->verts.end());
+		bool has2 = (std::find(face->verts.begin(), face->verts.end(), v2) != face->verts.end());
+		bool has3 = (std::find(face->verts.begin(), face->verts.end(), v3) != face->verts.end());
+
+		if (has1 && has2 && has3)
+		{
+			found = true;
+			theFace = face;
+			break;
+		}
+	}
+
+	return theFace;
+}
+
+const std::vector<QHFace*> QuickHull::FindFaceGivenSharedEdgeInitial(const QHEdge& edge, bool& found)
 {
 	std::vector<QHFace*> share_faces;
 	bool f1_found = false;
@@ -1115,7 +1295,41 @@ const std::vector<QHFace*> QuickHull::FindFaceGivenSharedEdge(const QHEdge& edge
 	return share_faces;
 }
 
-const std::vector<QHFace*> QuickHull::FindFaceGivenSharedVert(const QHVert& theVert, bool& found)
+const std::vector<QHFace*> QuickHull::FindFaceGivenSharedEdgeGeneral(const QHEdge& edge, bool& found, const std::vector<QHFace*>& new_faces)
+{
+	std::vector<QHFace*> share_faces;
+	bool f1_found = false;
+	bool f2_found = false;
+
+	// for general version, we find the face among new faces only instead of searching all faces
+	for (QHFace* face : new_faces)
+	{
+		bool v1_found = (std::find(face->verts.begin(), face->verts.end(), edge.v1) != face->verts.end());
+		bool v2_found = (std::find(face->verts.begin(), face->verts.end(), edge.v2) != face->verts.end());
+
+		if (v1_found && v2_found)
+		{
+			if (!f1_found)
+			{
+				f1_found = true;
+				share_faces.push_back(face);
+			}
+			else if (!f2_found)
+			{
+				f2_found = true;
+				share_faces.push_back(face);
+				break;		
+				// all two faces found, stop iterating
+			}
+		}
+	}
+
+	found = f1_found && f2_found;
+
+	return share_faces;
+}
+
+const std::vector<QHFace*> QuickHull::FindFaceGivenSharedVertInitial(const QHVert& theVert, bool& found)
 {
 	std::vector<QHFace*> share_faces;
 	bool found1 = false;
@@ -1152,6 +1366,8 @@ const std::vector<QHFace*> QuickHull::FindFaceGivenSharedVert(const QHVert& theV
 	return share_faces;
 }
 
+
+// Get the farthest conflict point of this HULL
 std::tuple<QHFace*, QHVert*> QuickHull::GetFarthestConflictPair(float& dist) const
 {
 	std::tuple<QHFace*, QHVert*> vert_pair;
@@ -1189,7 +1405,7 @@ std::set<Vector3> QuickHull::GetPointSet() const
 	return point_set;
 }
 
-void QuickHull::ChangeCurrentHalfEdge()
+void QuickHull::ChangeCurrentHalfEdgeMesh()
 {
 	if (m_test_he_mesh != nullptr)
 	{
@@ -1347,6 +1563,7 @@ void QHVert::ChangeColor(const Rgba& theColor)
 
 	vertMesh = Mesh::CreatePointImmediate(VERT_PCU, vert, theColor);
 }
+
 
 void QHVert::ConstructFeatureID()
 {
