@@ -463,6 +463,7 @@
     <ClInclude Include="Core\Light\SpotLight.hpp" />
     <ClInclude Include="Core\Time\Stopwatch.hpp" />
     <ClInclude Include="Core\Util\DataUtils.hpp" />
+    <ClInclude Include="Core\Util\RenderUtil.hpp" />
     <ClInclude Include="Core\Util\StringUtils.hpp" />
     <ClInclude Include="Core\Time\TheTime.hpp" />
     <ClInclude Include="Core\Transform.hpp" />

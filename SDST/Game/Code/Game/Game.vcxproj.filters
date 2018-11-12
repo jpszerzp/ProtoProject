@@ -97,6 +97,12 @@
     <ClCompile Include="WrapAround3.cpp">
       <Filter>General</Filter>
     </ClCompile>
+    <ClCompile Include="ControlGroup.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="Collision3State.cpp">
+      <Filter>General\States\Gallery</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameCommon.hpp">
@@ -166,6 +172,10 @@
       <Filter>General\Units</Filter>
     </ClInclude>
     <ClInclude Include="WrapAround3.hpp" />
+    <ClInclude Include="ControlGroup.hpp" />
+    <ClInclude Include="Collision3State.hpp">
+      <Filter>General\States\Gallery</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="..\..\Run_Win32\Data\Definitions\IsoSprite.xml" />

@@ -905,5 +905,6 @@
     <ClInclude Include="Core\GameInstance.hpp" />
     <ClInclude Include="Math\HalfEdge.hpp" />
     <ClInclude Include="Physics\3D\GJK3.hpp" />
+    <ClInclude Include="Core\Util\RenderUtil.hpp" />
   </ItemGroup>
 </Project>

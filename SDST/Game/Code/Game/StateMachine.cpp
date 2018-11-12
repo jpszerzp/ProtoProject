@@ -74,6 +74,8 @@ void StateMachine::AppendState(GameState* state)
 
 void StateMachine::SetCurrentState(GameState* state)
 {
+	// if the input state is nullptr, meaning that user does not know which state to use
+	// just use the default state as the current state
 	if (state == nullptr)
 	{
 		if (m_defaultState != nullptr)

@@ -45,8 +45,10 @@ void TheGame::UseGameState(GameState* state)
 
 void TheGame::UseDefaultState()
 {
+	// set the default state to be the first state in the vector
 	GameState* defaultState = m_states->GetState(0);
 
+	// apply that default state, adjust index correctly;
 	m_states->SetDefaultState(defaultState);
 	m_states->SetStateIndex(0);
 }
