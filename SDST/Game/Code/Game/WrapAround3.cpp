@@ -13,6 +13,7 @@ WrapAround::~WrapAround()
 
 void WrapAround::Update()
 {
+	// goes thru every gameobject in this wraparound group and update ONLY when they teleport
 	for (GameObject* go : m_gos)
 	{
 		// surpassing xmin

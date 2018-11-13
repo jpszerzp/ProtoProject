@@ -15,7 +15,7 @@ Quad::Quad()
 Quad::Quad(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint, std::string meshName,
 	std::string materialName, Vector2 uvBL, Vector2 uvBR, Vector2 uvTL, Vector2 uvTR,
 	eMoveStatus moveStat, eBodyIdentity bid, bool multipass, 
-	eCompare compare, eCullMode cull, eWindOrder order)
+	eCompare compare, eCullMode cull, eWindOrder order, eDynamicScheme scheme)
 {
 	Renderer* renderer = Renderer::GetInstance();
 
@@ -45,12 +45,13 @@ Quad::Quad(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint, std::string meshN
 	else
 		m_physEntity = new QuadRB3(4.9f, plane, pos, rot, scale, moveStat);
 	m_physEntity->SetEntityForPrimitive();
+	m_physEntity->m_scheme = scheme;
 }
 
 
 Quad::Quad(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint, std::string meshName,
 	std::string materialName, eMoveStatus moveStat, eBodyIdentity bid, bool multipass,
-	eCompare compare, eCullMode cull, eWindOrder order)
+	eCompare compare, eCullMode cull, eWindOrder order, eDynamicScheme scheme)
 {
 	Renderer* renderer = Renderer::GetInstance();
 
@@ -80,6 +81,7 @@ Quad::Quad(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint, std::string meshN
 	else
 		m_physEntity = new QuadRB3(4.9f, plane, pos, rot, scale, moveStat);
 	m_physEntity->SetEntityForPrimitive();
+	m_physEntity->m_scheme = scheme;
 }
 
 

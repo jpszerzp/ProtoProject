@@ -218,3 +218,35 @@ void Rigidbody3::Integrate(float deltaTime)
 
 	ClearAccs();
 }
+
+void Rigidbody3::Simulate(float deltaTime, Vector3& simulate_pos, Quaternion& simulate_orient)
+{
+	// simulated acc
+	Vector3 linear_acc = m_netforce * m_massData.m_invMass;
+	Vector3 ang_acc = m_inverseInertiaTensorWorld * m_torqueAcc;
+
+	// simulated vel
+	Vector3 linear_vel = m_linearVelocity + linear_acc * deltaTime;
+	Vector3 ang_vel = m_angularVelocity + ang_acc * deltaTime;
+
+	// clamp simulation
+	linear_vel *= powf(m_linearDamp, deltaTime);
+	ang_vel *= powf(m_angularDamp, deltaTime);
+
+	// first-order Newton
+	if (linear_acc.GetLength() < ACC_LIMIT && ang_acc.GetLength() < ACC_LIMIT)
+	{
+		simulate_pos = m_center + linear_vel * deltaTime;							// pos
+		simulate_orient = m_orientation;
+		simulate_orient.AddScaledVector(ang_vel, deltaTime);
+	}
+	// second-order Newton
+	// used when either linear or angular acc goes too large - in this case use second-order is safer yet costly
+	else
+	{
+		simulate_pos = m_center + (linear_vel * deltaTime + linear_acc * deltaTime * deltaTime * .5f);
+		simulate_orient = m_orientation;
+		simulate_orient.AddScaledVector(ang_vel, deltaTime);
+		simulate_orient.AddScaledVector(ang_acc, deltaTime * deltaTime * .5f);
+	}
+}

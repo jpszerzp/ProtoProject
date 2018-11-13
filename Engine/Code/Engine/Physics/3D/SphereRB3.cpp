@@ -114,6 +114,10 @@ void SphereRB3::Integrate(float deltaTime)
 
 	UpdateInput(deltaTime);
 
+	float usedTime = deltaTime;
+	if (m_scheme == CONTINUOUS && m_motionClamp)
+		usedTime = m_motionClampTime;
+
 	if (!m_frozen)
 	{
 		// acc
@@ -122,32 +126,35 @@ void SphereRB3::Integrate(float deltaTime)
 		Vector3 angularAcc = m_inverseInertiaTensorWorld * m_torqueAcc;
 
 		// vel
-		m_linearVelocity += m_linearAcceleration * deltaTime;
-		m_angularVelocity += angularAcc * deltaTime;
+		m_linearVelocity += m_linearAcceleration * usedTime;
+		m_angularVelocity += angularAcc * usedTime;
 
 		// damp on vel
-		m_linearVelocity *= powf(m_linearDamp, deltaTime);	// damp: 1 means no damp	
-		m_angularVelocity *= powf(m_angularDamp, deltaTime);
+		m_linearVelocity *= powf(m_linearDamp, usedTime);	// damp: 1 means no damp	
+		m_angularVelocity *= powf(m_angularDamp, usedTime);
 
 		// first-order Newton
 		if (m_linearAcceleration.GetLength() < ACC_LIMIT && angularAcc.GetLength() < ACC_LIMIT)
 		{
-			m_center += m_linearVelocity * deltaTime;							// pos
-			m_orientation.AddScaledVector(m_angularVelocity, deltaTime);		// rot
+			m_center += m_linearVelocity * usedTime;							// pos
+			m_orientation.AddScaledVector(m_angularVelocity, usedTime);		// rot
 		}
 		// second-order Newton
 		// used when either linear or angular acc goes too large - in this case use second-order is safer yet costly
 		else
 		{
-			m_center += (m_linearVelocity * deltaTime + m_linearAcceleration * deltaTime * deltaTime * .5f);
-			m_orientation.AddScaledVector(m_angularVelocity, deltaTime);
-			m_orientation.AddScaledVector(angularAcc, deltaTime * deltaTime * .5f);
+			m_center += (m_linearVelocity * usedTime + m_linearAcceleration * usedTime * usedTime * .5f);
+			m_orientation.AddScaledVector(m_angularVelocity, usedTime);
+			m_orientation.AddScaledVector(angularAcc, usedTime * usedTime * .5f);
 		}
 
 		CacheData();
 	}
 
 	ClearAccs();
+
+	if (m_scheme == CONTINUOUS && m_motionClamp)
+		m_motionClamp = false;
 
 	// updating sleep system
 	if (m_canSleep)

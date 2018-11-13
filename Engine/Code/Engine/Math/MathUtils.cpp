@@ -1283,6 +1283,18 @@ float DistPointToPlaneSigned(const Vector3& pt, const Vector3& vert1, const Vect
 	return signed_dist;
 }
 
+float DistPointToPlaneSigned(const Vector3& pt, const Plane& plane)
+{
+	// get info from plane
+	const Vector3& normal = plane.GetNormal();
+	const float& offset = plane.GetOffset();
+
+	// pt itself is the direction vector considering origin
+	float dot_pt = DotProduct(pt, normal);
+
+	return (dot_pt - offset);
+}
+
 float DistPointToPlaneUnsigned(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3)
 {
 	return abs(DistPointToPlaneSigned(pt, vert1, vert2, vert3));

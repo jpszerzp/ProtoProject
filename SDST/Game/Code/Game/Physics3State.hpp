@@ -6,6 +6,7 @@
 #include "Engine/Physics/3D/Rigidbody3.hpp"
 #include "Engine/Physics/3D/BVH3.hpp"
 #include "Engine/Physics/3D/SphereRB3.hpp"
+#include "Engine/Physics/3D/CCDResolver.hpp"
 #include "Engine/Core/Primitive/Sphere.hpp"
 #include "Engine/Core/Primitive/Cube.hpp"
 #include "Engine/Core/Primitive/Quad.hpp"
@@ -27,13 +28,13 @@ public:
 	~Physics3State();
 
 	Sphere* InitializePhysSphere(Vector3 pos, Vector3 rot, Vector3 scale,
-		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid);
+		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme scheme = DISCRETE);
 	Cube* InitializePhysCube(Vector3 pos, Vector3 rot, Vector3 scale,
 		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid);
 	Point* InitializePhysPoint(Vector3 pos, Vector3 rot, float size, 
 		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid);
 	Quad* InitializePhysQuad(Vector3 pos, Vector3 rot, Vector3 scale,
-		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid);
+		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme scheme = DISCRETE);
 	Box* InitializePhysBox(Vector3 pos, Vector3 rot, Vector3 scale,
 		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid);
 
@@ -97,6 +98,17 @@ public:
 	std::vector<Point*>  m_points;
 	std::vector<Box*>	 m_boxes;
 
+	// continuous convenience
+	Sphere* m_ball_ccd_test = nullptr;
+	Sphere* m_ball_ccd_test_0 = nullptr;
+	Quad* m_quad_ccd_test = nullptr;
+	std::vector<Vector3> m_inspection;
+	int m_insepction_count = 0;
+	// we do need some structure to observe continuous objects conveniently
+	std::vector<Sphere*> m_ccd_spheres;
+	std::vector<Quad*> m_ccd_planes;
+	//std::vector<CCDResolver> m_ccd_resolvers;
+
 	ParticleForceRegistry* m_particleRegistry = nullptr;
 	RigidForceRegistry* m_rigidRegistry = nullptr;
 
@@ -116,6 +128,7 @@ public:
 	
 	WrapAround* m_wraparound;
 	WrapAround* m_wraparound_0;
+	WrapAround* m_wraparound_1;
 	int m_wrapPosIterator = 0;
 	int m_wrapPosIterator_0 = 0;
 	Sphere* m_physBall = nullptr;

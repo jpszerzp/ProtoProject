@@ -21,5 +21,5 @@ public:
 	void UpdateTransforms() override;
 	void Integrate(float deltaTime) override;
 
-	Plane GetPlanePrimitive() { return m_primitive; }
+	Plane GetPlanePrimitive() const { return m_primitive; }
 };

@@ -514,6 +514,7 @@
     <ClInclude Include="Physics\3D\BoxEntity3.hpp" />
     <ClInclude Include="Physics\3D\BoxRB3.hpp" />
     <ClInclude Include="Physics\3D\BVH3.hpp" />
+    <ClInclude Include="Physics\3D\CCDResolver.hpp" />
     <ClInclude Include="Physics\3D\CollisionDetection.hpp" />
     <ClInclude Include="Physics\3D\ContactResolver.hpp" />
     <ClInclude Include="Physics\3D\CubeEntity3.hpp" />

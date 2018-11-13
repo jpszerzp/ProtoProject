@@ -28,6 +28,12 @@ enum eBodyIdentity
 	BODY_RIGID
 };
 
+enum eDynamicScheme
+{
+	DISCRETE,
+	CONTINUOUS
+};
+
 class GameObject;
 
 class Entity3
@@ -88,6 +94,10 @@ public:
 
 	bool m_frozen = false;
 
+	eDynamicScheme m_scheme;
+	float m_motionClampTime;
+	bool m_motionClamp = false;
+
 public:
 	virtual ~Entity3(){}
 
@@ -117,6 +127,7 @@ public:
 
 	bool HasInfiniteMass() const;
 	bool IsConst() const { return (m_moveStatus == MOVE_STATIC); }
+	bool IsContinuous() const { return (m_scheme == CONTINUOUS); }
 	bool GetDrawBoundingSphere() const { return m_drawBoundSphere; }
 	bool GetDrawBoundingBox() const { return m_drawBoundBox; }
 	Vector3 GetEntityCenter() const { return m_center; }

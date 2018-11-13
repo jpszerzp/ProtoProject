@@ -140,6 +140,7 @@ bool IsPointInCircle(Vector2 pos, float r);
 float DistPointToEdge(const Vector3& pt, const Vector3& vert1, const Vector3& vert2);
 float DistPointToPlaneSigned(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3);
 float DistPointToPlaneUnsigned(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3);
+float DistPointToPlaneSigned(const Vector3& pt, const Plane& plane);
 
 // qh
 QHFeature* DistPointToTriangleHull(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3, float& dist, Vector3& closest);

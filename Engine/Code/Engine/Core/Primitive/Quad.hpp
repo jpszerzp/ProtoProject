@@ -16,7 +16,8 @@ public:
 		bool multipass = false, 
 		eCompare compare = COMPARE_LESS, 
 		eCullMode cull = CULLMODE_BACK,
-		eWindOrder order = WIND_COUNTER_CLOCKWISE);
+		eWindOrder order = WIND_COUNTER_CLOCKWISE,
+		eDynamicScheme scheme = DISCRETE);
 	Quad(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint, 
 		std::string meshName, std::string materialName, 
 		eMoveStatus moveStat,
@@ -24,6 +25,7 @@ public:
 		bool multipass = false,
 		eCompare compare = COMPARE_LESS,
 		eCullMode cull = CULLMODE_BACK,
-		eWindOrder order = WIND_COUNTER_CLOCKWISE);
+		eWindOrder order = WIND_COUNTER_CLOCKWISE,
+		eDynamicScheme scheme = DISCRETE);
 	~Quad();
 };

@@ -12,7 +12,7 @@ Sphere::Sphere()
 Sphere::Sphere(Vector3 pos, Vector3 rot, Vector3 scale, 
 	Rgba tint, std::string meshName, std::string materialName,
 	eMoveStatus moveStat, eBodyIdentity bid, bool multipass,
-	eCompare compare, eCullMode cull, eWindOrder order)
+	eCompare compare, eCullMode cull, eWindOrder order, eDynamicScheme scheme)
 {
 	Renderer* renderer = Renderer::GetInstance();
 
@@ -40,6 +40,7 @@ Sphere::Sphere(Vector3 pos, Vector3 rot, Vector3 scale,
 		m_physEntity = new SphereEntity3(sphere3, moveStat);
 	else
 		m_physEntity = new SphereRB3(1.f, sphere3, moveStat);
+	m_physEntity->m_scheme = scheme;			// discrete or continuous
 	m_physEntity->SetEntityForPrimitive();
 }
 

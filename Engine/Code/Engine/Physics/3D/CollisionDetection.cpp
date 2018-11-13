@@ -887,6 +887,7 @@ uint CollisionDetector::Sphere3VsPlane3Coherent(const Sphere3& sph, const Plane&
 		// no contacts amount left, return directly
 		return 0;
 
+	// core of intersection test: sphere vs plane
 	Contact3 theContact;
 	bool contactGenerated = Sphere3VsPlane3Core(sph, pl, theContact);
 

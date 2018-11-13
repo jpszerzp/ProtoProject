@@ -46,6 +46,7 @@ public:
 
 	Vector3 GetWorldPosition();
 	Entity3* GetEntity() { return m_physEntity; }
+	Vector3 GetPhysicsCenter() const { return m_physEntity->GetEntityCenter(); }		// used when object is physics driven
 
 	GameObject();
 	virtual ~GameObject();

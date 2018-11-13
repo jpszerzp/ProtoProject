@@ -16,7 +16,8 @@ public:
 		bool multipass = false,
 		eCompare compare = COMPARE_LESS,
 		eCullMode cull = CULLMODE_BACK,
-		eWindOrder = WIND_COUNTER_CLOCKWISE);
+		eWindOrder = WIND_COUNTER_CLOCKWISE,
+		eDynamicScheme = DISCRETE);
 	~Sphere();
 
 	float GetRadius() const;

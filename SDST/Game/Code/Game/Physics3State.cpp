@@ -1,4 +1,4 @@
-#include "Game/Physics3State.hpp"
+﻿#include "Game/Physics3State.hpp"
 #include "Game/GameCommon.hpp"
 #include "Engine/Renderer/Window.hpp"
 #include "Engine/Renderer/DebugRenderer.hpp"
@@ -12,6 +12,7 @@
 #include "Engine/Physics/3D/BoxEntity3.hpp"
 #include "Engine/Physics/3D/BoxRB3.hpp"
 #include "Engine/Physics/3D/QuadRB3.hpp"
+
 #include <algorithm>
 
 
@@ -113,8 +114,8 @@ Physics3State::Physics3State()
 	*/
 
 	//InitializePhysQuad(Vector3(0.f, 20.f, 0.f), Vector3(90.f, 0.f, -45.f), Vector3(20.f, 20.f, 1.f), Rgba::BLUE, MOVE_STATIC, BODY_PARTICLE);
-	InitializePhysQuad(Vector3(0.f, 20.f, 0.f), Vector3(90.f, 0.f, -10.f), Vector3(2000.f, 2000.f, 1.f), Rgba::GREEN, MOVE_STATIC, BODY_RIGID);
-	InitializePhysQuad(Vector3(0.f, 20.f, 0.f), Vector3(90.f, 0.f, 10.f), Vector3(2000.f, 2000.f, 1.f), Rgba::GREEN, MOVE_STATIC, BODY_RIGID);
+	InitializePhysQuad(Vector3(0.f, 20.f, 0.f), Vector3(90.f, 0.f, 0.f), Vector3(2000.f, 2000.f, 1.f), Rgba::GREEN, MOVE_STATIC, BODY_RIGID);
+	//InitializePhysQuad(Vector3(0.f, 20.f, 0.f), Vector3(90.f, 0.f, 10.f), Vector3(2000.f, 2000.f, 1.f), Rgba::GREEN, MOVE_STATIC, BODY_RIGID);
 	//m_g2 = InitializePhysQuad(Vector3(20.f, -2.f, 0.f), Vector3(90.f, 0.f, 0.f), Vector3(800.f, 800.f, 1.f), Rgba::GREEN, MOVE_STATIC, BODY_PARTICLE);
 	//m_g3 = InitializePhysPoint(Vector3(25.f, 0.f, 0.f), Vector3::ZERO, 10.f, Rgba::WHITE, MOVE_STATIC, BODY_PARTICLE);
 	
@@ -202,6 +203,26 @@ Physics3State::Physics3State()
 	wraparoundMin = Vector3(28.f, 118.f, 8.f);
 	wraparoundMax = Vector3(37.f, 127.f, 17.f);
 	m_wraparound_0 = new WrapAround(wraparoundMin, wraparoundMax);
+	wraparoundMin = Vector3(1000.f, 1000.f, 1000.f);
+	wraparoundMax = Vector3(1200.f, 1200.f, 1200.f);
+	m_wraparound_1 = new WrapAround(wraparoundMin, wraparoundMax);
+
+	m_quad_ccd_test = InitializePhysQuad(Vector3(1150.f, 1100.f, 1100.f), Vector3(0.f, 90.f, 0.f), Vector3(200.f, 200.f, 1.f), Rgba::WHITE, MOVE_STATIC, BODY_RIGID, CONTINUOUS);
+	m_ball_ccd_test = InitializePhysSphere(Vector3(1050.f, 1100.f, 1100.f), Vector3::ZERO, Vector3(0.5f, 0.5f, 0.5f), Rgba::CYAN, MOVE_DYNAMIC, BODY_RIGID);			// this is for comparison without ccd
+	Rigidbody3* rigid_s = static_cast<Rigidbody3*>(m_ball_ccd_test->GetEntity());
+	rigid_s->SetLinearVelocity(Vector3(500.f, 0.f, 0.f));	
+	rigid_s->SetAwake(true);
+	rigid_s->SetCanSleep(false);
+	rigid_s->SetFrozen(true);			// freeze at the start
+	m_wraparound_1->m_gos.push_back(m_ball_ccd_test);
+	m_ball_ccd_test_0 = InitializePhysSphere(Vector3(1050.f, 1050.f, 1050.f), Vector3::ZERO, Vector3(0.5f, 0.5f, 0.5f), Rgba::CYAN, MOVE_DYNAMIC, BODY_RIGID, CONTINUOUS);
+	Rigidbody3* rigid_s_0 = static_cast<Rigidbody3*>(m_ball_ccd_test_0->GetEntity());
+	rigid_s_0->SetLinearVelocity(Vector3(500.f, -1.f, 0.f));	
+	rigid_s_0->SetAwake(true);
+	rigid_s_0->SetCanSleep(false);
+	rigid_s_0->SetFrozen(true);			// freeze at the start
+	m_wraparound_1->m_gos.push_back(m_ball_ccd_test_0);
+	m_inspection.push_back(Vector3(1100.f, 1100.f, 900.f));			// add a inspection point for this control group
 
 	// temporary - assimp test
 	m_assimp_0 = new AssimpLoader("nanosuit/nanosuit.obj");
@@ -248,17 +269,23 @@ Physics3State::~Physics3State()
 
 	delete m_wraparound_0;
 	m_wraparound_0 = nullptr;
+
+	delete m_wraparound_1;
+	m_wraparound_1 = nullptr;
 }
 
 
 Sphere* Physics3State::InitializePhysSphere(Vector3 pos, Vector3 rot, Vector3 scale,
-	Rgba tint, eMoveStatus moveStat, eBodyIdentity bid)
+	Rgba tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme scheme)
 {
-	Sphere* s = new Sphere(pos, rot, scale, tint, "sphere_pcu", "default", moveStat, bid);
+	Sphere* s = new Sphere(pos, rot, scale, tint, "sphere_pcu", "default", moveStat, bid, false, COMPARE_LESS, CULLMODE_BACK, WIND_COUNTER_CLOCKWISE, scheme);
 	s->m_physDriven = true;
 	m_gameObjects.push_back(s);
 	m_spheres.push_back(s);
 	s->m_physEntity->SetGameobject(s);
+
+	if (scheme == CONTINUOUS)
+		m_ccd_spheres.push_back(s);
 
 	return s;
 }
@@ -276,13 +303,16 @@ Cube* Physics3State::InitializePhysCube(Vector3 pos, Vector3 rot, Vector3 scale,
 }
 
 Quad* Physics3State::InitializePhysQuad(Vector3 pos, Vector3 rot, Vector3 scale,
-	Rgba tint, eMoveStatus moveStat, eBodyIdentity bid)
+	Rgba tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme scheme)
 {
-	Quad* q = new Quad(pos, rot, scale, tint, "quad_pcu", "default", moveStat, bid, false, COMPARE_LESS, CULLMODE_FRONT);
+	Quad* q = new Quad(pos, rot, scale, tint, "quad_pcu", "default", moveStat, bid, false, COMPARE_LESS, CULLMODE_FRONT, WIND_COUNTER_CLOCKWISE, CONTINUOUS);
 	q->m_physDriven = true;
 	m_gameObjects.push_back(q);
 	m_quads.push_back(q);
 	q->m_physEntity->SetGameobject(q);
+
+	if (scheme == CONTINUOUS)
+		m_ccd_planes.push_back(q);
 
 	return q;
 }
@@ -1131,6 +1161,18 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		*/
 	}
 
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_TAB))
+	{
+		Vector3 pos = m_inspection[m_insepction_count];
+
+		// set camera pos to this inspection position
+		m_camera->GetTransform().SetLocalPosition(pos);
+
+		int size = m_inspection.size();
+		++m_insepction_count;
+		m_insepction_count = (m_insepction_count % size);
+	}
+
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_SPACE))
 	{
 		// shoot a ball from camera
@@ -1174,6 +1216,7 @@ void Physics3State::UpdateGameobjects(float deltaTime)
 void Physics3State::UpdateDebugDraw(float deltaTime)
 {
 	// debug draw for all-at-once resolver
+	// do not need to worry about continuous pairs because they will not use all_resolver
 	DebugRenderUpdate(deltaTime);
 	for (int i = 0; i < m_allResolver->GetCollisionData()->m_contacts.size(); ++i)
 	{
@@ -1196,9 +1239,28 @@ void Physics3State::UpdateDebugDraw(float deltaTime)
 	{
 		Contact3& contact = m_coherentResolver->GetCollisionData()->m_contacts[i];
 
-		Vector3 point = contact.m_point;
-		Vector3 end = point + contact.m_normal * contact.m_penetration;
-		DebugRenderLine(0.1f, point, end, 5.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
+		// do not draw continuous pairs as the simulated time is not accurate
+		if (!(contact.m_e1->IsContinuous() && contact.m_e2->IsContinuous()))
+		{
+			Vector3 point = contact.m_point;
+			Vector3 end = point + contact.m_normal * contact.m_penetration;
+			DebugRenderLine(0.1f, point, end, 5.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
+		}
+	}
+
+	// draw a trail after spheres
+	for (int i = 0; i < m_spheres.size(); ++i)
+	{
+		Sphere* sph = m_spheres[i];
+		SphereRB3* rb = static_cast<SphereRB3*>(sph->m_physEntity);
+
+		if (rb != nullptr)
+		{
+			const Vector3& start = sph->GetPhysicsCenter();
+			const Vector3& vel_norm = rb->GetLinearVelocity().GetNormalized();
+			const Vector3& end = start + vel_norm * 0.1f;
+			DebugRenderLine(.1f, start, end, 10.f, Rgba::MEGENTA, Rgba::MEGENTA, DEBUG_RENDER_USE_DEPTH);
+		}
 	}
 }
 
@@ -1212,6 +1274,84 @@ void Physics3State::UpdateForceRegistry(float deltaTime)
 
 void Physics3State::UpdateGameobjectsCore(float deltaTime)
 {
+	// at the start of the frame, take a snapshot of all continuous pairs
+	// and record essential info for ccd test (see comments below)
+	// we start with sphere and plane pairs
+	for (std::vector<Sphere*>::size_type idx_sph = 0; idx_sph < m_ccd_spheres.size(); ++idx_sph)
+	{
+		// we get the first sphere
+		Sphere* sph = m_ccd_spheres[idx_sph];
+		SphereRB3* sph_rb = static_cast<SphereRB3*>(sph->m_physEntity);
+		const float& radius = sph->GetRadius();
+		const Vector3& this_center = sph->GetPhysicsCenter();
+
+		if (sph_rb->IsFrozen())
+			break;
+
+		// vs (STATIC) plane
+		for (std::vector<Quad*>::size_type idx_quad = 0; idx_quad < m_ccd_planes.size(); ++idx_quad)
+		{
+			TODO("Extend to entity3 as well");
+			Quad* quad = m_ccd_planes[idx_quad];
+			QuadRB3* quad_rb = static_cast<QuadRB3*>(quad->m_physEntity);
+			const Plane& plane = quad_rb->GetPlanePrimitive();
+
+			// we need to calculate a sc, which represents a signed distance to from sphere to plane before integration
+			const float& sc = DistPointToPlaneSigned(this_center, plane);
+
+			//const Vector3& linear_acc = sph_rb->GetLinearAcceleration();
+			//const Vector3& ang_acc = sph_rb->m_inverseInertiaTensorWorld * sph_rb->m_torqueAcc;
+			//const Vector3& linear_vel = sph_rb->GetLinearVelocity();
+			//const Vector3& ang_vel = sph_rb->GetAngularVelocity();
+
+			Vector3 next_center;
+			Quaternion next_orient;
+			sph_rb->Simulate(deltaTime, next_center, next_orient);
+
+			// with the simulated new center, get the signed dist again
+			const float& se = DistPointToPlaneSigned(next_center, plane); 
+
+			// now we need to adjust simulation time for continuous objects if they are about to tunnel
+			// remember the radius check, it is by nature based on minkowski method
+			// the check is sc*se > 0, |sc > r| and |se > r|
+			if (!(se * sc > 0 && abs(se) > radius && abs(sc) > radius))
+			{
+				// in this case we need motion clamp
+				float t = (sc - radius) / (sc - se);
+				float simulated_time = deltaTime * t;
+				
+				// now that we get this t, we want to iterate on it to make sure there would be a intersection using this t
+				Vector3 predicted_center;
+				Quaternion predicted_orient;
+				sph_rb->Simulate(simulated_time, predicted_center, predicted_orient);
+
+				float predicted_se = DistPointToPlaneSigned(predicted_center, plane);
+
+				while (abs(predicted_se) >= radius)
+				{
+					t += 0.01f;
+					simulated_time = deltaTime * t;
+					sph_rb->Simulate(simulated_time, predicted_center, predicted_orient);
+					predicted_se = DistPointToPlaneSigned(predicted_center, plane);
+				}
+
+				// at this time t is reusable since we know it clamps the motion to an extend that there will still be an intersection
+				sph_rb->m_motionClampTime = t;
+				sph_rb->m_motionClamp = true;
+			}
+		}
+
+		// vs sphere
+		// ...
+	}
+
+	// plane pairs (excluding spheres since that sort of pair has been processed)
+	// ...
+
+	////////////////////////////////////////////////////////////////////////////////////////////////
+	// actually committing the integration
+
+	// core of update
 	for (std::vector<GameObject*>::size_type idx = 0; idx < m_gameObjects.size(); ++idx)
 	{
 		m_gameObjects[idx]->Update(deltaTime);
@@ -1224,19 +1364,12 @@ void Physics3State::UpdateGameobjectsCore(float deltaTime)
 			idx--;
 		}
 	}
+	////////////////////////////////////////////////////////////////////////////////////////////////
 
-	// teleport for wraparound
+	// teleport for wraparound, meaning that it only updates objects in corner boundary cases
 	m_wraparound->Update();
 	m_wraparound_0->Update();
-	
-	if (m_physBall != nullptr)
-	{
-		Rigidbody3* rigid_s = static_cast<Rigidbody3*>(m_physBall->GetEntity());
-		const Vector3& angVel = rigid_s->GetAngularVelocity();
-		const Quaternion& orient = rigid_s->GetQuaternion();
-		DebuggerPrintf("angular velocity: %f, %f, %f\n", angVel.x, angVel.y, angVel.z);
-		DebuggerPrintf("orientation: %f, %f, %f; real: %f\n", orient.m_imaginary.x, orient.m_imaginary.y, orient.m_imaginary.z, orient.m_real);
-	}
+	m_wraparound_1->Update();
 }
 
 void Physics3State::UpdateContactGeneration()
