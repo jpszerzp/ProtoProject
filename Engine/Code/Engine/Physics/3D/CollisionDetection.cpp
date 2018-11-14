@@ -1110,7 +1110,7 @@ bool CollisionDetector::OBB3VsSphere3Core(const OBB3& obb, const Sphere3& sphere
 	Vector3 usedNormal = (sphere.GetCenter() - closestPointWorld).GetNormalized();
 	Vector3 contactPoint = closestPointWorld;
 	float penetration = r - sqrtf(dist);
-	Contact3 theContact = Contact3(sphere.GetEntity(), obb.GetEntity(), usedNormal, contactPoint, penetration, 1.f, 0.05f);
+	Contact3 theContact = Contact3(sphere.GetEntity(), obb.GetEntity(), usedNormal, contactPoint, penetration, 1.f, 0.01f);
 	contact = theContact;
 	
 	return true;

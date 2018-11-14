@@ -158,9 +158,7 @@ void Profiler::ConfigureMeshes()
 	m_frameGraphMesh = Mesh::CreateQuadImmediate(VERT_PCU, frameGraphBL, frameGraphBR,
 		frameGraphTL, frameGraphTR, frameGraphTint);
 
-	m_framePropertyMesh = MakeTextMesh(16.f, "Calls			% Total		(Time)"					
-	"														% Self		(Time)"
-	"														0 us", m_framePropertyBox.mins);
+	m_framePropertyMesh = MakeTextMesh(16.f, "______Calls______%Total______(Time)______%Self______(Time)", m_framePropertyBox.mins);
 }
 
 void Profiler::ConfigureTextMap()
@@ -355,11 +353,11 @@ void Profiler::UpdateTreeText()
 			float spercentage = (selfTime / g_gameConfigBlackboard->m_lastFrameTime) * 100.f;
 
 			std::string tag = currentNode->m_tag;
-			std::string callFormat = Stringf("			%i", callCount);
-			std::string totalPercentage = Stringf("			%f", tpercentage);
-			std::string total = Stringf("	%f", totalTime);
-			std::string selfPercentage = Stringf("			%f", spercentage);
-			std::string self = Stringf("	%f", selfTime);
+			std::string callFormat = Stringf("______%i", callCount);
+			std::string totalPercentage = Stringf("______%f", tpercentage);
+			std::string total = Stringf("______%f", totalTime);
+			std::string selfPercentage = Stringf("______%f", spercentage);
+			std::string self = Stringf("______%f", selfTime);
 			std::string text = tag + callFormat + totalPercentage + total + selfPercentage + self;				// all info in one text
 
 			Vector2 textBL;

@@ -168,11 +168,13 @@ Physics3State::Physics3State()
 	verlet_vel_ballistics->m_physEntity->SetVerletScheme(VELOCITY_VERLET);
 	*/
 
+	/*
 	float obj_rand_x = GetRandomFloatInRange(0.f, 360.f);
 	float obj_rand_y = GetRandomFloatInRange(0.f, 360.f);
 	float obj_rand_z = GetRandomFloatInRange(0.f, 360.f);
 	m_g4 = InitializePhysBox(Vector3(25.f, 0.f, 10.f), Vector3(45.f), Vector3(1.f), Rgba::CYAN, MOVE_KINEMATIC, BODY_PARTICLE);
 	m_g5 = InitializePhysBox(Vector3(30.f, 0.f, 10.f), Vector3(obj_rand_x, obj_rand_y, obj_rand_z), Vector3(1.f), Rgba::TEAL, MOVE_KINEMATIC, BODY_PARTICLE);
+	*/
 
 	//m_g4 = InitializePhysBox(Vector3(25.f, 0.f, 10.f), Vector3::ZERO, Vector3(1.f), Rgba::CYAN, MOVE_KINEMATIC, BODY_PARTICLE);
 	//m_g5 = InitializePhysBox(Vector3(30.f, 0.f, 10.f), Vector3::ZERO, Vector3(1.f), Rgba::TEAL, MOVE_KINEMATIC, BODY_PARTICLE);
@@ -614,6 +616,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		}
 	}
 
+	/*
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_UP_ARROW))
 		m_g5->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, 5.f));
 	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_DOWN_ARROW))
@@ -643,6 +646,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		m_g4->GetEntity()->SetLinearVelocity(Vector3(0.f, -5.f, 0.f));
 	else
 		m_g4->GetEntity()->SetLinearVelocity(Vector3::ZERO);
+		*/
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_0))
 	{

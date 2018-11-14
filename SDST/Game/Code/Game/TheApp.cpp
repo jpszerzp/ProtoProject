@@ -195,7 +195,6 @@ void TheApp::RunFrame()
 
 	//Sleep(1);
 	//::SwitchToThread();
-	//GL_CHECK_ERROR();
 }
 
 
