@@ -1709,7 +1709,7 @@ void Physics3State::Render(Renderer* renderer)
 	m_qh->RenderHull(renderer);
 	renderer->DrawModel(m_assimp_0);
 
-	RenderModelSamples(renderer);
+	RenderModelSamples(renderer);				// sample points for model
 
 	RenderGameobjects(renderer);
 	m_forwardPath->RenderScene(m_sceneGraph);
