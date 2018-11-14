@@ -3,6 +3,7 @@
 #include "Engine/Physics/3D/QuadEntity3.hpp"
 #include "Engine/Physics/3D/PointEntity3.hpp"
 #include "Engine/Physics/3D/BoxEntity3.hpp"
+#include "Engine/Physics/3D/BoxRB3.hpp"
 #include "Engine/Physics/3D/SphereRB3.hpp"
 #include "Engine/Core/GameObject.hpp"
 #include "Engine/Core/Util/DataUtils.hpp"
@@ -1048,16 +1049,16 @@ uint CollisionDetector::OBB3VsPlane3(const OBB3& obb, const Plane& plane, Collis
 	}
 }
 
-uint CollisionDetector::OBB3VsSphere3(const OBB3& obb, const Sphere3& sphere, CollisionData3* data)
+bool CollisionDetector::OBB3VsSphere3Core(const OBB3& obb, const Sphere3& sphere, Contact3& contact)
 {
-	if (data->m_contacts.size() >= data->m_maxContacts)
-		// no contacts amount left, return directly
-		return 0;
-
 	// get obb transform
 	BoxEntity3* boxEnt = dynamic_cast<BoxEntity3*>(obb.GetEntity());
-	ASSERT_OR_DIE(boxEnt != nullptr, "OBB is not using particle entity, try rigid body");
-	const Transform& t = boxEnt->GetEntityTransform();
+	BoxRB3* boxRb = dynamic_cast<BoxRB3*>(obb.GetEntity());
+	Transform t;
+	if (boxEnt != nullptr)
+		t = boxEnt->GetEntityTransform();
+	else
+		t = boxRb->GetEntityTransform();
 	
 	// transform sphere to local coord of obb 
 	Vector3 center_local = Transform::WorldToLocalOrthogonal(sphere.GetCenter(), t);
@@ -1099,7 +1100,8 @@ uint CollisionDetector::OBB3VsSphere3(const OBB3& obb, const Sphere3& sphere, Co
 
 	// check if we are in contact
 	dist = (closestPointLocal - center_local).GetLengthSquared();
-	if (dist > r * r) return 0;
+	if (dist > r * r) 
+		return false;
 
 	// at this point we get the contact point in the local space
 	// we need to transform it back to world space
@@ -1108,10 +1110,47 @@ uint CollisionDetector::OBB3VsSphere3(const OBB3& obb, const Sphere3& sphere, Co
 	Vector3 usedNormal = (sphere.GetCenter() - closestPointWorld).GetNormalized();
 	Vector3 contactPoint = closestPointWorld;
 	float penetration = r - sqrtf(dist);
-	Contact3 theContact = Contact3(sphere.GetEntity(), obb.GetEntity(),
-		usedNormal, contactPoint, penetration);
+	Contact3 theContact = Contact3(sphere.GetEntity(), obb.GetEntity(), usedNormal, contactPoint, penetration, 1.f, 0.05f);
+	contact = theContact;
+	
+	return true;
+}
+
+uint CollisionDetector::OBB3VsSphere3Single(const OBB3& obb, const Sphere3& sphere, CollisionData3* data)
+{
+	if (data->m_contacts.size() >= data->m_maxContacts)
+		// no contacts amount left, return directly
+		return 0;
+
+	Contact3 theContact;
+	bool contactGenerated = OBB3VsSphere3Core(obb, sphere, theContact);
+
+	if (!contactGenerated)
+		return 0;
 
 	data->m_contacts.push_back(theContact);
+
+	return 1;
+}
+
+uint CollisionDetector::OBB3VsSphere3Coherent(const OBB3& obb, const Sphere3& sphere, CollisionData3* data)
+{
+	if (data->m_contacts.size() >= data->m_maxContacts)
+		// no contacts amount left, return directly
+		return 0;
+
+	// core of intersection test: sphere vs plane
+	Contact3 theContact;
+	bool contactGenerated = OBB3VsSphere3Core(obb, sphere, theContact);
+
+	if (!contactGenerated)
+		return 0;
+
+	bool existed = data->HasAndUpdateContact(theContact);
+
+	if (!existed)
+		data->m_contacts.push_back(theContact);
+
 	return 1;
 }
 
@@ -1813,8 +1852,7 @@ uint CollisionDetector::OBB3VsOBB3Coherent(const OBB3& obb1, const OBB3& obb2, C
 	usedNormal.NormalizeAndGetLength();
 	Vector3 contactPoint = obb1.m_center;
 	float penetration = shallowest;
-	Contact3 theContact = Contact3(obb1.GetEntity(), obb2.GetEntity(),
-		usedNormal, contactPoint, penetration);
+	Contact3 theContact = Contact3(obb1.GetEntity(), obb2.GetEntity(), usedNormal, contactPoint, penetration, 1.f, 0.05f);
 
 	bool existed = data->HasAndUpdateContact(theContact);
 

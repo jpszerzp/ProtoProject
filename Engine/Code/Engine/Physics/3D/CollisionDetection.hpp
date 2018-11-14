@@ -163,7 +163,11 @@ public:
 		const Plane& plane, CollisionData3* data);
 
 	// obb3 vs sphere3
-	static uint OBB3VsSphere3(const OBB3& obb,
+	static bool OBB3VsSphere3Core(const OBB3& obb,
+		const Sphere3& sphere, Contact3& contact);
+	static uint OBB3VsSphere3Single(const OBB3& obb,
+		const Sphere3& sphere, CollisionData3* data);
+	static uint OBB3VsSphere3Coherent(const OBB3& obb,
 		const Sphere3& sphere, CollisionData3* data);
 
 	// obb3 vs obb3: single and coherent do not share same core 

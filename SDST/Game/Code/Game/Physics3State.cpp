@@ -197,11 +197,11 @@ Physics3State::Physics3State()
 	g_hull = m_qh;
 
 	// wrap around field
-	Vector3 wraparoundMin = Vector3(0.f, 110.f, 0.f);
-	Vector3 wraparoundMax = Vector3(20.f, 140.f, 30.f);
-	m_wraparound = new WrapAround(wraparoundMin, wraparoundMax);
-	wraparoundMin = Vector3(28.f, 118.f, 8.f);
-	wraparoundMax = Vector3(37.f, 127.f, 17.f);
+	//Vector3 wraparoundMin = Vector3(0.f, 110.f, 0.f);
+	//Vector3 wraparoundMax = Vector3(20.f, 140.f, 30.f);
+	//m_wraparound = new WrapAround(wraparoundMin, wraparoundMax);
+	Vector3 wraparoundMin = Vector3(28.f, 118.f, 8.f);
+	Vector3 wraparoundMax = Vector3(37.f, 127.f, 17.f);
 	m_wraparound_0 = new WrapAround(wraparoundMin, wraparoundMax);
 	wraparoundMin = Vector3(1000.f, 1000.f, 1000.f);
 	wraparoundMax = Vector3(1200.f, 1200.f, 1200.f);
@@ -264,14 +264,17 @@ Physics3State::~Physics3State()
 	delete m_anchorSpring;
 	m_anchorSpring = nullptr;
 
-	delete m_wraparound;
-	m_wraparound = nullptr;
+	//delete m_wraparound;
+	//m_wraparound = nullptr;
 
 	delete m_wraparound_0;
 	m_wraparound_0 = nullptr;
 
 	delete m_wraparound_1;
 	m_wraparound_1 = nullptr;
+
+	//delete m_wraparound_2;
+	//m_wraparound_2 = nullptr;
 }
 
 
@@ -1178,8 +1181,11 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		// shoot a ball from camera
 		//ShootBallFromCamera();
 
-		WrapAroundTestBox();
-		WrapAroundTestBall();
+		//WrapAroundTestBox();
+
+		//WrapAroundTestBall();
+
+		WrapAroundTestBallBox();
 	}
 
 	// camera update from input
@@ -1367,7 +1373,7 @@ void Physics3State::UpdateGameobjectsCore(float deltaTime)
 	////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// teleport for wraparound, meaning that it only updates objects in corner boundary cases
-	m_wraparound->Update();
+	//m_wraparound->Update();
 	m_wraparound_0->Update();
 	m_wraparound_1->Update();
 }
@@ -1542,7 +1548,7 @@ void Physics3State::UpdateCore()
 					Sphere3 sph = se->GetSpherePrimitive();
 					OBB3 obb = be->GetBoxPrimitive();
 
-					CollisionDetector::OBB3VsSphere3(obb, sph, m_allResolver->GetCollisionData());
+					CollisionDetector::OBB3VsSphere3Single(obb, sph, m_allResolver->GetCollisionData());
 				}
 				else
 				{
@@ -1552,7 +1558,7 @@ void Physics3State::UpdateCore()
 					Sphere3 sph = se->GetSpherePrimitive();
 					OBB3 obb = brb->GetBoxPrimitive();
 
-					CollisionDetector::OBB3VsSphere3(obb, sph, m_allResolver->GetCollisionData());
+					CollisionDetector::OBB3VsSphere3Single(obb, sph, m_allResolver->GetCollisionData());
 				}
 			}
 			else 
@@ -1565,7 +1571,7 @@ void Physics3State::UpdateCore()
 					Sphere3 sph = srb->GetSpherePrimitive();
 					OBB3 obb = be->GetBoxPrimitive();
 
-					CollisionDetector::OBB3VsSphere3(obb, sph, m_allResolver->GetCollisionData());
+					CollisionDetector::OBB3VsSphere3Single(obb, sph, m_allResolver->GetCollisionData());
 				}
 				else
 				{
@@ -1575,7 +1581,7 @@ void Physics3State::UpdateCore()
 					Sphere3 sph = se->GetSpherePrimitive();
 					OBB3 obb = brb->GetBoxPrimitive();
 
-					//CollisionDetector::OBB3VsSphere3(obb, sph, m_allResolver->GetCollisionData());
+					CollisionDetector::OBB3VsSphere3Coherent(obb, sph, m_coherentResolver->GetCollisionData());
 				}
 			}
 		}
@@ -1758,31 +1764,31 @@ void Physics3State::RenderModelSamples(Renderer* renderer)
 
 void Physics3State::WrapAroundTestBall()
 {
-	Vector3 positions[8] = {Vector3(10.f, 120.f, 10.f), Vector3(10.f, 120.f, 20.f), 
-		Vector3(20.f, 120.f, 10.f), Vector3(20.f, 120.f, 20.f),
-		Vector3(10.f, 130.f, 10.f), Vector3(10.f, 130.f, 20.f),
-		Vector3(20.f, 130.f, 10.f), Vector3(20.f, 130.f, 20.f)};
-	Vector3 pos = positions[m_wrapPosIterator];
-	if (m_physBall == nullptr)
-	{
-		m_physBall = InitializePhysSphere(pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID);
-		Rigidbody3* rigid_s = static_cast<Rigidbody3*>(m_physBall->GetEntity());
-		rigid_s->SetLinearVelocity(GetRandomVector3() * 20.f);
-		rigid_s->SetAwake(true);
-		rigid_s->SetCanSleep(true);
-		m_wraparound->m_gos.push_back(m_physBall);
-	}
-	else
-	{
-		Sphere* s = InitializePhysSphere(pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID);
-		Rigidbody3* rigid_s = static_cast<Rigidbody3*>(s->GetEntity());
-		rigid_s->SetLinearVelocity(GetRandomVector3() * 20.f);
-		rigid_s->SetAwake(true);
-		rigid_s->SetCanSleep(true);
-		m_wraparound->m_gos.push_back(s);
-	}
-	m_wrapPosIterator += 1;
-	m_wrapPosIterator %= 8;
+	//Vector3 positions[8] = {Vector3(10.f, 120.f, 10.f), Vector3(10.f, 120.f, 20.f), 
+	//	Vector3(20.f, 120.f, 10.f), Vector3(20.f, 120.f, 20.f),
+	//	Vector3(10.f, 130.f, 10.f), Vector3(10.f, 130.f, 20.f),
+	//	Vector3(20.f, 130.f, 10.f), Vector3(20.f, 130.f, 20.f)};
+	//Vector3 pos = positions[m_wrapPosIterator];
+	//if (m_physBall == nullptr)
+	//{
+	//	//m_physBall = InitializePhysSphere(pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID);
+	//	Rigidbody3* rigid_s = static_cast<Rigidbody3*>(m_physBall->GetEntity());
+	//	rigid_s->SetLinearVelocity(GetRandomVector3() * 20.f);
+	//	rigid_s->SetAwake(true);
+	//	rigid_s->SetCanSleep(true);
+	//	m_wraparound->m_gos.push_back(m_physBall);
+	//}
+	//else
+	//{
+	//	Sphere* s = InitializePhysSphere(pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID);
+	//	Rigidbody3* rigid_s = static_cast<Rigidbody3*>(s->GetEntity());
+	//	rigid_s->SetLinearVelocity(GetRandomVector3() * 20.f);
+	//	rigid_s->SetAwake(true);
+	//	rigid_s->SetCanSleep(true);
+	//	m_wraparound->m_gos.push_back(s);
+	//}
+	//m_wrapPosIterator += 1;
+	//m_wrapPosIterator %= 8;
 }
 
 void Physics3State::WrapAroundTestBox()
@@ -1816,6 +1822,42 @@ void Physics3State::WrapAroundTestBox()
 		rigid_b->SetCanSleep(true);
 		m_wraparound_0->m_gos.push_back(b);
 	}
+	m_wrapPosIterator_0 += 1;
+	m_wrapPosIterator_0 %= 8;
+}
+
+void Physics3State::WrapAroundTestBallBox()
+{
+	Vector3 positions_0[8] = {Vector3(30.f, 120.f, 10.f), Vector3(30.f, 120.f, 15.f),
+		Vector3(35.f, 120.f, 10.f), Vector3(35.f, 120.f, 15.f),
+		Vector3(30.f, 125.f, 10.f), Vector3(30.f, 125.f, 15.f),
+		Vector3(35.f, 125.f, 10.f), Vector3(35.f, 125.f, 15.f)};
+	Vector3 pos_0 = positions_0[m_wrapPosIterator_0];
+
+	if ((m_wrapPosIterator_0 % 2) == 0)
+	{
+		// even, spawn ball
+		Sphere* s = InitializePhysSphere(pos_0, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID);
+		Rigidbody3* rigid_s = static_cast<Rigidbody3*>(s->GetEntity());
+		rigid_s->SetLinearVelocity(GetRandomVector3() * 5.f);
+		rigid_s->SetAwake(true);
+		rigid_s->SetCanSleep(true);
+		m_wraparound_0->m_gos.push_back(s);
+	}
+	else
+	{
+		// odd, spawn box
+		float obj_rand_x = GetRandomFloatInRange(0.f, 360.f);
+		float obj_rand_y = GetRandomFloatInRange(0.f, 360.f);
+		float obj_rand_z = GetRandomFloatInRange(0.f, 360.f);
+		Box* b = InitializePhysBox(pos_0, Vector3(obj_rand_x, obj_rand_y, obj_rand_z), Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID);
+		Rigidbody3* rigid_b = static_cast<Rigidbody3*>(b->GetEntity());
+		rigid_b->SetLinearVelocity(GetRandomVector3() * 5.f);
+		rigid_b->SetAwake(true);
+		rigid_b->SetCanSleep(true);
+		m_wraparound_0->m_gos.push_back(b);
+	}
+
 	m_wrapPosIterator_0 += 1;
 	m_wrapPosIterator_0 %= 8;
 }

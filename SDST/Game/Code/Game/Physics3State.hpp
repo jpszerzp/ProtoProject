@@ -69,6 +69,7 @@ public:
 	// scene tests
 	void WrapAroundTestBall();
 	void WrapAroundTestBox();
+	void WrapAroundTestBallBox();
 	void ShootBallFromCamera();
 
 public:
@@ -126,10 +127,11 @@ public:
 	bool m_debug_vert_complete = false;
 	bool m_eye_found = false;
 	
-	WrapAround* m_wraparound;
+	//WrapAround* m_wraparound;
 	WrapAround* m_wraparound_0;
 	WrapAround* m_wraparound_1;
-	int m_wrapPosIterator = 0;
+	//WrapAround* m_wraparound_2;
+	//int m_wrapPosIterator = 0;
 	int m_wrapPosIterator_0 = 0;
 	Sphere* m_physBall = nullptr;
 	Box* m_physBox = nullptr;
