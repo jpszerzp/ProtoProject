@@ -2,7 +2,7 @@
 
 #include "Engine/Math/Vector3.hpp"
 
-#define COLOR_LIST_SIZE 1024
+#define COLOR_LIST_SIZE 15
 
 class Rgba 
 {
@@ -42,6 +42,11 @@ public:
 	static const Rgba DARK_BROWN;
 	static const Rgba TEAL;
 	static const Rgba PINK;
+	static const Rgba MAROON;
+	static const Rgba OLIVE;
+	static const Rgba NAVY;
+	static const Rgba LIME;
+	static const Rgba PURPLE;
 	static const Rgba BLACK_HALF_OPACITY;
 	static const Rgba WHITE_HALF_OPACITY;
 	static const Rgba BLUE_HALF_OPACITY;
@@ -57,3 +62,4 @@ Vector3 RGBToHSL(Vector3 rgb);
 Vector3 HSLToRGB(Vector3 hsl);
 
 extern Rgba color_list[COLOR_LIST_SIZE];
+extern int color_index;

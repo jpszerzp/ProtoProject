@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/Math/Vector3.hpp"
+#include "Engine/Renderer/Renderer.hpp"
 
 class QHFace;
 
@@ -24,7 +25,13 @@ struct HalfEdge
 		m_twin = nullptr;
 		m_parentFace = nullptr;
 	}
-	~HalfEdge(){}
+	~HalfEdge()
+	{
+		m_prev = nullptr;
+		m_next = nullptr;
+		m_twin = nullptr;
+		m_parentFace = nullptr;
+	}
 
 	void SetTwin(HalfEdge* value) { m_twin = value; }
 	bool IsTwin(HalfEdge* value)
@@ -32,4 +39,6 @@ struct HalfEdge
 		return (value->m_next->m_tail == m_tail
 			&& value->m_tail == m_next->m_tail);
 	}
+
+	void Draw(Renderer* renderer);
 };

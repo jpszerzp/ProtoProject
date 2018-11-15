@@ -45,6 +45,26 @@ QHFace::QHFace(const Vector3& v1, const Vector3& v2, const Vector3& v3)
 	ConstructFeatureID();
 }
 
+QHFace::QHFace(HalfEdge* onHorizon, HalfEdge* horizon_next, HalfEdge* horizon_prev)
+{
+	vert_num = 3;
+
+	// record vertices
+	verts.push_back(onHorizon->m_tail);
+	verts.push_back(horizon_next->m_tail);
+	verts.push_back(horizon_prev->m_tail);
+
+	// set as "face"
+	ConstructFeatureID();
+	
+	// set up prev and next relations
+	onHorizon->m_prev = horizon_prev;	onHorizon->m_next = horizon_next;
+	horizon_next->m_prev = onHorizon;	horizon_next->m_next =horizon_prev;
+	horizon_prev->m_prev = horizon_next;	horizon_prev->m_next = onHorizon;
+	m_entry = onHorizon;
+}
+
+/*
 QHFace::QHFace(HalfEdge* he, const Vector3& pt)
 {
 	// 3 vert for sure in this case
@@ -71,10 +91,12 @@ QHFace::QHFace(HalfEdge* he, const Vector3& pt)
 	he3->m_prev = he2; he3->m_next = he;
 	m_entry = he;
 }
-
+*/
 
 QHFace::~QHFace()
 {
+	m_entry = nullptr;
+
 	// delete face normal mesh
 	FlushFaceNormalMesh();
 
@@ -98,12 +120,34 @@ void QHFace::AddConflictPoint(QHVert* pt)
 // Get farthest point of the FACE
 QHVert* QHFace::GetFarthestConflictPoint(float& dist) const
 {
-	dist = -INFINITY;
+	float theDist = -INFINITY;
 	QHVert* res = nullptr;
 
 	for (QHVert* pt : conflicts)
 	{
-		float pt_dist = DistPointToPlaneSigned(pt->vert, verts[0], verts[1], verts[2]);
+		//float pt_dist = DistPointToPlaneSigned(pt->vert, verts[0], verts[1], verts[2]);
+		float pt_dist = DistPointToPlaneUnsigned(pt->vert, verts[0], verts[1], verts[2]);
+		if (pt_dist > theDist)
+		{
+			theDist = pt_dist;
+			res = pt;
+		}
+	}
+
+	dist = theDist;
+
+	return res;
+}
+
+QHVert* QHFace::GetFarthestConflictPoint() const
+{
+	float dist = -INFINITY;
+	QHVert* res = nullptr;
+
+	for (QHVert* pt : conflicts)
+	{
+		//float pt_dist = DistPointToPlaneSigned(pt->vert, verts[0], verts[1], verts[2]);
+		float pt_dist = DistPointToPlaneUnsigned(pt->vert, verts[0], verts[1], verts[2]);
 		if (pt_dist > dist)
 		{
 			dist = pt_dist;
@@ -356,6 +400,9 @@ QuickHull::QuickHull(uint num, const Vector3& min, const Vector3& max)
 
 	// initial hull (tetrahedron)
 	GenerateInitialHull();
+
+	// generate normals directly
+	CreateAllNormalMeshes();
 
 	/*
 	for (QHVert* vert : m_verts)
@@ -1005,7 +1052,6 @@ void QuickHull::GenerateOutboundNorm(const Vector3& external, QHFace& face)
 	// decide on initial face normal based on v4
 	Vector3 towardExternal = external - face.verts[0];
 	float ext1 = DotProduct(towardExternal, norm1);
-	//float ext2 = DotProduct(towardExternal, norm2);
 	Vector3 norm = (ext1 < 0.f) ? norm1 : norm2;
 	face.normal = norm;
 }
@@ -1063,13 +1109,16 @@ void QuickHull::RenderCurrentHalfEdge(Renderer* renderer)
 	}
 }
 
-void QuickHull::CreateNormalMeshes()
+void QuickHull::CreateAllNormalMeshes()
 {
 	for (std::vector<QHFace*>::size_type idx = 0; idx < m_faces.size(); ++idx)
 	{
-		const Rgba& theColor = color_list[idx];
+		const Rgba& theColor = color_list[color_index];
 		m_faces[idx]->normColor = theColor;
 		m_faces[idx]->CreateFaceNormalMesh(theColor);
+		++color_index;
+
+		color_index = color_index % COLOR_LIST_SIZE;
 	}
 }
 
@@ -1373,21 +1422,47 @@ std::tuple<QHFace*, QHVert*> QuickHull::GetFarthestConflictPair(float& dist) con
 	std::tuple<QHFace*, QHVert*> vert_pair;
 	QHVert* winner_vert = nullptr;
 	QHFace* winner_face = nullptr;
-	dist = -INFINITY;
+	float theDist = -INFINITY;
 
 	for (QHFace* face : m_faces)
 	{
 		float conflict_dist;
 		QHVert* conflict = face->GetFarthestConflictPoint(conflict_dist);
-		if (conflict_dist > dist)
+		if (conflict_dist > theDist)
 		{
-			dist = conflict_dist;
+			theDist = conflict_dist;
+			winner_vert = conflict;
+			winner_face = face;
+		}
+	}
+
+	dist = theDist;
+	vert_pair = std::make_tuple(winner_face, winner_vert);
+
+	return vert_pair;
+}
+
+std::tuple<QHFace*, QHVert*> QuickHull::GetFarthestConflictPair() const
+{
+	std::tuple<QHFace*, QHVert*> vert_pair;
+	QHVert* winner_vert = nullptr;
+	QHFace* winner_face = nullptr;
+	float theDist = -INFINITY;
+
+	for (QHFace* face : m_faces)
+	{
+		float conflict_dist;
+		QHVert* conflict = face->GetFarthestConflictPoint(conflict_dist);
+		if (conflict_dist > theDist)
+		{
+			theDist = conflict_dist;
 			winner_vert = conflict;
 			winner_face = face;
 		}
 	}
 
 	vert_pair = std::make_tuple(winner_face, winner_vert);
+
 	return vert_pair;
 }
 
@@ -1403,6 +1478,28 @@ std::set<Vector3> QuickHull::GetPointSet() const
 	}
 
 	return point_set;
+}
+
+bool QuickHull::HasVisitedFace(QHFace* face)
+{
+	bool found = std::find(m_allFaces.begin(), m_allFaces.end(), face) != m_allFaces.end();
+	//bool found = std::find(m_visibleFaces.begin(), m_visibleFaces.end(), face) != m_visibleFaces.end();
+	return found;
+}
+
+bool QuickHull::IsLastVisitedFace(QHFace* face)
+{
+	//return (face == m_last_visited);
+
+	size_t end_index = m_visibleFaces.size() - 1U;
+	size_t last_index = end_index - 1U;
+	QHFace* last_face = m_visibleFaces[last_index];
+	return (face == last_face);
+}
+
+bool QuickHull::ReachStartHalfEdge()
+{
+	return (test_he == test_start_he);
 }
 
 void QuickHull::ChangeCurrentHalfEdgeMesh()
@@ -1429,12 +1526,15 @@ void QuickHull::RenderHull(Renderer* renderer)
 	RenderVerts(renderer);
 	RenderCurrentHalfEdge(renderer);
 	RenderHorizon(renderer);
+	RenderAnchor(renderer);
 }
 
 void QuickHull::RenderFaces(Renderer* renderer)
 {
 	for (QHFace* face : m_faces)
 		face->DrawFace(renderer);
+	//for (QHFace* face : m_new_faces)
+	//	face->DrawFace(renderer);
 }
 
 
@@ -1469,7 +1569,29 @@ void QuickHull::RenderHorizon(Renderer* renderer)
 	}
 }
 
-void QuickHull::CreateFaceMesh(QHFace& face)
+void QuickHull::RenderAnchor(Renderer* renderer)
+{
+	if (m_anchor_mesh != nullptr)
+	{
+		Shader* shader = renderer->CreateOrGetShader("wireframe_color");
+		renderer->UseShader(shader);
+
+		Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
+		renderer->SetTexture2D(0, texture);
+		renderer->SetSampler2D(0, texture->GetSampler());
+		glPointSize(10.f);
+
+		renderer->m_objectData.model = Matrix44::IDENTITY;
+
+		renderer->m_currentShader->m_state.m_depthCompare = COMPARE_LESS;
+		renderer->m_currentShader->m_state.m_cullMode = CULLMODE_BACK;
+		renderer->m_currentShader->m_state.m_windOrder = WIND_COUNTER_CLOCKWISE;
+
+		renderer->DrawMesh(m_anchor_mesh);
+	}
+}
+
+void QuickHull::CreateFaceMesh(QHFace& face, Rgba color)
 {
 	if (face.vert_num == 3)
 	{
@@ -1477,7 +1599,7 @@ void QuickHull::CreateFaceMesh(QHFace& face)
 		const Vector3& v2 = face.verts[1];
 		const Vector3& v3 = face.verts[2];
 
-		Mesh* mesh = Mesh::CreateTriangleImmediate(VERT_PCU, Rgba::WHITE, v1, v2, v3);
+		Mesh* mesh = Mesh::CreateTriangleImmediate(VERT_PCU, color, v1, v2, v3);
 		face.faceMesh = mesh;
 	}
 	else 
@@ -1489,7 +1611,7 @@ void QuickHull::CreateFaceMesh(QHFace& face)
 		const Vector3& v3 = face.verts[2];
 		const Vector3& v4 = face.verts[3];
 
-		Mesh* mesh = Mesh::CreateQuadImmediate(VERT_PCU, v1, v2, v3, v4, Rgba::WHITE);
+		Mesh* mesh = Mesh::CreateQuadImmediate(VERT_PCU, v1, v2, v3, v4, color);
 		face.faceMesh = mesh;
 	}
 }

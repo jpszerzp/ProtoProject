@@ -193,9 +193,9 @@ Physics3State::Physics3State()
 	m_coherentResolver = new ContactResolver(RESOLVE_COHERENT);
 
 	// quick hull
-	Vector3 qhMin = Vector3(-100.f, 110.f, 0.f);
-	Vector3 qhMax = Vector3(-50.f, 160.f, 50.f);
-	m_qh = new QuickHull(5, qhMin, qhMax);
+	Vector3 qhMin = Vector3(-100.f, -50.f, 0.f);
+	Vector3 qhMax = Vector3(-50.f, 0.f, 50.f);
+	m_qh = new QuickHull(6, qhMin, qhMax);
 	g_hull = m_qh;
 
 	// wrap around field
@@ -676,22 +676,16 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		if (!m_eye_found)
 		{
 			// get the farthest conflict point
-			float farthest;
-			g_hull->m_eyePair = g_hull->GetFarthestConflictPair(farthest);
+			//float farthest;
+			g_hull->m_eyePair = g_hull->GetFarthestConflictPair();
 			QHFace* conflict_face = std::get<0>(g_hull->m_eyePair);
 			QHVert* conflict_pt = std::get<1>(g_hull->m_eyePair);
 
 			// initialization of the horizon generation step: we need to push the chosen conflict face as a start
 			if (conflict_face != nullptr && conflict_pt != nullptr)
 			{
-				g_hull->m_visibleFaces.push_back(conflict_face);
-				g_hull->m_allFaces.push_back(conflict_face);
-				g_hull->test_he = conflict_face->m_entry;
-				g_hull->test_he_twin = g_hull->test_he->m_twin;
-				g_hull->test_otherFace = g_hull->test_he_twin->m_parentFace;
-				g_hull->test_start_he = g_hull->test_he;
-
-				g_hull->ChangeCurrentHalfEdgeMesh();
+				// i also want to change the color of eye point
+				conflict_pt->ChangeColor(Rgba::PURPLE);
 			}
 
 			m_eye_found = true;
@@ -703,15 +697,83 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		QHFace* conflict_face = std::get<0>(g_hull->m_eyePair);
 		QHVert* conflict_pt = std::get<1>(g_hull->m_eyePair);
 
-		if (!g_hull->m_visibleFaces.empty())
+		g_hull->test_he = conflict_face->m_entry;
+		g_hull->test_start_he = g_hull->test_he;
+		g_hull->test_he_twin = g_hull->test_he->m_twin;
+		g_hull->test_otherFace = g_hull->test_he_twin->m_parentFace;
+
+		g_hull->m_visibleFaces.push_back(conflict_face);
+		g_hull->m_allFaces.push_back(conflict_face);
+
+		g_hull->ChangeCurrentHalfEdgeMesh();
+	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_3))
+	{
+		QHFace* conflict_face = std::get<0>(g_hull->m_eyePair);
+		QHVert* conflict_pt = std::get<1>(g_hull->m_eyePair);
+
+		// to start with, we can assume the we have never visited any other faces
+		bool visible = g_hull->PointOutBoundFace(conflict_pt->vert, *g_hull->test_otherFace);
+		if (visible)
 		{
-			bool visited = std::find(g_hull->m_allFaces.begin(), 
-				g_hull->m_allFaces.end(), g_hull->test_otherFace) != g_hull->m_allFaces.end();
-			if (!visited)
+			// step on a new face
+			g_hull->m_visibleFaces.push_back(g_hull->test_otherFace);
+			g_hull->m_allFaces.push_back(g_hull->test_otherFace);
+
+			g_hull->test_he = g_hull->test_he_twin->m_next;
+			g_hull->test_he_twin = g_hull->test_he->m_twin;
+			g_hull->test_otherFace = g_hull->test_he_twin->m_parentFace;
+		}
+		else
+		{
+			// invisible
+			g_hull->m_horizon.push_back(g_hull->test_he);
+			g_hull->AddHorizonMesh(g_hull->test_he);
+
+			g_hull->test_he = g_hull->test_he->m_next;
+			g_hull->test_he_twin = g_hull->test_he->m_twin;
+			g_hull->test_otherFace = g_hull->test_he_twin->m_parentFace;
+		}
+
+		g_hull->ChangeCurrentHalfEdgeMesh();
+	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_4))
+	{
+		QHFace* conflict_face = std::get<0>(g_hull->m_eyePair);
+		QHVert* conflict_pt = std::get<1>(g_hull->m_eyePair);
+
+		if (!g_hull->ReachStartHalfEdge())
+		{
+			bool visible = g_hull->PointOutBoundFace(conflict_pt->vert, *g_hull->test_otherFace);
+			if (visible)
 			{
-				if (g_hull->PointOutBoundFace(conflict_pt->vert, *g_hull->test_otherFace))
+				// if the face we have visited
+				bool visited = g_hull->HasVisitedFace(g_hull->test_otherFace);
+				if (visited)
 				{
-					// visible 
+					// if it is the last face visited
+					bool last_visited = g_hull->IsLastVisitedFace(g_hull->test_otherFace);
+					if (last_visited)
+					{
+						g_hull->m_visibleFaces.pop_back();
+
+						g_hull->test_he = g_hull->test_he_twin->m_next;
+						g_hull->test_he_twin = g_hull->test_he->m_twin;
+						g_hull->test_otherFace = g_hull->test_he_twin->m_parentFace;
+					}
+					else
+					{
+						// this is not the face we came from, it is just a normal face we previously visited; skip it
+						g_hull->test_he = g_hull->test_he->m_next;
+						g_hull->test_he_twin = g_hull->test_he->m_twin;
+						g_hull->test_otherFace = g_hull->test_he_twin->m_parentFace;
+					}
+				}
+				else
+				{
+					// this is a new face to visit
 					g_hull->m_visibleFaces.push_back(g_hull->test_otherFace);
 					g_hull->m_allFaces.push_back(g_hull->test_otherFace);
 
@@ -719,109 +781,40 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 					g_hull->test_he_twin = g_hull->test_he->m_twin;
 					g_hull->test_otherFace = g_hull->test_he_twin->m_parentFace;
 				}
-				else
-				{
-					// invisible
-					bool explored = std::find(g_hull->m_horizon.begin(), 
-						g_hull->m_horizon.end(), g_hull->test_he) != g_hull->m_horizon.end();
-					bool twin_explored = std::find(g_hull->m_horizon.begin(), 
-						g_hull->m_horizon.end(), g_hull->test_he->m_twin) != g_hull->m_horizon.end();
-					if (!explored && !twin_explored)
-					{
-						g_hull->m_horizon.push_back(g_hull->test_he);
-						g_hull->AddHorizonMesh(g_hull->test_he);
-					}
-
-					g_hull->test_he = g_hull->test_he->m_next;
-					g_hull->test_he_twin = g_hull->test_he->m_twin;
-					g_hull->test_otherFace = g_hull->test_he_twin->m_parentFace;
-
-					// Situation 1 - we are still on this face, there is a chance this is the finish step
-					if (g_hull->test_he == g_hull->test_start_he)
-					{
-						g_hull->m_visibleFaces.pop_back();
-					}
-				}
 			}
-			else
+			else 
 			{
-				if (g_hull->m_visibleFaces.size() == 1U)
-				{
-					// Situation 2 - we know we are back on initial conflict face
-					g_hull->test_he = g_hull->test_he->m_next;
-					g_hull->m_visibleFaces.pop_back();
-				}
-				else
-				{
-					size_t size = g_hull->m_visibleFaces.size();
-					QHFace* second = g_hull->m_visibleFaces[size - 2U];
+				// invisible
+				g_hull->m_horizon.push_back(g_hull->test_he);
+				g_hull->AddHorizonMesh(g_hull->test_he);
 
-					if (second == g_hull->test_otherFace)
-					{
-						if (g_hull->test_otherFace == conflict_face)
-						{
-							g_hull->test_he = g_hull->test_he_twin;
-							g_hull->test_he_twin = g_hull->test_he->m_twin;
-							g_hull->test_otherFace = conflict_face;				// force stay on initial face
-							g_hull->m_visibleFaces.pop_back();
-						}
-						else
-						{
-							g_hull->test_he = g_hull->test_he_twin->m_next;
-							g_hull->test_he_twin = g_hull->test_he->m_twin;
-							g_hull->test_otherFace = g_hull->test_he_twin->m_parentFace;
-							g_hull->m_visibleFaces.pop_back();
-						}
-					}
-					else
-					{
-						g_hull->test_he = g_hull->test_he->m_next;
-						g_hull->test_he_twin = g_hull->test_he->m_twin;
-						g_hull->test_otherFace = g_hull->test_he_twin->m_parentFace;
-
-						//// Situation 1 - we are still on this face, there is a chance this is the finish step - NOT FOR THIS ONE SINCE WE ARE NOT ON INITIAL FACE
-						//if (g_hull->test_he == g_hull->test_start_he)
-						//{
-						//	g_hull->m_visibleFaces.pop_back();
-						//}
-					}
-				}
-			}
-		}
-
-		if (g_hull->m_visibleFaces.empty())
-		{
-			if (g_hull->test_he != g_hull->test_start_he)
-			{
-				// we may miss other half edges for the initial face, so we added it back and continue processing
-				if (g_hull->m_visibleFaces.empty())
-					g_hull->m_visibleFaces.push_back(conflict_face);
-
+				g_hull->test_he = g_hull->test_he->m_next;
 				g_hull->test_he_twin = g_hull->test_he->m_twin;
 				g_hull->test_otherFace = g_hull->test_he_twin->m_parentFace;
-
-				//bool visited = std::find(g_hull->m_allFaces.begin(), g_hull->m_allFaces.end(),
-				//	g_hull->test_otherFace) != g_hull->m_allFaces.end();
-				//if (visited)
-				//	g_hull->test_he = g_hull->test_he->m_next;
-				//else
-				//	ASSERT_OR_DIE(false, "Should not have unvisited neighbor at this stage");
 			}
-			//else
-			//	ASSERT_RECOVERABLE(false, "Looped back to initial edge, do nothing");
-		}
 
-		g_hull->ChangeCurrentHalfEdgeMesh();
+			g_hull->ChangeCurrentHalfEdgeMesh();
+		}
 	}
 
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_3))
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_5))
 	{
+		// not that we have full horizon list, we transfer point info to another list so that we have info to restore HE relations for new faces
+		// this set should maintain the order of half edges, so a tuple is a good choice given the format of <head, tail>
+		for (HalfEdge* edge : g_hull->m_horizon)
+		{
+			const Vector3& tail = edge->m_tail;			// if "tail" is confusing, "base" is probably a better name
+			const Vector3& head = edge->m_next->m_tail;
+			std::tuple<Vector3, Vector3, HalfEdge*> he_tuple = std::make_tuple(tail, head, edge->m_twin);
+			g_hull->m_horizon_tuples.push_back(he_tuple);
+		}
+		// up to this point, the vector of pair (man...) should be populated with pairs in the correct order
+
 		// it is easier for us to first delete old faces and then generate new ones
 
 		// we first get the list of faces that are visible to the eye:
 		// these are the faces we need to delete from the hull
 		QHVert* eye = std::get<1>(g_hull->m_eyePair);
-		//std::vector<QHFace*>& eyeVisibles = eye->visibleFaces;
 		std::deque<QHFace*>& eyeVisibles = g_hull->m_allFaces;
 		
 		// find face expected to be deleted in hull's storage
@@ -854,6 +847,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 						// instead, it is just going to be the point added to hull's peripheral, so we keep it in m_eyePair for later reference
 					}
 
+					/*
 					// now that we have cached orphans, we can free this face
 					// but things are a little complex here, some cases we need to consider:
 					// first, we only want to delete half edges that are not in the horizon list already,
@@ -876,8 +870,22 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 
 					if (std::find(g_hull->m_horizon.begin(), g_hull->m_horizon.end(), next) == g_hull->m_horizon.end())
 						delete next;
-
+					*/
 					
+					// for easiness, we just delete all half edges,
+					// but cache vertex pair for each in the right order for later reference
+					// to cache we can directly transfer point info from m_horizon to a new structure
+					// after that we can just delete half edges for this face and decrement m_horizon
+					// Note that the transfer of point info does not happen here, it happens as soon as we get the complete horizon list
+					// ATTENTION: we can do this in destructor of face too, not necessarily here 
+					HalfEdge* it_he = deleteThis->m_entry;
+					HalfEdge* prev = it_he->m_prev;
+					HalfEdge* next = it_he->m_next;
+					delete it_he;
+					delete prev;
+					delete next;
+					it_he = nullptr;
+
 					// we want to unregister the meshes for sure, but could be handled by destructor later
 
 					// we do NOT want to handle freeing memory for conflict points, 
@@ -885,17 +893,25 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 					// we simple clear the vector
 					deleteThis->conflicts.clear();
 
-					// finally, before we delete this face, we need to use find one point on this face, 
+					// finally, before we delete this face, we need to use it to find one point on this face, 
 					// and set it as anchor to be used when setting normals of new faces.
 					// This is applicable because this point is guaranteed to be inside the new hull due to
-					// the fact that it is on an obsolete face/
+					// the fact that it is on an obsolete face
 					// Note that we only need one such point, so this assignment should only happen once
-					if (Vector3::EqualByTolerance(0.1f, g_hull->m_anchor, Vector3::INVALID))
+					if (g_hull->m_anchor == Vector3::INVALID)
 					{
-						// this is first time we need to set the anchor
+						// this is the first time we need to set the anchor
 						// a good candidate is the centroid of the face
 						Vector3 interior = deleteThis->GetFaceCentroid();
 						g_hull->m_anchor = interior;
+						//DebugRenderPoint(10000.f, 10.f, interior, Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+
+						if (g_hull->m_anchor_mesh != nullptr)
+						{
+							delete g_hull->m_anchor_mesh;
+							g_hull->m_anchor_mesh = nullptr;
+						}
+						g_hull->m_anchor_mesh = Mesh::CreatePointImmediate(VERT_PCU, interior, Rgba::RED);
 					}
 
 					// now we can delete this face, we don't need any data from it anymore
@@ -914,27 +930,45 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 			// going to the next face we want to delete
 		}
 
+		// we have finished deleting all faces, therefore clear the horizon list
+		g_hull->m_horizon.clear();
+
 		// visible list of eye should be empty at this moment, we make sure we clear it here
-		ASSERT_OR_DIE(eyeVisibles.empty(), "Visible face list of eye (allFaces of hull) should be empty but is not, abort.");
-		eyeVisibles.clear();
-		std::get<0>(g_hull->m_eyePair) = nullptr;			// note that the face in eye pair should be one of those faces deleted, so we set null here
+		ASSERT_OR_DIE(g_hull->m_allFaces.empty(), "Visible face list of eye (allFaces of hull) should be empty but is not, abort. line 937 Physics3State.cpp");
+		g_hull->m_allFaces.clear();
+		// note that the face in eye pair should be one of those faces deleted, so we set null here
+		std::get<0>(g_hull->m_eyePair) = nullptr;		
 
 		// Up to this point, face free logic should come at an end
 		// now we need to think about how to add new faces to the hull
-		// to start on that, remember that we still have the eye and the horizon list
+		// to start on that, remember that we still have the eye and the horizon pair list
 		// NOTE: HE is on the visible side when pushed, so we can just keep that direction for new faces
-
-		// holder for new faces
 		std::vector<QHFace*> new_faces;
-		for (HalfEdge* he : g_hull->m_horizon)
+		for (std::tuple<Vector3, Vector3, HalfEdge*> horizon_tuple : g_hull->m_horizon_tuples)
 		{
 			// with eye position, we can form a face given each half edge in the horizon list
 			const Vector3& eyePos = eye->vert;
-			QHFace* new_face = new QHFace(he, eyePos);
+
+			// then we get points of horizon pair
+			const Vector3& tail = std::get<0>(horizon_tuple);
+			const Vector3& head = std::get<1>(horizon_tuple);
+			HalfEdge* twin_to_restore = std::get<2>(horizon_tuple);
+
+			// we start with half edges without correct prev and next relation
+			HalfEdge* onHorizon = new HalfEdge(tail);
+			HalfEdge* horizon_next = new HalfEdge(head);
+			HalfEdge* horizon_prev = new HalfEdge(eyePos);
+
+			// now with the half edges, we can construct the new face and build relations
+			QHFace* new_face = new QHFace(onHorizon, horizon_next, horizon_prev);
 
 			// remember that for each half edge we have a parent face
 			// so we want to make sure each halfedge of the new face actually configures that in the right way
 			new_face->SetParentHalfEdge();
+
+			// remember we recreate the half edge from the horizon list
+			// so that edge does not have the correct twin HE set up yet, we need to do that first
+			onHorizon->m_twin = twin_to_restore;
 
 			// for each half edge, information set up at this moment looks like the following
 			// ----- prev ----- next ----- tail ----- parent ----- twin -----
@@ -967,6 +1001,128 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		// at this moment we have HE relation of all new faces configured
 		// we also have feature id and verts set correctly
 		// some other stuff we care absolutely: normal, face mesh, conflicts (from the orphans)
+		// the rest of properties we can also add here per needed, so we set up the above one by one
+		// To extend from above list, we also set
+		for (std::vector<QHFace*>::size_type i = 0; i < new_faces.size(); ++i)
+		{
+			QHFace* theNew = new_faces[i];
+
+			// face mesh
+			g_hull->CreateFaceMesh(*theNew);
+
+			// normal
+			// remember that we stored a anchor that is always valid to compute the outbound normal
+			g_hull->GenerateOutboundNorm(g_hull->m_anchor, *theNew);
+
+			// I do want to have normal color set before setting orphans
+			// so, just set the normal mesh along the way too
+			const Rgba& theColor = color_list[color_index];
+			theNew->normColor = theColor;
+			theNew->CreateFaceNormalMesh(theColor);
+			++color_index;
+			color_index = color_index % COLOR_LIST_SIZE;
+		}
+
+		// re-assigning orphaned conflict points is a little more complex
+		for (QHVert* orphan : g_hull->m_orphans)
+			g_hull->AddConflictPointGeneral(orphan, new_faces); 
+		// at this point the orphan storage is no longer important, we can just clear it
+		g_hull->m_orphans.clear();
+
+		// add faces to hull - remember: we have a new face holder in QH
+		for (QHFace* addedFace : new_faces)
+			g_hull->m_faces.push_back(addedFace);
+		new_faces.clear();
+
+		// there is one subtle op here: we need to set eye back to null as don't use it anymore
+		// this will set the tupel too since std::get returns a reference, making the eyePair a <null, null> effectively
+		// In fact, before setting to null, we need to free this QHVert, because it will not be in any of the conflict list anymore
+		// and also we need to make sure that the global list of vert for the hull does not have this point any longer
+		g_hull->RemovePointGlobal(eye->vert);
+		eye = nullptr;							// optional
+
+		// at the end we need to reset params for next round of adding point to hull
+		// to avoid repeat ops, the variables reset already are:
+		// m_verts has been updated; m_faces is updated; m_eyePair back to null for both value;
+		// m_allFaces is cleared and its contained faces released;
+		// m_orphans is cleared.
+		// local new_faces vector is cleared.
+		// m_horizon is cleared.
+		// This leaves params m_visibleFaces, m_horizon_tuples, test params, all meshes, m_anchor to be reset
+		if (!g_hull->m_visibleFaces.empty())
+			g_hull->m_visibleFaces.clear();
+		if (!g_hull->m_horizon_tuples.empty())
+			g_hull->m_horizon_tuples.clear();
+		g_hull->test_start_he = nullptr;
+		g_hull->test_he = nullptr;
+		g_hull->test_he_twin = nullptr;
+		g_hull->test_otherFace = nullptr;
+		for (Mesh* horizonMesh : g_hull->m_horizon_mesh)
+			delete horizonMesh;
+		g_hull->m_horizon_mesh.clear();
+		if (g_hull->m_test_he_mesh != nullptr)
+		{
+			delete g_hull->m_test_he_mesh;
+			g_hull->m_test_he_mesh = nullptr;
+		}
+		g_hull->m_anchor = Vector3::INVALID;
+		// comment this to show debug view for anchor
+		if (g_hull->m_anchor_mesh != nullptr)
+		{
+			delete g_hull->m_anchor_mesh;
+			g_hull->m_anchor_mesh = nullptr;
+		}
+		m_eye_found = false;				// now we can find "eye" again!
+
+		/*
+		// holder for new faces
+		//int count_lock = 0;
+		std::vector<QHFace*> new_faces;
+		for (HalfEdge* he : g_hull->m_horizon)
+		{
+			// with eye position, we can form a face given each half edge in the horizon list
+			const Vector3& eyePos = eye->vert;
+			QHFace* new_face = new QHFace(he, eyePos);
+
+			// remember that for each half edge we have a parent face
+			// so we want to make sure each halfedge of the new face actually configures that in the right way
+			new_face->SetParentHalfEdge();
+
+			// for each half edge, information set up at this moment looks like the following
+			// ----- prev ----- next ----- tail ----- parent ----- twin -----
+			// -he1- SET  ----- SET  ----- SET  ----- SET    ----- SET  -----
+			// -he2- SET  ----- SET  ----- SET  ----- SET    ----- NOT  -----
+			// -he3- SET  ----- SET  ----- SET  ----- SET    ----- NOT  -----
+
+			new_faces.push_back(new_face);
+
+			//++count_lock;
+			//if (count_lock == 1)
+			//	break;
+		}
+
+		// fully set all twin relations
+		for (std::vector<QHFace*>::size_type i1 = 0; i1 < new_faces.size(); ++i1)
+		{
+			QHFace* subject = new_faces[i1];
+
+			for (std::vector<QHFace*>::size_type i2 = 0; i2 <new_faces.size(); ++i2)
+			{
+				QHFace* object = new_faces[i2];
+				if (subject != object)
+				{
+					// for each new face, there is a possibility that it shares an edge with another new face
+					// once we find that shared edge, the half edge corresponding to it in that other face is just the twin
+					// of the half edge corresponding to this shared edge in this current face we are inspecting
+					subject->UpdateSharedEdge(object);		// set twins along the way
+				}
+			}
+		}
+		// all data set for HE: tail, prev, next, twin, parent face
+
+		// at this moment we have HE relation of all new faces configured
+		// we also have feature id and verts set correctly
+		// some other stuff we care absolutely: normal, face mesh, conflicts (from the orphans)
 		// the rest of properties we can also add here per needed
 		// so we set up the above one by one
 		for (std::vector<QHFace*>::size_type i = 0; i < new_faces.size(); ++i)
@@ -974,7 +1130,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 			QHFace* theNew = new_faces[i];
 
 			// face mesh
-			g_hull->CreateFaceMesh(*theNew);
+			g_hull->CreateFaceMesh(*theNew, Rgba::RED);
 
 			// normal
 			// remember that we stored a anchor that is always valid to compute the outbound normal
@@ -1018,7 +1174,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 			g_hull->m_test_he_mesh = nullptr;
 		}
 		g_hull->m_anchor = Vector3::INVALID;
-
+		*/
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		// horizon list is complete, form s with conflicting point

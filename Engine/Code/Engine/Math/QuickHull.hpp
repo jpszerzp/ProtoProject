@@ -40,7 +40,6 @@ public:
 	Vector3 vert;
 	Mesh* vertMesh = nullptr;
 	Rgba color;
-	//std::vector<QHFace*> visibleFaces;
 
 public:
 	QHVert() { ConstructFeatureID(); }
@@ -100,12 +99,14 @@ public:
 public:
 	QHFace(){ ConstructFeatureID(); }
 	QHFace(const Vector3& v1, const Vector3& v2, const Vector3& v3);
-	QHFace(HalfEdge* he, const Vector3& pt);
+	QHFace(HalfEdge* onHorizon, HalfEdge* horizon_next, HalfEdge* horizon_prev);
+	//QHFace(HalfEdge* he, const Vector3& pt);
 	QHFace(int num, Vector3* sample);
 	~QHFace();
 
 	void AddConflictPoint(QHVert* pt);
 	QHVert* GetFarthestConflictPoint(float& dist) const;
+	QHVert* GetFarthestConflictPoint() const;
 	bool FindTwinAgainstFace(QHFace* face);
 	bool FindEdgeTwinAgainstFace(QHFace* face, HalfEdge* entry);
 
@@ -148,10 +149,13 @@ public:
 
 	std::tuple<QHFace*, QHVert*> m_eyePair;
 
+	// QH utils
 	std::deque<QHFace*> m_visibleFaces;
 	std::deque<QHFace*> m_allFaces;
 	std::deque<HalfEdge*> m_horizon;		
+	std::vector<std::tuple<Vector3, Vector3, HalfEdge*>> m_horizon_tuples;
 	std::vector<Mesh*> m_horizon_mesh;
+	//QHFace* m_last_visited = nullptr;
 
 	// test
 	HalfEdge* test_start_he = nullptr;
@@ -162,11 +166,11 @@ public:
 
 	// orphans
 	std::vector<QHVert*> m_orphans;
-	//QHVert* m_candidate = nullptr;
 
 	// anchor point that is "inside" the hull generated in future rounds
 	// always valid for use to generate normals of new faces
 	Vector3 m_anchor = Vector3::INVALID;
+	Mesh* m_anchor_mesh = nullptr;
 
 public:
 	bool AddConflictPointInitial(QHVert* vert);
@@ -193,7 +197,11 @@ public:
 	QHVert* GetVert(int idx) { return m_verts[idx]; }
 	size_t GetVertNum() const { return m_verts.size(); }
 	std::tuple<QHFace*, QHVert*> GetFarthestConflictPair(float& dist) const;
+	std::tuple<QHFace*, QHVert*> GetFarthestConflictPair() const;
 	std::set<Vector3> GetPointSet() const;
+	bool HasVisitedFace(QHFace* face);
+	bool IsLastVisitedFace(QHFace* face);
+	bool ReachStartHalfEdge();
 
 	void ChangeCurrentHalfEdgeMesh();
 
@@ -201,9 +209,10 @@ public:
 	void RenderFaces(Renderer* renderer);
 	void RenderVerts(Renderer* renderer);
 	void RenderHorizon(Renderer* renderer);
+	void RenderAnchor(Renderer* renderer);
 	void RenderCurrentHalfEdge(Renderer* renderer);
 
-	void CreateNormalMeshes();
+	void CreateAllNormalMeshes();
 	void FlushNormalMeshes();
-	void CreateFaceMesh(QHFace& face);
+	void CreateFaceMesh(QHFace& face, Rgba color = Rgba::WHITE);
 };

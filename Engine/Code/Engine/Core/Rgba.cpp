@@ -16,6 +16,11 @@ const Rgba Rgba::MEGENTA = Rgba(255, 0, 255);
 const Rgba Rgba::DARK_BROWN = Rgba(153, 76, 0);
 const Rgba Rgba::TEAL = Rgba(0, 128, 128);
 const Rgba Rgba::PINK = Rgba(255, 192, 203);
+const Rgba Rgba::MAROON = Rgba(128, 0, 0);
+const Rgba Rgba::OLIVE = Rgba(128, 128, 0);
+const Rgba Rgba::NAVY = Rgba(0, 0, 128);
+const Rgba Rgba::LIME = Rgba(0, 128, 0);
+const Rgba Rgba::PURPLE = Rgba(128, 0, 128);
 const Rgba Rgba::BLACK_HALF_OPACITY = Rgba(0, 0, 0, 127);
 const Rgba Rgba::WHITE_HALF_OPACITY = Rgba(255, 255, 255, 127);
 const Rgba Rgba::BLUE_HALF_OPACITY = Rgba(0, 0, 255, 127);
@@ -24,7 +29,9 @@ const Rgba Rgba::RED_HALF_OPACITY = Rgba(255, 0, 0, 127);
 const Rgba Rgba::CYAN_HALF_OPACITY = Rgba(0, 255, 255, 127);
 const Rgba Rgba::MEGENTA_HALF_OPACITY = Rgba(255, 0, 255, 127);
 Rgba color_list[COLOR_LIST_SIZE] = {Rgba::RED, Rgba::GREEN, Rgba::BLUE, Rgba::YELLOW,
-	Rgba::GREY, Rgba::CYAN, Rgba::MEGENTA, Rgba::DARK_BROWN, Rgba::TEAL, Rgba::PINK};
+	Rgba::GREY, Rgba::CYAN, Rgba::MEGENTA, Rgba::DARK_BROWN, Rgba::TEAL, Rgba::PINK,
+	Rgba::MAROON, Rgba::OLIVE, Rgba::NAVY, Rgba::LIME, Rgba::PURPLE};
+int color_index = 0;
 
 Rgba::Rgba()
 {

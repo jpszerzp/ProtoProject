@@ -804,7 +804,7 @@ void BroadPhaseCommand(Command& cmd)
 		ConsolePrintfUnit(Rgba::RED, "Unknown arg!");
 }
 
-
+/*
 void QHNormalDrawCommand(Command& cmd)
 {
 	std::string subStr = cmd.GetNextString();
@@ -820,6 +820,7 @@ void QHNormalDrawCommand(Command& cmd)
 		ConsolePrintfUnit(Rgba::YELLOW, "QH normal meshes flushed!");
 	}
 }
+*/
 
 void EncounterCommand(Command&)
 {
@@ -958,7 +959,7 @@ void CommandStartup()
 	
 	// physics
 	CommandRegister("broadphase", BroadPhaseCommand, "{bool}", "Turn on/off broadphase");
-	CommandRegister("qh_draw_normal", QHNormalDrawCommand, "{true}", "Draw face normal of a convex hull");
+	//CommandRegister("qh_draw_normal", QHNormalDrawCommand, "{true}", "Draw face normal of a convex hull");
 }
 
 
