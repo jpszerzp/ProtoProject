@@ -84,7 +84,6 @@ public:
 	int vert_num;
 	std::vector<Vector3> verts;			// size of 3 or 4 size, vertices of face (triangle or quad)
 	std::vector<QHVert*> conflicts;		// conflicting point list of the face		
-	//std::vector<QHEdge*> edges;
 
 	// normal
 	Vector3 normal;
@@ -100,7 +99,6 @@ public:
 	QHFace(){ ConstructFeatureID(); }
 	QHFace(const Vector3& v1, const Vector3& v2, const Vector3& v3);
 	QHFace(HalfEdge* onHorizon, HalfEdge* horizon_next, HalfEdge* horizon_prev);
-	//QHFace(HalfEdge* he, const Vector3& pt);
 	QHFace(int num, Vector3* sample);
 	~QHFace();
 
@@ -155,7 +153,6 @@ public:
 	std::deque<HalfEdge*> m_horizon;		
 	std::vector<std::tuple<Vector3, Vector3, HalfEdge*>> m_horizon_tuples;
 	std::vector<Mesh*> m_horizon_mesh;
-	//QHFace* m_last_visited = nullptr;
 
 	// test
 	HalfEdge* test_start_he = nullptr;

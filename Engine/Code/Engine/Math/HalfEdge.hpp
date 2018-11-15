@@ -13,7 +13,8 @@ struct HalfEdge
 	Vector3 m_tail;
 	QHFace* m_parentFace = nullptr;		// weak pointer to belonging face
 
-	//bool m_markDelete = false;
+	Mesh* m_body_mesh;
+	Mesh* m_arrow_mesh[3];
 
 	HalfEdge(HalfEdge* prev, HalfEdge* next, HalfEdge* twin, Vector3 tail)
 		: m_prev(prev), m_next(next), m_twin(twin), m_tail(tail){}
@@ -33,12 +34,17 @@ struct HalfEdge
 		m_parentFace = nullptr;
 	}
 
-	void SetTwin(HalfEdge* value) { m_twin = value; }
-	bool IsTwin(HalfEdge* value)
-	{
-		return (value->m_next->m_tail == m_tail
-			&& value->m_tail == m_next->m_tail);
-	}
-
 	void Draw(Renderer* renderer);
+
+	void SetTwin(HalfEdge* value) { m_twin = value; }
+	void FillBodyMesh();
+	void FillArrowMeshes(Vector3 arrow_end[3]);
+	void FillArrowMeshesOffset(Vector3 arrow_end[3], const Vector3& head);
+	void FillBodyMeshOffset(float percentage, const Vector3& centroid);
+	void CreateArrowMeshes();
+	void CreateArrowMeshesOffset(float percentage, const Vector3& centroid);
+	void GetOffsetTailHead(float percentage, const Vector3& centroid, Vector3& tail, Vector3& head);
+
+	bool IsTwin(HalfEdge* value) { return (value->m_next->m_tail == m_tail && value->m_tail == m_next->m_tail); }
+	Vector3 GetHeadPos() const;
 };

@@ -108,7 +108,6 @@ public:
 	// we do need some structure to observe continuous objects conveniently
 	std::vector<Sphere*> m_ccd_spheres;
 	std::vector<Quad*> m_ccd_planes;
-	//std::vector<CCDResolver> m_ccd_resolvers;
 
 	ParticleForceRegistry* m_particleRegistry = nullptr;
 	RigidForceRegistry* m_rigidRegistry = nullptr;
@@ -117,22 +116,21 @@ public:
 	ContactResolver* m_iterResolver;
 	ContactResolver* m_coherentResolver;
 	
+	// BVH
 	bool m_broadPhase = false;
 	std::vector<BVHContact> m_bvhContacts;
 	BVHNode<BoundingSphere>* m_node;
 	int m_nodeCount = 0;			// temp: later will flush all GO into tree at once
 
+	// QH
 	QuickHull* m_qh = nullptr;
 	uint m_debug_vert_count = 0;
 	bool m_debug_vert_complete = false;
 	bool m_eye_found = false;
 	
-	//WrapAround* m_wraparound;
 	WrapAround* m_wraparound_0;
-	WrapAround* m_wraparound_1;
-	//WrapAround* m_wraparound_2;
-	//int m_wrapPosIterator = 0;
 	int m_wrapPosIterator_0 = 0;
+	WrapAround* m_wraparound_1;
 	Sphere* m_physBall = nullptr;
 	Box* m_physBox = nullptr;
 

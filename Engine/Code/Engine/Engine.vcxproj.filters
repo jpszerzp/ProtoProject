@@ -523,6 +523,9 @@
     <ClCompile Include="Physics\3D\GJK3.cpp">
       <Filter>General</Filter>
     </ClCompile>
+    <ClCompile Include="Math\HalfEdge.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">

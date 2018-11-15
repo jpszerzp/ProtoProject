@@ -30,6 +30,14 @@ QHFace::QHFace(int num, Vector3* sample)
 	he2->m_prev = he1; he2->m_next = he3;
 	he3->m_prev = he2; he3->m_next = he1;
 	m_entry = he1;
+
+	const Vector3& centroid = ComputeTriangleCenter(verts[0], verts[1], verts[2]);
+	he1->FillBodyMeshOffset(0.2f, centroid);
+	he2->FillBodyMeshOffset(0.2f, centroid);
+	he3->FillBodyMeshOffset(0.2f, centroid);
+	he1->CreateArrowMeshesOffset(0.2f, centroid);
+	he2->CreateArrowMeshesOffset(0.2f, centroid);
+	he3->CreateArrowMeshesOffset(0.2f, centroid);
 }
 
 // Note: This constructor is ONLY for book keeping purpose, to record
@@ -64,34 +72,6 @@ QHFace::QHFace(HalfEdge* onHorizon, HalfEdge* horizon_next, HalfEdge* horizon_pr
 	m_entry = onHorizon;
 }
 
-/*
-QHFace::QHFace(HalfEdge* he, const Vector3& pt)
-{
-	// 3 vert for sure in this case
-	vert_num = 3;
-
-	// record vertices
-	Vector3 vert1 = he->m_tail;
-	Vector3 vert2 = he->m_next->m_tail;
-	verts.push_back(vert1);
-	verts.push_back(vert2);
-	verts.push_back(pt);
-
-	// set feature as "face"
-	ConstructFeatureID();
-
-	// set up tail, prev and next for half edges
-	// twin and parent face NOT set up yet, EXCEPT for the twin of half edge 1
-	// for HE1, twin is set already, parent face however, is the wrong one 
-	// (the one that is already deleted), and so still needs to be set correctly later
-	HalfEdge* he2 = new HalfEdge(vert2);
-	HalfEdge* he3 = new HalfEdge(pt);
-	he->m_prev  = he3; he->m_next  = he2;	// rearrange next and prev of horizon
-	he2->m_prev = he; he2->m_next  = he3;
-	he3->m_prev = he2; he3->m_next = he;
-	m_entry = he;
-}
-*/
 
 QHFace::~QHFace()
 {
@@ -125,7 +105,6 @@ QHVert* QHFace::GetFarthestConflictPoint(float& dist) const
 
 	for (QHVert* pt : conflicts)
 	{
-		//float pt_dist = DistPointToPlaneSigned(pt->vert, verts[0], verts[1], verts[2]);
 		float pt_dist = DistPointToPlaneUnsigned(pt->vert, verts[0], verts[1], verts[2]);
 		if (pt_dist > theDist)
 		{
@@ -146,7 +125,6 @@ QHVert* QHFace::GetFarthestConflictPoint() const
 
 	for (QHVert* pt : conflicts)
 	{
-		//float pt_dist = DistPointToPlaneSigned(pt->vert, verts[0], verts[1], verts[2]);
 		float pt_dist = DistPointToPlaneUnsigned(pt->vert, verts[0], verts[1], verts[2]);
 		if (pt_dist > dist)
 		{
@@ -219,22 +197,6 @@ bool QHFace::FindEdgeTwinAgainstFace(QHFace* face, HalfEdge* entry)
 
 void QHFace::SetParentHalfEdge()
 {
-	/*
-	HalfEdge* myEntry = m_entry;
-	HalfEdge* it_he = myEntry;
-
-	if (it_he->m_parentFace == nullptr)
-		it_he->m_parentFace = this;
-
-	it_he = it_he->m_next;
-	while (it_he != myEntry)
-	{
-		if (it_he->m_parentFace == nullptr)
-			it_he->m_parentFace = this;
-		it_he = it_he->m_next;
-	}
-	*/
-
 	HalfEdge* myEntry = m_entry;
 	HalfEdge* it_he = myEntry;
 
@@ -386,6 +348,14 @@ void QHFace::DrawFace(Renderer* renderer)
 
 		renderer->DrawMesh(normMesh);
 	}
+
+	// draw every half edge
+	HalfEdge* current = m_entry;
+	current->Draw(renderer);
+	current = current->m_next;
+	current->Draw(renderer);
+	current = current->m_next;
+	current->Draw(renderer);
 }
 
 QuickHull::QuickHull(uint num, const Vector3& min, const Vector3& max)
@@ -403,106 +373,6 @@ QuickHull::QuickHull(uint num, const Vector3& min, const Vector3& max)
 
 	// generate normals directly
 	CreateAllNormalMeshes();
-
-	/*
-	for (QHVert* vert : m_verts)
-		AddConflictPoint(vert);
-
-	// get the farthest conflict point 
-	float farthest;
-	m_eyePair = GetFarthestConflictPair(farthest);
-
-	std::deque<QHFace*> allFaces; 
-	QHFace* conflict_face = std::get<0>(m_eyePair);
-	QHVert* conflict_pt = std::get<1>(m_eyePair);
-	m_visibleFaces.push_back(conflict_face);
-	allFaces.push_back(conflict_face);
-
-	// pick a edge to cross, and hence a face to stepped on
-	HalfEdge* he = conflict_face->m_entry;
-	HalfEdge* he_twin = he->m_twin;
-	QHFace* otherFace = he_twin->m_parentFace;
-	HalfEdge* startEdge = he;
-
-	while (!m_visibleFaces.empty())
-	{
-		bool visited = std::find(allFaces.begin(), allFaces.end(), otherFace) != allFaces.end();
-		if (!visited)
-		{
-			if (PointOutBoundFace(conflict_pt->vert, *otherFace))
-			{
-				m_visibleFaces.push_back(otherFace);
-				allFaces.push_back(otherFace);
-
-				he = he_twin->m_next;
-				he_twin = he->m_twin;
-				otherFace = he_twin->m_parentFace;
-			}
-			else
-			{
-				m_horizon.push_back(he);
-				he = he->m_next;
-				he_twin = he->m_twin;
-				otherFace = he_twin->m_parentFace;
-			}
-		}
-		else
-		{
-			if (otherFace == conflict_face && m_visibleFaces.size() == 1U)
-			{
-				// we arrived at initial conflicting face
-				he = he->m_next;
-				m_visibleFaces.pop_back();
-			}
-			else
-			{
-				size_t size = m_visibleFaces.size();
-				QHFace* second = m_visibleFaces[size - 2U];
-
-				if (second == otherFace)
-				{
-					if (otherFace == conflict_face)
-					{
-						he = he_twin;
-						he_twin = nullptr;
-						otherFace = nullptr;
-						m_visibleFaces.pop_back();
-						// we just reached back the initial conflicting face
-						// right now the only face in visibles should be the initial one
-					}
-					else
-					{
-						he = he_twin->m_next;
-						he_twin = he->m_twin;
-						otherFace = he_twin->m_parentFace;
-						m_visibleFaces.pop_back();
-					}
-				}
-				else
-				{
-					he = he->m_next;
-					he_twin = he->m_twin;
-					otherFace = he_twin->m_parentFace;
-				}
-			}
-		}
-	}
-
-	// but we still want to check remaining edges until we loop back to the "startEdge"
-	while (he != startEdge)
-	{
-		he_twin = he->m_twin;
-		otherFace = he_twin->m_parentFace;
-
-		bool visited = std::find(allFaces.begin(), allFaces.end(), otherFace) != allFaces.end();
-		if (visited)
-			he = he->m_next;
-		else
-		{
-			ASSERT_OR_DIE(false, "Should not have unvisited neighbor at this stage");
-		}
-	}
-	*/
 }
 
 QuickHull::~QuickHull()
@@ -1533,8 +1403,6 @@ void QuickHull::RenderFaces(Renderer* renderer)
 {
 	for (QHFace* face : m_faces)
 		face->DrawFace(renderer);
-	//for (QHFace* face : m_new_faces)
-	//	face->DrawFace(renderer);
 }
 
 
