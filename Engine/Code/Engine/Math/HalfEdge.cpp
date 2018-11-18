@@ -1,8 +1,27 @@
 #include "Engine/Math/HalfEdge.hpp"
 #include "Engine/Math/MathUtils.hpp"
 #include "Engine/Renderer/Mesh.hpp"
+#include "Engine/Core/ErrorWarningAssert.hpp"
 
 #include <assert.h>
+
+void HalfEdge::FlushMeshes()
+{
+	if (m_body_mesh != nullptr)
+	{
+		delete m_body_mesh;
+		m_body_mesh = nullptr;
+	}
+
+	for (Mesh* arrow_mesh : m_arrow_mesh)
+	{
+		if (arrow_mesh != nullptr)
+		{
+			delete arrow_mesh;
+			arrow_mesh = nullptr;
+		}
+	}
+}
 
 void HalfEdge::Draw(Renderer* renderer)
 {
@@ -12,14 +31,15 @@ void HalfEdge::Draw(Renderer* renderer)
 	Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
 	renderer->SetTexture2D(0, texture);
 	renderer->SetSampler2D(0, texture->GetSampler());
-	glLineWidth(1.f);
 	renderer->m_objectData.model = Matrix44::IDENTITY;
 	renderer->m_currentShader->m_state.m_depthCompare = COMPARE_LESS;
 	renderer->m_currentShader->m_state.m_cullMode = CULLMODE_BACK;
 	renderer->m_currentShader->m_state.m_windOrder = WIND_COUNTER_CLOCKWISE;
 
+	glLineWidth(1.f);
 	renderer->DrawMesh(m_body_mesh);
 	
+	glLineWidth(3.f);
 	for (int i = 0; i < 3; ++i)
 		renderer->DrawMesh(m_arrow_mesh[i]);
 }
@@ -31,6 +51,11 @@ Vector3 HalfEdge::GetHeadPos() const
 	return m_next->m_tail;
 }
 
+
+void HalfEdge::VerifyHorizonTwin()
+{
+	ASSERT_OR_DIE(HasTwin(), "Horizon does not have twin");
+}
 
 void HalfEdge::FillBodyMesh()
 {
@@ -45,20 +70,20 @@ void HalfEdge::FillArrowMeshes(Vector3 arrow_end[3])
 		m_arrow_mesh[i] = Mesh::CreateLineImmediate(VERT_PCU, head, arrow_end[i], Rgba::RED);
 }
 
-void HalfEdge::FillArrowMeshesOffset(Vector3 arrow_end[3], const Vector3& head)
+void HalfEdge::FillArrowMeshesOffset(Vector3 arrow_end[3], const Vector3& head, const Rgba& color)
 {
 	for (int i = 0; i < 3; ++i)
-		m_arrow_mesh[i] = Mesh::CreateLineImmediate(VERT_PCU, head, arrow_end[i], Rgba::RED);
+		m_arrow_mesh[i] = Mesh::CreateLineImmediate(VERT_PCU, head, arrow_end[i], color);
 }
 
-void HalfEdge::FillBodyMeshOffset(float percentage, const Vector3& centroid)
+void HalfEdge::FillBodyMeshOffset(float percentage, const Vector3& centroid, const Rgba& color)
 {
 	Vector3 offset_head;
 	Vector3 offset_tail;
 
 	GetOffsetTailHead(percentage, centroid, offset_tail, offset_head);
 
-	m_body_mesh = Mesh::CreateLineImmediate(VERT_PCU, offset_tail, offset_head, Rgba::RED);
+	m_body_mesh = Mesh::CreateLineImmediate(VERT_PCU, offset_tail, offset_head, color);
 }
 
 void HalfEdge::CreateArrowMeshes()
@@ -101,7 +126,7 @@ void HalfEdge::CreateArrowMeshes()
 	FillArrowMeshes(arrow_end);
 }
 
-void HalfEdge::CreateArrowMeshesOffset(float percentage, const Vector3& centroid)
+void HalfEdge::CreateArrowMeshesOffset(float percentage, const Vector3& centroid, const Rgba& color)
 {
 	Vector3 head;
 	Vector3 tail;
@@ -137,7 +162,7 @@ void HalfEdge::CreateArrowMeshesOffset(float percentage, const Vector3& centroid
 	local_dir = local_dir.RotateAboutAxisWithAngle(120.f, dir);
 	arrow_end[2] = local_dir + head;
 
-	FillArrowMeshesOffset(arrow_end, head);
+	FillArrowMeshesOffset(arrow_end, head, color);
 }
 
 void HalfEdge::GetOffsetTailHead(float percentage, const Vector3& centroid, Vector3& tail, Vector3& head)
@@ -155,4 +180,78 @@ void HalfEdge::GetOffsetTailHead(float percentage, const Vector3& centroid, Vect
 
 	head = head + head_to_centroid_norm * head_to_centroid_length;
 	tail = tail + tail_to_centroid_norm * tail_to_centroid_length;
+}
+
+void HalfEdge::DebugUpdateTwin()
+{
+	SwapMeshTwin((m_twin != nullptr));
+}
+
+// first check if this edge is the current HE, fall into a color space based on this
+// then check if this edge has twin, select different color based on that
+void HalfEdge::SwapMeshTwin(bool twinSet)
+{
+	FlushMeshes();
+
+	float percentage = 0.2f;
+	const Vector3& centroid = m_parentFace->GetFaceCentroid();
+	Rgba usedColor;
+
+	if (twinSet)
+		usedColor = Rgba::GREEN;
+	else 
+		usedColor = Rgba::RED;
+
+	FillBodyMeshOffset(percentage, centroid, usedColor);
+	CreateArrowMeshesOffset(percentage, centroid, usedColor);
+}
+
+void HalfEdge::SwapMeshTwinGeneral(bool twinSet)
+{
+	FlushMeshes();
+
+	float percentage = 0.2f;
+	const Vector3& centroid = m_parentFace->GetFaceCentroid();
+	Rgba usedColor;
+
+	TODO("Better work for ALL hulls");
+	if (g_hull->m_current_he == this)
+	{
+		if (twinSet)
+			usedColor = Rgba::CYAN;
+		else
+			usedColor = Rgba::MEGENTA;
+	}
+	else
+	{
+		if (twinSet)
+			usedColor = Rgba::GREEN;
+		else 
+			usedColor = Rgba::RED;
+	}
+
+	FillBodyMeshOffset(percentage, centroid, usedColor);
+	CreateArrowMeshesOffset(percentage, centroid, usedColor);
+}
+
+void HalfEdge::SwapMesh(const Rgba& color)
+{
+	FlushMeshes();
+
+	float percentage = 0.2f;
+	const Vector3& centroid = m_parentFace->GetFaceCentroid();
+
+	FillBodyMeshOffset(percentage, centroid, color);
+	CreateArrowMeshesOffset(percentage, centroid, color);
+}
+
+void HalfEdge::SwapMeshTwinHorizon()
+{
+	FlushMeshes();
+
+	float percentage = 0.2f;
+	const Vector3& centroid = m_parentFace->GetFaceCentroid();
+
+	FillBodyMeshOffset(percentage, centroid, Rgba::YELLOW);
+	CreateArrowMeshesOffset(percentage, centroid, Rgba::YELLOW);
 }

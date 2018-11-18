@@ -98,8 +98,9 @@ public:
 public:
 	QHFace(){ ConstructFeatureID(); }
 	QHFace(const Vector3& v1, const Vector3& v2, const Vector3& v3);
-	QHFace(HalfEdge* onHorizon, HalfEdge* horizon_next, HalfEdge* horizon_prev);
+	//QHFace(HalfEdge* onHorizon, HalfEdge* horizon_next, HalfEdge* horizon_prev);
 	QHFace(int num, Vector3* sample);
+	QHFace(HalfEdge* he, const Vector3& head, const Vector3& eyePos);
 	~QHFace();
 
 	void AddConflictPoint(QHVert* pt);
@@ -109,6 +110,10 @@ public:
 	bool FindEdgeTwinAgainstFace(QHFace* face, HalfEdge* entry);
 
 	void SetParentHalfEdge();
+
+	void VerifyHalfEdgeNext();
+	void VerifyHalfEdgeParent();
+	void VerifyHalfEdgeTwin();
 
 	const Vector3& GetVert1() const { return verts[0]; }
 	const Vector3& GetVert2() const { return verts[1]; }
@@ -144,37 +149,38 @@ public:
 
 	// face
 	std::vector<QHFace*> m_faces;
+	std::vector<QHFace*> m_newFaces;
 
 	std::tuple<QHFace*, QHVert*> m_eyePair;
 
 	// QH utils
-	std::deque<QHFace*> m_visibleFaces;
-	std::deque<QHFace*> m_allFaces;
+	std::deque<QHFace*> m_exploredFaces;
+	std::deque<QHFace*> m_visitedFaces;
 	std::deque<HalfEdge*> m_horizon;		
-	std::vector<std::tuple<Vector3, Vector3, HalfEdge*>> m_horizon_tuples;
-	std::vector<Mesh*> m_horizon_mesh;
+	std::deque<std::tuple<Vector3, Vector3, HalfEdge*>> m_horizon_infos;
+	bool m_render_horizon = false;
 
 	// test
-	HalfEdge* test_start_he = nullptr;
-	HalfEdge* test_he = nullptr;			
-	Mesh* m_test_he_mesh = nullptr;
-	HalfEdge* test_he_twin = nullptr;		
-	QHFace* test_otherFace = nullptr;
+	HalfEdge* m_start_he = nullptr;
+	HalfEdge* m_current_he = nullptr;			
+	QHFace* m_otherFace = nullptr;
 
 	// orphans
-	std::vector<QHVert*> m_orphans;
+	std::deque<QHVert*> m_orphans;
 
 	// anchor point that is "inside" the hull generated in future rounds
 	// always valid for use to generate normals of new faces
 	Vector3 m_anchor = Vector3::INVALID;
-	Mesh* m_anchor_mesh = nullptr;
 
 public:
 	bool AddConflictPointInitial(QHVert* vert);
 	bool AddConflictPointGeneral(QHVert* vert, std::vector<QHFace*>& faces);
-	void AddHorizonMesh(HalfEdge* horizon);
+	//void AddHorizonMesh(HalfEdge* horizon);
 	bool AddToFinalizedFaceInitial(QHFeature* feature, const Vector3& closest, QHVert* vert);
 	bool AddToFinalizedFaceGeneral(QHFeature* feature, const Vector3& closest, QHVert* vert, std::vector<QHFace*>& faces);
+	void AddHorizonInfo(HalfEdge* he);
+	void AddFace(QHFace* face) { m_faces.push_back(face); }
+	void AddNewFace(QHFace* face) { m_newFaces.push_back(face); }
 
 	void GeneratePointSet(uint num, const Vector3& min, const Vector3& max);
 	void GenerateInitialFace();
@@ -199,17 +205,25 @@ public:
 	bool HasVisitedFace(QHFace* face);
 	bool IsLastVisitedFace(QHFace* face);
 	bool ReachStartHalfEdge();
+	QHFace* PeekVisitedFrontier();
+	void RemoveVisitedFrontier();
+	HalfEdge* PeekHorizonFrontier();
+	void RemoveHorizonFrontier();
 
+	void ChangeCurrentHalfEdgeOldFace();
+	void ChangeCurrentHalfEdgeNewFace();
 	void ChangeCurrentHalfEdgeMesh();
+	void ChangeOtherFace();
 
 	void RenderHull(Renderer* renderer);
 	void RenderFaces(Renderer* renderer);
 	void RenderVerts(Renderer* renderer);
 	void RenderHorizon(Renderer* renderer);
-	void RenderAnchor(Renderer* renderer);
-	void RenderCurrentHalfEdge(Renderer* renderer);
+	//void RenderAnchor(Renderer* renderer);
+	//void RenderCurrentHalfEdge(Renderer* renderer);
 
 	void CreateAllNormalMeshes();
 	void FlushNormalMeshes();
 	void CreateFaceMesh(QHFace& face, Rgba color = Rgba::WHITE);
+	void CreateFaceNormalMesh(QHFace& face);
 };

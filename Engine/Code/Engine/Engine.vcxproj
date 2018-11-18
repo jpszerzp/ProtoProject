@@ -301,6 +301,7 @@
     <ClCompile Include="Core\Light\SpotLight.cpp" />
     <ClCompile Include="Core\Time\Stopwatch.cpp" />
     <ClCompile Include="Core\Util\DataUtils.cpp" />
+    <ClCompile Include="Core\Util\RenderUtil.cpp" />
     <ClCompile Include="Core\Util\StringUtils.cpp" />
     <ClCompile Include="Core\Time\TheTime.cpp" />
     <ClCompile Include="Core\Transform.cpp" />

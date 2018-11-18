@@ -21,6 +21,20 @@
 
 #include <set>
 
+enum eHullGenerationStep
+{
+	HULL_GEN_FORM_CONFLICTS,
+	HULL_GEN_FORM_EYE,
+	HULL_GEN_FORM_HORIZON_START,
+	HULL_GEN_FORM_HORIZON_PROECSS,
+	HULL_GEN_DELETE_OLD_FACES,
+	HULL_GEN_FORM_NEW_FACES,
+	HULL_GEN_ASSIGN_ORPHANS,
+	HULL_GEN_TOPO_ERRORS,
+	HULL_GEN_FINISH_RESET,
+	HULL_GEN_COMPLETE
+};
+
 class Physics3State : public GameState
 {
 public:
@@ -71,6 +85,9 @@ public:
 	void WrapAroundTestBox();
 	void WrapAroundTestBallBox();
 	void ShootBallFromCamera();
+
+	std::string SelectHullStatus();
+	void SwapHullStatusMesh(const std::string& str);
 
 public:
 	// entity
@@ -124,9 +141,12 @@ public:
 
 	// QH
 	QuickHull* m_qh = nullptr;
-	uint m_debug_vert_count = 0;
-	bool m_debug_vert_complete = false;
-	bool m_eye_found = false;
+	eHullGenerationStep m_genStep = HULL_GEN_FORM_CONFLICTS;
+	Mesh* m_hull_title = nullptr;
+	Mesh* m_hull_status = nullptr;
+	float m_textHeight = 0.f;
+	Vector2 m_titleMin = Vector2::ZERO;
+	Vector2 m_statusMin = Vector2::ZERO;
 	
 	WrapAround* m_wraparound_0;
 	int m_wrapPosIterator_0 = 0;

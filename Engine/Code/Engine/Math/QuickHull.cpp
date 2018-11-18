@@ -40,6 +40,7 @@ QHFace::QHFace(int num, Vector3* sample)
 	he3->CreateArrowMeshesOffset(0.2f, centroid);
 }
 
+
 // Note: This constructor is ONLY for book keeping purpose, to record
 // the closest feature when working with closest-point algorithms.
 // That said, it suffices for this constructor to only take down vertices that this face is consisted of.
@@ -53,6 +54,36 @@ QHFace::QHFace(const Vector3& v1, const Vector3& v2, const Vector3& v3)
 	ConstructFeatureID();
 }
 
+QHFace::QHFace(HalfEdge* he, const Vector3& head, const Vector3& eyePos)
+{
+	vert_num = 3;
+
+	verts.push_back(he->m_tail);
+	verts.push_back(head);
+	verts.push_back(eyePos);
+
+	ConstructFeatureID();
+
+	HalfEdge* he_next = new HalfEdge(head);
+	HalfEdge* he_prev = new HalfEdge(eyePos);
+
+	// set up prev and next relations
+	m_entry = he;
+	he->m_prev = he_prev;		he->m_next = he_next;
+	he_next->m_prev = he;		he_next->m_next = he_prev;
+	he_prev->m_prev = he_next;	he_prev->m_next = he;
+
+	// not yet for parent face
+
+	// meshes
+	const Vector3& centroid = ComputeTriangleCenter(verts[0], verts[1], verts[2]);
+	he_next->FillBodyMeshOffset(0.2f, centroid);
+	he_prev->FillBodyMeshOffset(0.2f, centroid);
+	he_next->CreateArrowMeshesOffset(0.2f, centroid);
+	he_prev->CreateArrowMeshesOffset(0.2f, centroid);
+}
+
+/*
 QHFace::QHFace(HalfEdge* onHorizon, HalfEdge* horizon_next, HalfEdge* horizon_prev)
 {
 	vert_num = 3;
@@ -71,10 +102,12 @@ QHFace::QHFace(HalfEdge* onHorizon, HalfEdge* horizon_next, HalfEdge* horizon_pr
 	horizon_prev->m_prev = horizon_next;	horizon_prev->m_next = onHorizon;
 	m_entry = onHorizon;
 }
+*/
 
 
 QHFace::~QHFace()
 {
+	conflicts.clear();
 	m_entry = nullptr;
 
 	// delete face normal mesh
@@ -206,6 +239,55 @@ void QHFace::SetParentHalfEdge()
 	while (it_he != myEntry)
 	{
 		it_he->m_parentFace = this;
+		it_he = it_he->m_next;
+	}
+}
+
+void QHFace::VerifyHalfEdgeNext()
+{
+	HalfEdge* myEntry = m_entry;
+	HalfEdge* it_he = myEntry;
+
+	if (it_he->m_next == nullptr)
+		ASSERT_OR_DIE(false, "QHFace disconnects");
+	it_he = it_he->m_next;
+
+	while (it_he != myEntry)
+	{
+		if (it_he->m_next == nullptr)
+			ASSERT_OR_DIE(false, "QHFace disconnects");
+		it_he = it_he->m_next;
+	}
+}
+
+void QHFace::VerifyHalfEdgeParent()
+{
+	HalfEdge* myEntry = m_entry;
+	HalfEdge* it_he = myEntry;
+
+	if (it_he->m_parentFace == nullptr)
+		ASSERT_OR_DIE(false, "QHFace not assigned to HE");
+	it_he = it_he->m_next;
+
+	while (it_he != myEntry)
+	{
+		if (it_he->m_parentFace == nullptr)
+			ASSERT_OR_DIE(false, "QHFace not assigned to HE");
+		it_he = it_he->m_next;
+	}
+}
+
+void QHFace::VerifyHalfEdgeTwin()
+{
+	HalfEdge* myEntry = m_entry;
+	HalfEdge* it_he = myEntry;
+
+	it_he->DebugUpdateTwin();
+	it_he = it_he->m_next;
+
+	while (it_he != myEntry)
+	{
+		it_he->DebugUpdateTwin();
 		it_he = it_he->m_next;
 	}
 }
@@ -373,6 +455,14 @@ QuickHull::QuickHull(uint num, const Vector3& min, const Vector3& max)
 
 	// generate normals directly
 	CreateAllNormalMeshes();
+
+	// verifications: next, parent face and twin of HEs
+	for (QHFace* face : m_faces)
+	{
+		face->VerifyHalfEdgeNext();
+		face->VerifyHalfEdgeParent();
+		face->VerifyHalfEdgeTwin();
+	}
 }
 
 QuickHull::~QuickHull()
@@ -408,7 +498,7 @@ bool QuickHull::AddConflictPointGeneral(QHVert* vert, std::vector<QHFace*>& face
 
 	QHFeature* closest_feature = FindClosestFeatureGeneral(globalPt, dist, closest, faces);
 
-	int numFace = (int)(faces.size());
+	//int numFace = (int)(faces.size());
 	// after this operation, the point is either deleted because it will sit INSIDE the hull
 	// or, set as the conflict point of one of the new faces and is kept in the m_verts of hull
 	// Note that either way we do not bother altering content of orphan, because each vert in m_orphans,
@@ -418,6 +508,7 @@ bool QuickHull::AddConflictPointGeneral(QHVert* vert, std::vector<QHFace*>& face
 	return pointRemoved;
 }
 
+/*
 void QuickHull::AddHorizonMesh(HalfEdge* horizon)
 {
 	Vector3 start = horizon->m_tail;
@@ -425,6 +516,7 @@ void QuickHull::AddHorizonMesh(HalfEdge* horizon)
 	Mesh* mesh = Mesh::CreateLineImmediate(VERT_PCU, start, end, Rgba::CYAN);
 	m_horizon_mesh.push_back(mesh);
 }
+*/
 
 /*
  * Add point to a face based on closest feature info
@@ -672,9 +764,26 @@ bool QuickHull::AddToFinalizedFaceGeneral(QHFeature* feature, const Vector3& clo
 		// if we find the point as inside future hull
 		// (remember the new faces are not yet added to the hull, so strictly speaking that is a future hull)
 		// we remove it from m_verts of hull (remember the invariant: m_verts is sum of all conflicting points)
+
+		// Subtlety: if this point is in new hull, then the face that WAS containing this conflict point will be
+		// over-covered by a new face, hence we do not consider dealing with memory issues caused from conflict 
+		// list of that old face, because it will be deleted anyways. But we do want to delete it from the m_verts "base" list of hull
+
 		RemovePointGlobal(globalPt);
 		return true;			// this point IS removed
 	}
+}
+
+void QuickHull::AddHorizonInfo(HalfEdge* he)
+{
+	// horizon itself
+	m_horizon.push_back(he);
+
+	// horizon neighbor data
+	const Vector3& tail = he->m_tail;			// if "tail" is confusing, "base" is probably a better name
+	const Vector3& head = he->m_next->m_tail;
+	std::tuple<Vector3, Vector3, HalfEdge*> he_data = std::make_tuple(tail, head, he->m_twin);
+	g_hull->m_horizon_infos.push_back(he_data);
 }
 
 void QuickHull::GeneratePointSet(uint num, const Vector3& min, const Vector3& max)
@@ -857,9 +966,9 @@ void QuickHull::GenerateInitialHull()
 	QHFace* face243 = new QHFace(3, verts243); face243->SetParentHalfEdge();
 
 	// fill twin for 123
-	bool found = m_faces[0]->FindTwinAgainstFace(face214);	
-	found = m_faces[0]->FindTwinAgainstFace(face134);		
-	found = m_faces[0]->FindTwinAgainstFace(face243);		
+	m_faces[0]->FindTwinAgainstFace(face214);	
+	m_faces[0]->FindTwinAgainstFace(face134);		
+	m_faces[0]->FindTwinAgainstFace(face243);		
 
 	// fill twin for 214
 	face214->FindTwinAgainstFace(m_faces[0]);	
@@ -957,9 +1066,10 @@ bool QuickHull::PointOutBoundFace(const Vector3& pt, const QHFace& face)
 	return outbound;
 }
 
+/*
 void QuickHull::RenderCurrentHalfEdge(Renderer* renderer)
 {
-	if (m_test_he_mesh != nullptr)
+	if (m_current_he_mesh != nullptr)
 	{
 		Shader* shader = renderer->CreateOrGetShader("wireframe_color");
 		renderer->UseShader(shader);
@@ -975,9 +1085,10 @@ void QuickHull::RenderCurrentHalfEdge(Renderer* renderer)
 		renderer->m_currentShader->m_state.m_cullMode = CULLMODE_BACK;
 		renderer->m_currentShader->m_state.m_windOrder = WIND_COUNTER_CLOCKWISE;
 
-		renderer->DrawMesh(m_test_he_mesh);
+		renderer->DrawMesh(m_current_he_mesh);
 	}
 }
+*/
 
 void QuickHull::CreateAllNormalMeshes()
 {
@@ -1125,7 +1236,7 @@ QHFeature* QuickHull::FindClosestFeatureGeneral(const Vector3& pt, float& dist, 
 				closest_feature_f = DistPointToTriangleHull(pt, face->GetVert1(),
 					face->GetVert2(), face->GetVert3(), dist_f, closest_f);
 			else
-				ASSERT_RECOVERABLE(false, "Initial hull should not have a quad face");
+				ASSERT_RECOVERABLE(false, "should not have a quad face");
 
 			if (dist_f < minDist)
 			{
@@ -1352,51 +1463,79 @@ std::set<Vector3> QuickHull::GetPointSet() const
 
 bool QuickHull::HasVisitedFace(QHFace* face)
 {
-	bool found = std::find(m_allFaces.begin(), m_allFaces.end(), face) != m_allFaces.end();
-	//bool found = std::find(m_visibleFaces.begin(), m_visibleFaces.end(), face) != m_visibleFaces.end();
+	bool found = std::find(m_visitedFaces.begin(), m_visitedFaces.end(), face) != m_visitedFaces.end();
 	return found;
 }
 
 bool QuickHull::IsLastVisitedFace(QHFace* face)
 {
-	//return (face == m_last_visited);
-
-	size_t end_index = m_visibleFaces.size() - 1U;
+	size_t end_index = m_exploredFaces.size() - 1U;
 	size_t last_index = end_index - 1U;
-	QHFace* last_face = m_visibleFaces[last_index];
+	QHFace* last_face = m_exploredFaces[last_index];
 	return (face == last_face);
 }
 
 bool QuickHull::ReachStartHalfEdge()
 {
-	return (test_he == test_start_he);
+	return (m_current_he == m_start_he);
 }
 
+QHFace* QuickHull::PeekVisitedFrontier()
+{
+	return m_visitedFaces.front();
+}
+
+void QuickHull::RemoveVisitedFrontier()
+{
+	m_visitedFaces.pop_front();
+}
+
+HalfEdge* QuickHull::PeekHorizonFrontier()
+{
+	return m_horizon.front();
+}
+
+void QuickHull::RemoveHorizonFrontier()
+{
+	m_horizon.pop_front();
+}
+
+void QuickHull::ChangeCurrentHalfEdgeOldFace()
+{
+	m_current_he = m_current_he->m_next;
+}
+
+void QuickHull::ChangeCurrentHalfEdgeNewFace()
+{
+	m_current_he = m_current_he->m_twin->m_next;
+}
+
+// change the mesh of NEW current HE 
 void QuickHull::ChangeCurrentHalfEdgeMesh()
 {
-	if (m_test_he_mesh != nullptr)
+	if (m_current_he != nullptr)
 	{
-		delete m_test_he_mesh;
-		m_test_he_mesh = nullptr;
-	}
-
-	if (test_he != nullptr)
-	{
-		Vector3 start = test_he->m_tail;
-		Vector3 end = test_he->m_twin->m_tail;
-		m_test_he_mesh = Mesh::CreateLineImmediate(VERT_PCU, start, end, Rgba::MEGENTA);
+		// for this HE, swap mesh to hint that we are stepping thru it
+		bool hasTwin = (m_current_he->m_twin != nullptr);
+		m_current_he->SwapMeshTwinGeneral(hasTwin);
 	}
 	else 
 		ASSERT_OR_DIE(false, "Half edge is null, cannot generate mesh for it");
+}
+
+void QuickHull::ChangeOtherFace()
+{
+	g_hull->m_otherFace = g_hull->m_current_he->m_twin->m_parentFace;
 }
 
 void QuickHull::RenderHull(Renderer* renderer)
 {
 	RenderFaces(renderer);
 	RenderVerts(renderer);
-	RenderCurrentHalfEdge(renderer);
-	RenderHorizon(renderer);
-	RenderAnchor(renderer);
+	if (m_render_horizon)
+		RenderHorizon(renderer);
+	//RenderCurrentHalfEdge(renderer);
+	//RenderAnchor(renderer);
 }
 
 void QuickHull::RenderFaces(Renderer* renderer)
@@ -1412,31 +1551,37 @@ void QuickHull::RenderVerts(Renderer* renderer)
 		vert->DrawVert(renderer);
 }
 
+
 void QuickHull::RenderHorizon(Renderer* renderer)
 {
-	for (Mesh* mesh : m_horizon_mesh)
-	{
-		if (mesh != nullptr)
-		{
-			Shader* shader = renderer->CreateOrGetShader("wireframe_color");
-			renderer->UseShader(shader);
+	//for (Mesh* mesh : m_horizon_mesh)
+	//{
+	//	if (mesh != nullptr)
+	//	{
+	//		Shader* shader = renderer->CreateOrGetShader("wireframe_color");
+	//		renderer->UseShader(shader);
 
-			Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
-			renderer->SetTexture2D(0, texture);
-			renderer->SetSampler2D(0, texture->GetSampler());
-			glLineWidth(20.f);
+	//		Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
+	//		renderer->SetTexture2D(0, texture);
+	//		renderer->SetSampler2D(0, texture->GetSampler());
+	//		glLineWidth(20.f);
 
-			renderer->m_objectData.model = Matrix44::IDENTITY;
+	//		renderer->m_objectData.model = Matrix44::IDENTITY;
 
-			renderer->m_currentShader->m_state.m_depthCompare = COMPARE_LESS;
-			renderer->m_currentShader->m_state.m_cullMode = CULLMODE_BACK;
-			renderer->m_currentShader->m_state.m_windOrder = WIND_COUNTER_CLOCKWISE;
+	//		renderer->m_currentShader->m_state.m_depthCompare = COMPARE_LESS;
+	//		renderer->m_currentShader->m_state.m_cullMode = CULLMODE_BACK;
+	//		renderer->m_currentShader->m_state.m_windOrder = WIND_COUNTER_CLOCKWISE;
 
-			renderer->DrawMesh(mesh);
-		}
-	}
+	//		renderer->DrawMesh(mesh);
+	//	}
+	//}
+
+	for (HalfEdge* he : m_horizon)
+		he->Draw(renderer);
 }
 
+
+/*
 void QuickHull::RenderAnchor(Renderer* renderer)
 {
 	if (m_anchor_mesh != nullptr)
@@ -1458,6 +1603,7 @@ void QuickHull::RenderAnchor(Renderer* renderer)
 		renderer->DrawMesh(m_anchor_mesh);
 	}
 }
+*/
 
 void QuickHull::CreateFaceMesh(QHFace& face, Rgba color)
 {
@@ -1482,6 +1628,15 @@ void QuickHull::CreateFaceMesh(QHFace& face, Rgba color)
 		Mesh* mesh = Mesh::CreateQuadImmediate(VERT_PCU, v1, v2, v3, v4, color);
 		face.faceMesh = mesh;
 	}
+}
+
+void QuickHull::CreateFaceNormalMesh(QHFace& face)
+{
+	const Rgba& theColor = color_list[color_index];
+	face.normColor = theColor;
+	face.CreateFaceNormalMesh(theColor);
+	++color_index;
+	color_index = color_index % COLOR_LIST_SIZE;
 }
 
 QHEdge::QHEdge(const Vector3& vert1, const Vector3& vert2)
