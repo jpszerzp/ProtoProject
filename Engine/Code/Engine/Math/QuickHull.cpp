@@ -493,12 +493,40 @@ bool QuickHull::AddConflictPointInitial(QHVert* vert)
 bool QuickHull::AddConflictPointGeneral(QHVert* vert, std::vector<QHFace*>& faces)
 {
 	const Vector3& globalPt = vert->GetVertRef();
-	float dist;
+	float closest_dist = INFINITY;
+	QHFace* candidate = nullptr;
+
+	for (QHFace* face : faces)
+	{
+		if (PointOutBoundFace(globalPt, *face))
+		{
+			float this_dist = DistPointToPlaneUnsigned(globalPt, face->GetVert1(), face->GetVert2(), face->GetVert3());
+
+			if (this_dist < closest_dist)
+			{
+				closest_dist = this_dist;
+				candidate = face;
+			}
+		}
+	}
+
+	// after this, we either found a closest face, or we found that there is no such face, in which case we wish to remove the point
+	if (closest_dist == INFINITY || candidate == nullptr)
+	{
+		RemovePointGlobal(globalPt);
+		return true;
+	}
+	else
+	{
+		candidate->AddConflictPoint(vert);
+		return false;
+	}
+
+	/*
 	Vector3 closest = Vector3::INVALID;
 
 	QHFeature* closest_feature = FindClosestFeatureGeneral(globalPt, dist, closest, faces);
 
-	//int numFace = (int)(faces.size());
 	// after this operation, the point is either deleted because it will sit INSIDE the hull
 	// or, set as the conflict point of one of the new faces and is kept in the m_verts of hull
 	// Note that either way we do not bother altering content of orphan, because each vert in m_orphans,
@@ -506,6 +534,7 @@ bool QuickHull::AddConflictPointGeneral(QHVert* vert, std::vector<QHFace*>& face
 	// Therefore we can always clear the m_orphans when we are done with operations.
 	bool pointRemoved = AddToFinalizedFaceGeneral(closest_feature, closest, vert, faces);
 	return pointRemoved;
+	*/
 }
 
 /*

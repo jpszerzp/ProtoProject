@@ -801,15 +801,6 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 					}
 				}
 
-				//// re-assigning orphaned conflict points is a little more complex
-				//for (QHVert* orphan : g_hull->m_orphans)
-				//	g_hull->AddConflictPointGeneral(orphan, g_hull->m_newFaces); 
-
-				//// some clear up 
-				//// horizon and horizon_data are already empty
-				//g_hull->m_orphans.clear();
-				//g_hull->m_newFaces.clear();
-
 				// verifications
 				for (QHFace* face : g_hull->m_faces)
 				{
