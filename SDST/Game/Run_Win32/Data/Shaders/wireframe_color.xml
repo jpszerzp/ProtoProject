@@ -17,6 +17,4 @@
 	<cull face="back" />
 
 	<texture bind="0" name="gTexDiffuse" value="white.png" />
-
-	<color bind="TINT" value="255,255,255,255" />
 </shader>

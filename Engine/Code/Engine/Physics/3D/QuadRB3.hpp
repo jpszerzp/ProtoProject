@@ -11,8 +11,7 @@ public:
 public:
 	QuadRB3(){}
 	QuadRB3(float mass, const Plane& primitive, 
-		const Vector3& center, const Vector3& euler, const Vector3& scale,
-		eMoveStatus moveStat);
+		const Vector3& center, const Vector3& euler, const Vector3& scale, const eMoveStatus& moveStat);
 	~QuadRB3(){}
 
 	void SetEntityForPrimitive() override;

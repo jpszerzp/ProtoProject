@@ -16,7 +16,10 @@ BoxRB3::BoxRB3(float mass, const OBB3& primitive, const Vector3& euler, eMoveSta
 	Vector3 scale = primitive.GetHalfExt() * 2.f;
 	m_entityTransform = Transform(m_center, euler, scale);
 
-	m_orientation = Quaternion::FromEuler(euler);
+	// euler to quaternion
+	Matrix44 rot_mat = Matrix44::MakeRotationDegrees3D(euler);
+	Matrix33 rot_only = rot_mat.ExtractMat3();
+	m_orientation = Quaternion::FromMatrix(rot_only);
 	
 	// ignore bounding box for this, use bounding sphere
 
@@ -93,9 +96,8 @@ void BoxRB3::UpdateTransforms()
 	m_entityTransform.SetLocalPosition(m_center);
 
 	// rot
-	Matrix44 transMat;
-	CacheTransform(transMat, m_center, m_orientation);
-	Vector3 euler = Matrix44::DecomposeMatrixIntoEuler(transMat);
+	Matrix44 rot_mat_44 = Quaternion::GetMatrixRotation(m_orientation);
+	Vector3 euler = Matrix44::DecomposeMatrixIntoEuler(rot_mat_44);
 	m_entityTransform.SetLocalRotation(euler);
 
 	// assume scale is unchanged

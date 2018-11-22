@@ -249,22 +249,88 @@ Matrix44 Quaternion::GetMatrixWithPosition(const Quaternion& q, const Vector3& p
 	return res;
 }
 
-Quaternion Quaternion::FromEuler(const Vector3& euler)
+Quaternion Quaternion::FromMatrix(const Matrix33& rot)
 {
-	// in our system, euler.x is pitch, euler.y is yaw, euler.z is roll
-
-	float c1 = cosf(euler.y * .5f);
-	float c2 = cosf(euler.x * .5f);
-	float c3 = cosf(euler.z * .5f);
-	float s1 = sinf(euler.y * .5f);
-	float s2 = sinf(euler.x * .5f);
-	float s3 = sinf(euler.z * .5f);
-
 	Quaternion res;
-	res.m_real = c1 * c2 * c3 - s1 * s2 * s3;
-	res.m_imaginary.x = s1 * s2 * c3 + c1 * c2 * s3;
-	res.m_imaginary.y = s1 * c2 * c3 + c1 * s2 * s3;
-	res.m_imaginary.z = c1 * s2 * c3 - s1 * c2 * s3;
+
+	float m11 = rot.Ix;
+	float m12 = rot.Jx;
+	float m13 = rot.Kx;
+	float m21 = rot.Iy;
+	float m22 = rot.Jy;
+	float m23 = rot.Ky;
+	float m31 = rot.Iz;
+	float m32 = rot.Jz;
+	float m33 = rot.Kz;
+
+	float w = 0.f;
+	float x = 0.f;
+	float y = 0.f;
+	float z = 0.f;
+
+	float w_sqrf = m11 + m22 + m33;
+	float x_sqrf = m11 - m22 - m33;
+	float y_sqrf = m22 - m11 - m33;
+	float z_sqrf = m33 - m11 - m22;
+
+	int idx = 0;
+	float biggest = w_sqrf;
+	if (x > biggest)
+	{
+		biggest = x_sqrf;
+		idx = 1;
+	}
+	if (y_sqrf > biggest)
+	{
+		biggest = y_sqrf;
+		idx = 2;
+	}
+	if (z_sqrf > biggest)
+	{
+		biggest = z_sqrf;
+		idx = 3;
+	}
+
+	float big_sqrt = sqrtf(biggest + 1.f) * .5f;
+	float mult = .25f / big_sqrt;
+
+	switch (idx)
+	{
+	case 0:
+	{
+		res.m_real = big_sqrt;
+		res.m_imaginary.x = (m23 - m32) * mult;
+		res.m_imaginary.y = (m31 - m13) * mult;
+		res.m_imaginary.z = (m12 - m21) * mult;
+	}
+		break;
+	case 1:
+	{
+		res.m_imaginary.x = big_sqrt;
+		res.m_real = (m23 - m32) * mult;
+		res.m_imaginary.y = (m12 + m21) * mult;
+		res.m_imaginary.z = (m31 + m13) * mult;
+	}
+		break;
+	case 2:
+	{
+		res.m_imaginary.y = big_sqrt;
+		res.m_real = (m31 - m13) * mult;
+		res.m_imaginary.x = (m12 + m21) * mult;
+		res.m_imaginary.z = (m23 + m32) * mult;
+	}
+		break;
+	case 3:
+	{
+		res.m_imaginary.z = big_sqrt;
+		res.m_real = (m12 - m21) * mult;
+		res.m_imaginary.x = (m31 + m13) * mult;
+		res.m_imaginary.y = (m23 + m32) * mult;
+	}
+		break;
+	default:
+		break;
+	}
 
 	return res;
 }

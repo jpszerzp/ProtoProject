@@ -880,7 +880,6 @@ Matrix33 Matrix44::ExtractMat3() const
 
 Matrix44 Matrix44::RotateToward(const Matrix44&, float) const
 {
-	//Vector3 currentEuler = DecomposeMatrixIntoEuler(*this);
-	//Vector3 targetEuler = DecomposeMatrixIntoEuler(rotateTarget);
+	TODO("Implement this");
 	return Matrix44::IDENTITY;
 }

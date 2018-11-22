@@ -40,12 +40,10 @@ class Entity3
 {
 public:
 	Mesh* m_colliderMesh = nullptr;
-	//Mesh* m_sphereBoundMesh = nullptr;
 	Mesh* m_boxBoundMesh = nullptr;
 	
 	// need updated
 	Transform m_entityTransform;
-	//Transform m_sphereBoundTransform;
 	Transform m_boxBoundTransform;
 
 	// p 

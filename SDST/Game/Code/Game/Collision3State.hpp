@@ -13,7 +13,6 @@ public:
 	void Update(float deltaTime) override;
 	void UpdateMouse(float deltaTime) override;
 	void UpdateKeyboard(float deltaTime) override; 
-	void UpdateUI(float deltaTime);
 	void UpdateFocusedGroup(float deltaTime);
 	void UpdateDebugDraw(float deltaTime);
 
@@ -23,10 +22,4 @@ private:
 	std::vector<ControlGroup*> m_controlGrps;
 	ControlGroup* m_focusedGrp = nullptr;
 	int m_focusedIndex;
-
-	// mesh
-	std::vector<Mesh*> m_cpView;
-	Mesh* m_title = nullptr;
-	float m_textHeight = 0.f;
-	Vector2 m_titleMin = Vector2::ZERO;
 };

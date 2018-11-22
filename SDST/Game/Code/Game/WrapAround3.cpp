@@ -4,6 +4,16 @@
 WrapAround::WrapAround(Vector3 min, Vector3 max)
 {
 	m_bounds = AABB3(min, max);
+	float bound_width = m_bounds.GetDimensions().x;
+	float bound_height = m_bounds.GetDimensions().y;
+	float bound_thickness = m_bounds.GetDimensions().z;
+
+	m_mesh = Mesh::CreateCube(VERT_PCU);
+
+	Vector3 pos = m_bounds.GetCenter();
+	Vector3 rot = Vector3::ZERO;
+	Vector3 scale = Vector3(bound_width, bound_height, bound_thickness);
+	m_transform = Transform(pos, rot, scale);
 }
 
 WrapAround::~WrapAround()
@@ -71,7 +81,6 @@ void WrapAround::Update()
 			go->GetEntity()->SetEntityCenter(Vector3(pos_x, pos_y, pos_z));
 		}
 
-		// see line 74 in Sphere.cpp for physics driven update logic
 		go->GetEntity()->m_entityTransform.SetLocalPosition(go->GetEntity()->GetEntityCenter());
 		go->GetEntity()->m_boundSphere.m_transform.SetLocalPosition(go->GetEntity()->GetEntityCenter());
 		go->GetEntity()->m_boxBoundTransform.SetLocalPosition(go->GetEntity()->GetEntityCenter());
@@ -84,3 +93,18 @@ void WrapAround::Update()
 	}
 }
 
+void WrapAround::Render(Renderer* renderer)
+{
+	Shader* shader = renderer->CreateOrGetShader("wireframe_color");
+	renderer->UseShader(shader);
+
+	Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
+	renderer->SetTexture2D(0, texture);
+	renderer->SetSampler2D(0, texture->GetSampler());
+	glLineWidth(2.f);
+
+	renderer->m_objectData.model = m_transform.GetWorldMatrix();
+
+	if (m_mesh != nullptr)
+		renderer->DrawMesh(m_mesh, false);
+}

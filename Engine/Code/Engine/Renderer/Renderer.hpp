@@ -214,7 +214,7 @@ public:
 	//	const Vector2& texCoordsAtMins, const Vector2& texCoordsAtMaxs, const Rgba& tint, float scaleX = 1.f, float scaleY = 1.f);
 
 	void Draw(const Drawcall& dc);
-	void DrawMesh(Mesh* mesh, bool culling = true);
+	void DrawMesh(Mesh* mesh, bool culling = true, bool depth_test = true);
 	void DrawMeshImmediate();
 	void DetachMeshImmediate();
 	void DrawSkybox(TextureCube* skybox, Mesh* mesh);
@@ -263,7 +263,7 @@ public:
 	void BindProperties(const Drawcall& dc);
 
 	// Shader/uniforms
-	void BindRenderState(const sRenderState& state, bool culling = true);
+	void BindRenderState(const sRenderState& state, bool culling = true, bool depth_test = true);
 	void SetImmediateMesh(Mesh* mesh) { m_immediateMesh = mesh; }
 	void SetUniform(const char* name, float f);
 	void SetUniform(const char* name, Vector3 v3);

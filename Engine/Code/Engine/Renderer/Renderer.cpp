@@ -1313,7 +1313,7 @@ void Renderer::Draw(const Drawcall& dc)
 }
 
 // Not using forward path or material - for example, see the use of SetObjectColorUBO
-void Renderer::DrawMesh(Mesh* mesh, bool culling)
+void Renderer::DrawMesh(Mesh* mesh, bool culling, bool depth_test)
 {
 	//PROFILE_LOG_SCOPED_FUNCTION();
 	GLuint programHandle = m_currentShader->GetShaderProgram()->GetHandle();
@@ -1327,7 +1327,7 @@ void Renderer::DrawMesh(Mesh* mesh, bool culling)
 
 	TODO("VAO?");
 
-	BindRenderState(m_currentShader->m_state, culling);
+	BindRenderState(m_currentShader->m_state, culling, depth_test);
 	glBindBuffer(GL_ARRAY_BUFFER, mesh->m_vbo.GetHandle());
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->m_ibo.GetHandle());
 	BindLayoutToProgram( programHandle, mesh->GetLayout() ); 
@@ -1380,7 +1380,7 @@ void Renderer::DrawMeshImmediate()
 }
 
 
-void Renderer::BindRenderState(const sRenderState& state, bool culling)
+void Renderer::BindRenderState(const sRenderState& state, bool culling, bool depth_test)
 {
 	// blend mode
 	glEnable( GL_BLEND ); 
@@ -1392,9 +1392,14 @@ void Renderer::BindRenderState(const sRenderState& state, bool culling)
 		ToGLBlendFactor(state.m_alphaDstFactor) );
 
 	// Depth mode ones
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(ToGLCompare(state.m_depthCompare));
-	glDepthMask(state.m_depthWrite);
+	if (depth_test)
+	{
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(ToGLCompare(state.m_depthCompare));
+		glDepthMask(state.m_depthWrite);
+	}
+	else
+		glDisable(GL_DEPTH_TEST);
 
 	// Fill mode
 	glPolygonMode(GL_FRONT_AND_BACK, ToGLFillMode(state.m_fillMode));

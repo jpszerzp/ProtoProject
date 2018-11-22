@@ -9,7 +9,7 @@ SphereRB3::SphereRB3()
 	// "zero" primitive
 }
 
-SphereRB3::SphereRB3(float mass, Sphere3 primitive, eMoveStatus moveStat) 
+SphereRB3::SphereRB3(float mass, Sphere3 primitive, Vector3 euler, eMoveStatus moveStat) 
 {
 	m_primitive = primitive;
 	m_moveStatus = moveStat;
@@ -18,14 +18,18 @@ SphereRB3::SphereRB3(float mass, Sphere3 primitive, eMoveStatus moveStat)
 	m_linearVelocity = Vector3::ZERO;
 	m_center = primitive.m_center;
 
-	Vector3 rot = Vector3::ZERO;
 	float radius = primitive.m_radius;
 	Vector3 scale = Vector3(radius);
-	m_entityTransform = Transform(m_center, rot, scale);
+	m_entityTransform = Transform(m_center, euler, scale);
+
+	// euler to quaternion
+	Matrix44 rot_mat = Matrix44::MakeRotationDegrees3D(euler);
+	Matrix33 rot_only = rot_mat.ExtractMat3();
+	m_orientation = Quaternion::FromMatrix(rot_only);
 
 	float boundBoxDim = 2.f * radius;
 	Vector3 boundBoxScale = Vector3(boundBoxDim);
-	m_boxBoundTransform = Transform(m_center, rot, boundBoxScale);
+	m_boxBoundTransform = Transform(m_center, euler, boundBoxScale);
 
 	if (m_moveStatus != MOVE_STATIC)
 	{
@@ -90,9 +94,8 @@ void SphereRB3::UpdateTransforms()
 	m_entityTransform.SetLocalPosition(m_center);
 
 	// rot
-	Matrix44 transMat;
-	CacheTransform(transMat, m_center, m_orientation);
-	Vector3 euler = Matrix44::DecomposeMatrixIntoEuler(transMat);
+	Matrix44 rot_mat_44 = Quaternion::GetMatrixRotation(m_orientation);
+	Vector3 euler = Matrix44::DecomposeMatrixIntoEuler(rot_mat_44);
 	m_entityTransform.SetLocalRotation(euler);
 
 	// assume scale is unchanged

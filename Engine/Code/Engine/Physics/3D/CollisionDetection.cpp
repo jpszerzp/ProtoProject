@@ -789,7 +789,7 @@ bool CollisionDetector::Sphere3VsSphere3Core(const Sphere3& s1, const Sphere3& s
 	float penetration = s1Rad + s2Rad - length;
 
 	TODO("Hook friction with physics material with both entities");
-	Contact3 theContact = Contact3(s1.GetEntity(), s2.GetEntity(), normal, point, penetration, 1.f, 0.05f);	
+	Contact3 theContact = Contact3(s1.GetEntity(), s2.GetEntity(), normal, point, penetration, .8f, 0.05f);	
 	contact = theContact;
 
 	return true;

@@ -17,7 +17,7 @@ out vec4 outColor;
 void main()
 {
    vec4 diffuse = texture( gTexDiffuse, passUV );
-   vec4 finalColor = diffuse * TINT;
+   vec4 finalColor = diffuse * TINT;        // not using vertex color
 
    outColor = finalColor; 
 }

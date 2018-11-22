@@ -1,20 +1,24 @@
 #include "Engine/Physics/3D/QuadRB3.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
+#include "Engine/Math/MathUtils.hpp"
 
 QuadRB3::QuadRB3(float mass, const Plane& primitive, 
-	const Vector3& center, const Vector3& euler, const Vector3& scale,
-	eMoveStatus moveStat)
+	const Vector3& center, const Vector3& euler, const Vector3& scale, const eMoveStatus& moveStat)
 {
 	m_primitive = primitive;
 	m_moveStatus = moveStat;
 	m_bodyID = BODY_RIGID;
 
 	m_linearVelocity = Vector3::ZERO;
-
 	m_center = center;
 
 	// entity transform
 	m_entityTransform = Transform(m_center, euler, scale);
+	
+	// euler to quaternion
+	Matrix44 rot_mat = Matrix44::MakeRotationDegrees3D(euler);
+	Matrix33 rot_only = rot_mat.ExtractMat3();
+	m_orientation = Quaternion::FromMatrix(rot_only);
 
 	// BV transform - sphere
 	Vector3 boundSpherePos = m_center;
@@ -24,8 +28,8 @@ QuadRB3::QuadRB3(float mass, const Plane& primitive,
 
 	if (m_moveStatus != MOVE_STATIC)
 	{
-		m_massData.m_mass = 1.f;
-		m_massData.m_invMass = 1.f / m_massData.m_mass;
+		m_massData.m_mass = mass;
+		m_massData.m_invMass = 1.f / mass;
 
 		TODO("Plane tensor");
 	}
@@ -61,32 +65,39 @@ void QuadRB3::UpdatePrimitives()
 
 	// No concept of "center" for plane, hence no need to update
 
-	TODO("Update rot for primitive, otherwise visual will look off");
+	// update rot of plane is just updating the normal and offset, 
+	// quite different from other primitives
+	Vector3 new_forward_norm = m_entityTransform.GetWorldForward().GetNormalized();
+	float new_offset = DotProduct(m_center, new_forward_norm);
+	m_primitive.m_normal = new_forward_norm;
+	m_primitive.m_offset = new_offset;
 }
 
 void QuadRB3::UpdateTransforms()
 {
 	m_entityTransform.SetLocalPosition(m_center);
 
-	// rot
-	Matrix44 transMat;
-	CacheTransform(transMat, m_center, m_orientation);
-	Vector3 euler = Matrix44::DecomposeMatrixIntoEuler(transMat);
+	// with the updated quaternion, we want to update euler
+	// meaning follow combo of functions return euler from quaternion
+	Matrix44 rot_mat_44 = Quaternion::GetMatrixRotation(m_orientation);
+	Vector3 euler = Matrix44::DecomposeMatrixIntoEuler(rot_mat_44);
 	m_entityTransform.SetLocalRotation(euler);
-
-	TODO("Assume scale unchanged. Safe?");
 
 	m_boundSphere.m_transform.SetLocalPosition(m_center);
 }
 
 void QuadRB3::Integrate(float deltaTime)
 {
-	CacheData();
+	if (!m_awake) return;
 
-	if (m_frozen)
+	float usedTime = deltaTime;
+	if (m_scheme == CONTINUOUS && m_motionClamp)
+		usedTime = m_motionClampTime;
+
+	if (!m_frozen)
 	{
 		// acc
-		//m_lastAcc = m_linearAcceleration;
+		m_lastFrameLinearAcc = m_linearAcceleration;
 		m_linearAcceleration = m_netforce * m_massData.m_invMass;
 		Vector3 angularAcc = m_inverseInertiaTensorWorld * m_torqueAcc;
 
@@ -101,8 +112,27 @@ void QuadRB3::Integrate(float deltaTime)
 		// pos
 		m_center += m_linearVelocity * deltaTime;
 		m_orientation.AddScaledVector(m_angularVelocity, deltaTime);
+
+		CacheData();
 	}
 
 	ClearAccs();
+
+	if (m_scheme == CONTINUOUS && m_motionClamp)
+		m_motionClamp = false;
+
+	// updating sleep system
+	if (m_canSleep)
+	{
+		float currentMotion = DotProduct(m_linearVelocity, m_linearVelocity) + DotProduct(m_angularVelocity, m_angularVelocity);
+
+		float bias = powf(.5f, deltaTime);
+		m_motion = bias * m_motion + (1.f - bias) * currentMotion;
+
+		if (m_motion < m_sleepThreshold) 
+			SetAwake(false);
+		else if (m_motion > 10.f * m_sleepThreshold) 
+			m_motion = 10.f * m_sleepThreshold;		// clamp up to 10 times of threshold
+	}
 }
 

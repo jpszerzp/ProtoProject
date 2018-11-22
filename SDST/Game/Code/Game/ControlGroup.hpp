@@ -7,7 +7,8 @@
 
 enum eControlID
 {
-	CONTROL_SPHERE_SPHERE
+	CONTROL_SPHERE_SPHERE,
+	CONTROL_SPHERE_PLANE
 };
 
 class ControlGroup
@@ -17,21 +18,23 @@ private:
 	std::vector<GameObject*> m_gos;
 	Vector3 m_observation_pos;
 	eControlID m_id;
-	Contact3 m_contact;
-	bool m_intersect;
+	std::vector<Contact3> m_contacts;
+
+	std::vector<Mesh*> m_view;
+	float m_textHeight = 0.f;
+	Vector2 m_startMin = Vector2::ZERO;
 
 public:
-	ControlGroup(GameObject* go1, GameObject* go2, eControlID id);
+	ControlGroup(GameObject* go1, GameObject* go2, const eControlID& id, const Vector3& observation);
 	~ControlGroup(){}
 
 	void ProcessInput();
-	void Render(Renderer* renderer);
+	void RenderCore(Renderer* renderer);
+	void RenderUI();
 	void Update(float deltaTime);
+	void UpdateDebugDraw();
+	void UpdateUI();
 
-	const eControlID& GetID() const { return m_id; }
-	bool IsIntersect() const { return m_intersect; }
-	std::string GetControlIDString() const;
-	std::string GetPointString() const;
-	std::string GetNormalString() const;
-	std::string GetPenetrationString() const;
+	eControlID GetID() const { return m_id; }
+	Vector3 GetObservationPos() const { return m_observation_pos; }
 };

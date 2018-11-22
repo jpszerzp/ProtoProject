@@ -81,27 +81,11 @@ public:
 	void RenderModelSamples(Renderer* renderer);
 
 	// scene tests
-	void WrapAroundTestBall();
-	void WrapAroundTestBox();
-	void WrapAroundTestBallBox();
-	void ShootBallFromCamera();
+	void WrapAroundTestGeneral();
 
-	std::string SelectHullStatus();
 	void SwapHullStatusMesh(const std::string& str);
 
 public:
-	// entity
-	GameObject* m_g0;
-	GameObject* m_g1;
-	GameObject* m_g2;
-	GameObject* m_g3;
-	GameObject* m_g4;
-	GameObject* m_g5;
-
-	// rigid body
-	GameObject* m_r0;
-	GameObject* m_r1;
-
 	Ballistics* m_ballistics;
 	Spring* m_spring;
 	AnchorSpring* m_anchorSpring;
@@ -117,8 +101,8 @@ public:
 	std::vector<Box*>	 m_boxes;
 
 	// continuous convenience
-	Sphere* m_ball_ccd_test = nullptr;
-	Sphere* m_ball_ccd_test_0 = nullptr;
+	Sphere* m_ball_ccd_test_discrete = nullptr;
+	Sphere* m_ball_ccd_test_continuous = nullptr;
 	Quad* m_quad_ccd_test = nullptr;
 	std::vector<Vector3> m_inspection;
 	int m_insepction_count = 0;
@@ -148,11 +132,9 @@ public:
 	Vector2 m_titleMin = Vector2::ZERO;
 	Vector2 m_statusMin = Vector2::ZERO;
 	
-	WrapAround* m_wraparound_0;
-	int m_wrapPosIterator_0 = 0;
-	WrapAround* m_wraparound_1;
-	Sphere* m_physBall = nullptr;
-	Box* m_physBox = nullptr;
+	WrapAround* m_wraparound_continuous;
+	WrapAround* m_wraparound_general;
+	int m_wrap_pos_it_general = 0;
 
 	// assimp test
 	AssimpLoader* m_assimp_0 = nullptr;

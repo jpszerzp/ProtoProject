@@ -37,9 +37,9 @@ Sphere::Sphere(Vector3 pos, Vector3 rot, Vector3 scale,
 	float radius = scale.x;
 	Sphere3 sphere3 = Sphere3(pos, radius);
 	if (bid == BODY_PARTICLE)
-		m_physEntity = new SphereEntity3(sphere3, moveStat);
+		m_physEntity = new SphereEntity3(sphere3, rot, moveStat);
 	else
-		m_physEntity = new SphereRB3(1.f, sphere3, moveStat);
+		m_physEntity = new SphereRB3(1.f, sphere3, rot, moveStat);
 	m_physEntity->m_scheme = scheme;			// discrete or continuous
 	m_physEntity->SetEntityForPrimitive();
 }
@@ -76,11 +76,14 @@ void Sphere::Update(float deltaTime)
 {
 	if (m_physDriven)
 	{
-		m_physEntity->Integrate(deltaTime);
-		m_physEntity->UpdateTransforms();
-		m_physEntity->UpdatePrimitives();
+		if (m_physEntity->GetEntityMoveStatus() != MOVE_STATIC)
+		{
+			m_physEntity->Integrate(deltaTime);
+			m_physEntity->UpdateTransforms();
+			m_physEntity->UpdatePrimitives();
 
-		m_renderable->m_transform = m_physEntity->GetEntityTransform();
+			m_renderable->m_transform = m_physEntity->GetEntityTransform();
+		}
 	}
 
 	UpdateBasis();

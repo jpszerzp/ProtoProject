@@ -2,14 +2,25 @@
 #include "Game/GameCommon.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/Core/Primitive/Sphere.hpp"
+#include "Engine/Core/Util/DataUtils.hpp"
+#include "Engine/Core/Util/RenderUtil.hpp"
 #include "Engine/Physics/3D/SphereRB3.hpp"
 #include "Engine/Renderer/DebugRenderer.hpp"
+#include "Engine/Renderer/Window.hpp"
 
-ControlGroup::ControlGroup(GameObject* go1, GameObject* go2, eControlID id)
+ControlGroup::ControlGroup(GameObject* go1, GameObject* go2, const eControlID& id, const Vector3& observation)
 {
 	m_gos.push_back(go1);
 	m_gos.push_back(go2);
 	m_id = id;
+
+	Window* window = Window::GetInstance();
+	float width = window->GetWindowWidth();
+	float height = window->GetWindowHeight();
+	m_textHeight = height / 50.f;
+	m_startMin = Vector2(-width / 2.f, height / 2.f - m_textHeight);
+
+	m_observation_pos = observation;
 }
 
 void ControlGroup::ProcessInput()
@@ -54,7 +65,7 @@ void ControlGroup::ProcessInput()
 		g1->GetEntity()->SetLinearVelocity(Vector3::ZERO);
 }
 
-void ControlGroup::Render(Renderer* renderer)
+void ControlGroup::RenderCore(Renderer* renderer)
 {
 	for (std::vector<GameObject*>::size_type idx = 0; idx < m_gos.size(); ++idx)
 	{
@@ -63,8 +74,16 @@ void ControlGroup::Render(Renderer* renderer)
 	}
 }
 
+void ControlGroup::RenderUI()
+{
+	DrawTexts(m_view);
+}
+
 void ControlGroup::Update(float deltaTime)
 {
+	// clear all contacts at beginning of frame
+	m_contacts.clear();
+
 	ProcessInput();
 
 	for (GameObject* go : m_gos)
@@ -75,6 +94,8 @@ void ControlGroup::Update(float deltaTime)
 	{
 	case CONTROL_SPHERE_SPHERE:
 	{
+		Contact3 contact;
+
 		Sphere* s1 = static_cast<Sphere*>(m_gos[0]);
 		Sphere* s2 = static_cast<Sphere*>(m_gos[1]);
 
@@ -84,45 +105,92 @@ void ControlGroup::Update(float deltaTime)
 		const Sphere3& sph1 = rb1->m_primitive;
 		const Sphere3& sph2 = rb2->m_primitive;
 
-		m_intersect = CollisionDetector::Sphere3VsSphere3Core(sph1, sph2, m_contact);
+		bool intersected = CollisionDetector::Sphere3VsSphere3Core(sph1, sph2, contact);
+		if (intersected)
+			m_contacts.push_back(contact);
+	}
+		break;
+	case CONTROL_SPHERE_PLANE:
+	{
+
 	}
 		break;
 	default:
 		break;
 	}
 
-	if (m_intersect)
+	UpdateUI();
+
+	UpdateDebugDraw();
+}
+
+void ControlGroup::UpdateDebugDraw()
+{
+	for (const Contact3& contact : m_contacts)
 	{
-		Vector3 point = m_contact.m_point;
-		Vector3 end = point + m_contact.m_normal * m_contact.m_penetration;
+		Vector3 point = contact.m_point;
+		Vector3 end = point + contact.m_normal * contact.m_penetration;
 		DebugRenderLine(0.1f, point, end, 5.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
 	}
 }
 
-std::string ControlGroup::GetControlIDString() const
+void ControlGroup::UpdateUI()
 {
+	Renderer* renderer = Renderer::GetInstance();
+	BitmapFont* font = renderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
+
+	DeleteVector(m_view);
+
 	switch (m_id)
 	{
 	case CONTROL_SPHERE_SPHERE:
-		return "Sphere3 v.s Sphere3";
+	{
+		Vector2 min = m_startMin;
+
+		// basic info
+		std::string cp_title = "Sphere v.s sphere";
+		Mesh* mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, cp_title, VERT_PCU);
+		m_view.push_back(mesh);
+		min -= Vector2(0.f, m_textHeight);
+
+		std::string contac_num = Stringf("Contact number: %i", m_contacts.size());
+		mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, contac_num, VERT_PCU);
+		m_view.push_back(mesh);
+		min -= Vector2(0.f, m_textHeight);
+
+		// detailed contact info
+		if (m_contacts.size() > 0U)
+		{
+			for (int i = 0; i < m_contacts.size(); ++i)
+			{
+				const Contact3& theContact = m_contacts[i];
+				std::string contact_info = Stringf("Contact at (%f, %f, %f), has normal (%f, %f, %f), with penetration %f",
+					theContact.m_point.x, theContact.m_point.y, theContact.m_point.z,
+					theContact.m_normal.x, theContact.m_normal.y, theContact.m_normal.z, theContact.m_penetration);
+				mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, contact_info, VERT_PCU);
+				m_view.push_back(mesh);
+				min -= Vector2(0.f, m_textHeight);
+			}
+		}
+	}
+		break;
+	case CONTROL_SPHERE_PLANE:
+	{
+		Vector2 min = m_startMin;
+
+		// basic info
+		std::string cp_title = "Sphere v.s plane";
+		Mesh* mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, cp_title, VERT_PCU);
+		m_view.push_back(mesh);
+		min -= Vector2(0.f, m_textHeight);
+
+		std::string contac_num = Stringf("Contact number: %i", m_contacts.size());
+		mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, contac_num, VERT_PCU);
+		m_view.push_back(mesh);
+		min -= Vector2(0.f, m_textHeight);
+	}
 		break;
 	default:
 		break;
 	}
 }
-
-std::string ControlGroup::GetPointString() const
-{
-	return Stringf("Point: (%f, %f, %f)", m_contact.m_point.x, m_contact.m_point.y, m_contact.m_point.z);
-}
-
-std::string ControlGroup::GetNormalString() const
-{
-	return Stringf("Normal: (%f, %f, %f)", m_contact.m_normal.x, m_contact.m_normal.y, m_contact.m_normal.z);
-}
-
-std::string ControlGroup::GetPenetrationString() const
-{
-	return Stringf("Penetration: %f", m_contact.m_penetration);
-}
-

@@ -4,6 +4,7 @@
 #include "Engine/Core/Util/DataUtils.hpp"
 #include "Engine/Core/Util/RenderUtil.hpp"
 #include "Engine/Core/Primitive/Sphere.hpp"
+#include "Engine/Core/Primitive/Quad.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/Math/MathUtils.hpp"
 #include "Engine/Physics/3D/Rigidbody3.hpp"
@@ -47,13 +48,7 @@ Collision3State::Collision3State()
 		m_UICamera->SetProjectionOrtho(width, height, 0.f, 100.f);
 	}
 
-	m_textHeight = height / 50.f;
-	m_titleMin = Vector2(-width / 2.f, height / 2.f - m_textHeight);
-	Rgba titleColor = Rgba::WHITE;
-	BitmapFont* font = renderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
-	std::string title = "Collision playground!";
-	m_title = Mesh::CreateTextImmediate(titleColor, m_titleMin, font, m_textHeight, .5f, title, VERT_PCU);
-
+	// cp 1
 	Vector3 pos = Vector3(-1.5f, 0.f, 0.f);
 	Vector3 rot = Vector3::ZERO;
 	Vector3 scale = Vector3::ONE;
@@ -76,6 +71,7 @@ Collision3State::Collision3State()
 	m_gameObjects.push_back(sph);
 
 	pos = Vector3(1.5f, 0.f, 0.f);
+	scale = Vector3(2.f, 2.f, 2.f);
 	Sphere* sph_0 = new Sphere(pos, rot, scale, tint, meshName, matName, stat, bid, multipass, compare, cull, wind, scheme);
 	rigid = static_cast<Rigidbody3*>(sph_0->GetEntity());
 	sph_0->m_physDriven = true;
@@ -84,17 +80,38 @@ Collision3State::Collision3State()
 	rigid->SetCanSleep(false);
 	m_gameObjects.push_back(sph_0);
 
-	// control groups
-	ControlGroup* grp_0 = new ControlGroup(sph, sph_0, CONTROL_SPHERE_SPHERE);
+	ControlGroup* grp = new ControlGroup(sph, sph_0, CONTROL_SPHERE_SPHERE, m_cameraInitialPos);
+	m_controlGrps.push_back(grp);
 
+	// cp 2
+	pos = Vector3(0.f, -5.f, 0.f);
+	scale = Vector3::ONE;
+	Sphere* sph_1 = new Sphere(pos, rot, scale, tint, meshName, matName, stat, bid, multipass, compare, cull, wind, scheme);
+	rigid = static_cast<Rigidbody3*>(sph_1->GetEntity());
+	sph_1->m_physDriven = true;
+	rigid->SetGameobject(sph_1);
+	rigid->SetAwake(true);
+	rigid->SetCanSleep(false);
+	m_gameObjects.push_back(sph_1);
+
+	pos = Vector3(0.f, -7.f, 0.f);
+	rot = Vector3(90.f, 0.f, 0.f);
+	scale = Vector3(2.f, 2.f, 2.f);
+	stat = MOVE_KINEMATIC;
+	Quad* pl = new Quad(pos, rot, scale, tint, "quad_pcu", matName, stat, bid, multipass, compare, CULLMODE_FRONT, wind, scheme);
+	rigid = static_cast<Rigidbody3*>(pl->GetEntity());
+	pl->m_physDriven = true;
+	rigid->SetGameobject(pl);
+	rigid->SetAwake(true);
+	rigid->SetCanSleep(false);
+	m_gameObjects.push_back(pl);
+
+	ControlGroup* grp_0 = new ControlGroup(sph_1, pl, CONTROL_SPHERE_PLANE, Vector3(0.f, -6.f, -7.f));
 	m_controlGrps.push_back(grp_0);
 
 	// set the focused grp and the initial index
 	m_focusedIndex = 0;
 	m_focusedGrp = m_controlGrps[m_focusedIndex];
-
-	// the number of cp view text is 5: id, intersected, contact point, normal and penetration
-	m_cpView.resize(5, nullptr);
 
 	// debug
 	DebugRenderSet3DCamera(m_camera);
@@ -103,14 +120,6 @@ Collision3State::Collision3State()
 
 Collision3State::~Collision3State()
 {
-	if (m_title != nullptr)
-	{
-		delete m_title;
-		m_title = nullptr;
-	}
-
-	DeleteVector(m_cpView);
-
 	DeleteVector(m_controlGrps);
 }
 
@@ -119,7 +128,6 @@ void Collision3State::Update(float deltaTime)
 	UpdateDebugDraw(deltaTime);
 	UpdateKeyboard(deltaTime);
 	UpdateMouse(deltaTime);
-	UpdateUI(deltaTime);
 	UpdateFocusedGroup(deltaTime);
 }
 
@@ -143,7 +151,6 @@ void Collision3State::UpdateMouse(float deltaTime)
 
 	Matrix44 inverseModel = model.Invert();
 	m_camera->SetView(inverseModel);
-	//m_camera->GetView().Print();
 }
 
 void Collision3State::UpdateKeyboard(float deltaTime)
@@ -154,6 +161,20 @@ void Collision3State::UpdateKeyboard(float deltaTime)
 		m_camera->GetTransform().SetLocalPosition(m_cameraInitialPos);
 		m_camera->GetTransform().SetLocalRotation(Vector3::ZERO);
 		m_camera->GetTransform().SetLocalScale(Vector3::ONE);
+	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_TAB))
+	{
+		// switch focused control group
+		++m_focusedIndex;
+		int groupCount = m_controlGrps.size();
+		m_focusedIndex = m_focusedIndex % groupCount;
+		m_focusedGrp = m_controlGrps[m_focusedIndex];
+
+		const Vector3& observation = m_focusedGrp->GetObservationPos();
+
+		m_camera->GetTransform().SetLocalPosition(observation);
+		m_camera->GetTransform().SetLocalRotation(Vector3::ZERO);
 	}
 
 	// Apply camera movement
@@ -197,75 +218,6 @@ void Collision3State::UpdateKeyboard(float deltaTime)
 	m_camera->GetTransform().TranslateLocal(worldOffset); 
 }
 
-void Collision3State::UpdateUI(float deltaTime)
-{
-	const std::string id_str = m_focusedGrp->GetControlIDString();
-
-	bool intersected = m_focusedGrp->IsIntersect();
-
-	std::string intersect_str;
-	std::string point_str;
-	std::string normal_str;
-	std::string penetration_str;
-	
-	if (intersected)
-	{
-		intersect_str = "YES";
-		point_str = m_focusedGrp->GetPointString();
-		normal_str = m_focusedGrp->GetNormalString();
-		penetration_str = m_focusedGrp->GetPenetrationString();
-	}
-	else
-	{
-		intersect_str = "NO";
-		point_str = "N/A";
-		normal_str = "N/A";
-		penetration_str = "N/A";
-	}
-
-	Renderer* renderer = Renderer::GetInstance();
-	BitmapFont* font = renderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
-	Vector2 min = m_titleMin - Vector2(0.f, m_textHeight);
-	if (m_cpView[0] != nullptr)
-	{
-		delete m_cpView[0];
-		m_cpView[0] = nullptr;
-	}
-	m_cpView[0] = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, id_str, VERT_PCU);
-	
-	min = min - Vector2(0.f, m_textHeight);
-	if (m_cpView[1] != nullptr)
-	{
-		delete m_cpView[1];
-		m_cpView[1] = nullptr;
-	}
-	Rgba color = intersected ? Rgba::GREEN : Rgba::RED;
-	m_cpView[1] = Mesh::CreateTextImmediate(color, min, font, m_textHeight, .5f, intersect_str, VERT_PCU);
-
-	min = min - Vector2(0.f, m_textHeight);
-	if (m_cpView[2] != nullptr)
-	{
-		delete m_cpView[2];
-		m_cpView[2] = nullptr;
-	}
-	m_cpView[2] = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, point_str, VERT_PCU);
-
-	min = min - Vector2(0.f, m_textHeight);
-	if (m_cpView[3] != nullptr)
-	{
-		delete m_cpView[3];
-		m_cpView[3] = nullptr;
-	}
-	m_cpView[3] = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, normal_str, VERT_PCU);
-
-	min = min - Vector2(0.f, m_textHeight);
-	if (m_cpView[4] != nullptr)
-	{
-		delete m_cpView[4];
-		m_cpView[4] = nullptr;
-	}
-	m_cpView[4] = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, penetration_str, VERT_PCU);
-}
 
 void Collision3State::UpdateFocusedGroup(float deltaTime)
 {
@@ -282,14 +234,11 @@ void Collision3State::Render(Renderer* renderer)
 	// draw UI
 	renderer->SetCamera(m_UICamera);
 	renderer->ClearScreen(Rgba::BLACK);
-	DrawTextCut(m_title);
-	DrawTexts(m_cpView);
+	m_focusedGrp->RenderUI();
 
 	// draw group contents
 	renderer->SetCamera(m_camera);
-	m_focusedGrp->Render(renderer);
-	//for (ControlGroup* cgrp : m_controlGrps)
-	//	cgrp->Render(renderer);
+	m_focusedGrp->RenderCore(renderer);
 
 	m_forwardPath->RenderScene(m_sceneGraph);
 }

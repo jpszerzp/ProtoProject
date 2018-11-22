@@ -9,7 +9,7 @@ public:
 	Sphere3 m_primitive;
 
 public:
-	SphereEntity3(const Sphere3& primitive, eMoveStatus moveStat);
+	SphereEntity3(const Sphere3& primitive, Vector3 euler, eMoveStatus moveStat);
 	~SphereEntity3();
 
 	void UpdatePrimitives() override;

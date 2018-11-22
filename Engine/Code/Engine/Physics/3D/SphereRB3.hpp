@@ -9,7 +9,7 @@ public:
 
 public:
 	SphereRB3();
-	SphereRB3(float mass, Sphere3 primitive, eMoveStatus moveStat);
+	SphereRB3(float mass, Sphere3 primitive, Vector3 euler, eMoveStatus moveStat);
 	~SphereRB3();
 
 	void SetEntityForPrimitive() override;

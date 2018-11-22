@@ -1,6 +1,6 @@
 #include "Engine/Physics/3D/SphereEntity3.hpp"
 
-SphereEntity3::SphereEntity3(const Sphere3& primitive, eMoveStatus moveStat)
+SphereEntity3::SphereEntity3(const Sphere3& primitive, Vector3 euler, eMoveStatus moveStat)
 {
 	m_primitive = primitive;
 	m_moveStatus = moveStat;
@@ -9,15 +9,15 @@ SphereEntity3::SphereEntity3(const Sphere3& primitive, eMoveStatus moveStat)
 	m_linearVelocity = Vector3::ZERO;
 	m_center = primitive.m_center;
 
-	Vector3 rot = Vector3::ZERO;
+	//Vector3 rot = Vector3::ZERO;
 	float radius = primitive.m_radius;
 	Vector3 scale = Vector3(radius);
-	m_entityTransform = Transform(m_center, rot, scale);
+	m_entityTransform = Transform(m_center, euler, scale);
 
 	float boundBoxDim = 2.f * radius;
 	Vector3 boundBoxScale = Vector3(boundBoxDim);
 	//m_sphereBoundTransform = m_entityTransform;
-	m_boxBoundTransform = Transform(m_center, rot, boundBoxScale);
+	m_boxBoundTransform = Transform(m_center, euler, boundBoxScale);
 
 	if (m_moveStatus != MOVE_STATIC)
 	{

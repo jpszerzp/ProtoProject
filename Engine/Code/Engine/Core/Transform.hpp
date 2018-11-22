@@ -87,17 +87,13 @@ public:
 
 	// scale
 	static Vector3 TransformLocalToWorldPos(Vector3 local, Transform transform);
-	static Vector3 TransformWorldToLocalPosOrthogonal(const Vector3& world,
-		const Transform& transform);	// assumes orthogonal bases
-	static Vector3 TransformWorldToLocalPosGeneral(const Vector3& world,
-		const Transform& transform);	// no assumption on bases
+	static Vector3 TransformWorldToLocalPosOrthogonal(const Vector3& world, const Transform& transform);	// assumes orthogonal bases
+	static Vector3 TransformWorldToLocalPosGeneral(const Vector3& world, const Transform& transform);	// no assumption on bases
 
 	// non-scale
 	static Vector3 LocalToWorldPos(Vector3 local, Transform transform);
-	static Vector3 WorldToLocalOrthogonal(const Vector3& world, 
-		const Transform& transform);	
-	static Vector3 WorldToLocalGeneral(const Vector3& world,
-		const Transform& transform);	
+	static Vector3 WorldToLocalOrthogonal(const Vector3& world, const Transform& transform);	
+	static Vector3 WorldToLocalGeneral(const Vector3& world, const Transform& transform);	
 	static void TransformRotationAtoBCoord(Matrix44& rotation, const Transform& A, const Transform& B);
 
 	// dir

@@ -21,7 +21,6 @@ QuadEntity3::QuadEntity3(const Plane& primitive, eMoveStatus moveStat,
 	Vector3 boundSphereRot = Vector3::ZERO;
 	float boundSphereRadius = sqrtf(scale.x * scale.x + scale.y * scale.y) / 2.f;
 	Vector3 boundSphereScale = Vector3(boundSphereRadius, boundSphereRadius, boundSphereRadius);
-	//m_sphereBoundTransform = Transform(boundSpherePos, boundSphereRot, boundSphereScale);
 
 	// BV box transform ignored
 
@@ -34,9 +33,7 @@ QuadEntity3::QuadEntity3(const Plane& primitive, eMoveStatus moveStat,
 		m_massData.m_invMass = 0.f;
 
 	// BV sphere primitive
-	//m_boundSphere = Sphere3(boundSpherePos, boundSphereRad);
 	m_boundSphere = BoundingSphere(m_center, boundSphereRadius);
-	//m_sphereBoundMesh = Mesh::CreateUVSphere(VERT_PCU, 18, 36);
 	m_boundSphere.m_boundMesh = Mesh::CreateUVSphere(VERT_PCU, 18, 36);
 	m_boundSphere.m_transform = Transform(boundSpherePos, boundSphereRot, boundSphereScale);
 
@@ -73,7 +70,6 @@ void QuadEntity3::Translate(Vector3 translation)
 	// update transform
 	// bound box ignored
 	m_entityTransform.SetLocalPosition(m_center);
-	//m_sphereBoundTransform.SetLocalPosition(m_center);
 	m_boundSphere.m_transform.SetLocalPosition(m_center);
 
 	// update primitive

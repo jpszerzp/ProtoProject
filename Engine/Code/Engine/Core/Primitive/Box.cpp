@@ -56,11 +56,14 @@ void Box::Update(float deltaTime)
 {
 	if (m_physDriven)
 	{
-		m_physEntity->Integrate(deltaTime);
-		m_physEntity->UpdateTransforms();
-		m_physEntity->UpdatePrimitives();
+		if (m_physEntity->GetEntityMoveStatus() != MOVE_STATIC)
+		{
+			m_physEntity->Integrate(deltaTime);
+			m_physEntity->UpdateTransforms();
+			m_physEntity->UpdatePrimitives();
 
-		m_renderable->m_transform = m_physEntity->GetEntityTransform();
+			m_renderable->m_transform = m_physEntity->GetEntityTransform();
+		}
 	}
 
 	UpdateBasis();

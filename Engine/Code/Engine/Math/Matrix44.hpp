@@ -83,6 +83,3 @@ public:
 
 	Matrix44 RotateToward(const Matrix44& rotateTarget, float maxAngleToMove) const;
 };
-
-//bool CloseEnough(const float& a, const float& b, const float& epsilon = std::numeric_limits<float>::epsilon());
-//Vector3 EulerAngles(const Matrix33& R);

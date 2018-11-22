@@ -37,8 +37,12 @@ public:
 	Quaternion GetConjugate() const;
 	Quaternion GetInverse() const;
 
+	// from and to rotation matrix (note the subtlety between mat33 and mat44 here)
+	// we can use extract function to retrieve a mat33 from mat44
 	static Matrix44 GetMatrixRotation(const Quaternion& q);
 	static Matrix44 GetMatrixWithPosition(const Quaternion& q, const Vector3& pos);
+	static Quaternion FromMatrix(const Matrix33& rot);
 
 	static Quaternion FromEuler(const Vector3& euler);
+	Vector3 ToEuler() const;
 };
