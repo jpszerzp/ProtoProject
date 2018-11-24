@@ -888,6 +888,19 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		WrapAroundTestGeneral();
 	}
 
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_F1))
+	{
+		GravityRigidForceGenerator* gravity = new GravityRigidForceGenerator(Vector3::GRAVITY);
+
+		Vector3 pos = Vector3(0.f, 230.f, 0.f);
+		Sphere* s = InitializePhysSphere(pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID);
+		Rigidbody3* rigid_s = static_cast<Rigidbody3*>(s->GetEntity());
+		m_rigidRegistry->Register(rigid_s, gravity);
+		rigid_s->SetAwake(true);
+		rigid_s->SetCanSleep(true);
+		m_wraparound_general->m_gos.push_back(s);
+	}
+
 	// camera update from input
 	Vector3 camForward = m_camera->GetLocalForward(); 
 	Vector3 camUp = m_camera->GetLocalUp(); 
@@ -965,6 +978,7 @@ void Physics3State::UpdateForceRegistry(float deltaTime)
 
 void Physics3State::UpdateGameobjectsCore(float deltaTime)
 {
+	/*
 	// CONTINUOUS INTEGRATION FIRST
 
 	// at the start of the frame, take a snapshot of all continuous pairs
@@ -1035,6 +1049,7 @@ void Physics3State::UpdateGameobjectsCore(float deltaTime)
 
 	// plane pairs (excluding spheres since that sort of pair has been processed)
 	// ...
+	*/
 
 	// DISCRETE INTEGRATION
 

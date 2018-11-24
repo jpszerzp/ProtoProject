@@ -161,32 +161,45 @@ Vector3 Contact3::ComputeContactImpulseFriction()
 {
 	Vector3 imp;
 	Rigidbody3* rigid1 = dynamic_cast<Rigidbody3*>(m_e1);
-	float invMass = rigid1->GetMassData3().m_invMass;
 
+	float invMass = 0.f;
+	Matrix33 deltaVelWorld1;
+	Matrix33 deltaVelWorld2;
+	Matrix33 deltaVelWorld = Matrix33(0.f);
 	Matrix33 toTorque;
-	toTorque.SetSkewSymmetric(m_relativePosWorld[0]);
 
-	// in world coord
-	Matrix33 deltaVelWorld = toTorque;
-	deltaVelWorld *= rigid1->m_inverseInertiaTensorWorld;
-	deltaVelWorld *= toTorque;
-	deltaVelWorld *= -1.f;
+	if (!rigid1->IsEntityStatic() && !rigid1->IsEntityKinematic())
+	{
+		invMass += rigid1->GetMassData3().m_invMass;
+
+		toTorque.SetSkewSymmetric(m_relativePosWorld[0]);
+
+		deltaVelWorld1 = toTorque;
+		deltaVelWorld1 *= rigid1->m_inverseInertiaTensorWorld;
+		deltaVelWorld1 *= toTorque;
+		deltaVelWorld1 *= -1.f;
+
+		deltaVelWorld += deltaVelWorld1;
+	}
 
 	if (m_e2 != nullptr)
 	{
 		Rigidbody3* rigid2 = dynamic_cast<Rigidbody3*>(m_e1);
 
-		// it was a cross product in the frictionless version
-		toTorque.SetSkewSymmetric(m_relativePosWorld[1]);
+		if (!rigid2->IsEntityStatic() && !rigid2->IsEntityKinematic())
+		{
+			// it was a cross product in the frictionless version
+			toTorque.SetSkewSymmetric(m_relativePosWorld[1]);
 
-		Matrix33 deltaVelWorld2 = toTorque;
-		deltaVelWorld2 *= rigid2->m_inverseInertiaTensorWorld;
-		deltaVelWorld2 *= toTorque;
-		deltaVelWorld2 *= -1.f;
+			deltaVelWorld2 = toTorque;
+			deltaVelWorld2 *= rigid2->m_inverseInertiaTensorWorld;
+			deltaVelWorld2 *= toTorque;
+			deltaVelWorld2 *= -1.f;
 
-		deltaVelWorld += deltaVelWorld2;
+			deltaVelWorld += deltaVelWorld2;
 
-		invMass += rigid2->GetMassData3().m_invMass;
+			invMass += rigid2->GetMassData3().m_invMass;
+		}
 	}
 
 	// convert to contact coord (change of basis)
@@ -417,6 +430,7 @@ Vector3 Contact3::ComputeContactVelocity(int idx, Entity3* ent, float deltaTime)
 	Vector3 contactVel = toContact * vel;	// to contact coord
 
 	TODO("Is adding the planar vel necessary? Need more test if we really do this.");
+	TODO("Potential bug source for plane collision");
 	Vector3 accVel = rigid->m_lastFrameLinearAcc * deltaTime;
 	accVel = toContact * accVel;
 	accVel.x = 0.f;					// ignore acceleration along local normal direction
@@ -442,13 +456,13 @@ void Contact3::ComputeDesiredVelDeltaResting(float deltaTime)
 	float velFromAcc = 0.f;
 
 	Rigidbody3* r1 = static_cast<Rigidbody3*>(m_e1);
-	if (r1 != nullptr && r1->IsAwake())
-		//velFromAcc += DotProduct(r1->m_lastFrameLinearAcc, m_normal);
+	if (r1 != nullptr && r1->IsAwake() && !r1->IsEntityStatic() && !r1->IsEntityKinematic())
+	//if (r1 != nullptr && r1->IsAwake())
 		velFromAcc += DotProduct(r1->m_lastFrameLinearAcc, m_normal) * deltaTime;
 	
 	Rigidbody3* r2 = static_cast<Rigidbody3*>(m_e2);
-	if (r2 != nullptr && r2->IsAwake())
-		//velFromAcc -= DotProduct(r2->m_lastFrameLinearAcc, m_normal);
+	if (r2 != nullptr && r2->IsAwake() && !r2->IsEntityStatic() && !r2->IsEntityKinematic())
+	//if (r2 != nullptr && r2->IsAwake())
 		velFromAcc -= DotProduct(r2->m_lastFrameLinearAcc, m_normal) * deltaTime;
 
 	float r = m_restitution;
@@ -859,7 +873,7 @@ bool CollisionDetector::Sphere3VsPlane3Core(const Sphere3& sph, const Plane& pl,
 
 	Vector3 contactPoint = spherePos - planeNormal * signedDistToPlane;
 	Contact3 theContact = Contact3(sph.GetEntity(), pl.GetEntity(),
-		usedNormal.GetNormalized(), contactPoint, penetration);
+		usedNormal.GetNormalized(), contactPoint, penetration, 0.8f, .05f);
 	contact = theContact;
 
 	return true;
