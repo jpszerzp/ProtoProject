@@ -2,9 +2,11 @@
 #include "Game/GameCommon.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/Core/Primitive/Sphere.hpp"
+#include "Engine/Core/Primitive/Quad.hpp"
 #include "Engine/Core/Util/DataUtils.hpp"
 #include "Engine/Core/Util/RenderUtil.hpp"
 #include "Engine/Physics/3D/SphereRB3.hpp"
+#include "Engine/Physics/3D/QuadRb3.hpp"
 #include "Engine/Renderer/DebugRenderer.hpp"
 #include "Engine/Renderer/Window.hpp"
 
@@ -49,6 +51,16 @@ void ControlGroup::ProcessInput()
 	else
 		g0->GetEntity()->SetLinearVelocity(Vector3::ZERO);
 
+	Rigidbody3* rb0 = static_cast<Rigidbody3*>(g0->GetEntity());
+	if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_1))
+		rb0->SetAngularVelocity(Vector3(30.f, 0.f, 0.f));
+	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_4))
+		rb0->SetAngularVelocity(Vector3(0.f, 30.f, 0.f));
+	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_7))
+		rb0->SetAngularVelocity(Vector3(0.f, 0.f, 30.f));
+	else
+		rb0->SetAngularVelocity(Vector3::ZERO);
+
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_I))
 		g1->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, 5.f));
 	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_K))
@@ -63,6 +75,16 @@ void ControlGroup::ProcessInput()
 		g1->GetEntity()->SetLinearVelocity(Vector3(0.f, -5.f, 0.f));
 	else
 		g1->GetEntity()->SetLinearVelocity(Vector3::ZERO);
+
+	Rigidbody3* rb1 = static_cast<Rigidbody3*>(g1->GetEntity());
+	if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_2))
+		rb1->SetAngularVelocity(Vector3(30.f, 0.f, 0.f));
+	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_5))
+		rb1->SetAngularVelocity(Vector3(0.f, 30.f, 0.f));
+	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_8))
+		rb1->SetAngularVelocity(Vector3(0.f, 0.f, 30.f));
+	else 
+		rb1->SetAngularVelocity(Vector3::ZERO);
 }
 
 void ControlGroup::RenderCore(Renderer* renderer)
@@ -112,7 +134,20 @@ void ControlGroup::Update(float deltaTime)
 		break;
 	case CONTROL_SPHERE_PLANE:
 	{
+		Contact3 contact;
 
+		Sphere* s = static_cast<Sphere*>(m_gos[0]);
+		Quad* q = static_cast<Quad*>(m_gos[1]);
+
+		SphereRB3* rbs = static_cast<SphereRB3*>(s->GetEntity());
+		QuadRB3* rbq = static_cast<QuadRB3*>(q->GetEntity());
+
+		const Sphere3& sph = rbs->m_primitive;
+		const Plane& pl = rbq->m_primitive;
+
+		bool intersected = CollisionDetector::Sphere3VsPlane3Core(sph, pl, contact);
+		if (intersected)
+			m_contacts.push_back(contact);
 	}
 		break;
 	default:
@@ -188,6 +223,20 @@ void ControlGroup::UpdateUI()
 		mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, contac_num, VERT_PCU);
 		m_view.push_back(mesh);
 		min -= Vector2(0.f, m_textHeight);
+
+		if (m_contacts.size() > 0U)
+		{
+			for (int i = 0; i < m_contacts.size(); ++i)
+			{
+				const Contact3& theContact = m_contacts[i];
+				std::string contact_info = Stringf("Contact at (%f, %f, %f), has normal (%f, %f, %f), with penetration %f",
+					theContact.m_point.x, theContact.m_point.y, theContact.m_point.z,
+					theContact.m_normal.x, theContact.m_normal.y, theContact.m_normal.z, theContact.m_penetration);
+				mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, contact_info, VERT_PCU);
+				m_view.push_back(mesh);
+				min -= Vector2(0.f, m_textHeight);
+			}
+		}
 	}
 		break;
 	default:

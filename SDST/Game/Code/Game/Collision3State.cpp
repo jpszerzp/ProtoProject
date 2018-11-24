@@ -96,7 +96,7 @@ Collision3State::Collision3State()
 
 	pos = Vector3(0.f, -7.f, 0.f);
 	rot = Vector3(90.f, 0.f, 0.f);
-	scale = Vector3(2.f, 2.f, 2.f);
+	scale = Vector3(4.f, 4.f, 1.f);
 	stat = MOVE_KINEMATIC;
 	Quad* pl = new Quad(pos, rot, scale, tint, "quad_pcu", matName, stat, bid, multipass, compare, CULLMODE_FRONT, wind, scheme);
 	rigid = static_cast<Rigidbody3*>(pl->GetEntity());

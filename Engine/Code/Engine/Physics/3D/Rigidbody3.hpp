@@ -34,6 +34,7 @@ public:
 	void SetQuaternion(const float r, const float x, const float y, const float z);
 	void SetAwake(bool awake);
 	void SetCanSleep(bool value);
+	void SetAngularVelocity(const Vector3& angular) { m_angularVelocity = angular; }
 
 	// just before integration
 	void CacheData();
