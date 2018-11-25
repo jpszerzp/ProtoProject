@@ -68,7 +68,7 @@ void Ballistics::ConfigureBallisticsType()
 	{
 		m_physEntity->SetMass(1.f);
 		m_physEntity->SetLinearVelocity(Vector3::ZERO);
-		m_physEntity->SetNetForce(Vector3::GRAVITY / 2.f);
+		m_physEntity->SetNetForce(Vector3::GRAVITY);
 		m_physEntity->SetDamping(.99f);
 	}
 		break;
@@ -98,8 +98,7 @@ void Ballistics::Update(float deltaTime)
 void Ballistics::UpdateInput(float)
 {
 	InputSystem* input = InputSystem::GetInstance();
-	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_P)
-		&& !DevConsoleIsOpen())
+	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_P) && !DevConsoleIsOpen())
 	{
 		bool frostness = m_physEntity->IsFrozen();
 		m_physEntity->SetFrozen(!frostness);

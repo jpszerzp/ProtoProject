@@ -55,12 +55,12 @@ void Entity3::VerletIntegrate(float deltaTime)
 	if (m_verlet_scheme == BASIC_VERLET)
 	{
 		// limitation: object of verlet needs to have a natural start (no initial velocity to kick off with)
-		Vector3 curr_pos = m_center;
+		Vector3 old_pos = m_center;
 
 		m_linearAcceleration = m_netforce * m_massData.m_invMass;
 
 		m_center += (m_center - m_lastCenter) + m_linearAcceleration * deltaTime * deltaTime;
-		m_lastCenter = curr_pos;
+		m_lastCenter = old_pos;
 	}
 	// velocity verlet
 	else

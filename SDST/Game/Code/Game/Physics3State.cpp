@@ -121,6 +121,22 @@ Physics3State::Physics3State()
 
 	// wraparounds
 	m_wraparound_general = new WrapAround(Vector3(-10.f, 200.f, -10.f), Vector3(10.f, 220.f, 10.f));
+	m_wraparound_verlet = new WrapAround(Vector3(20.f, 200.f, -10.f), Vector3(30.f, 250.f, 0.f));
+
+	// verlet comparison
+	Ballistics* free_ballistics = SetupBallistics(FREEFALL, Vector3(23.f, 240.f, -5.f), true, Rgba::CYAN);
+	// NOTE: we do not present basic verlet here, simply because wraparound will mess the way center is corrected
+	// and it is NOT worth adjusting the existing correct pipeline just because we want to fit it in the wraparound
+	//Ballistics* verlet_basic_ballistics = SetupBallistics(FREEFALL, Vector3(26.f, 240.f, -5.f), true, Rgba::MEGENTA);
+	//verlet_basic_ballistics->m_physEntity->SetVerlet(true);
+	//verlet_basic_ballistics->m_physEntity->SetVerletScheme(BASIC_VERLET);
+	//verlet_basic_ballistics->m_physEntity->SetEntityLastCenter(verlet_basic_ballistics->m_physEntity->GetEntityCenter());
+	Ballistics* verlet_vel_ballistics = SetupBallistics(FREEFALL, Vector3(29.f, 240.f, -5.f), true, Rgba::PINK);
+	verlet_vel_ballistics->m_physEntity->SetVerlet(true);
+	verlet_vel_ballistics->m_physEntity->SetVerletScheme(VELOCITY_VERLET);
+	m_wraparound_verlet->m_gos.push_back(free_ballistics);
+	//m_wraparound_verlet->m_gos.push_back(verlet_basic_ballistics);
+	m_wraparound_verlet->m_gos.push_back(verlet_vel_ballistics);
 
 	// debug
 	DebugRenderSet3DCamera(m_camera);
@@ -145,6 +161,9 @@ Physics3State::~Physics3State()
 
 	delete m_wraparound_general;
 	m_wraparound_general = nullptr;
+
+	delete m_wraparound_verlet;
+	m_wraparound_verlet = nullptr;
 }
 
 
@@ -232,7 +251,7 @@ Ballistics* Physics3State::SetupBallistics(eBallisticsType type, Vector3 pos, bo
 	m_gameObjects.push_back(b);
 	m_points.push_back(b);
 	b->m_physEntity->SetGameobject(b);
-	b->m_physEntity->SetNetForcePersistent(true);
+	b->m_physEntity->SetNetForcePersistent(true);			// do NOT clear force every frame
 
 	return b;
 }
@@ -1069,6 +1088,7 @@ void Physics3State::UpdateGameobjectsCore(float deltaTime)
 
 	// WRAPAROUND UPDATE
 	m_wraparound_general->Update();
+	m_wraparound_verlet->Update();
 }
 
 void Physics3State::UpdateContactGeneration()
@@ -1418,6 +1438,7 @@ void Physics3State::Render(Renderer* renderer)
 	RenderBVH(renderer);
 
 	m_wraparound_general->Render(renderer);
+	m_wraparound_verlet->Render(renderer);
 }
 
 void Physics3State::RenderGameobjects(Renderer* renderer)
@@ -1461,8 +1482,6 @@ void Physics3State::RenderModelSamples(Renderer* renderer)
 
 void Physics3State::WrapAroundTestGeneral()
 {
-	//m_wraparound_general = new WrapAround(Vector3(-50.f, 200.f, -50.f), Vector3(50.f, 2000.f, 50.f));
-	
 	Vector3 positions[8] = {Vector3(-5.f, 205.f, -5.f), Vector3(5.f, 205.f, -5.f),
 		Vector3(-5.f, 205.f, 5.f), Vector3(5.f, 205.f, 5.f),
 		Vector3(-5.f, 215.f, -5.f), Vector3(5.f, 215.f, -5.f),

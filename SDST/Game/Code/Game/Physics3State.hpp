@@ -134,6 +134,7 @@ public:
 	
 	WrapAround* m_wraparound_continuous;
 	WrapAround* m_wraparound_general;
+	WrapAround* m_wraparound_verlet;
 	int m_wrap_pos_it_general = 0;
 
 	// assimp test
