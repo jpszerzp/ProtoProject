@@ -91,6 +91,7 @@ public:
 	eBodyIdentity m_bodyID = BODY_PARTICLE;		// this entity can be statically casted to specified type
 
 	bool m_frozen = false;
+	bool m_constrained = false;
 
 	eDynamicScheme m_scheme;
 	float m_motionClampTime;

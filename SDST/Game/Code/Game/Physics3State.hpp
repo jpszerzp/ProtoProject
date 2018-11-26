@@ -86,12 +86,15 @@ public:
 	void SwapHullStatusMesh(const std::string& str);
 
 public:
-	Ballistics* m_ballistics;
+	GravityRigidForceGenerator* m_gravity;
+
 	Spring* m_spring;
 	AnchorSpring* m_anchorSpring;
 	Rod* m_rod;
 	GeneralRigidAnchorSpring* m_rigidAnchorSpring;
-	GravityRigidForceGenerator* m_gravity;
+
+	ParticleForceRegistry* m_particleRegistry = nullptr;
+	RigidForceRegistry* m_rigidRegistry = nullptr;
 
 	// entities
 	std::vector<Sphere*> m_spheres;
@@ -109,9 +112,6 @@ public:
 	// we do need some structure to observe continuous objects conveniently
 	std::vector<Sphere*> m_ccd_spheres;
 	std::vector<Quad*> m_ccd_planes;
-
-	ParticleForceRegistry* m_particleRegistry = nullptr;
-	RigidForceRegistry* m_rigidRegistry = nullptr;
 
 	ContactResolver* m_allResolver;		
 	ContactResolver* m_iterResolver;

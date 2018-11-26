@@ -1,5 +1,7 @@
+#include "Game/GameCommon.hpp"
 #include "Engine/Core/Primitive/Point.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
+#include "Engine/Input/InputSystem.hpp"
 #include "Engine/Renderer/Renderable.hpp"
 #include "Engine/Math/Particle.hpp"
 #include "Engine/Physics/3D/PointEntity3.hpp"
@@ -52,6 +54,8 @@ Point::~Point()
 
 void Point::Update(float deltaTime)
 {
+	UpdateInput(deltaTime);
+
 	if (m_physDriven)
 	{
 		m_physEntity->Integrate(deltaTime);
@@ -64,6 +68,15 @@ void Point::Update(float deltaTime)
 
 	// update basis as needed
 	UpdateBasis();
+}
+
+void Point::UpdateInput(float)
+{
+	// adding the constrained condition is to only freeze particles in constraints like spring
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_3) && m_physEntity->m_constrained)
+	{
+		m_physEntity->m_frozen = !m_physEntity->m_frozen;
+	}
 }
 
 void Point::ObjectDrivePosition(Vector3 pos)

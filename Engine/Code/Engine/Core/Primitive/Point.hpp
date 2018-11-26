@@ -7,6 +7,7 @@ class Point : public GameObject
 public:
 	virtual void Render(Renderer* renderer) override;
 	virtual void Update(float deltaTime) override;
+	virtual void UpdateInput(float) override;
 
 	void ObjectDrivePosition(Vector3 pos) override;
 

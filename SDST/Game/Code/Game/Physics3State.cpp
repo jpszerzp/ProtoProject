@@ -138,6 +138,23 @@ Physics3State::Physics3State()
 	//m_wraparound_verlet->m_gos.push_back(verlet_basic_ballistics);
 	m_wraparound_verlet->m_gos.push_back(verlet_vel_ballistics);
 
+	// particla springs
+	// points for springs
+	Point* sp_point_0 = InitializePhysPoint(Vector3(40.f, 225.f, -5.f), Vector3::ZERO, 10.f, Rgba::RED, MOVE_DYNAMIC, BODY_PARTICLE);
+	Point* sp_point_1 = InitializePhysPoint(Vector3(40.f, 235.f, -5.f), Vector3::ZERO, 10.f, Rgba::CYAN, MOVE_DYNAMIC, BODY_PARTICLE);
+	Point* asp_point_0 = InitializePhysPoint(Vector3(45.f, 225.f, -5.f), Vector3::ZERO, 10.f, Rgba::RED, MOVE_DYNAMIC, BODY_PARTICLE);
+	Point* asp_point_1 = InitializePhysPoint(Vector3(45.f, 235.f, -5.f), Vector3::ZERO, 10.f, Rgba::CYAN, MOVE_STATIC, BODY_PARTICLE);
+	sp_point_0->m_physEntity->SetFrozen(true);
+	sp_point_1->m_physEntity->SetFrozen(true);
+	asp_point_0->m_physEntity->SetFrozen(true);
+	asp_point_1->m_physEntity->SetFrozen(true);
+	// setting up registrations in the registry
+	// A. springs
+	m_spring = SetupSpring(sp_point_0, sp_point_1, 2.f, 8.f);		
+	// two points initialized to be 5 units away, constraint by a spring system with rest length of 3
+	// B. anchored spring
+	m_anchorSpring = SetupAnchorSpring(asp_point_0, asp_point_1, 2.f, 8.f);
+
 	// debug
 	DebugRenderSet3DCamera(m_camera);
 	DebugRenderSet2DCamera(m_UICamera);
@@ -264,6 +281,9 @@ Spring* Physics3State::SetupSpring(Point* end1, Point* end2, float coef, float r
 	Entity3* e1 = end1->m_physEntity;
 	Entity3* e2 = end2->m_physEntity;
 
+	e1->m_constrained = true;
+	e2->m_constrained = true;
+
 	// turn off damping for springs
 	e1->SetConsiderDamp(false);
 	e2->SetConsiderDamp(false);
@@ -286,6 +306,9 @@ AnchorSpring* Physics3State::SetupAnchorSpring(Point* end1, Point* end2, float c
 	// get entities 
 	Entity3* e1 = end1->m_physEntity;
 	Entity3* e2 = end2->m_physEntity;
+
+	e1->m_constrained = true;
+	e2->m_constrained = true;
 
 	// turn off damping for springs
 	e1->SetConsiderDamp(false);

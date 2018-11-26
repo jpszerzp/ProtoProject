@@ -36,13 +36,9 @@ TheApp::TheApp()
 	g_input = InputSystem::GetInstance();
 	g_audio = AudioSystem::GetInstance();
 
-	ProtoState* proto = new ProtoState();
-	PachinkoState* pachinko = new PachinkoState();
 	Physics3State* phys3 = new Physics3State();
 	Collision3State* collision = new Collision3State();
 	StateMachine* states = new StateMachine();
-	states->AppendState(proto);
-	states->AppendState(pachinko);
 	states->AppendState(phys3);
 	states->AppendState(collision);
 	g_theGame = new TheGame();
