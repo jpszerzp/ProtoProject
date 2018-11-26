@@ -155,6 +155,29 @@ Physics3State::Physics3State()
 	// B. anchored spring
 	m_anchorSpring = SetupAnchorSpring(asp_point_0, asp_point_1, 2.f, 8.f);
 
+	// rigid spring
+	// the rigid ball
+	Sphere* spring_sphere = InitializePhysSphere(Vector3(55.f, 220.f, -5.f), Vector3::ZERO, Vector3::ONE, Rgba::MEGENTA, MOVE_DYNAMIC, BODY_RIGID);
+	spring_sphere->m_physEntity->SetFrozen(true);
+	// anchor
+	Point* rigid_anchor = InitializePhysPoint(Vector3(55.f, 235.f, -5.f), Vector3::ZERO, 10.f, Rgba::MEGENTA, MOVE_STATIC, BODY_PARTICLE);
+	rigid_anchor->m_physEntity->SetFrozen(true);
+	// entities
+	Entity3* anchor_entity = rigid_anchor->GetEntity();
+	Rigidbody3* attached_rigid = static_cast<Rigidbody3*>(spring_sphere->GetEntity());
+	anchor_entity->m_constrained = true;
+	attached_rigid->m_constrained = true;
+	// set up anchor spring
+	m_rigidAnchorSpring = new GeneralRigidAnchorSpring(anchor_entity, attached_rigid, .25f, 12.f);
+	// force generator
+	Vector3 attach_local = Vector3::ZERO;
+	ProjectPlaneToSphere(Vector2(.01f, .01f), spring_sphere->GetRadius(), attach_local);
+	GravityRigidForceGenerator* grg = new GravityRigidForceGenerator(Vector3::GRAVITY);
+	AnchorSpringRigidForceGenerator* asrfg = new AnchorSpringRigidForceGenerator(rigid_anchor->GetWorldPosition(), attached_rigid, attach_local, .25f, 12.f);
+	// force registration
+	m_rigidRegistry->Register(attached_rigid, asrfg);
+	m_rigidRegistry->Register(attached_rigid, grg);
+
 	// debug
 	DebugRenderSet3DCamera(m_camera);
 	DebugRenderSet2DCamera(m_UICamera);
@@ -170,11 +193,17 @@ Physics3State::~Physics3State()
 	delete m_particleRegistry;
 	m_particleRegistry = nullptr;
 
+	delete m_rigidRegistry;
+	m_rigidRegistry = nullptr;
+
 	delete m_spring;
 	m_spring = nullptr;
 
 	delete m_anchorSpring;
 	m_anchorSpring = nullptr;
+
+	delete m_rigidAnchorSpring;
+	m_rigidAnchorSpring = nullptr;
 
 	delete m_wraparound_general;
 	m_wraparound_general = nullptr;

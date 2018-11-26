@@ -20,8 +20,7 @@ void GravityRigidForceGenerator::UpdateForce(Rigidbody3* body, float)
 	body->AddForce(force);	
 	
 	Vector3 center = body->GetEntityCenter();
-	DebugRenderLine(.01f, center, center + force, 
-		5.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderLine(.01f, center, center + force, 5.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
 }	
 
 
@@ -33,6 +32,5 @@ void AnchorSpringRigidForceGenerator::UpdateForce(Rigidbody3* body, float)
 	Vector3 force = extension.GetNormalized() * (delta * m_const);
 	body->AddForcePointWorldCoord(force, attach_world);
 
-	DebugRenderLine(.01f, attach_world, attach_world + force,
-		5.f, Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderLine(.01f, attach_world, attach_world + force, 5.f, Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
 }

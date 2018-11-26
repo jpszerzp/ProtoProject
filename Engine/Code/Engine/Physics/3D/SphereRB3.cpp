@@ -107,7 +107,10 @@ void SphereRB3::UpdateTransforms()
 void SphereRB3::UpdateInput(float)
 {
 	InputSystem* input = InputSystem::GetInstance();
-	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_P) && !DevConsoleIsOpen())
+	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_P) && !DevConsoleIsOpen() && !m_constrained)
+		m_frozen = !m_frozen;
+
+	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_3) && m_constrained)
 		m_frozen = !m_frozen;
 }
 
