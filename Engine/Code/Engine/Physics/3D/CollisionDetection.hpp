@@ -5,6 +5,7 @@
 #include "Engine/Math/MathUtils.hpp"
 #include "Engine/Physics/3D/Entity3.hpp"
 #include "Engine/Physics/3D/SphereEntity3.hpp"
+#include "Engine/Physics/3D/Rigidbody3.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
 
 #define MAX_CONTACTS 2000
@@ -181,5 +182,6 @@ public:
 	
 	// general entity detection
 	static uint Entity3VsEntity3(Entity3* e1, Entity3* e2, CollisionData3* data);
+	static uint Rigid3VsRigid3(Rigidbody3* rb1, Rigidbody3* rb2, CollisionData3* data);
 };
 

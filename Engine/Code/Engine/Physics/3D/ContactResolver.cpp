@@ -146,7 +146,6 @@ void ContactResolver::ResolvePositionsCoherent(float)
 					deltaPos += linearChange[0];
 
 					TODO("Maybe multiply rotation amount later? how is that different? Need another array at that time");
-					//thisContact.m_penetration -= rotationAmount[0] * DotProduct(deltaPos, thisContact.m_normal);
 					thisContact.m_penetration -= DotProduct(deltaPos, thisContact.m_normal);
 				}
 				else if (ent1 == maxContact.m_e2)

@@ -68,7 +68,7 @@ Physics3State::Physics3State()
 
 	// hull status
 	float textWidth = title.size() * (m_textHeight * 0.5f);
-	const Rgba& statusColor = titleColor;
+	Rgba statusColor = titleColor;
 	m_statusMin = m_titleMin + Vector2(textWidth, 0.f);
 	std::string status = "Filling conflict lists";
 	m_hull_status = Mesh::CreateTextImmediate(statusColor, m_statusMin, font, m_textHeight, .5f, status, VERT_PCU);
@@ -79,15 +79,20 @@ Physics3State::Physics3State()
 	m_qh = new QuickHull(20, qhMin, qhMax);
 	g_hull = m_qh;
 
+	// bvh title
+	std::string bp_title = "Broadphase status: ";
+	Vector2 bp_title_min = m_titleMin - Vector2(0, m_textHeight);
+	m_bp_title = Mesh::CreateTextImmediate(Rgba::WHITE, bp_title_min, font, m_textHeight, .5f, bp_title, VERT_PCU);
+
 	// force registry 
 	m_particleRegistry = new ParticleForceRegistry();
 	m_rigidRegistry = new RigidForceRegistry();
 
 	//m_gravity = new GravityRigidForceGenerator(Vector3::GRAVITY);
 	//m_gravity = new GravityRigidForceGenerator(Vector3::GRAVITY / 2.f);
-	//m_gravity = new GravityRigidForceGenerator(Vector3::GRAVITY / 4.f);
+	m_gravity = new GravityRigidForceGenerator(Vector3::GRAVITY / 4.f);
 	//m_gravity = new GravityRigidForceGenerator(Vector3::GRAVITY / 8.f);
-	m_gravity = new GravityRigidForceGenerator(Vector3::GRAVITY / 16.f);
+	//m_gravity = new GravityRigidForceGenerator(Vector3::GRAVITY / 16.f);
 	
 	m_iterResolver = new ContactResolver(2);
 	m_allResolver = new ContactResolver();
@@ -112,26 +117,27 @@ Physics3State::Physics3State()
 		limit++;
 	}
 
-	//InitializePhysQuad(Vector3(0.f, 200.f, 0.f), Vector3(90.f, 0.f, 0.f), Vector3(20.f, 20.f, 1.f), Rgba::GREEN, MOVE_STATIC, BODY_RIGID);
+	InitializePhysQuad(Vector3(0.f, 280.f, 0.f), Vector3(90.f, 0.f, 0.f), Vector3(20.f, 20.f, 1.f), Rgba::GREEN, MOVE_STATIC, BODY_RIGID);
 
 	// inspection spot
 	m_inspection.push_back(Vector3(0.f, 0.f, -7.f));
 	m_inspection.push_back(Vector3(-100.f, 50.f, -50.f));
-	m_inspection.push_back(Vector3(0.f, 220.f, -20.f));
+	m_inspection.push_back(Vector3(0.f, 310.f, -30.f));
+	m_inspection.push_back(Vector3(0.f, 225, -30.f));
 
 	// wraparounds
-	m_wraparound_general = new WrapAround(Vector3(-10.f, 200.f, -10.f), Vector3(10.f, 220.f, 10.f));
-	m_wraparound_verlet = new WrapAround(Vector3(20.f, 200.f, -10.f), Vector3(30.f, 250.f, 0.f));
+	m_wraparound_general = new WrapAround(Vector3(-10.f, 280.f, -10.f), Vector3(10.f, 380.f, 10.f));
+	m_wraparound_verlet = new WrapAround(Vector3(-10.f, 200.f, -10.f), Vector3(0.f, 250.f, 0.f));
 
 	// verlet comparison
-	Ballistics* free_ballistics = SetupBallistics(FREEFALL, Vector3(23.f, 240.f, -5.f), true, Rgba::CYAN);
+	Ballistics* free_ballistics = SetupBallistics(FREEFALL, Vector3(-7.f, 240.f, -5.f), true, Rgba::CYAN);
 	// NOTE: we do not present basic verlet here, simply because wraparound will mess the way center is corrected
 	// and it is NOT worth adjusting the existing correct pipeline just because we want to fit it in the wraparound
 	//Ballistics* verlet_basic_ballistics = SetupBallistics(FREEFALL, Vector3(26.f, 240.f, -5.f), true, Rgba::MEGENTA);
 	//verlet_basic_ballistics->m_physEntity->SetVerlet(true);
 	//verlet_basic_ballistics->m_physEntity->SetVerletScheme(BASIC_VERLET);
 	//verlet_basic_ballistics->m_physEntity->SetEntityLastCenter(verlet_basic_ballistics->m_physEntity->GetEntityCenter());
-	Ballistics* verlet_vel_ballistics = SetupBallistics(FREEFALL, Vector3(29.f, 240.f, -5.f), true, Rgba::PINK);
+	Ballistics* verlet_vel_ballistics = SetupBallistics(FREEFALL, Vector3(-3.f, 240.f, -5.f), true, Rgba::PINK);
 	verlet_vel_ballistics->m_physEntity->SetVerlet(true);
 	verlet_vel_ballistics->m_physEntity->SetVerletScheme(VELOCITY_VERLET);
 	m_wraparound_verlet->m_gos.push_back(free_ballistics);
@@ -140,10 +146,10 @@ Physics3State::Physics3State()
 
 	// particla springs
 	// points for springs
-	Point* sp_point_0 = InitializePhysPoint(Vector3(40.f, 225.f, -5.f), Vector3::ZERO, 10.f, Rgba::RED, MOVE_DYNAMIC, BODY_PARTICLE);
-	Point* sp_point_1 = InitializePhysPoint(Vector3(40.f, 235.f, -5.f), Vector3::ZERO, 10.f, Rgba::CYAN, MOVE_DYNAMIC, BODY_PARTICLE);
-	Point* asp_point_0 = InitializePhysPoint(Vector3(45.f, 225.f, -5.f), Vector3::ZERO, 10.f, Rgba::RED, MOVE_DYNAMIC, BODY_PARTICLE);
-	Point* asp_point_1 = InitializePhysPoint(Vector3(45.f, 235.f, -5.f), Vector3::ZERO, 10.f, Rgba::CYAN, MOVE_STATIC, BODY_PARTICLE);
+	Point* sp_point_0 = InitializePhysPoint(Vector3(10.f, 225.f, -5.f), Vector3::ZERO, 10.f, Rgba::RED, MOVE_DYNAMIC, BODY_PARTICLE);
+	Point* sp_point_1 = InitializePhysPoint(Vector3(10.f, 235.f, -5.f), Vector3::ZERO, 10.f, Rgba::CYAN, MOVE_DYNAMIC, BODY_PARTICLE);
+	Point* asp_point_0 = InitializePhysPoint(Vector3(15.f, 225.f, -5.f), Vector3::ZERO, 10.f, Rgba::RED, MOVE_DYNAMIC, BODY_PARTICLE);
+	Point* asp_point_1 = InitializePhysPoint(Vector3(15.f, 235.f, -5.f), Vector3::ZERO, 10.f, Rgba::CYAN, MOVE_STATIC, BODY_PARTICLE);
 	sp_point_0->m_physEntity->SetFrozen(true);
 	sp_point_1->m_physEntity->SetFrozen(true);
 	asp_point_0->m_physEntity->SetFrozen(true);
@@ -157,10 +163,10 @@ Physics3State::Physics3State()
 
 	// rigid spring
 	// the rigid ball
-	Sphere* spring_sphere = InitializePhysSphere(Vector3(55.f, 220.f, -5.f), Vector3::ZERO, Vector3::ONE, Rgba::MEGENTA, MOVE_DYNAMIC, BODY_RIGID);
+	Sphere* spring_sphere = InitializePhysSphere(Vector3(25.f, 220.f, -5.f), Vector3::ZERO, Vector3::ONE, Rgba::MEGENTA, MOVE_DYNAMIC, BODY_RIGID, DISCRETE, false);
 	spring_sphere->m_physEntity->SetFrozen(true);
 	// anchor
-	Point* rigid_anchor = InitializePhysPoint(Vector3(55.f, 235.f, -5.f), Vector3::ZERO, 10.f, Rgba::MEGENTA, MOVE_STATIC, BODY_PARTICLE);
+	Point* rigid_anchor = InitializePhysPoint(Vector3(25.f, 235.f, -5.f), Vector3::ZERO, 10.f, Rgba::MEGENTA, MOVE_STATIC, BODY_PARTICLE);
 	rigid_anchor->m_physEntity->SetFrozen(true);
 	// entities
 	Entity3* anchor_entity = rigid_anchor->GetEntity();
@@ -214,16 +220,20 @@ Physics3State::~Physics3State()
 
 
 Sphere* Physics3State::InitializePhysSphere(Vector3 pos, Vector3 rot, Vector3 scale,
-	Rgba tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme scheme)
+	Rgba tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme scheme, bool bp)
 {
 	Sphere* s = new Sphere(pos, rot, scale, tint, "sphere_pcu", "default", moveStat, bid, false, COMPARE_LESS, CULLMODE_BACK, WIND_COUNTER_CLOCKWISE, scheme);
 	s->m_physDriven = true;
 	m_gameObjects.push_back(s);
 	m_spheres.push_back(s);
 	s->m_physEntity->SetGameobject(s);
+	s->m_physEntity->m_body_shape = SHAPE_SPHERE;
 
 	if (scheme == CONTINUOUS)
 		m_ccd_spheres.push_back(s);
+
+	if (bid == BODY_RIGID && bp)
+		m_rigid_gos.push_back(s);
 
 	return s;
 }
@@ -231,11 +241,13 @@ Sphere* Physics3State::InitializePhysSphere(Vector3 pos, Vector3 rot, Vector3 sc
 Cube* Physics3State::InitializePhysCube(Vector3 pos, Vector3 rot, Vector3 scale,
 	Rgba tint, eMoveStatus moveStat, eBodyIdentity bid)
 {
+	// AABB3 - deprecated
 	Cube* c = new Cube(pos, rot, scale, tint, "cube_pcu", "default", moveStat, bid);
 	c->m_physDriven = true;
 	m_gameObjects.push_back(c);
 	m_cubes.push_back(c);
 	c->m_physEntity->SetGameobject(c);
+	//c->m_physEntity->m_body_shape = SHAPE_BOX;
 
 	return c;
 }
@@ -243,14 +255,19 @@ Cube* Physics3State::InitializePhysCube(Vector3 pos, Vector3 rot, Vector3 scale,
 Quad* Physics3State::InitializePhysQuad(Vector3 pos, Vector3 rot, Vector3 scale,
 	Rgba tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme scheme)
 {
-	Quad* q = new Quad(pos, rot, scale, tint, "quad_pcu", "default", moveStat, bid, false, COMPARE_LESS, CULLMODE_FRONT, WIND_COUNTER_CLOCKWISE, CONTINUOUS);
+	Quad* q = new Quad(pos, rot, scale, tint, "quad_pcu", "default", moveStat, bid, false, COMPARE_LESS, CULLMODE_FRONT, WIND_COUNTER_CLOCKWISE, scheme);
 	q->m_physDriven = true;
 	m_gameObjects.push_back(q);
 	m_quads.push_back(q);
+
 	q->m_physEntity->SetGameobject(q);
+	q->m_physEntity->m_body_shape = SHAPE_PLANE;
 
 	if (scheme == CONTINUOUS)
 		m_ccd_planes.push_back(q);
+	
+	if (bid == BODY_RIGID)
+		m_rigid_gos.push_back(q);
 
 	return q;
 }
@@ -262,7 +279,12 @@ Box* Physics3State::InitializePhysBox(Vector3 pos, Vector3 rot, Vector3 scale,
 	b->m_physDriven = true;
 	m_gameObjects.push_back(b);
 	m_boxes.push_back(b);
+
 	b->m_physEntity->SetGameobject(b);
+	b->m_physEntity->m_body_shape = SHAPE_BOX;
+
+	if (bid == BODY_RIGID)
+		m_rigid_gos.push_back(b);
 
 	return b;
 }
@@ -271,11 +293,14 @@ Box* Physics3State::InitializePhysBox(Vector3 pos, Vector3 rot, Vector3 scale,
 Point* Physics3State::InitializePhysPoint(Vector3 pos, Vector3 rot, float size,
 	Rgba tint, eMoveStatus moveStat, eBodyIdentity bid)
 {
+	// note: points are all entities and non-rigid
 	Point* pt = new Point(pos, rot, size, tint, "point_pcu", "default", moveStat, bid);
 	pt->m_physDriven = true;
 	m_gameObjects.push_back(pt);
 	m_points.push_back(pt);
+
 	pt->m_physEntity->SetGameobject(pt);
+	pt->m_physEntity->m_body_shape = SHAPE_POINT;
 
 	return pt;
 }
@@ -292,12 +317,15 @@ Fireworks* Physics3State::SetupFireworks(float age, Vector3 pos, Vector3 inherit
 
 Ballistics* Physics3State::SetupBallistics(eBallisticsType type, Vector3 pos, bool frozen, Rgba color)
 {
+	// note: ballistics is point by nature, so non-rigid
 	Ballistics* b = new Ballistics(type, pos, frozen, color);
 	b->m_physDriven = true;
 	m_gameObjects.push_back(b);
 	m_points.push_back(b);
+
 	b->m_physEntity->SetGameobject(b);
 	b->m_physEntity->SetNetForcePersistent(true);			// do NOT clear force every frame
+	b->m_physEntity->m_body_shape = SHAPE_POINT;
 
 	return b;
 }
@@ -361,6 +389,7 @@ Rod* Physics3State::SetupRod(float length, Point* p1, Point* p2)
 void Physics3State::Update(float deltaTime)
 {
 	m_broadPhase = g_broadphase;		// hacky...
+
 	UpdateInput(deltaTime);				// update input
 	UpdateGameobjects(deltaTime);		// update gameobjects
 	UpdateDebugDraw(deltaTime);			// update debug draw
@@ -504,48 +533,46 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	}
 
 	// BVH
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_T)
-		&& !DevConsoleIsOpen())
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_T) && !DevConsoleIsOpen())
 	{
 		if (m_broadPhase)
 		{
 			// get rigid body expect to insert
-			Entity3* ent = m_gameObjects[m_nodeCount]->GetEntity();
+			//Entity3* ent = m_gameObjects[m_nodeCount]->GetEntity();
+			Entity3* ent = m_rigid_gos[m_nodeCount]->GetEntity();
 
 			// add gameobject to BVH
-			if (m_node == nullptr)
-				m_node = new BVHNode<BoundingSphere>(nullptr, ent->GetBoundingSphere(), ent);
+			if (m_bvh_node == nullptr)
+				m_bvh_node = new BVHNode<BoundingSphere>(nullptr, ent->GetBoundingSphere(), ent);
 			else
-				m_node->Insert(ent, ent->GetBoundingSphere());
+				m_bvh_node->Insert(ent, ent->GetBoundingSphere());
 
 			m_nodeCount++;
 		}
 	}
-	// test removing from leaf
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_R)
-		&& !DevConsoleIsOpen())
+	// test removing from leaf of BVH
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_R) && !DevConsoleIsOpen())
 	{
-		if (m_node != nullptr && m_broadPhase)
+		if (m_bvh_node != nullptr && m_broadPhase)
 		{
-			BVHNode<BoundingSphere>* leaf = m_node->GetRightLeaf();
+			BVHNode<BoundingSphere>* leaf = m_bvh_node->GetRightLeaf();
 
 			if (leaf != nullptr)
 			{
 				if (leaf->m_parent == nullptr)
-					m_node = nullptr;
+					m_bvh_node = nullptr;
 
 				delete leaf;
 				m_nodeCount--;
 			}
 		}
 	}
-	// test removing branch
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_Y)
-		&& !DevConsoleIsOpen())
+	// test removing branch of BVH
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_Y) && !DevConsoleIsOpen())
 	{
 		if (m_broadPhase)
 		{
-			BVHNode<BoundingSphere>* branch = m_node->m_children[1];
+			BVHNode<BoundingSphere>* branch = m_bvh_node->m_children[1];
 
 			if (branch != nullptr)
 				delete branch;
@@ -553,6 +580,8 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 			m_nodeCount = 1;
 		}
 	}
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_F2))
+		g_broadphase = !g_broadphase;
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_0))
 	{
@@ -947,6 +976,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 
 			// set camera pos to this inspection position
 			m_camera->GetTransform().SetLocalPosition(pos);
+			m_camera->GetTransform().SetLocalRotation(Vector3::ZERO);
 
 			int size = m_inspection.size();
 			++m_insepction_count;
@@ -963,7 +993,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	{
 		GravityRigidForceGenerator* gravity = new GravityRigidForceGenerator(Vector3::GRAVITY);
 
-		Vector3 pos = Vector3(0.f, 230.f, 0.f);
+		Vector3 pos = Vector3(0.f, 290.f, 0.f);
 		Sphere* s = InitializePhysSphere(pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID);
 		Rigidbody3* rigid_s = static_cast<Rigidbody3*>(s->GetEntity());
 		m_rigidRegistry->Register(rigid_s, gravity);
@@ -1156,29 +1186,32 @@ void Physics3State::UpdateContactGeneration()
 		// hard constraints use iterative solver
 		//m_rod->FillContact(m_iterResolver->GetCollisionData()->m_contacts);
 
+		// this is NOT using BVH to generate contacts
 		UpdateCore();
 	}
 	else
 	{
-		TODO("BVH also considers the coherent solver");
-		m_iterResolver->ClearRecords();
-		m_allResolver->ClearRecords();
+		TODO("BVH considers other resolvers");
+		TODO("BVH undetermined behavior when number of entities in the tree exceeds some threshold, does not seem to generate bvh contact candidates correctly");
+		m_coherentResolver->ClearRecords();
 		m_bvhContacts.clear();
 
-		// rod constraint is always here
-		m_rod->FillContact(m_iterResolver->GetCollisionData()->m_contacts);
-
 		// broad phase, use BVH to generate contacts
-		if (m_node != nullptr)
+		if (m_bvh_node != nullptr)
 		{
-			m_node->GetContacts(m_bvhContacts, 1000);
+			m_bvh_node->GetContacts(m_bvhContacts, 1000);
 
+			// process rigid bodies
 			for (const BVHContact& bvhc : m_bvhContacts)
 			{
 				Entity3* e1 = bvhc.m_rb1;
 				Entity3* e2 = bvhc.m_rb2;
 
-				CollisionDetector::Entity3VsEntity3(e1, e2, m_allResolver->GetCollisionData());
+				Rigidbody3* rb1 = static_cast<Rigidbody3*>(e1);
+				Rigidbody3* rb2 = static_cast<Rigidbody3*>(e2);
+
+				//CollisionDetector::Entity3VsEntity3(e1, e2, m_allResolver->GetCollisionData());
+				CollisionDetector::Rigid3VsRigid3(rb1, rb2, m_coherentResolver->GetCollisionData());
 			}
 		}
 	}
@@ -1466,8 +1499,23 @@ void Physics3State::UpdateContactResolution(float deltaTime)
 void Physics3State::UpdateBVH()
 {
 	// update BVH bottom up
-	if (m_node != nullptr && m_broadPhase)
-		m_node->UpdateNode();
+	if (m_bvh_node != nullptr && m_broadPhase)
+		m_bvh_node->UpdateNode();
+
+	// update UI
+	if (m_bp_status != nullptr)
+	{
+		delete m_bp_status;
+		m_bp_status = nullptr;
+	}
+	Renderer* theRenderer = Renderer::GetInstance();
+	BitmapFont* font = theRenderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
+	std::string bp_status = m_broadPhase ? "On" : "Off";
+	std::string bp_title = "Broadphase status: ";
+	float bp_title_width = bp_title.size() * (.5f * m_textHeight);
+	Vector2 bp_title_min = m_titleMin - Vector2(0.f, m_textHeight);
+	Vector2 bp_status_min = bp_title_min + Vector2(bp_title_width, 0.f);
+	m_bp_status = Mesh::CreateTextImmediate(Rgba::WHITE, bp_status_min, font, m_textHeight, .5f, bp_status, VERT_PCU);
 }
 
 void Physics3State::Render(Renderer* renderer)
@@ -1476,6 +1524,8 @@ void Physics3State::Render(Renderer* renderer)
 	renderer->ClearScreen(Rgba::BLACK);
 	DrawTextCut(m_hull_title);
 	DrawTextCut(m_hull_status);
+	DrawTextCut(m_bp_title);
+	DrawTextCut(m_bp_status);
 
 	renderer->SetCamera(m_camera);
 
@@ -1505,8 +1555,8 @@ void Physics3State::RenderGameobjects(Renderer* renderer)
 void Physics3State::RenderBVH(Renderer* renderer)
 {
 	// traverse the BVH
-	if (m_node != nullptr && m_broadPhase)
-		m_node->DrawNode(renderer);
+	if (m_bvh_node != nullptr && m_broadPhase)
+		m_bvh_node->DrawNode(renderer);
 }
 
 void Physics3State::RenderModelSamples(Renderer* renderer)
@@ -1534,10 +1584,10 @@ void Physics3State::RenderModelSamples(Renderer* renderer)
 
 void Physics3State::WrapAroundTestGeneral()
 {
-	Vector3 positions[8] = {Vector3(-5.f, 205.f, -5.f), Vector3(5.f, 205.f, -5.f),
-		Vector3(-5.f, 205.f, 5.f), Vector3(5.f, 205.f, 5.f),
-		Vector3(-5.f, 215.f, -5.f), Vector3(5.f, 215.f, -5.f),
-		Vector3(-5.f, 215.f, 5.f), Vector3(5.f, 215.f, 5.f)};
+	Vector3 positions[8] = {Vector3(-5.f, 295.f, -5.f), Vector3(5.f, 295.f, -5.f),
+		Vector3(-5.f, 295.f, 5.f), Vector3(5.f, 295.f, 5.f),
+		Vector3(-5.f, 305.f, -5.f), Vector3(5.f, 305.f, -5.f),
+		Vector3(-5.f, 305.f, 5.f), Vector3(5.f, 305.f, 5.f)};
 	Vector3 pos = positions[m_wrap_pos_it_general];
 
 	// spawn sphere

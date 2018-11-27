@@ -206,8 +206,7 @@ uint BVHNode<T>::GetContacts(std::vector<BVHContact>& contacts, uint limit) cons
 }
 
 template<class T>
-uint BVHNode<T>::GetContactsAgainst(const BVHNode<T>* other, 
-	std::vector<BVHContact>& contacts, uint limit) const
+uint BVHNode<T>::GetContactsAgainst(const BVHNode<T>* other, std::vector<BVHContact>& contacts, uint limit) const
 {
 	if (!Overlaps(other) || limit == 0)
 		return 0;

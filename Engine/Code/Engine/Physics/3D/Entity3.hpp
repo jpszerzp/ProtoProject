@@ -28,6 +28,15 @@ enum eBodyIdentity
 	BODY_RIGID
 };
 
+enum eBodyShape
+{
+	SHAPE_DEFAULT,
+	SHAPE_SPHERE,
+	SHAPE_PLANE,
+	SHAPE_BOX,
+	SHAPE_POINT
+};
+
 enum eDynamicScheme
 {
 	DISCRETE,
@@ -89,6 +98,7 @@ public:
 
 	eMoveStatus m_moveStatus = MOVE_DYNAMIC;	// constness
 	eBodyIdentity m_bodyID = BODY_PARTICLE;		// this entity can be statically casted to specified type
+	eBodyShape m_body_shape = SHAPE_DEFAULT;
 
 	bool m_frozen = false;
 	bool m_constrained = false;

@@ -42,7 +42,7 @@ public:
 	~Physics3State();
 
 	Sphere* InitializePhysSphere(Vector3 pos, Vector3 rot, Vector3 scale,
-		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme scheme = DISCRETE);
+		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme scheme = DISCRETE, bool bp = true);
 	Cube* InitializePhysCube(Vector3 pos, Vector3 rot, Vector3 scale,
 		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid);
 	Point* InitializePhysPoint(Vector3 pos, Vector3 rot, float size, 
@@ -102,6 +102,7 @@ public:
 	std::vector<Quad*>	 m_quads;
 	std::vector<Point*>  m_points;
 	std::vector<Box*>	 m_boxes;
+	std::vector<GameObject*> m_rigid_gos;
 
 	// continuous convenience
 	Sphere* m_ball_ccd_test_discrete = nullptr;
@@ -120,8 +121,10 @@ public:
 	// BVH
 	bool m_broadPhase = false;
 	std::vector<BVHContact> m_bvhContacts;
-	BVHNode<BoundingSphere>* m_node;
+	BVHNode<BoundingSphere>* m_bvh_node;
 	int m_nodeCount = 0;			// temp: later will flush all GO into tree at once
+	Mesh* m_bp_title = nullptr;
+	Mesh* m_bp_status = nullptr;
 
 	// QH
 	QuickHull* m_qh = nullptr;

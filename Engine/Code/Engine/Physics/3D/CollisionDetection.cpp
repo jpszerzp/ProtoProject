@@ -5,6 +5,7 @@
 #include "Engine/Physics/3D/BoxEntity3.hpp"
 #include "Engine/Physics/3D/BoxRB3.hpp"
 #include "Engine/Physics/3D/SphereRB3.hpp"
+#include "Engine/Physics/3D/QuadRB3.hpp"
 #include "Engine/Core/GameObject.hpp"
 #include "Engine/Core/Util/DataUtils.hpp"
 #include "Engine/Math/MathUtils.hpp"
@@ -150,8 +151,6 @@ float Contact3::GetDeltaVel()
 
 Vector3 Contact3::ComputeContactImpulse()
 {
-	TODO("This is frictionless version; need a friction version if we need to consider that.");
-
 	float delta = GetVelPerImpulseContact();
 	float imp = m_desiredVelDelta / delta;
 	return Vector3(imp, 0.f, 0.f);
@@ -247,7 +246,6 @@ Vector3 Contact3::ComputeWorldImpulseFriction()
 	Vector3 worldImpulse = m_toWorld * ComputeContactImpulseFriction();
 	DebugRenderLine(0.2f, m_point, m_point + worldImpulse, 5.f, Rgba::CYAN, Rgba::CYAN, DEBUG_RENDER_USE_DEPTH);
 	return worldImpulse;
-
 }
 
 void Contact3::ApplyImpulse()
@@ -266,7 +264,11 @@ void Contact3::ResolveVelocityCoherent(Vector3 linearChange[2], Vector3 angularC
 	if (m_friction == 0.f)
 		impulseWorld = ComputeWorldImpulse();
 	else
+	{
 		impulseWorld = ComputeWorldImpulseFriction();
+		TODO("review the system to see why i have to multiply here to make impulse work for plane collisions particularly");
+		//impulseWorld *= 2.f;			
+	}
 
 	if (rigid1 != nullptr && !rigid1->IsEntityStatic() && !rigid1->IsEntityKinematic())
 	{
@@ -325,11 +327,10 @@ void Contact3::ResolvePositionCoherent(Vector3 linearChange[2], Vector3 angularC
 
 	SolveNonlinearProjection(angularInertia, linearInertia, angularMove, linearMove);
 
-	// if static, all change arrays have Vector3::ZERO
+	// if static, both change arrays have Vector3::ZERO, so we do not need to consider static/kinematic on purpose
 	if (rigid1 != nullptr)
 	{
 		const Vector3& pos1 = rigid1->GetEntityCenter();
-		//const Vector3& relPos1 = m_point - pos1;
 
 		// linear
 		Vector3 translation = m_normal * linearMove[0];
@@ -358,7 +359,6 @@ void Contact3::ResolvePositionCoherent(Vector3 linearChange[2], Vector3 angularC
 	if (rigid2 != nullptr)
 	{
 		const Vector3& pos2 = rigid2->GetEntityCenter();
-		//const Vector3& relPos2 = m_point - pos2;
 
 		// linear
 		Vector3 translation = m_normal * linearMove[1];
@@ -398,6 +398,9 @@ void Contact3::PrepareInternal(float deltaTime)
 	if (m_e2 != nullptr)
 		m_relativePosWorld[1] = m_point - m_e2->GetEntityCenter();
 
+	// If entity is static/kinematic, it will have NO contribution to closing vel
+	// because their angular/linear velocity will 0.
+	// Hence we do not check for static/kinematic here
 	m_closingVel = ComputeContactVelocity(0, m_e1, deltaTime);
 	if (m_e2 != nullptr)
 		m_closingVel -= ComputeContactVelocity(1, m_e2, deltaTime);
@@ -429,8 +432,6 @@ Vector3 Contact3::ComputeContactVelocity(int idx, Entity3* ent, float deltaTime)
 	const Matrix33& toContact = m_toWorld.Transpose();
 	Vector3 contactVel = toContact * vel;	// to contact coord
 
-	TODO("Is adding the planar vel necessary? Need more test if we really do this.");
-	TODO("Potential bug source for plane collision");
 	Vector3 accVel = rigid->m_lastFrameLinearAcc * deltaTime;
 	accVel = toContact * accVel;
 	accVel.x = 0.f;					// ignore acceleration along local normal direction
@@ -455,6 +456,8 @@ void Contact3::ComputeDesiredVelDeltaResting(float deltaTime)
 
 	float velFromAcc = 0.f;
 
+	// technically i do not care static/kinematic here...
+	// because last frame acc for those rigid bodies will be 0
 	Rigidbody3* r1 = static_cast<Rigidbody3*>(m_e1);
 	if (r1 != nullptr && r1->IsAwake() && !r1->IsEntityStatic() && !r1->IsEntityKinematic())
 	//if (r1 != nullptr && r1->IsAwake())
@@ -504,7 +507,7 @@ void Contact3::SolveNonlinearProjection(
 	Rigidbody3* rigid1 = dynamic_cast<Rigidbody3*>(m_e1);
 	Rigidbody3* rigid2 = dynamic_cast<Rigidbody3*>(m_e2);
 
-	if (rigid1 != nullptr)
+	if (rigid1 != nullptr && !rigid1->IsEntityStatic() && !rigid1->IsEntityKinematic())
 	{
 		const Matrix33& iitWorld = rigid1->m_inverseInertiaTensorWorld;
 
@@ -517,7 +520,7 @@ void Contact3::SolveNonlinearProjection(
 
 		totalInertia += (angularInertia[0] + linearInertia[0]);
 	}
-	if (rigid2 != nullptr)
+	if (rigid2 != nullptr && !rigid2->IsEntityStatic() && !rigid2->IsEntityKinematic())
 	{
 		const Matrix33& iitWorld = rigid2->m_inverseInertiaTensorWorld;
 
@@ -532,7 +535,7 @@ void Contact3::SolveNonlinearProjection(
 	}
 
 	float contact_ii = 1.f / totalInertia;
-	if (!rigid1->IsEntityStatic())
+	if (!rigid1->IsEntityStatic() && !rigid1->IsEntityKinematic())
 	{
 		linearMove[0] = m_penetration * linearInertia[0] * contact_ii;
 		angularMove[0] = m_penetration * angularInertia[0] * contact_ii;
@@ -543,7 +546,7 @@ void Contact3::SolveNonlinearProjection(
 		angularMove[0] = 0.f;
 	}
 
-	if (!rigid2->IsEntityStatic())
+	if (!rigid2->IsEntityStatic() && !rigid2->IsEntityKinematic())
 	{
 		linearMove[1] = -m_penetration * linearInertia[1] * contact_ii;
 		angularMove[1] = -m_penetration * angularInertia[1] * contact_ii;
@@ -555,10 +558,9 @@ void Contact3::SolveNonlinearProjection(
 	}
 
 	// limit angular movement 
-	// does not affect static objects
+	// does not affect static objects - move values will be 0
 	const float angularLimit = .2f;
 	float limit1 = angularLimit * m_relativePosWorld[0].GetLength();
-	//if (abs(angularMove[0]) >= limit1)
 	if (abs(angularMove[0]) > limit1)
 	{
 		float totalMove1 = linearMove[0] + angularMove[0];
@@ -872,8 +874,7 @@ bool CollisionDetector::Sphere3VsPlane3Core(const Sphere3& sph, const Plane& pl,
 	penetration += sph.GetRadius();
 
 	Vector3 contactPoint = spherePos - planeNormal * signedDistToPlane;
-	Contact3 theContact = Contact3(sph.GetEntity(), pl.GetEntity(),
-		usedNormal.GetNormalized(), contactPoint, penetration, 0.8f, .05f);
+	Contact3 theContact = Contact3(sph.GetEntity(), pl.GetEntity(), usedNormal.GetNormalized(), contactPoint, penetration, 0.8f, 0.f);
 	contact = theContact;
 
 	return true;
@@ -2057,6 +2058,47 @@ uint CollisionDetector::Entity3VsEntity3(Entity3* e1, Entity3* e2, CollisionData
 		{
 			TODO("Later deal with quad vs quad");
 		}
+	}
+
+	return res;
+}
+
+uint CollisionDetector::Rigid3VsRigid3(Rigidbody3* rb1, Rigidbody3* rb2, CollisionData3* data)
+{
+	uint res;
+
+	const eBodyShape& shape1 = rb1->m_body_shape;
+	const eBodyShape& shape2 = rb2->m_body_shape;
+
+	if (shape1 == SHAPE_SPHERE && shape2 == SHAPE_SPHERE)
+	{
+		SphereRB3* srb1 = static_cast<SphereRB3*>(rb1);
+		SphereRB3* srb2 = static_cast<SphereRB3*>(rb2);
+
+		Sphere3 sph1 = srb1->GetSpherePrimitive();
+		Sphere3 sph2 = srb2->GetSpherePrimitive();
+
+		res = CollisionDetector::Sphere3VsSphere3Coherent(sph1, sph2, data);
+	}
+	else if (shape1 == SHAPE_SPHERE && shape2 == SHAPE_PLANE)
+	{
+		SphereRB3* srb = static_cast<SphereRB3*>(rb1);
+		QuadRB3* qrb = static_cast<QuadRB3*>(rb2);
+
+		Sphere3 sph = srb->GetSpherePrimitive();
+		Plane pl = qrb->GetPlanePrimitive();
+
+		res = CollisionDetector::Sphere3VsPlane3Coherent(sph, pl, data);
+	}
+	else if (shape1 == SHAPE_PLANE && shape2 == SHAPE_SPHERE)
+	{
+		QuadRB3* qrb = static_cast<QuadRB3*>(rb1);
+		SphereRB3* srb = static_cast<SphereRB3*>(rb2);
+
+		Plane pl = qrb->GetPlanePrimitive();
+		Sphere3 sph = srb->GetSpherePrimitive();
+
+		res = CollisionDetector::Sphere3VsPlane3Coherent(sph, pl, data);
 	}
 
 	return res;
