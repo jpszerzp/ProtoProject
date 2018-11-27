@@ -874,6 +874,7 @@ bool CollisionDetector::Sphere3VsPlane3Core(const Sphere3& sph, const Plane& pl,
 	penetration += sph.GetRadius();
 
 	Vector3 contactPoint = spherePos - planeNormal * signedDistToPlane;
+	TODO("If we are to add frcition, we need to multiply frcition impulse by 2 for some reason, see comment at line 270");
 	Contact3 theContact = Contact3(sph.GetEntity(), pl.GetEntity(), usedNormal.GetNormalized(), contactPoint, penetration, 0.8f, 0.f);
 	contact = theContact;
 
