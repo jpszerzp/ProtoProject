@@ -163,10 +163,10 @@ Physics3State::Physics3State()
 
 	// rigid spring
 	// the rigid ball
-	Sphere* spring_sphere = InitializePhysSphere(Vector3(25.f, 220.f, -5.f), Vector3::ZERO, Vector3::ONE, Rgba::MEGENTA, MOVE_DYNAMIC, BODY_RIGID, DISCRETE, false);
+	Sphere* spring_sphere = InitializePhysSphere(Vector3(45.f, 220.f, -5.f), Vector3::ZERO, Vector3::ONE, Rgba::MEGENTA, MOVE_DYNAMIC, BODY_RIGID, DISCRETE, false);
 	spring_sphere->m_physEntity->SetFrozen(true);
 	// anchor
-	Point* rigid_anchor = InitializePhysPoint(Vector3(25.f, 235.f, -5.f), Vector3::ZERO, 10.f, Rgba::MEGENTA, MOVE_STATIC, BODY_PARTICLE);
+	Point* rigid_anchor = InitializePhysPoint(Vector3(45.f, 235.f, -5.f), Vector3::ZERO, 10.f, Rgba::MEGENTA, MOVE_STATIC, BODY_PARTICLE);
 	rigid_anchor->m_physEntity->SetFrozen(true);
 	// entities
 	Entity3* anchor_entity = rigid_anchor->GetEntity();
@@ -183,6 +183,9 @@ Physics3State::Physics3State()
 	// force registration
 	m_rigidRegistry->Register(attached_rigid, asrfg);
 	m_rigidRegistry->Register(attached_rigid, grg);
+
+	// fireworks
+	SetupFireworks(5.f, Vector3(25.f, 230.f, -5.f), Vector3::ZERO, Vector3(0.f, 4.f, 0.f), Vector3(0.f, 4.f, 0.f), false);
 
 	// debug
 	DebugRenderSet3DCamera(m_camera);
@@ -311,7 +314,11 @@ Fireworks* Physics3State::SetupFireworks(float age, Vector3 pos, Vector3 inherit
 	fw->Configure(age, inheritVel, maxVel, minVel, lastRound);
 	m_gameObjects.push_back(fw);
 	m_points.push_back(fw);
+
 	fw->m_physEntity->SetGameobject(fw);
+
+	m_fw_points.push_back(fw);
+
 	return fw;
 }
 
@@ -389,7 +396,7 @@ Rod* Physics3State::SetupRod(float length, Point* p1, Point* p2)
 void Physics3State::Update(float deltaTime)
 {
 	m_broadPhase = g_broadphase;		// hacky...
-
+	RespawnFireworks();
 	UpdateInput(deltaTime);				// update input
 	UpdateGameobjects(deltaTime);		// update gameobjects
 	UpdateDebugDraw(deltaTime);			// update debug draw
@@ -582,6 +589,23 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	}
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_F2))
 		g_broadphase = !g_broadphase;
+
+	// fireworks cleanup - it is the only case where a GO's lifetime would expire
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_I))
+	{
+		m_fw_points.clear();
+		
+		for (std::vector<Point*>::size_type idx = 0; idx < m_points.size(); ++idx)
+		{
+			if (m_points[idx] == nullptr)
+			{
+				std::vector<Point*>::iterator it_pt = m_points.begin() + idx;
+				m_points.erase(it_pt);
+
+				idx--;
+			}
+		}
+	}
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_0))
 	{
@@ -1069,6 +1093,12 @@ void Physics3State::UpdateDebugDraw(float deltaTime)
 
 }
 
+void Physics3State::RespawnFireworks()
+{
+	if (m_fw_points.empty())
+		SetupFireworks(5.f, Vector3(25.f, 230.f, -5.f), Vector3::ZERO, Vector3(0.f, 4.f, 0.f), Vector3(0.f, 4.f, 0.f), false);
+}
+
 void Physics3State::UpdateForceRegistry(float deltaTime)
 {
 	if (m_particleRegistry != nullptr)
@@ -1160,11 +1190,15 @@ void Physics3State::UpdateGameobjectsCore(float deltaTime)
 		m_gameObjects[idx]->Update(deltaTime);
 		if (m_gameObjects[idx]->m_dead)
 		{
-			delete m_gameObjects[idx];
-			m_gameObjects[idx] = nullptr;
+			GameObject* to_be_deleted = m_gameObjects[idx];
+
 			std::vector<GameObject*>::iterator it = m_gameObjects.begin() + idx;
 			m_gameObjects.erase(it);
+
 			idx--;
+
+			delete to_be_deleted;
+			to_be_deleted = nullptr;
 		}
 	}
 

@@ -20,6 +20,7 @@
 #include "Game/WrapAround3.hpp"
 
 #include <set>
+#include <list>
 
 enum eHullGenerationStep
 {
@@ -66,6 +67,7 @@ public:
 	void UpdateInput(float deltaTime);
 	void UpdateGameobjects(float deltaTime);
 	void UpdateDebugDraw(float deltaTime);
+	void RespawnFireworks();
 
 	// update of GO
 	void UpdateForceRegistry(float deltaTime);
@@ -101,8 +103,9 @@ public:
 	std::vector<Cube*>	 m_cubes;
 	std::vector<Quad*>	 m_quads;
 	std::vector<Point*>  m_points;
+	std::vector<Fireworks*>  m_fw_points;
 	std::vector<Box*>	 m_boxes;
-	std::vector<GameObject*> m_rigid_gos;
+	std::vector<GameObject*> m_rigid_gos;		// for convenience of BVH
 
 	// continuous convenience
 	Sphere* m_ball_ccd_test_discrete = nullptr;
