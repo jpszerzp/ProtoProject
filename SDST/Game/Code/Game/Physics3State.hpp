@@ -43,15 +43,15 @@ public:
 	~Physics3State();
 
 	Sphere* InitializePhysSphere(Vector3 pos, Vector3 rot, Vector3 scale,
-		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme scheme = DISCRETE, bool bp = true);
+		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid, bool bp, eDynamicScheme scheme = DISCRETE);
 	Cube* InitializePhysCube(Vector3 pos, Vector3 rot, Vector3 scale,
 		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid);
 	Point* InitializePhysPoint(Vector3 pos, Vector3 rot, float size, 
 		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid);
 	Quad* InitializePhysQuad(Vector3 pos, Vector3 rot, Vector3 scale,
-		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme scheme = DISCRETE);
+		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid, bool bp, eDynamicScheme scheme = DISCRETE);
 	Box* InitializePhysBox(Vector3 pos, Vector3 rot, Vector3 scale,
-		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid);
+		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid, bool bp, eDynamicScheme scheme = DISCRETE);
 
 	Fireworks* SetupFireworks(float age, Vector3 pos, Vector3 inheritVel, Vector3 maxVel, Vector3 minVel, bool lastRound = false);
 	Ballistics* SetupBallistics(eBallisticsType type, Vector3 pos, bool frozen, Rgba color);
