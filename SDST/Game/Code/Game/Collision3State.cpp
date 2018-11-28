@@ -5,6 +5,7 @@
 #include "Engine/Core/Util/RenderUtil.hpp"
 #include "Engine/Core/Primitive/Sphere.hpp"
 #include "Engine/Core/Primitive/Quad.hpp"
+#include "Engine/Core/Primitive/Box.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/Math/MathUtils.hpp"
 #include "Engine/Physics/3D/Rigidbody3.hpp"
@@ -108,6 +109,93 @@ Collision3State::Collision3State()
 
 	ControlGroup* grp_0 = new ControlGroup(sph_1, pl, CONTROL_SPHERE_PLANE, Vector3(0.f, -6.f, -7.f));
 	m_controlGrps.push_back(grp_0);
+
+	// cp 3
+	pos = Vector3(10.f, -5.f, 0.f);
+	float rand_rot_x = GetRandomFloatInRange(0.f, 360.f);
+	float rand_rot_y = GetRandomFloatInRange(0.f, 360.f);
+	float rand_rot_z = GetRandomFloatInRange(0.f, 360.f);
+	rot = Vector3(rand_rot_x, rand_rot_y, rand_rot_z);
+	scale = Vector3::ONE;
+	Box* b = new Box(pos, rot, scale, tint, "cube_pcu", "default", stat, bid, multipass, compare, cull, wind);
+	rigid = static_cast<Rigidbody3*>(b->GetEntity());
+	b->m_physDriven = true;
+	rigid->SetGameobject(b);
+	rigid->SetAwake(true);
+	rigid->SetCanSleep(false);
+	m_gameObjects.push_back(b);
+
+	pos = Vector3(10.f, -7.f, 0.f);
+	rot = Vector3(90.f, 0.f, 0.f);
+	scale = Vector3(4.f, 4.f, 1.f);
+	Quad* pl_0 = new Quad(pos, rot, scale, tint, "quad_pcu", matName, stat, bid, multipass, compare, CULLMODE_FRONT, wind, scheme);
+	rigid = static_cast<Rigidbody3*>(pl_0->GetEntity());
+	pl_0->m_physDriven = true;
+	rigid->SetGameobject(pl_0);
+	rigid->SetAwake(true);
+	rigid->SetCanSleep(false);
+	m_gameObjects.push_back(pl_0);
+
+	ControlGroup* grp_1 = new ControlGroup(b, pl_0, CONTROL_BOX_PLANE, Vector3(10.f, -6.f, -7.f));
+	m_controlGrps.push_back(grp_1);
+
+	// cp 4
+	pos = Vector3(10.f, 0.f, 0.f);
+	rand_rot_x = GetRandomFloatInRange(0.f, 360.f);
+	rand_rot_y = GetRandomFloatInRange(0.f, 360.f);
+	rand_rot_z = GetRandomFloatInRange(0.f, 360.f);
+	rot = Vector3(rand_rot_x, rand_rot_y, rand_rot_z);
+	scale = Vector3::ONE;
+	Box* b_0 = new Box(pos, rot, scale, tint, "cube_pcu", "default", stat, bid, multipass, compare, cull, wind);
+	rigid = static_cast<Rigidbody3*>(b_0->GetEntity());
+	b_0->m_physDriven = true;
+	rigid->SetGameobject(b_0);
+	rigid->SetAwake(true);
+	rigid->SetCanSleep(false);
+	m_gameObjects.push_back(b_0);
+
+	pos = Vector3(12.f, 0.f, 0.f);
+	rot = Vector3::ZERO;
+	Sphere* sph_2 = new Sphere(pos, rot, scale, tint, meshName, matName, stat, bid, multipass, compare, cull, wind);
+	rigid = static_cast<Rigidbody3*>(sph_2->GetEntity());
+	sph_2->m_physDriven = true;
+	rigid->SetGameobject(sph_2);
+	rigid->SetAwake(true);
+	rigid->SetCanSleep(false);
+	m_gameObjects.push_back(sph_2);
+
+	ControlGroup* grp_2 = new ControlGroup(b_0, sph_2, CONTROL_BOX_SPHERE, Vector3(11.f, 0.f, -7.f));
+	m_controlGrps.push_back(grp_2);
+
+	// cp 5
+	pos = Vector3(20.f, 0.f, 0.f);
+	rand_rot_x = GetRandomFloatInRange(0.f, 360.f);
+	rand_rot_y = GetRandomFloatInRange(0.f, 360.f);
+	rand_rot_z = GetRandomFloatInRange(0.f, 360.f);
+	rot = Vector3(rand_rot_x, rand_rot_y, rand_rot_z);
+	Box* b_1 = new Box(pos, rot, scale, tint, "cube_pcu", "default", stat, bid, multipass, compare, cull, wind);
+	rigid = static_cast<Rigidbody3*>(b_1->GetEntity());
+	b_1->m_physDriven = true;
+	rigid->SetGameobject(b_1);
+	rigid->SetAwake(true);
+	rigid->SetCanSleep(false);
+	m_gameObjects.push_back(b_1);
+
+	pos = Vector3(22.f, 0.f, 0.f);
+	rand_rot_x = GetRandomFloatInRange(0.f, 360.f);
+	rand_rot_y = GetRandomFloatInRange(0.f, 360.f);
+	rand_rot_z = GetRandomFloatInRange(0.f, 360.f);
+	rot = Vector3(rand_rot_x, rand_rot_y, rand_rot_z);
+	Box* b_2 = new Box(pos, rot, scale, tint, "cube_pcu", "default", stat, bid, multipass, compare, cull, wind);
+	rigid = static_cast<Rigidbody3*>(b_2->GetEntity());
+	b_2->m_physDriven = true;
+	rigid->SetGameobject(b_2);
+	rigid->SetAwake(true);
+	rigid->SetCanSleep(false);
+	m_gameObjects.push_back(b_2);
+
+	ControlGroup* grp_3 = new ControlGroup(b_1, b_2, CONTROL_BOX_BOX, Vector3(21.f, 0.f, -7.f));
+	m_controlGrps.push_back(grp_3);
 
 	// set the focused grp and the initial index
 	m_focusedIndex = 0;

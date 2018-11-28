@@ -1492,7 +1492,7 @@ void Physics3State::UpdateCore()
 					OBB3 obb = be->GetBoxPrimitive();
 					Plane pl = qe->GetPlanePrimitive();
 
-					CollisionDetector::OBB3VsPlane3(obb, pl, m_allResolver->GetCollisionData());
+					CollisionDetector::OBB3VsPlane3Single(obb, pl, m_allResolver->GetCollisionData());
 				}
 			}
 			else
@@ -1505,7 +1505,7 @@ void Physics3State::UpdateCore()
 					OBB3 obb = brb->GetBoxPrimitive();
 					Plane pl = qe->GetPlanePrimitive();
 
-					CollisionDetector::OBB3VsPlane3(obb, pl, m_allResolver->GetCollisionData());
+					CollisionDetector::OBB3VsPlane3Single(obb, pl, m_allResolver->GetCollisionData());
 				}
 			}
 		}

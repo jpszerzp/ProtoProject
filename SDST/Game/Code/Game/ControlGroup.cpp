@@ -3,10 +3,12 @@
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/Core/Primitive/Sphere.hpp"
 #include "Engine/Core/Primitive/Quad.hpp"
+#include "Engine/Core/Primitive/Box.hpp"
 #include "Engine/Core/Util/DataUtils.hpp"
 #include "Engine/Core/Util/RenderUtil.hpp"
 #include "Engine/Physics/3D/SphereRB3.hpp"
 #include "Engine/Physics/3D/QuadRb3.hpp"
+#include "Engine/Physics/3D/BoxRB3.hpp"
 #include "Engine/Renderer/DebugRenderer.hpp"
 #include "Engine/Renderer/Window.hpp"
 
@@ -150,6 +152,61 @@ void ControlGroup::Update(float deltaTime)
 			m_contacts.push_back(contact);
 	}
 		break;
+	case CONTROL_BOX_PLANE:
+	{
+		Contact3 contact;
+		
+		Box* b = static_cast<Box*>(m_gos[0]);
+		Quad* q = static_cast<Quad*>(m_gos[1]);
+
+		BoxRB3* rbb = static_cast<BoxRB3*>(b->GetEntity());
+		QuadRB3* rbq = static_cast<QuadRB3*>(q->GetEntity());
+
+		const OBB3& obb = rbb->m_primitive;
+		const Plane& pl = rbq->m_primitive;
+
+		bool intersected = CollisionDetector::OBB3VsPlane3Core(obb, pl, contact);
+		if (intersected)
+			m_contacts.push_back(contact);
+	}
+		break;
+	case CONTROL_BOX_SPHERE:
+	{
+		Contact3 contact;
+		
+		Box* b = static_cast<Box*>(m_gos[0]);
+		Sphere* s = static_cast<Sphere*>(m_gos[1]);
+
+		BoxRB3* rbb = static_cast<BoxRB3*>(b->GetEntity());
+		SphereRB3* rbs = static_cast<SphereRB3*>(s->GetEntity());
+
+		const OBB3& obb = rbb->m_primitive;
+		const Sphere3& sph = rbs->m_primitive;
+
+		bool intersected = CollisionDetector::OBB3VsSphere3Core(obb, sph, contact);
+		if (intersected)
+			m_contacts.push_back(contact);
+	}
+		break;
+	case CONTROL_BOX_BOX:
+	{
+		Contact3 contact;
+
+		Box* b_0 = static_cast<Box*>(m_gos[0]);
+		Box* b_1 = static_cast<Box*>(m_gos[1]);
+
+		BoxRB3* rbb_0 = static_cast<BoxRB3*>(b_0->GetEntity());
+		BoxRB3* rbb_1 = static_cast<BoxRB3*>(b_1->GetEntity());
+
+		const OBB3& obb_0 = rbb_0->m_primitive;
+		const OBB3& obb_1 = rbb_1->m_primitive;
+
+		TODO("contact point is not correct - it is set to center of an entity, see Core for detail");
+		bool intersected = CollisionDetector::OBB3VsOBB3Core(obb_0, obb_1, contact);
+		if (intersected)
+			m_contacts.push_back(contact);
+	}
+		break;
 	default:
 		break;
 	}
@@ -188,8 +245,8 @@ void ControlGroup::UpdateUI()
 		m_view.push_back(mesh);
 		min -= Vector2(0.f, m_textHeight);
 
-		std::string contac_num = Stringf("Contact number: %i", m_contacts.size());
-		mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, contac_num, VERT_PCU);
+		std::string contact_num = Stringf("Contact number: %i", m_contacts.size());
+		mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, contact_num, VERT_PCU);
 		m_view.push_back(mesh);
 		min -= Vector2(0.f, m_textHeight);
 
@@ -219,8 +276,8 @@ void ControlGroup::UpdateUI()
 		m_view.push_back(mesh);
 		min -= Vector2(0.f, m_textHeight);
 
-		std::string contac_num = Stringf("Contact number: %i", m_contacts.size());
-		mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, contac_num, VERT_PCU);
+		std::string contact_num = Stringf("Contact number: %i", m_contacts.size());
+		mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, contact_num, VERT_PCU);
 		m_view.push_back(mesh);
 		min -= Vector2(0.f, m_textHeight);
 
@@ -236,6 +293,90 @@ void ControlGroup::UpdateUI()
 				m_view.push_back(mesh);
 				min -= Vector2(0.f, m_textHeight);
 			}
+		}
+	}
+		break;
+	case CONTROL_BOX_PLANE:
+	{
+		Vector2 min = m_startMin;
+
+		std::string cp_title = "Box v.s plane";
+		Mesh* mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, cp_title, VERT_PCU);
+		m_view.push_back(mesh);
+		min -= Vector2(0.f, m_textHeight);
+
+		std::string contact_num = Stringf("Contact number: %i", m_contacts.size());
+		mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, contact_num, VERT_PCU);
+		m_view.push_back(mesh);
+		min -= Vector2(0.f, m_textHeight);
+
+		if (m_contacts.size() > 0U)
+		{
+			for (int i = 0; i < m_contacts.size(); ++i)
+			{
+				const Contact3& theContact = m_contacts[i];
+				std::string contact_info = Stringf("Contact at (%f, %f, %f), has normal (%f, %f, %f), with penetration %f",
+					theContact.m_point.x, theContact.m_point.y, theContact.m_point.z,
+					theContact.m_normal.x, theContact.m_normal.y, theContact.m_normal.z, theContact.m_penetration);
+				mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, contact_info, VERT_PCU);
+				m_view.push_back(mesh);
+				min -= Vector2(0.f, m_textHeight);
+			}
+		}
+	}
+		break;
+	case CONTROL_BOX_SPHERE:
+	{
+		Vector2 min = m_startMin;
+
+		std::string cp_title = "Box v.s sphere";
+		Mesh* mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, cp_title, VERT_PCU);
+		m_view.push_back(mesh);
+		min -= Vector2(0.f, m_textHeight);
+
+		std::string contact_num = Stringf("Contact number: %i", m_contacts.size());
+		mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, contact_num, VERT_PCU);
+		m_view.push_back(mesh);
+		min -= Vector2(0.f, m_textHeight);
+
+		if (m_contacts.size() > 0U)
+		{
+			for (int i = 0; i < m_contacts.size(); ++i)
+			{
+				const Contact3& theContact = m_contacts[i];
+				std::string contact_info = Stringf("Contact at (%f, %f, %f), has normal (%f, %f, %f), with penetration %f",
+					theContact.m_point.x, theContact.m_point.y, theContact.m_point.z,
+					theContact.m_normal.x, theContact.m_normal.y, theContact.m_normal.z, theContact.m_penetration);
+				mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, contact_info, VERT_PCU);
+				m_view.push_back(mesh);
+				min -= Vector2(0.f, m_textHeight);
+			}
+		}
+	}
+		break;
+	case CONTROL_BOX_BOX:
+	{
+		Vector2 min = m_startMin;
+
+		std::string cp_title = "Box v.s box";
+		Mesh* mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, cp_title, VERT_PCU);
+		m_view.push_back(mesh);
+		min -= Vector2(0.f, m_textHeight);
+
+		std::string contact_num = Stringf("Contact number: %i", m_contacts.size());
+		mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, contact_num, VERT_PCU);
+		m_view.push_back(mesh);
+		min -= Vector2(0.f, m_textHeight);
+
+		for (int i = 0; i < m_contacts.size(); ++i)
+		{
+			const Contact3& theContact = m_contacts[i];
+			std::string contact_info = Stringf("Contact at (%f, %f, %f), has normal (%f, %f, %f), with penetration %f",
+				theContact.m_point.x, theContact.m_point.y, theContact.m_point.z,
+				theContact.m_normal.x, theContact.m_normal.y, theContact.m_normal.z, theContact.m_penetration);
+			mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, contact_info, VERT_PCU);
+			m_view.push_back(mesh);
+			min -= Vector2(0.f, m_textHeight);
 		}
 	}
 		break;

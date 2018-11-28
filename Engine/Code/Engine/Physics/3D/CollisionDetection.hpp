@@ -128,54 +128,29 @@ public:
 	~CollisionDetector();
 
 	// sphere vs sphere
-	static bool Sphere3VsSphere3Core(const Sphere3& s1,
-		const Sphere3& s2, Contact3& contact);
-	static uint Sphere3VsSphere3Single(const Sphere3& s1, 
-		const Sphere3& s2, CollisionData3* data);
-	static uint Sphere3VsSphere3Coherent(const Sphere3& s1,
-		const Sphere3& s2, CollisionData3* data);
+	static bool Sphere3VsSphere3Core(const Sphere3& s1, const Sphere3& s2, Contact3& contact);
+	static uint Sphere3VsSphere3Single(const Sphere3& s1, const Sphere3& s2, CollisionData3* data);
+	static uint Sphere3VsSphere3Coherent(const Sphere3& s1, const Sphere3& s2, CollisionData3* data);
 
 	// sphere vs plane
-	static bool Sphere3VsPlane3Core(const Sphere3& sph,
-		const Plane& pl, Contact3& contact);
-	static uint Sphere3VsPlane3Single(const Sphere3& sph,
-		const Plane& pl, CollisionData3* data);
-	static uint Sphere3VsPlane3Coherent(const Sphere3& sph,
-		const Plane& pl, CollisionData3* data);
-
-	// sphere vs aabb3
-	static uint Sphere3VsAABB3(const Sphere3& sph,
-		const AABB3& aabb3, CollisionData3* data);
-
-	// aabb3 vs plane
-	static uint AABB3VsPlane3Single(const AABB3& aabb,
-		const Plane& plane, CollisionData3* data);
-	static uint AABB3VsPlane3Coherent(const AABB3& aabb,
-		const Plane& plane, CollisionData3* data);
-
-	// aabb3 vs aabb3
-	static uint AABB3VsAABB3Single(const AABB3& aabb3_1,
-		const AABB3& aabb3_2, CollisionData3* data);
-	static uint AABB3VsAABB3Coherent(const AABB3& aabb3_1,
-		const AABB3& aabb3_2, CollisionData3* data);
+	static bool Sphere3VsPlane3Core(const Sphere3& sph, const Plane& pl, Contact3& contact);
+	static uint Sphere3VsPlane3Single(const Sphere3& sph, const Plane& pl, CollisionData3* data);
+	static uint Sphere3VsPlane3Coherent(const Sphere3& sph, const Plane& pl, CollisionData3* data);
 
 	// obb3 vs plane
-	static uint OBB3VsPlane3(const OBB3& obb,
-		const Plane& plane, CollisionData3* data);
+	static bool OBB3VsPlane3Core(const OBB3& obb, const Plane& pl, Contact3& contact);
+	static uint OBB3VsPlane3Single(const OBB3& obb, const Plane& plane, CollisionData3* data);
+	static uint OBB3VsPlane3Coherent(const OBB3& obb, const Plane& plane, CollisionData3* data);
 
 	// obb3 vs sphere3
-	static bool OBB3VsSphere3Core(const OBB3& obb,
-		const Sphere3& sphere, Contact3& contact);
-	static uint OBB3VsSphere3Single(const OBB3& obb,
-		const Sphere3& sphere, CollisionData3* data);
-	static uint OBB3VsSphere3Coherent(const OBB3& obb,
-		const Sphere3& sphere, CollisionData3* data);
+	static bool OBB3VsSphere3Core(const OBB3& obb, const Sphere3& sphere, Contact3& contact);
+	static uint OBB3VsSphere3Single(const OBB3& obb, const Sphere3& sphere, CollisionData3* data);
+	static uint OBB3VsSphere3Coherent(const OBB3& obb, const Sphere3& sphere, CollisionData3* data);
 
-	// obb3 vs obb3: single and coherent do not share same core 
-	static uint OBB3VsOBB3Single(const OBB3& obb1,
-		const OBB3& obb2, CollisionData3* data);
-	static uint OBB3VsOBB3Coherent(const OBB3& obb1,
-		const OBB3& obb2, CollisionData3* data);
+	// obb3 vs obb3
+	static bool OBB3VsOBB3Core(const OBB3& obb_0, const OBB3& obb_1, Contact3& contact);
+	static uint OBB3VsOBB3Single(const OBB3& obb1, const OBB3& obb2, CollisionData3* data);
+	static uint OBB3VsOBB3Coherent(const OBB3& obb1, const OBB3& obb2, CollisionData3* data);
 
 	// obb3 vs point
 	static uint OBB3VsPoint(const OBB3& obb, const Vector3& p, Contact3& contact, bool reverse);
@@ -183,5 +158,17 @@ public:
 	// general entity detection
 	static uint Entity3VsEntity3(Entity3* e1, Entity3* e2, CollisionData3* data);
 	static uint Rigid3VsRigid3(Rigidbody3* rb1, Rigidbody3* rb2, CollisionData3* data);
+
+	// AABB deprecated
+	// sphere vs aabb3
+	static uint Sphere3VsAABB3(const Sphere3& sph, const AABB3& aabb3, CollisionData3* data);
+
+	// aabb3 vs plane
+	static uint AABB3VsPlane3Single(const AABB3& aabb, const Plane& plane, CollisionData3* data);
+	static uint AABB3VsPlane3Coherent(const AABB3& aabb, const Plane& plane, CollisionData3* data);
+
+	// aabb3 vs aabb3
+	static uint AABB3VsAABB3Single(const AABB3& aabb3_1, const AABB3& aabb3_2, CollisionData3* data);
+	static uint AABB3VsAABB3Coherent(const AABB3& aabb3_1, const AABB3& aabb3_2, CollisionData3* data);
 };
 
