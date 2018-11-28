@@ -615,6 +615,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		g_broadphase = !g_broadphase;
 
 	// delete objects in dynamic/general wraparound
+	TODO("Find a way to delete objects in a wraparound");
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_F3))
 	{
 		for (std::vector<GameObject*>::size_type idx = 0; idx < m_wraparound_general->m_gos.size(); ++idx)
