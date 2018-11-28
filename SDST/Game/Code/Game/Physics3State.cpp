@@ -118,17 +118,19 @@ Physics3State::Physics3State()
 	}
 
 	// for dynamics demo
-	InitializePhysQuad(Vector3(0.f, 280.f, 0.f), Vector3(90.f, 0.f, 0.f), Vector3(20.f, 20.f, 1.f), Rgba::GREEN, MOVE_STATIC, BODY_RIGID, false);
+	InitializePhysQuad(Vector3(0.f, 280.f, 0.f), Vector3(90.f, 0.f, 0.f), Vector3(20.f, 20.f, 1.f), Rgba::GREEN, MOVE_STATIC, BODY_RIGID, true);
 
 	// inspection spot
 	m_inspection.push_back(Vector3(0.f, 0.f, -7.f));
 	m_inspection.push_back(Vector3(-100.f, 50.f, -50.f));
 	m_inspection.push_back(Vector3(0.f, 310.f, -30.f));
 	m_inspection.push_back(Vector3(0.f, 225, -30.f));
+	m_inspection.push_back(Vector3(1100.f, 1100.f, 900.f));		
 
 	// wraparounds
 	m_wraparound_general = new WrapAround(Vector3(-10.f, 280.f, -10.f), Vector3(10.f, 380.f, 10.f));
 	m_wraparound_verlet = new WrapAround(Vector3(-10.f, 200.f, -10.f), Vector3(0.f, 250.f, 0.f));
+	m_wraparound_continuous = new WrapAround(Vector3(1000.f, 1000.f, 1000.f), Vector3(1200.f, 1200.f, 1200.f));
 
 	// verlet comparison
 	Ballistics* free_ballistics = SetupBallistics(FREEFALL, Vector3(-7.f, 240.f, -5.f), true, Rgba::CYAN);
@@ -188,6 +190,23 @@ Physics3State::Physics3State()
 	// fireworks
 	SetupFireworks(5.f, Vector3(25.f, 230.f, -5.f), Vector3::ZERO, Vector3(0.f, 4.f, 0.f), Vector3(0.f, 4.f, 0.f), false);
 
+	// continuity
+	m_quad_ccd_test = InitializePhysQuad(Vector3(1150.f, 1100.f, 1100.f), Vector3(0.f, 90.f, 0.f), Vector3(200.f, 200.f, 1.f), Rgba::WHITE, MOVE_STATIC, BODY_RIGID, false, CONTINUOUS);
+	m_ball_ccd_test_discrete = InitializePhysSphere(Vector3(1050.f, 1100.f, 1100.f), Vector3::ZERO, Vector3(0.5f, 0.5f, 0.5f), Rgba::CYAN, MOVE_DYNAMIC, BODY_RIGID, false);			// this is for comparison without ccd
+	Rigidbody3* rigid_ccd_s_dis = static_cast<Rigidbody3*>(m_ball_ccd_test_discrete->GetEntity());
+	rigid_ccd_s_dis->SetLinearVelocity(Vector3(500.f, 0.f, 0.f));	
+	rigid_ccd_s_dis->SetAwake(true);
+	rigid_ccd_s_dis->SetCanSleep(false);
+	rigid_ccd_s_dis->SetFrozen(true);			// freeze at the start
+	m_wraparound_continuous->m_gos.push_back(m_ball_ccd_test_discrete);
+	m_ball_ccd_test_continuous = InitializePhysSphere(Vector3(1050.f, 1050.f, 1050.f), Vector3::ZERO, Vector3(0.5f, 0.5f, 0.5f), Rgba::CYAN, MOVE_DYNAMIC, BODY_RIGID, false, CONTINUOUS);
+	Rigidbody3* rigid_ccd_s_cnt = static_cast<Rigidbody3*>(m_ball_ccd_test_continuous->GetEntity());
+	rigid_ccd_s_cnt->SetLinearVelocity(Vector3(500.f, -1.f, 0.f));	
+	rigid_ccd_s_cnt->SetAwake(true);
+	rigid_ccd_s_cnt->SetCanSleep(false);
+	rigid_ccd_s_cnt->SetFrozen(true);			// freeze at the start
+	m_wraparound_continuous->m_gos.push_back(m_ball_ccd_test_continuous);
+
 	// debug
 	DebugRenderSet3DCamera(m_camera);
 	DebugRenderSet2DCamera(m_UICamera);
@@ -220,6 +239,9 @@ Physics3State::~Physics3State()
 
 	delete m_wraparound_verlet;
 	m_wraparound_verlet = nullptr;
+
+	delete m_wraparound_continuous;
+	m_wraparound_continuous = nullptr;
 }
 
 
@@ -591,6 +613,29 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	}
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_F2))
 		g_broadphase = !g_broadphase;
+
+	// delete objects in dynamic/general wraparound
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_F3))
+	{
+		for (std::vector<GameObject*>::size_type idx = 0; idx < m_wraparound_general->m_gos.size(); ++idx)
+		{
+			GameObject* go = m_wraparound_general->m_gos[idx];
+
+			// first erase it from this structure
+			std::vector<GameObject*>::iterator it_wrap = m_wraparound_general->m_gos.begin() + idx;
+			m_wraparound_general->m_gos.erase(it_wrap);
+
+			// then erase from gameobject structure
+			
+			// then erase from sphere/box structure
+
+			// then erase from rigid structure 
+
+			delete go;
+
+			idx--;
+		}
+	}
 
 	// fireworks cleanup - it is the only case where a GO's lifetime would expire
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_I))
@@ -1020,7 +1065,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		GravityRigidForceGenerator* gravity = new GravityRigidForceGenerator(Vector3::GRAVITY);
 
 		Vector3 pos = Vector3(0.f, 290.f, 0.f);
-		Sphere* s = InitializePhysSphere(pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID, false);
+		Sphere* s = InitializePhysSphere(pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID, true);
 		Rigidbody3* rigid_s = static_cast<Rigidbody3*>(s->GetEntity());
 		m_rigidRegistry->Register(rigid_s, gravity);
 		rigid_s->SetAwake(true);
@@ -1092,7 +1137,19 @@ void Physics3State::UpdateDebugDraw(float deltaTime)
 	}
 
 	// draw a trail after continuous spheres
+	for (int i = 0; i < m_spheres.size(); ++i)
+	{
+		Sphere* sph = m_spheres[i];
+		SphereRB3* rb = static_cast<SphereRB3*>(sph->m_physEntity);
 
+		if (rb != nullptr)
+		{
+			const Vector3& start = sph->GetPhysicsCenter();
+			const Vector3& vel_norm = rb->GetLinearVelocity().GetNormalized();
+			const Vector3& end = start + vel_norm * 0.1f;
+			DebugRenderLine(.1f, start, end, 10.f, Rgba::MEGENTA, Rgba::MEGENTA, DEBUG_RENDER_USE_DEPTH);
+		}
+	}
 }
 
 void Physics3State::RespawnFireworks()
@@ -1111,7 +1168,6 @@ void Physics3State::UpdateForceRegistry(float deltaTime)
 
 void Physics3State::UpdateGameobjectsCore(float deltaTime)
 {
-	/*
 	// CONTINUOUS INTEGRATION FIRST
 
 	// at the start of the frame, take a snapshot of all continuous pairs
@@ -1182,7 +1238,6 @@ void Physics3State::UpdateGameobjectsCore(float deltaTime)
 
 	// plane pairs (excluding spheres since that sort of pair has been processed)
 	// ...
-	*/
 
 	// DISCRETE INTEGRATION
 
@@ -1207,6 +1262,7 @@ void Physics3State::UpdateGameobjectsCore(float deltaTime)
 	// WRAPAROUND UPDATE
 	m_wraparound_general->Update();
 	m_wraparound_verlet->Update();
+	m_wraparound_continuous->Update();
 }
 
 void Physics3State::UpdateContactGeneration()
@@ -1597,6 +1653,7 @@ void Physics3State::Render(Renderer* renderer)
 
 	m_wraparound_general->Render(renderer);
 	m_wraparound_verlet->Render(renderer);
+	m_wraparound_continuous->Render(renderer);
 }
 
 void Physics3State::RenderGameobjects(Renderer* renderer)
@@ -1650,7 +1707,7 @@ void Physics3State::WrapAroundTestGeneral()
 	if ((m_wrap_pos_it_general % 2) == 0)
 	{
 		// even, spawn ball
-		Sphere* s = InitializePhysSphere(pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID, false);
+		Sphere* s = InitializePhysSphere(pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID, true);
 		Rigidbody3* rigid_s = static_cast<Rigidbody3*>(s->GetEntity());
 		m_rigidRegistry->Register(rigid_s, m_gravity);
 		rigid_s->SetLinearVelocity(GetRandomVector3() * 5.f);
@@ -1661,7 +1718,7 @@ void Physics3State::WrapAroundTestGeneral()
 	else
 	{
 		// spawn box
-		Box* b = InitializePhysBox(pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID, false);
+		Box* b = InitializePhysBox(pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID, true);
 		Rigidbody3* rigid_b = static_cast<Rigidbody3*>(b->GetEntity());
 		m_rigidRegistry->Register(rigid_b, m_gravity);
 		rigid_b->SetLinearVelocity(GetRandomVector3() * 5.f);

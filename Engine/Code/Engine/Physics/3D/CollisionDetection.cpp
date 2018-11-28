@@ -875,7 +875,7 @@ bool CollisionDetector::Sphere3VsPlane3Core(const Sphere3& sph, const Plane& pl,
 
 	Vector3 contactPoint = spherePos - planeNormal * signedDistToPlane;
 	TODO("If we are to add frcition, we need to multiply frcition impulse by 2 for some reason, see comment at line 270");
-	Contact3 theContact = Contact3(sph.GetEntity(), pl.GetEntity(), usedNormal.GetNormalized(), contactPoint, penetration, 0.8f, 0.f);
+	Contact3 theContact = Contact3(sph.GetEntity(), pl.GetEntity(), usedNormal.GetNormalized(), contactPoint, penetration, 1.f, 0.f);
 	contact = theContact;
 
 	return true;
@@ -1052,7 +1052,7 @@ bool CollisionDetector::OBB3VsPlane3Core(const OBB3& obb, const Plane& pl, Conta
 	else
 		usedNormal = -pl.GetNormal();
 	Vector3 contactPoint = obb.GetCenter() + (-usedNormal) * s;
-	Contact3 theContact = Contact3(obb.GetEntity(), pl.GetEntity(), usedNormal, contactPoint, penetration);
+	Contact3 theContact = Contact3(obb.GetEntity(), pl.GetEntity(), usedNormal, contactPoint, penetration, 0.9f);
 	contact = theContact;
 
 	return true;
@@ -1878,6 +1878,16 @@ uint CollisionDetector::Rigid3VsRigid3(Rigidbody3* rb1, Rigidbody3* rb2, Collisi
 
 		res = CollisionDetector::Sphere3VsPlane3Coherent(sph, pl, data);
 	}
+	else if (shape1 == SHAPE_SPHERE && shape2 == SHAPE_BOX)
+	{
+		SphereRB3* srb = static_cast<SphereRB3*>(rb1);
+		BoxRB3* brb = static_cast<BoxRB3*>(rb2);
+
+		const Sphere3& sph = srb->GetSpherePrimitive();
+		const OBB3& obb = brb->GetBoxPrimitive();
+
+		res = CollisionDetector::OBB3VsSphere3Coherent(obb, sph, data);
+	}
 	else if (shape1 == SHAPE_PLANE && shape2 == SHAPE_SPHERE)
 	{
 		QuadRB3* qrb = static_cast<QuadRB3*>(rb1);
@@ -1887,6 +1897,46 @@ uint CollisionDetector::Rigid3VsRigid3(Rigidbody3* rb1, Rigidbody3* rb2, Collisi
 		Sphere3 sph = srb->GetSpherePrimitive();
 
 		res = CollisionDetector::Sphere3VsPlane3Coherent(sph, pl, data);
+	}
+	else if (shape1 == SHAPE_PLANE && shape2 == SHAPE_BOX)
+	{
+		QuadRB3* qrb = static_cast<QuadRB3*>(rb1);
+		BoxRB3* brb = static_cast<BoxRB3*>(rb2);
+
+		const Plane& pl = qrb->GetPlanePrimitive();
+		const OBB3& obb = brb->GetBoxPrimitive();
+
+		res = CollisionDetector::OBB3VsPlane3Coherent(obb, pl, data);
+	}
+	else if (shape1 == SHAPE_BOX && shape2 == SHAPE_BOX)
+	{
+		BoxRB3* brb1 = static_cast<BoxRB3*>(rb1);
+		BoxRB3* brb2 = static_cast<BoxRB3*>(rb2);
+
+		const OBB3& obb1 = brb1->GetBoxPrimitive();
+		const OBB3& obb2 = brb2->GetBoxPrimitive();
+
+		res = CollisionDetector::OBB3VsOBB3Coherent(obb1, obb2, data);
+	}
+	else if (shape1 == SHAPE_BOX && shape2 == SHAPE_PLANE)
+	{
+		BoxRB3* brb = static_cast<BoxRB3*>(rb1);
+		QuadRB3* qrb = static_cast<QuadRB3*>(rb2);
+
+		const OBB3& obb = brb->GetBoxPrimitive();
+		const Plane& pl = qrb->GetPlanePrimitive();
+
+		res = CollisionDetector::OBB3VsPlane3Coherent(obb, pl, data);
+	}
+	else if (shape1 == SHAPE_BOX && shape2 == SHAPE_SPHERE)
+	{
+		BoxRB3* brb = static_cast<BoxRB3*>(rb1);
+		SphereRB3* srb = static_cast<SphereRB3*>(rb2);
+
+		const OBB3& obb = brb->GetBoxPrimitive();
+		const Sphere3& sph = srb->GetSpherePrimitive();
+
+		res = CollisionDetector::OBB3VsSphere3Coherent(obb, sph, data);
 	}
 
 	return res;
