@@ -9,6 +9,7 @@ Vector3 Vector4::ToVector3() const
 	return Vector3(x, y, z);
 }
 
+
 //-----------------------------------------------------------------------------------------------
 Vector4::Vector4( const Vector4& copy )
 	: x( copy.x )

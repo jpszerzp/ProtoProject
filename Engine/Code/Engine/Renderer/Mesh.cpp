@@ -693,6 +693,50 @@ Mesh* Mesh::CreateTriangleImmediate(eVertexType type, const Rgba& color,
 	return mesh;
 }
 
+Mesh* Mesh::CreateCone(eVertexType type, int base_side)
+{
+	// apex
+	Vector3 apex = Vector3(0.f, 1.f, 0.f);
+
+	MeshBuilder mb;
+
+	mb.Begin(DRAW_TRIANGLE, true);
+	mb.SetColor(Rgba::WHITE);
+
+	// uv, tangent and normal are different per faces
+	float del_deg = 360.f / (float)(base_side);
+	for (int i = 0; i < base_side; ++i)
+	{
+		Vector3 bottom_vert_0 = Vector3(1.f * cosf(del_deg * i), 0.f, 1.f * sinf(del_deg * i));
+		Vector3 bottom_vert_1 = Vector3(1.f * cosf(del_deg * (i + 1)), 0.f, 1.f * sinf(del_deg * (i + 1)));
+
+		Vector3 tangentV3 = (bottom_vert_1 - bottom_vert_0).GetNormalized();
+		Vector4 tangent = tangentV3.ToVector4(1.f);
+		mb.SetTangent(tangent);
+
+		Vector3 toApex = (apex - bottom_vert_0).GetNormalized();
+		Vector3 normal = tangentV3.Cross(toApex);
+		mb.SetNormal(normal);
+
+		mb.SetUV(Vector2(0.f, 0.f));			// uv
+		uint idx = mb.PushVertex(bottom_vert_0);
+
+		mb.SetUV(Vector2(1.f, 0.f));
+		mb.PushVertex(bottom_vert_1);
+
+		mb.SetUV(Vector2(0.5f, 1.f));
+		mb.PushVertex(apex);
+
+		mb.AddTriangle(idx, idx + 1, idx + 2);
+	}
+
+	mb.End(); 
+
+	Mesh* mesh = mb.CreateMesh(type, DRAW_TRIANGLE);
+	mesh->m_type = type;
+	return mesh; 
+}
+
 Mesh* Mesh::CreateQuad2D(eVertexType type, Rgba color /*= Rgba::WHITE*/)
 {
 	MeshBuilder mb;

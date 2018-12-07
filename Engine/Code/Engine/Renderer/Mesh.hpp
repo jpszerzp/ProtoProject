@@ -20,6 +20,7 @@ public:
 	void SetDrawInstruction(  eDrawPrimitiveType type, bool use_indices, uint start_index, uint elem_count ); 
 	void SetLayout(VertexLayout layout) { m_layout = layout; }
 
+	// 3D
 	static Mesh* CreatePoint(eVertexType type);
 	static Mesh* CreateLineImmediate(eVertexType type, const Vector3& startPos, const Vector3& endPos, const Rgba& color);
 	static Mesh* CreatePointImmediate(eVertexType type, const Vector3& pos, const Rgba& color);
@@ -38,6 +39,7 @@ public:
 	static Mesh* CreateTerrainImmediateFromChunk(MapChunk* chunk, eVertexType type);
 	static Mesh* CreateTriangleImmediate(eVertexType type, const Rgba& color,
 		const Vector3& v1, const Vector3& v2, const Vector3& v3);
+	static Mesh* CreateCone(eVertexType type, int base_side);
 
 	// 2D
 	static Mesh* CreateQuad2D(eVertexType type, Rgba color = Rgba::WHITE);
