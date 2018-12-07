@@ -105,7 +105,7 @@ public:
 	std::vector<Point*>  m_points;
 	std::vector<Fireworks*>  m_fw_points;
 	std::vector<Box*>	 m_boxes;
-	std::vector<GameObject*> m_rigid_gos;		// for convenience of BVH
+	std::vector<GameObject*> m_rigid_bvh_gos;		// for convenience of BVH
 
 	// continuous convenience
 	Sphere* m_ball_ccd_test_discrete = nullptr;

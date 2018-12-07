@@ -34,9 +34,6 @@
     <ClCompile Include="GameCommon.cpp">
       <Filter>General</Filter>
     </ClCompile>
-    <ClCompile Include="Animator.cpp">
-      <Filter>General</Filter>
-    </ClCompile>
     <ClCompile Include="TheApp.cpp">
       <Filter>General</Filter>
     </ClCompile>
@@ -54,9 +51,6 @@
     </ClCompile>
     <ClCompile Include="Ship.cpp">
       <Filter>General\Units</Filter>
-    </ClCompile>
-    <ClCompile Include="WaterSurface.cpp">
-      <Filter>General</Filter>
     </ClCompile>
     <ClCompile Include="ProtoState.cpp">
       <Filter>General\States\Gallery</Filter>
@@ -117,9 +111,6 @@
     <ClInclude Include="TheGame.hpp">
       <Filter>General</Filter>
     </ClInclude>
-    <ClInclude Include="Animator.hpp">
-      <Filter>General</Filter>
-    </ClInclude>
     <ClInclude Include="GameState.hpp">
       <Filter>General\States</Filter>
     </ClInclude>
@@ -131,9 +122,6 @@
     </ClInclude>
     <ClInclude Include="Ship.hpp">
       <Filter>General\Units</Filter>
-    </ClInclude>
-    <ClInclude Include="WaterSurface.hpp">
-      <Filter>General</Filter>
     </ClInclude>
     <ClInclude Include="ProtoState.hpp">
       <Filter>General\States\Gallery</Filter>

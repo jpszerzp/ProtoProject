@@ -18,93 +18,42 @@
 
 TheApp::TheApp()
 {
-	DevConsole* theConsole = DevConsole::GetInstance();
-
-	XMLDocument gameConfigDoc;
-	gameConfigDoc.LoadFile("Data/GameConfig.xml");
-	g_gameConfigBlackboard = new Blackboard();
-	g_gameConfigBlackboard->PopulateFromXmlElementAttributes(*(gameConfigDoc.FirstChildElement()));
-	
-	// master clock forced to be null
-	g_masterClock = new Clock();
-	g_masterClock->SetParent(nullptr);
-
-	m_accTimer = 0.f;
-	m_frames = 0;
-
-	g_renderer = Renderer::GetInstance();
-	g_input = InputSystem::GetInstance();
-	g_audio = AudioSystem::GetInstance();
-
-	Physics3State* phys3 = new Physics3State();
-	Collision3State* collision = new Collision3State();
-	StateMachine* states = new StateMachine();
-	states->AppendState(phys3);
-	states->AppendState(collision);
-	g_theGame = new TheGame();
-	g_theGame->SetStateMachine(states);
-	g_theGame->UseDefaultState();			// now that we set default state, we use/apply it
-	g_theGame->UseGameState(nullptr);
-
-	theConsole->RegisterConsoleHandler();
-	theConsole->SetFont(g_renderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png"));
-	CommandStartup();
-
-	// set up profiler
-	Profiler::GetInstance();
-
-	// set up net work
-	Net::Startup();
-	//GetAddressExample();
-
-	// set instance of rcs
-	g_rcs = RCS::GetInstance();
-	g_rcs->Startup();
-
-	// set up udp test
-	UDPTest::GetInstance();
-
-	g_input->MouseShowCursor(false);
-	g_input->MouseLockCursor(true);
+	TimeStartup();
+	RendererStartup();
+	InputSystemStartup();
+	AudioSystemStartup();
+	NetStartup();
+	StateStartup();
+	ProfilerStartup();
+	ConsoleStartup();
+	BlackboardStartup();
 }
 
 
 TheApp::~TheApp()
 {
-	delete g_theGame;
-	g_theGame = nullptr;
-
-	Renderer::DestroyInstance();
-
-	//delete g_input;
-	//g_input = nullptr;
-
-	InputSystem::DestroyInstance();
-
-	AudioSystem::DestroyInstance();
-
 	delete g_gameConfigBlackboard;
 	g_gameConfigBlackboard = nullptr;
 
-	delete g_masterClock;
-	g_masterClock = nullptr;
-
-	delete g_atlas;
-	g_atlas = nullptr;
-
-	delete g_archer;
-	g_archer = nullptr;
-
-	delete g_mage;
-	g_mage = nullptr;
-
 	DevConsole::DestroyConsole();
+
 	Profiler::DestroyInstance();
-	Net::Shutdown();
-	UDPTest::DestroyInstance();
+
+	delete g_theGame;
+	g_theGame = nullptr;
 
 	// destroy rcs
 	RCS::DestroyInstance();
+	Net::Shutdown();
+
+	AudioSystem::DestroyInstance();
+
+	InputSystem::DestroyInstance();
+
+	Renderer::DestroyInstance();
+
+	delete g_masterClock;
+	g_masterClock = nullptr;
 }
 
 
@@ -133,15 +82,14 @@ void TheApp::SetDelayedFPS()
 void TheApp::Update()
 {
 	UpdateTime();
-	g_input->Update();
-	g_theGame->Update();
-	//PlayState::ProfilerTestUpdate();
 
+	g_input->Update();
 	ProcessInput();
+
+	g_theGame->Update();
 
 	DevConsole* console = DevConsole::GetInstance();
 	console->Update(g_input, m_deltaSeconds);
-
 	if (console->GetAppShouldQuit())
 	{
 		OnQuitRequested();
@@ -158,7 +106,6 @@ void TheApp::Update()
 void TheApp::UpdateTime()
 {
 	m_deltaSeconds = g_masterClock->frame.seconds;
-	//SetInstantFPS();
 }
 
 
@@ -264,4 +211,78 @@ void TheApp::PlayAudio(std::string clipName)
 {
 	SoundID testSound = g_audio->CreateOrGetSound( clipName );
 	g_audio->PlaySound( testSound );
+}
+
+void TheApp::TimeStartup()
+{
+	// master clock forced to be null
+	g_masterClock = new Clock();
+	g_masterClock->SetParent(nullptr);
+	m_accTimer = 0.f;
+	m_frames = 0;
+}
+
+void TheApp::RendererStartup()
+{
+	g_renderer = Renderer::GetInstance();
+}
+
+void TheApp::InputSystemStartup()
+{
+	g_input = InputSystem::GetInstance();
+	g_input->MouseShowCursor(false);
+	g_input->MouseLockCursor(true);
+}
+
+void TheApp::AudioSystemStartup()
+{
+	g_audio = AudioSystem::GetInstance();
+}
+
+void TheApp::NetStartup()
+{
+	// set up net work
+	Net::Startup();
+
+	// set instance of rcs
+	g_rcs = RCS::GetInstance();
+	g_rcs->Startup();
+}
+
+void TheApp::StateStartup()
+{
+	Physics3State* phys3 = new Physics3State();
+	Collision3State* collision = new Collision3State();
+	ProtoState* proto = new ProtoState();
+	StateMachine* states = new StateMachine();
+	states->AppendState(phys3);
+	states->AppendState(collision);
+	states->AppendState(proto);
+	g_theGame = new TheGame();
+	g_theGame->SetStateMachine(states);
+	g_theGame->UseDefaultState();			// now that we set default state, we use/apply it
+	g_theGame->UseGameState(nullptr);
+}
+
+void TheApp::ProfilerStartup()
+{
+	// set up profiler
+	Profiler::GetInstance();
+}
+
+void TheApp::ConsoleStartup()
+{
+	DevConsole* theConsole = DevConsole::GetInstance();
+	theConsole->RegisterConsoleHandler();
+	theConsole->SetFont(g_renderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png"));
+	theConsole->ConfigureMeshes();
+	CommandStartup();
+}
+
+void TheApp::BlackboardStartup()
+{
+	XMLDocument gameConfigDoc;
+	gameConfigDoc.LoadFile("Data/GameConfig.xml");
+	g_gameConfigBlackboard = new Blackboard();
+	g_gameConfigBlackboard->PopulateFromXmlElementAttributes(*(gameConfigDoc.FirstChildElement()));
 }

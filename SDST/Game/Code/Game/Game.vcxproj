@@ -292,7 +292,6 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Animator.cpp" />
     <ClCompile Include="Ballistics.cpp" />
     <ClCompile Include="CameraAnchor.cpp" />
     <ClCompile Include="Collision3State.cpp" />
@@ -322,7 +321,6 @@
     <ClCompile Include="TheApp.cpp" />
     <ClCompile Include="TheGame.cpp" />
     <ClCompile Include="TransformTest.cpp" />
-    <ClCompile Include="WaterSurface.cpp" />
     <ClCompile Include="WrapAround3.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -331,7 +329,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Animator.hpp" />
     <ClInclude Include="Ballistics.hpp" />
     <ClInclude Include="CameraAnchor.hpp" />
     <ClInclude Include="Collision3State.hpp" />
@@ -354,7 +351,6 @@
     <ClInclude Include="TheApp.hpp" />
     <ClInclude Include="TheGame.hpp" />
     <ClInclude Include="TransformTest.hpp" />
-    <ClInclude Include="WaterSurface.hpp" />
     <ClInclude Include="WrapAround3.hpp" />
   </ItemGroup>
   <ItemGroup>

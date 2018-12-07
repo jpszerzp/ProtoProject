@@ -43,6 +43,17 @@ public:
 	void Render();
 
 	void PlayAudio(std::string clipName);
+
+	// module startups
+	void TimeStartup();
+	void RendererStartup();
+	void InputSystemStartup();
+	void AudioSystemStartup();
+	void NetStartup();
+	void StateStartup();
+	void ProfilerStartup();
+	void ConsoleStartup();
+	void BlackboardStartup();
 };
 
 extern TheApp* g_theApp;

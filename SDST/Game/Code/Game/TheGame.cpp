@@ -23,8 +23,6 @@ TheGame::TheGame()
 
 	DebugRenderStartup();
 	//ProfilerSystemInitialize();
-
-	DevConsole::GetInstance()->ConfigureMeshes();
 }
 
 
@@ -92,19 +90,12 @@ void TheGame::InitializeClock()
 
 void TheGame::Update()
 {
-	PROFILE_LOG_SCOPED_FUNCTION();
-
 	UpdateTime();
 	
 	m_states->Update(m_deltaTime);
 
-	PassTimeToRenderer();
-
 	// Update rcs
 	g_rcs->Update(m_deltaTime);
-
-	// udpate udp test
-	UDPTest::GetInstance()->Update();
 }
 
 

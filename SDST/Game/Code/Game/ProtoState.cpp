@@ -663,5 +663,6 @@ void ProtoState::Render(Renderer* renderer)
 	renderer->m_objectData.model = Matrix44::IDENTITY;
 	renderer->DrawLine3D(m_normalTestStart, m_normalTestEnd, Rgba::CYAN, 5.f);
 
+	// fp
 	m_forwardPath->RenderScene(m_sceneGraph);
 }

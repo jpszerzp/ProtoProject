@@ -40,19 +40,5 @@ void RenderSceneGraph::RemoveCameras2D()
 
 void RenderSceneGraph::SortCamera()
 {
-}
 
-// deprecated
-/*
-bool RenderSceneGraph::IsLightAppropriate(Light* light, Vector3 renderablePos)
-{
-	Vector3 displacement = light->m_renderable->GetLocalPosition() - renderablePos;
-
-	if (displacement.GetLength() < 50.f)
-	{
-		return true;
-	}
-	
-	return false;
 }
-*/

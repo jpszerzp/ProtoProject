@@ -260,7 +260,7 @@ Sphere* Physics3State::InitializePhysSphere(Vector3 pos, Vector3 rot, Vector3 sc
 		m_ccd_spheres.push_back(s);
 
 	if (bid == BODY_RIGID && bp)
-		m_rigid_gos.push_back(s);
+		m_rigid_bvh_gos.push_back(s);
 
 	return s;
 }
@@ -294,7 +294,7 @@ Quad* Physics3State::InitializePhysQuad(Vector3 pos, Vector3 rot, Vector3 scale,
 		m_ccd_planes.push_back(q);
 	
 	if (bid == BODY_RIGID && bp)
-		m_rigid_gos.push_back(q);
+		m_rigid_bvh_gos.push_back(q);
 
 	return q;
 }
@@ -311,7 +311,7 @@ Box* Physics3State::InitializePhysBox(Vector3 pos, Vector3 rot, Vector3 scale,
 	b->m_physEntity->m_body_shape = SHAPE_BOX;
 
 	if (bid == BODY_RIGID && bp)
-		m_rigid_gos.push_back(b);
+		m_rigid_bvh_gos.push_back(b);
 
 	return b;
 }
@@ -570,7 +570,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		{
 			// get rigid body expect to insert
 			//Entity3* ent = m_gameObjects[m_nodeCount]->GetEntity();
-			Entity3* ent = m_rigid_gos[m_nodeCount]->GetEntity();
+			Entity3* ent = m_rigid_bvh_gos[m_nodeCount]->GetEntity();
 
 			// add gameobject to BVH
 			if (m_bvh_node == nullptr)
