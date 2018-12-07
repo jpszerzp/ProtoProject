@@ -1202,7 +1202,10 @@ uint CollisionDetector::OBB3VsSphere3Coherent(const OBB3& obb, const Sphere3& sp
 	return 1;
 }
 
-bool CollisionDetector::OBB3VsOBB3Core(const OBB3& obb1, const OBB3& obb2, Contact3& contact)
+/*
+ * Check if the two obb3 intersect. No contact info returned.
+ */
+bool CollisionDetector::OBB3VsOBB3Intersected(const OBB3& obb1, const OBB3& obb2)
 {
 	Vector3 obb1_local[3] = {obb1.m_right, obb1.m_up, obb1.m_forward};	// x y z
 	Vector3 obb2_local[3] = {obb2.m_right, obb2.m_up, obb2.m_forward};
@@ -1237,10 +1240,6 @@ bool CollisionDetector::OBB3VsOBB3Core(const OBB3& obb1, const OBB3& obb2, Conta
 		}
 	}
 	Matrix33 abs_rotation = Matrix33(abs_entries);
-	// axis record 
-	IntVector2 axis_pair;
-	//float deepest = -INFINITY;
-	float shallowest = INFINITY;
 
 	// 4 - test obb1 basis
 	float r1, r2;
@@ -1252,15 +1251,6 @@ bool CollisionDetector::OBB3VsOBB3Core(const OBB3& obb1, const OBB3& obb2, Conta
 			obb2.GetHalfExtCopy()[2] * abs_rotation[6 + i];
 		if (abs(t[i]) > (r1 + r2))
 			return false;
-		else
-		{
-			float overlap = (r1 + r2) - abs(t[i]);
-			if (overlap < shallowest)
-			{
-				shallowest = overlap;
-				axis_pair = IntVector2(i, -1);
-			}
-		}
 	}
 
 	// 5 - test obb2 basis
@@ -1273,15 +1263,6 @@ bool CollisionDetector::OBB3VsOBB3Core(const OBB3& obb1, const OBB3& obb2, Conta
 		float dist = abs(t[0] * rotation[3*i] + t[1] * rotation[3*i+1] + t[2] * rotation[3*i+2]); 
 		if (dist > (r1 + r2))
 			return false;
-		else
-		{
-			float overlap = (r1 + r2) - dist;
-			if (overlap < shallowest)
-			{
-				shallowest = overlap;
-				axis_pair = IntVector2(-1, i);
-			}
-		}
 	}
 
 	// 6 - test axis obb1x cross obb2x
@@ -1290,15 +1271,6 @@ bool CollisionDetector::OBB3VsOBB3Core(const OBB3& obb1, const OBB3& obb2, Conta
 	float dist = abs(t[2] * rotation[1] - t[1] * rotation[2]);
 	if (dist > (r1 + r2))
 		return false;
-	else
-	{
-		float overlap = (r1 + r2) - dist;
-		if (overlap < shallowest)
-		{
-			shallowest = overlap;
-			axis_pair = IntVector2(0, 0);
-		}
-	}
 
 	// 7 - test axis obb1x cross obb2y
 	r1 = obb1.m_halfExt[1] * abs_rotation[5] + obb1.m_halfExt[2] * abs_rotation[4];
@@ -1306,15 +1278,6 @@ bool CollisionDetector::OBB3VsOBB3Core(const OBB3& obb1, const OBB3& obb2, Conta
 	dist = abs(t[2] * rotation[4] - t[1] * rotation[5]);
 	if (dist > (r1 + r2))
 		return false;
-	else
-	{
-		float overlap = (r1 + r2) - dist;
-		if (overlap < shallowest)
-		{
-			shallowest = overlap;
-			axis_pair = IntVector2(0, 1);
-		}
-	}
 
 	// 8 - test axis obb1x cross obb2z
 	r1 = obb1.m_halfExt[1] * abs_rotation[8] + obb1.m_halfExt[2] * abs_rotation[7];
@@ -1322,15 +1285,6 @@ bool CollisionDetector::OBB3VsOBB3Core(const OBB3& obb1, const OBB3& obb2, Conta
 	dist = abs(t[2] * rotation[7] - t[1] * rotation[8]);
 	if (dist > (r1 + r2))
 		return false;
-	else
-	{
-		float overlap = (r1 + r2) - dist;
-		if (overlap < shallowest)
-		{
-			shallowest = overlap;
-			axis_pair = IntVector2(0, 2);
-		}
-	}
 
 	// 9 - test axis obb1y cross obb2x
 	r1 = obb1.m_halfExt[0] * abs_rotation[2] + obb1.m_halfExt[2] * abs_rotation[0];
@@ -1338,15 +1292,6 @@ bool CollisionDetector::OBB3VsOBB3Core(const OBB3& obb1, const OBB3& obb2, Conta
 	dist = abs(t[0] * rotation[2] - t[2] * rotation[0]);
 	if (dist > (r1 + r2))
 		return false;
-	else
-	{
-		float overlap = (r1 + r2) - dist;
-		if (overlap < shallowest)
-		{
-			shallowest = overlap;
-			axis_pair = IntVector2(1, 0);
-		}
-	}
 
 	// 10 - test axis obb1y cross obb2y
 	r1 = obb1.m_halfExt[0] * abs_rotation[5] + obb1.m_halfExt[2] * abs_rotation[3];
@@ -1354,16 +1299,6 @@ bool CollisionDetector::OBB3VsOBB3Core(const OBB3& obb1, const OBB3& obb2, Conta
 	dist = abs(t[0] * rotation[5] - t[2] * rotation[3]);
 	if (dist > (r1 + r2))
 		return false;
-	else
-	{
-		float overlap = (r1 + r2) - dist;
-
-		if (overlap < shallowest)
-		{
-			shallowest = overlap;
-			axis_pair = IntVector2(1, 1);
-		}
-	}
 
 	// 11 - test axis obb1y cross obb2z
 	r1 = obb1.m_halfExt[0] * abs_rotation[8] + obb1.m_halfExt[2] * abs_rotation[6];
@@ -1371,15 +1306,6 @@ bool CollisionDetector::OBB3VsOBB3Core(const OBB3& obb1, const OBB3& obb2, Conta
 	dist = abs(t[0] * rotation[8] - t[2] * rotation[6]);
 	if (dist > (r1 + r2))
 		return false;
-	else
-	{
-		float overlap = (r1 + r2) - dist;
-		if (overlap < shallowest)
-		{
-			shallowest = overlap;
-			axis_pair = IntVector2(1, 2);
-		}
-	}
 
 	// 12 - test axis obb1z cross obb2x
 	r1 = obb1.m_halfExt[0] * abs_rotation[1] + obb1.m_halfExt[1] * abs_rotation[0];
@@ -1387,15 +1313,6 @@ bool CollisionDetector::OBB3VsOBB3Core(const OBB3& obb1, const OBB3& obb2, Conta
 	dist = abs(t[1] * rotation[0] - t[0] * rotation[1]);
 	if (dist > (r1 + r2))
 		return false;
-	else
-	{
-		float overlap = (r1 + r2) - dist;
-		if (overlap < shallowest)
-		{
-			shallowest = overlap;
-			axis_pair = IntVector2(2, 0);
-		}
-	}
 
 	// 13 - test axis obb1z cross obb2y
 	r1 = obb1.m_halfExt[0] * abs_rotation[4] + obb1.m_halfExt[1] * abs_rotation[3];
@@ -1403,15 +1320,6 @@ bool CollisionDetector::OBB3VsOBB3Core(const OBB3& obb1, const OBB3& obb2, Conta
 	dist = abs(t[1] * rotation[3] - t[0] * rotation[4]);
 	if (dist > (r1 + r2))
 		return false;
-	else
-	{
-		float overlap = (r1 + r2) - dist;
-		if (overlap < shallowest)
-		{
-			shallowest = overlap;
-			axis_pair = IntVector2(2, 1);
-		}
-	}
 
 	// 14 - test axis obb1z cross obb2z
 	r1 = obb1.m_halfExt[0] * abs_rotation[7] + obb1.m_halfExt[1] * abs_rotation[6];
@@ -1419,56 +1327,14 @@ bool CollisionDetector::OBB3VsOBB3Core(const OBB3& obb1, const OBB3& obb2, Conta
 	dist = abs(t[1] * rotation[6] - t[0] * rotation[7]);
 	if (dist > (r1 + r2))
 		return false;
-	else
-	{
-		float overlap = (r1 + r2) - dist;
-		if (overlap < shallowest)
-		{
-			shallowest = overlap;
-			axis_pair = IntVector2(2, 2);
-		}
-	}
 
-	// 15 - restore axis and hence find normal
-	Vector3 usedNormal;
-	Vector3 a1 = ISA;
-	Vector3 a2 = ISA;
-	int basis1 = axis_pair.x;
-	int basis2 = axis_pair.y;
-	switch (basis1)
-	{
-	case -1: break;
-	case 0: a1 = obb1.m_right; break;
-	case 1: a1 = obb1.m_up; break;
-	case 2: a1 = obb1.m_forward; break;
-	default: break;
-	}
-	switch (basis2)
-	{
-	case -1: break;
-	case 0: a2 = obb2.m_right; break;
-	case 1: a2 = obb2.m_up; break;
-	case 2: a2 = obb2.m_forward; break;
-	default: break;
-	}
-	if(a1 == ISA)
-		// valid subject axis is a2
-		usedNormal = a2;
-	else if (a2 == ISA)
-		usedNormal = a1;
-	else
-		usedNormal = a1.Cross(a2);
-	if (DotProduct(usedNormal, obb2.m_center - obb1.m_center) > 0.f)	// should not equal 0
-		usedNormal *= -1.f;
-
-	// 16 - generate contact
-	usedNormal.NormalizeAndGetLength();
-	Vector3 contactPoint = obb1.m_center;
-	float penetration = shallowest;
-	Contact3 theContact = Contact3(obb1.GetEntity(), obb2.GetEntity(), usedNormal, contactPoint, penetration, 0.9f);
-	contact = theContact;
-
+	// no SAT, mush intersect
 	return true;
+}
+
+bool CollisionDetector::OBB3VsOBB3Core(const OBB3& obb1, const OBB3& obb2, Contact3& contact)
+{
+	return false;
 }
 
 uint CollisionDetector::OBB3VsOBB3Single(const OBB3& obb1, const OBB3& obb2, CollisionData3* data)

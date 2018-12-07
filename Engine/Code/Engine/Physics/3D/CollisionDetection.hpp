@@ -148,6 +148,7 @@ public:
 	static uint OBB3VsSphere3Coherent(const OBB3& obb, const Sphere3& sphere, CollisionData3* data);
 
 	// obb3 vs obb3
+	static bool OBB3VsOBB3Intersected(const OBB3& obb_0, const OBB3& obb_1);
 	static bool OBB3VsOBB3Core(const OBB3& obb_0, const OBB3& obb_1, Contact3& contact);
 	static uint OBB3VsOBB3Single(const OBB3& obb1, const OBB3& obb2, CollisionData3* data);
 	static uint OBB3VsOBB3Coherent(const OBB3& obb1, const OBB3& obb2, CollisionData3* data);
