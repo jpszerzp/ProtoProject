@@ -5,7 +5,14 @@
 #include "Engine/Math/Primitive3.hpp"
 #include "Engine/Core/Transform.hpp"
 
+#include <vector>
+
 class Entity3;
+
+struct OBB3Face
+{
+	Vector3 m_normal;
+};
 
 class OBB3
 {
@@ -18,6 +25,7 @@ public:
 	Vector3 m_up;
 	Vector3 m_right;
 	Vector3 m_halfExt;			// halfway extends of OBB along basis 
+	std::vector<OBB3Face> m_faces;
 
 public:
 	OBB3(){}
@@ -44,6 +52,9 @@ public:
 	Vector3 GetBBR() const;
 	Vector3 GetBTR() const;
 	Entity3* GetEntity() const { return m_entity; }
+	Vector3 GetForward() const { return m_forward; }
+	Vector3 GetUp() const { return m_up; }
+	Vector3 GetRight() const { return m_right; }
 
 	void SetCenter(const Vector3& center);
 	void SetEntity(Entity3* ent) { m_entity = ent; }

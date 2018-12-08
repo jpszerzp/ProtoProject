@@ -1334,6 +1334,45 @@ bool CollisionDetector::OBB3VsOBB3Intersected(const OBB3& obb1, const OBB3& obb2
 
 bool CollisionDetector::OBB3VsOBB3Core(const OBB3& obb1, const OBB3& obb2, Contact3& contact)
 {
+	//// make sure obb1 and obb2 basis are unit vector, so that all vectors are unit here
+	//Vector3 forward1 = obb1.GetForward();
+	//Vector3 up1 = obb1.GetUp();
+	//Vector3 right1 = obb1.GetRight();
+	//Vector3 forward2 = obb2.GetForward();
+	//Vector3 up2 = obb2.GetUp();
+	//Vector3 right2 = obb2.GetRight();
+	//Vector3 f1f2 = forward1.Cross(forward2);
+	//Vector3 f1r2 = forward1.Cross(right2);
+	//Vector3 f1u2 = forward1.Cross(up2);
+	//Vector3 r1f2 = right1.Cross(forward2);
+	//Vector3 r1r2 = right1.Cross(right2);
+	//Vector3 r1u2 = right1.Cross(up2);
+	//Vector3 u1f2 = up1.Cross(forward2);
+	//Vector3 u1r2 = up1.Cross(right2);
+	//Vector3 u1u2 = up1.Cross(up2);
+
+	//// make axes out of these bases (Line3)
+	//Line3 axis_forward1 = Line3::FromVector3(forward1);
+	//Line3 axis_up1 = Line3::FromVector3(up1);
+	//Line3 axis_right1 = Line3::FromVector3(right1);
+	//Line3 axis_forward2 = Line3::FromVector3(forward2);
+	//Line3 axis_up2 = Line3::FromVector3(up2);
+	//Line3 axis_right2 = Line3::FromVector3(right2);
+	//Line3 axis_f1f2 = Line3::FromVector3(f1f2);
+	//Line3 axis_f1r2 = Line3::FromVector3(f1r2);
+	//Line3 axis_f1u2 = Line3::FromVector3(f1u2);
+	//Line3 axis_r1f2 = Line3::FromVector3(r1f2);
+	//Line3 axis_r1r2 = Line3::FromVector3(r1r2);
+	//Line3 axis_r1u2 = Line3::FromVector3(r1u2);
+	//Line3 axis_u1f2 = Line3::FromVector3(u1f2);
+	//Line3 axis_u1r2 = Line3::FromVector3(u1r2);
+	//Line3 axis_u1u2 = Line3::FromVector3(u1u2);
+
+	//// 
+	//DirectionalInterval interval1 = GetIntervalOfBoxAcrossAxis(obb1, axis_forward1);
+	//DirectionalInterval interval2 = GetIntervalOfBoxAcrossAxis(obb2, axis_forward1);
+	//float overlap = GetIntervalOverlapDirectional(interval1, interval2);
+
 	return false;
 }
 
@@ -1356,162 +1395,6 @@ uint CollisionDetector::OBB3VsOBB3Single(const OBB3& obb1, const OBB3& obb2, Col
 
 uint CollisionDetector::OBB3VsOBB3Coherent(const OBB3& obb1, const OBB3& obb2, CollisionData3* data)
 {
-	/*
-	if (data->m_contacts.size() >= data->m_maxContacts)
-		// no contacts amount left, return directly
-		return 0;
-
-	BoxEntity3* e1 = static_cast<BoxEntity3*>(obb1.GetEntity());
-	BoxEntity3* e2 = static_cast<BoxEntity3*>(obb2.GetEntity());
-
-	// 1 - get all candidates of obb1 verts intersecting with obb2
-	std::vector<Contact3> candidates1;
-	for (int i = 0; i < 8; ++i)
-	{
-		eContactFeature feature = e1->m_features[i];
-		Vector3 vert = e1->GetFeaturedPoint(feature);
-
-		Contact3 contact;
-		contact.m_e1 = e1; contact.m_e2 = e2;
-		contact.m_f1 = feature;	contact.m_f2 = UNKNOWN;
-		uint intersected = OBB3VsPoint(obb2, vert, contact, false);
-		if (intersected == 1) 
-			candidates1.push_back(contact);
-	}
-
-	// 2 - pick the deepest as final candidate of obb1
-	Contact3 final1;
-	final1.m_penetration = -INFINITY;
-	for (const Contact3& c : candidates1)
-	{
-		if (c.m_penetration > final1.m_penetration)
-			final1 = c;
-	}
-
-	// 3 - get all candidates of obb2 verts intersecting with obb1
-	std::vector<Contact3> candidates2;
-	for (int i = 0; i < 8; ++i)
-	{
-		eContactFeature feature = e2->m_features[i];
-		Vector3 vert = e2->GetFeaturedPoint(feature);
-
-		Contact3 contact;
-		contact.m_e1 = e1; contact.m_e2 = e2;
-		contact.m_f1 = UNKNOWN; contact.m_f2 = feature; 
-		uint intersected = OBB3VsPoint(obb1, vert, contact, true);
-		if (intersected == 1) 
-			candidates1.push_back(contact);
-	}
-
-	// 4 - pick the deepest as final candidate of obb2
-	Contact3 final2;
-	final2.m_penetration = -INFINITY;
-	for (const Contact3& c : candidates2)
-	{
-		if (c.m_penetration > final2.m_penetration)
-			final2 = c;
-	}
-
-	// 5 - pick the overall deepest, set as point-face candidate
-	Contact3 pointFace;
-	pointFace.m_penetration = -INFINITY;
-	if (final1.m_penetration > final2.m_penetration)
-		pointFace = final1;
-	else if (final1.m_penetration < final2.m_penetration)
-		pointFace = final2;
-	else
-	{
-		if (final1.m_penetration != -INFINITY)
-			// default to final1 if penetrations are the same
-			pointFace = final1;
-		// otherwise there is no point-face contact, leaving the candidate has a -INFINITY penetration
-	}
-	pointFace.m_type = POINT_FACE;
-
-	std::vector<Contact3> edgeCandidates;
-	// edge to edge contacts
-	for (int i = 14; i < 26; ++i)
-	{
-		// 6 - get each edge for 1
-		eContactFeature feature1 = e1->m_features[i];
-		LineSegment3 seg1 = e1->GetFeaturedEdge(feature1);
-
-		// 7 - compute its shallowest penetration (not separation) with each edge of 2
-		Contact3 candidate;
-		candidate.m_penetration = INFINITY;
-		candidate.m_e1 = e1;
-		candidate.m_e2 = e2;
-		candidate.m_f1 = feature1;
-		candidate.m_type = EDGE_EDGE;
-		for (int j = 14; j < 26; ++j)
-		{
-			eContactFeature feature2 = e2->m_features[j];
-			LineSegment3 seg2 = e2->GetFeaturedEdge(feature2);
-
-			float t1, t2;
-			Vector3 close1, close2;
-			float distSquared = LineSegment3::ClosestPointsSegments(seg1, seg2, t1, t2, close1, close2);
-
-			// see if this dist is pen dist or sep dist
-			float distSame = (close2 - obb2.m_center).GetLength();
-			float distDiff = (close1 - obb2.m_center).GetLength();
-			if (distDiff < distSame)		// this is a pen
-			{
-				float dist = sqrtf(distSquared);
-				if (dist < candidate.m_penetration)
-				{
-					candidate.m_penetration = dist;
-					candidate.m_f2 = feature2;
-					candidate.m_point = close1;
-					candidate.m_normal = close2 - close1;
-					candidate.m_normal.NormalizeAndGetLength();
-				}
-			}
-		}
-
-		// 8 - sanity check for the candidate, is it valid?
-		if (candidate.m_penetration != INFINITY)
-			edgeCandidates.push_back(candidate);
-	}
-
-	// 9 - get the contact with deepest pen
-	Contact3 edgeEdge;
-	edgeEdge.m_penetration = -INFINITY;
-	for (const Contact3& c : edgeCandidates)
-	{
-		if (c.m_penetration > edgeEdge.m_penetration)
-			edgeEdge = c;
-	}
-
-	// 10 - get the deeper of point-face winner and edge-edge winner
-	Contact3 winner;
-	winner.m_penetration = -INFINITY;		// -INFINITY means the contact is not valid
-	if (pointFace.m_penetration > edgeEdge.m_penetration)
-		winner = pointFace;
-	else if (edgeEdge.m_penetration > pointFace.m_penetration)
-		winner = edgeEdge;
-	else
-	{
-		if (pointFace.m_penetration != -INFINITY)
-			winner = pointFace;			// default to point face contact if pen is the same
-		// otherwise winner contact remains to be invalid
-		else
-			// meaning that there is no valid contact
-			return 0;
-	}
-	
-	// 11 - if the winner contact already exists, update it
-	bool existed = data->HasAndUpdateContact(winner);
-
-	// 12 - if not, push it as a new contact
-	if (!existed)
-		data->m_contacts.push_back(winner);
-
-	return 1;		
-	// in this case, 1 does not necessarily mean that we have 1 more collision,
-	// but also could mean that we "updated" 1 collision
-	*/
-
 	if (data->m_contacts.size() >= data->m_maxContacts)
 		// no contacts amount left, return directly
 		return 0;

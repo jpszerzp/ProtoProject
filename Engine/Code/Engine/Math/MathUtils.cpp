@@ -1,6 +1,7 @@
 #include "Engine/Math/MathUtils.hpp"
 #include "Engine/Core/Transform.hpp"
 #include "Engine/Core/Profiler/ProfileSystem.hpp"
+#include "Engine/Core/ErrorWarningAssert.hpp"
 
 float ConvertDegreesToRadians(float degrees)
 {
@@ -784,6 +785,22 @@ bool ProjectPlaneToSphere(Vector2 pos, float r, Vector3& out_pos)
 	return inCircle;
 }
 
+Vector3 ProjectPointToLine(const Vector3& point, const Line3& line, float& ext)
+{
+	// extension is based 'one_end' of the line
+	const Vector3& one_end = line.one_end;
+	const Vector3& the_other_end = line.the_other_end;
+
+	Vector3 one_end_to_point = point - one_end;
+	Vector3 dir = (the_other_end - one_end).GetNormalized();
+
+	ext = DotProduct(one_end_to_point, dir);
+
+	Vector3 projection = one_end + dir * ext;
+
+	return projection;
+}
+
 bool Quadratic(Vector2& out, float a, float b, float c)
 {
 	float delta = b * b - 4 * a * c;
@@ -1212,6 +1229,98 @@ bool AABB3VsAABB3Intersection(const AABB3& aabb_1, const AABB3& aabb_2, Vector3&
 
 	overlap = min_overlap;
 	return true;
+}
+
+DirectionalInterval GetIntervalOfBoxAcrossAxis(const OBB3& obb, const Line3& line)
+{
+	// first we get the direction of line, because the extremal problem is subject to the direction
+	const Vector3& one_end = line.one_end;
+	const Vector3& the_other = line.the_other_end;
+
+	// two directions
+	Vector3 dir = (the_other - one_end).GetNormalized();		// the direction for max winner
+	Vector3 reverse_dir = -dir;									// the direction for min winner
+
+	std::vector<Vector3> obb_vertices;
+	const Vector3& ftl = obb.GetFTL();	obb_vertices.push_back(ftl); 
+	const Vector3& fbl = obb.GetFBL();	obb_vertices.push_back(fbl);
+	const Vector3& fbr = obb.GetFBR();	obb_vertices.push_back(fbr);
+	const Vector3& ftr = obb.GetFTR();	obb_vertices.push_back(ftr);
+	const Vector3& btl = obb.GetBTL();	obb_vertices.push_back(btl);
+	const Vector3& bbl = obb.GetBBL();	obb_vertices.push_back(bbl);
+	const Vector3& bbr = obb.GetBBR();	obb_vertices.push_back(bbr);
+	const Vector3& btr = obb.GetBTR();	obb_vertices.push_back(btr);
+
+	Vector3 min_winner;
+	Vector3 max_winner;
+	float max_ext;
+	float min_ext;
+	float ext = 0.f;		// ext is with respect to 'one_end' of line
+
+	for (int i = 0; i < obb_vertices.size(); ++i)
+	{
+		const Vector3& candidate = obb_vertices[i];
+
+		// project this point onto the line
+		const Vector3& projection = ProjectPointToLine(candidate, line, ext);
+
+		// at the first round, the first we consider will take over both winner place
+		if (i == 0)
+		{
+			min_winner = projection;
+			max_winner = projection;
+			max_ext = ext;
+			min_ext = ext;
+			continue;
+		}
+
+		if (ext > max_ext)
+		{
+			max_winner = projection;
+			max_ext = ext;
+		}
+
+		if (ext < min_ext)
+		{
+			min_winner = projection;
+			min_ext = ext;
+		}
+	}
+
+	return DirectionalInterval(min_winner, max_winner);
+	// the number of interval ends does not tell meaningful thing
+	// it only tells the min/max relation based on the relation between 'one_end' and 'the_other' of the line3
+	// shortly put, this min/max reflect direction of line3 itself
+}
+
+/*
+ * This assumes both interval comes from the same line, which means the 'the_other' - 'one_end'
+ * is pointing in the same direction as the line they are generated from for both intervals
+ */
+float GetIntervalOverlapDirectional(const DirectionalInterval& interval1, const DirectionalInterval& interval2)
+{
+	Vector3 dir1 = interval1.m_max - interval1.m_min;
+	Vector3 dir2 = interval2.m_max - interval2.m_min;
+	ASSERT_OR_DIE(DotProduct(dir1, dir2) > 0.f, "Two intervals have different direction");
+
+	if (interval1.IsPointSmaller(interval2.m_min, interval1.m_max) &&
+		interval1.IsPointSmaller(interval1.m_min, interval2.m_min) && 
+		interval1.IsPointSmaller(interval1.m_max, interval2.m_max))
+		return ((interval1.m_max - interval2.m_min).GetLength());
+	else if (interval1.IsPointSmaller(interval2.m_min, interval1.m_max) &&
+			 interval1.IsPointSmaller(interval1.m_min, interval2.m_min) && 
+			 interval1.IsPointSmaller(interval2.m_max, interval1.m_max))
+		return interval2.GetIntervalLength();
+	else if (interval1.IsPointSmaller(interval1.m_min, interval2.m_max) &&
+			 interval1.IsPointSmaller(interval2.m_min, interval1.m_min) &&
+			 interval1.IsPointSmaller(interval2.m_max, interval1.m_max))
+		return ((interval2.m_max - interval1.m_min).GetLength());
+	else if (interval1.IsPointSmaller(interval1.m_min, interval2.m_max) && 
+			 interval1.IsPointSmaller(interval2.m_min, interval1.m_min) && 
+			 interval1.IsPointSmaller(interval1.m_max, interval2.m_max))
+		return interval1.GetIntervalLength();
+	else 
+		return 0.f;
 }
 
 AABB2 MinkowskiAABBVsAABB(const AABB2& aabb1, const AABB2& aabb2)

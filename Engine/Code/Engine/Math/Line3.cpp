@@ -70,3 +70,12 @@ float LineSegment3::ClosestPointsSegments(const LineSegment3& seg1,
 	return DotProduct(p1 - p2, p1 - p2);			// return length squared
 }
 
+Line3 Line3::FromVector3(const Vector3& dir)
+{
+	Line3 aixs;
+
+	aixs.one_end = Vector3::ZERO;
+	aixs.the_other_end = aixs.one_end + dir;
+
+	return aixs;
+}

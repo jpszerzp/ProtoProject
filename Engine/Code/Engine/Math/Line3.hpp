@@ -16,6 +16,14 @@ public:
 
 	constexpr static float EPSILON = 0.01f;
 
-	static float ClosestPointsSegments(const LineSegment3& seg1,
-		const LineSegment3& seg2, float& t1, float& t2, Vector3& p1, Vector3& p2);
+	static float ClosestPointsSegments(const LineSegment3& seg1, const LineSegment3& seg2, float& t1, float& t2, Vector3& p1, Vector3& p2);
+};
+
+class Line3
+{
+public:
+	Vector3 one_end;
+	Vector3 the_other_end;
+
+	static Line3 FromVector3(const Vector3& dir);
 };

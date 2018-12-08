@@ -12,6 +12,8 @@
 #include "Engine/Math/OBB3.hpp"
 #include "Engine/Math/Plane.hpp"
 #include "Engine/Math/QuickHull.hpp"
+#include "Engine/Math/Line3.hpp"
+#include "Engine/Core/Interval.hpp"
 
 #include <set>
 
@@ -47,6 +49,8 @@ bool  AABB3VsPlaneIntersection(const AABB3& aabb, const Plane& plane);
 bool  AABB3VsAABB3Intersection(const AABB3& aabb_1, const AABB3& aabb_2);
 bool  AABB3VsAABB3Intersection(const AABB3& aabb_1, const AABB3& aabb_2,
 	Vector3& axis, float& overlap);
+DirectionalInterval GetIntervalOfBoxAcrossAxis(const OBB3& obb, const Line3& line);
+float GetIntervalOverlapDirectional(const DirectionalInterval& interval1, const DirectionalInterval& interval2);
 
 // rounding, clamping and range mapping
 float RangeMapFloat(float inValue, float inStart, float inEnd, float outStart, float outEnd);
@@ -112,6 +116,7 @@ void MakeOrthonormalBasis(const Vector3& x, Vector3& y, Vector3& z);
 void MakeOrthonormalBasisOpt(const Vector3& x, Vector3& y, Vector3& z);
 //void MakeOrthonormalBasisStable(const Vector3& x);
 bool ProjectPlaneToSphere(Vector2 pos, float r, Vector3& out_pos);	// a spherical coord operation
+Vector3 ProjectPointToLine(const Vector3& point, const Line3& line, float& ext);
 
 bool  Quadratic(Vector2& out, float a, float b, float c);
 int   ComputeManhattanDistanceInt(IntVector2 v1, IntVector2 v2);

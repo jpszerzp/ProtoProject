@@ -529,6 +529,9 @@
     <ClCompile Include="Core\Util\RenderUtil.cpp">
       <Filter>General</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Interval.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -913,5 +916,8 @@
     <ClInclude Include="Physics\3D\GJK3.hpp" />
     <ClInclude Include="Core\Util\RenderUtil.hpp" />
     <ClInclude Include="Physics\3D\CCDResolver.hpp" />
+    <ClInclude Include="Core\Interval.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
