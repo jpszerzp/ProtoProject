@@ -12,6 +12,10 @@ class Entity3;
 struct OBB3Face
 {
 	Vector3 m_normal;
+	Vector3 m_center;
+
+	OBB3Face(const Vector3& normal, const Vector3& center)
+		: m_normal(normal), m_center(center) {}
 };
 
 class OBB3
@@ -29,8 +33,7 @@ public:
 
 public:
 	OBB3(){}
-	OBB3(Vector3 center, Vector3 forward, Vector3 up, Vector3 right, Vector3 halfExt)
-		: m_center(center), m_forward(forward), m_up(up), m_right(right), m_halfExt(halfExt){}
+	OBB3(Vector3 center, Vector3 forward, Vector3 up, Vector3 right, Vector3 halfExt);
 	~OBB3(){}
 
 	float GetDiagonalHalf() const { return m_halfExt.GetLength(); }
@@ -55,6 +58,8 @@ public:
 	Vector3 GetForward() const { return m_forward; }
 	Vector3 GetUp() const { return m_up; }
 	Vector3 GetRight() const { return m_right; }
+	std::vector<Vector3> GetVertices() const;
+	std::vector<Vector3> GetBase() const;
 
 	void SetCenter(const Vector3& center);
 	void SetEntity(Entity3* ent) { m_entity = ent; }

@@ -36,6 +36,7 @@ BoxEntity3::~BoxEntity3()
 
 }
 
+/*
 Vector3 BoxEntity3::GetFeaturedPoint(eContactFeature feature)
 {
 	switch (feature)
@@ -74,6 +75,7 @@ LineSegment3 BoxEntity3::GetFeaturedEdge(eContactFeature feature)
 	}
 	return LineSegment3(Vector3::INVALID, Vector3::INVALID);
 }
+*/
 
 void BoxEntity3::UpdatePrimitives()
 {

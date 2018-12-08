@@ -1334,44 +1334,53 @@ bool CollisionDetector::OBB3VsOBB3Intersected(const OBB3& obb1, const OBB3& obb2
 
 bool CollisionDetector::OBB3VsOBB3Core(const OBB3& obb1, const OBB3& obb2, Contact3& contact)
 {
-	//// make sure obb1 and obb2 basis are unit vector, so that all vectors are unit here
-	//Vector3 forward1 = obb1.GetForward();
-	//Vector3 up1 = obb1.GetUp();
-	//Vector3 right1 = obb1.GetRight();
-	//Vector3 forward2 = obb2.GetForward();
-	//Vector3 up2 = obb2.GetUp();
-	//Vector3 right2 = obb2.GetRight();
-	//Vector3 f1f2 = forward1.Cross(forward2);
-	//Vector3 f1r2 = forward1.Cross(right2);
-	//Vector3 f1u2 = forward1.Cross(up2);
-	//Vector3 r1f2 = right1.Cross(forward2);
-	//Vector3 r1r2 = right1.Cross(right2);
-	//Vector3 r1u2 = right1.Cross(up2);
-	//Vector3 u1f2 = up1.Cross(forward2);
-	//Vector3 u1r2 = up1.Cross(right2);
-	//Vector3 u1u2 = up1.Cross(up2);
+	float face_face_ext = -INFINITY;
+	Vector3 face_face_pt;
+	for (std::vector<OBB3Face>::size_type idx = 0; idx < obb1.m_faces.size(); ++idx)
+	{
+		const OBB3Face& face = obb1.m_faces[idx];
+		const Vector3& face_center = face.m_center;
+		const Vector3& face_normal = face.m_normal;
 
-	//// make axes out of these bases (Line3)
-	//Line3 axis_forward1 = Line3::FromVector3(forward1);
-	//Line3 axis_up1 = Line3::FromVector3(up1);
-	//Line3 axis_right1 = Line3::FromVector3(right1);
-	//Line3 axis_forward2 = Line3::FromVector3(forward2);
-	//Line3 axis_up2 = Line3::FromVector3(up2);
-	//Line3 axis_right2 = Line3::FromVector3(right2);
-	//Line3 axis_f1f2 = Line3::FromVector3(f1f2);
-	//Line3 axis_f1r2 = Line3::FromVector3(f1r2);
-	//Line3 axis_f1u2 = Line3::FromVector3(f1u2);
-	//Line3 axis_r1f2 = Line3::FromVector3(r1f2);
-	//Line3 axis_r1r2 = Line3::FromVector3(r1r2);
-	//Line3 axis_r1u2 = Line3::FromVector3(r1u2);
-	//Line3 axis_u1f2 = Line3::FromVector3(u1f2);
-	//Line3 axis_u1r2 = Line3::FromVector3(u1r2);
-	//Line3 axis_u1u2 = Line3::FromVector3(u1u2);
+		float ext = INFINITY;
+		Vector3 pt;
+		std::vector<Vector3>& verts = obb2.GetVertices();
+		for (const Vector3& vert : verts)
+		{
+			Vector3 toVert = vert - face_center;
+			float ext_cand = DotProduct(toVert, face_normal);
+			if (ext_cand < ext)
+			{
+				ext = ext_cand;
+				pt = vert;
+			}
+		}
 
-	//// 
-	//DirectionalInterval interval1 = GetIntervalOfBoxAcrossAxis(obb1, axis_forward1);
-	//DirectionalInterval interval2 = GetIntervalOfBoxAcrossAxis(obb2, axis_forward1);
-	//float overlap = GetIntervalOverlapDirectional(interval1, interval2);
+		// SAT test fails in the face-face case
+		if (ext > 0.f)
+			return false;
+
+		// otherwise SAT survives, we record this distance if it is largest in amount
+		if (abs(ext) > face_face_ext)
+		{
+			face_face_ext = ext;
+			face_face_pt = pt;
+		}  
+	}
+
+	// given the face to face winner contact, we compute the edge to edge
+	std::vector<Vector3> base1 = obb1.GetBase();
+	std::vector<Vector3> base2 = obb2.GetBase();
+	for (std::vector<Vector3>::size_type idx1 = 0; idx1 < base1.size(); ++idx1)
+	{
+		for (std::vector<Vector3>::size_type idx2 = 0; idx2 < base2.size(); ++idx2)
+		{
+			const Vector3& basis1 = base1[idx1];
+			const Vector3& basis2 = base2[idx2];
+
+
+		}
+	}
 
 	return false;
 }

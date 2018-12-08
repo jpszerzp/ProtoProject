@@ -25,5 +25,9 @@ public:
 	Vector3 one_end;
 	Vector3 the_other_end;
 
+	Line3(){}
+	Line3(const Vector3& end1, const Vector3& end2)
+		: one_end(end1), the_other_end(end2) {}
+
 	static Line3 FromVector3(const Vector3& dir);
 };
