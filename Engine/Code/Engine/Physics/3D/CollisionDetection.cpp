@@ -1334,55 +1334,237 @@ bool CollisionDetector::OBB3VsOBB3Intersected(const OBB3& obb1, const OBB3& obb2
 
 bool CollisionDetector::OBB3VsOBB3Core(const OBB3& obb1, const OBB3& obb2, Contact3& contact)
 {
-	float face_face_ext = -INFINITY;
-	Vector3 face_face_pt;
-	for (std::vector<OBB3Face>::size_type idx = 0; idx < obb1.m_faces.size(); ++idx)
+	std::map<Vector3, std::tuple<OBB3Face, float>> record2;
+	for (std::vector<OBB3Vert>::size_type idx = 0; idx < obb2.m_verts.size(); ++idx)
 	{
-		const OBB3Face& face = obb1.m_faces[idx];
-		const Vector3& face_center = face.m_center;
-		const Vector3& face_normal = face.m_normal;
+		bool pt_overlap = true;
+		const Vector3& pt = obb2.m_verts[idx].m_vert;
+		float shallowest = -INFINITY;
+		OBB3Face shallowest_against;
+		std::tuple<OBB3Face, float> pt_face_distance;
 
-		float ext = INFINITY;
-		Vector3 pt;
-		std::vector<Vector3>& verts = obb2.GetVertices();
-		for (const Vector3& vert : verts)
+		for (std::vector<OBB3Face>::size_type idx_face = 0; idx_face < obb1.m_faces.size(); ++idx_face)
 		{
-			Vector3 toVert = vert - face_center;
-			float ext_cand = DotProduct(toVert, face_normal);
-			if (ext_cand < ext)
+			const OBB3Face& face = obb1.m_faces[idx_face];
+			Vector3 toPt = pt - face.m_center;
+			const Vector3& face_n = face.m_normal;
+			float ext = DotProduct(toPt, face_n);
+			if (ext > 0.f)
 			{
-				ext = ext_cand;
-				pt = vert;
+				pt_overlap = false;
+				break;
+			}
+
+			if (ext > shallowest)
+			{
+				shallowest = ext;
+				shallowest_against = face;
 			}
 		}
 
-		// SAT test fails in the face-face case
-		if (ext > 0.f)
-			return false;
-
-		// otherwise SAT survives, we record this distance if it is largest in amount
-		if (abs(ext) > face_face_ext)
+		if (pt_overlap)
 		{
-			face_face_ext = ext;
-			face_face_pt = pt;
-		}  
+			std::get<0>(pt_face_distance) = shallowest_against;
+			std::get<1>(pt_face_distance) = shallowest;
+
+			record2.emplace(std::make_pair(pt, pt_face_distance));
+		}
 	}
-
-	// given the face to face winner contact, we compute the edge to edge
-	std::vector<Vector3> base1 = obb1.GetBase();
-	std::vector<Vector3> base2 = obb2.GetBase();
-	for (std::vector<Vector3>::size_type idx1 = 0; idx1 < base1.size(); ++idx1)
+	float record2_deepest = INFINITY;
+	std::tuple<Vector3, Vector3, float> c_info2;
+	for (std::map<Vector3, std::tuple<OBB3Face, float>>::iterator it = record2.begin(); it != record2.end(); ++it)
 	{
-		for (std::vector<Vector3>::size_type idx2 = 0; idx2 < base2.size(); ++idx2)
+		const Vector3& pt = it->first;
+		const std::tuple<OBB3Face, float>& tup = it->second;
+		float dist = std::get<1>(tup);
+		Vector3 normal = std::get<0>(tup).m_normal;
+		if (dist < record2_deepest)
 		{
-			const Vector3& basis1 = base1[idx1];
-			const Vector3& basis2 = base2[idx2];
+			record2_deepest = dist;
 
-
+			std::get<0>(c_info2) = pt;
+			std::get<1>(c_info2) = normal;
+			std::get<2>(c_info2) = dist;
 		}
 	}
 
-	return false;
+	std::map<Vector3, std::tuple<OBB3Face, float>> record1;
+	for (std::vector<OBB3Vert>::size_type idx = 0; idx < obb1.m_verts.size(); ++idx)
+	{
+		bool pt_overlap = true;
+		const Vector3& pt = obb1.m_verts[idx].m_vert;
+		float shallowest = -INFINITY;
+		OBB3Face shallowest_against;
+		std::tuple<OBB3Face, float> pt_face_distance;
+
+		for (std::vector<OBB3Face>::size_type idx_face = 0; idx_face < obb2.m_faces.size(); ++idx_face)
+		{
+			const OBB3Face& face = obb2.m_faces[idx_face];
+			Vector3 toPt = pt - face.m_center;
+			const Vector3& face_n = face.m_normal;
+			float ext = DotProduct(toPt, face_n);
+			if (ext > 0.f)
+			{
+				pt_overlap = false;
+				break;
+			}
+
+			if (ext > shallowest)
+			{
+				shallowest = ext;
+				shallowest_against = face;
+			}
+		}
+
+		if (pt_overlap)
+		{
+			std::get<0>(pt_face_distance) = shallowest_against;
+			std::get<1>(pt_face_distance) = shallowest;
+
+			record2.emplace(std::make_pair(pt, pt_face_distance));
+		}
+	}
+	float record1_deepest = INFINITY;
+	std::tuple<Vector3, Vector3, float> c_info1;
+	for (std::map<Vector3, std::tuple<OBB3Face, float>>::iterator it = record1.begin(); it != record1.end(); ++it)
+	{
+		Vector3 pt = it->first;
+		const std::tuple<OBB3Face, float>& tup = it->second;
+		float dist = std::get<1>(tup);
+		Vector3 normal = -std::get<0>(tup).m_normal;
+		if (dist < record1_deepest)
+		{
+			record1_deepest = dist;
+
+			pt = pt - normal * dist;
+			std::get<0>(c_info1) = pt;
+			std::get<1>(c_info1) = normal;
+			std::get<2>(c_info1) = dist;
+		}
+	}
+
+	// if either of record 1 or 2 is NOT empty, there is a candidate for pt-face contact
+	bool pt_face_has_win = (!record1.empty()) || (!record2.empty());
+
+	// get deeper of the two, the winner is piont-face contact
+	std::tuple<Vector3, Vector3, float> pt_face_winner;
+	if (pt_face_has_win)
+	{
+		float pen1 = std::get<2>(c_info1);
+		float pen2 = std::get<2>(c_info2);
+		if (pen1 < pen2) 
+			pt_face_winner = c_info1;
+		else
+			pt_face_winner = c_info2;
+	}
+
+	// now look at edge to edge contact
+	std::map<OBB3Edge, std::tuple<OBB3Edge, Vector3, float>> edge_pen_record;
+	for (std::vector<OBB3Edge>::size_type idx_edge1 = 0; idx_edge1 < obb1.m_edges.size(); ++idx_edge1)
+	{
+		float shallowest = -INFINITY;
+		std::tuple<OBB3Edge, Vector3, float> edge_edge_penetration;	// <edge, normal, dist>
+
+		const OBB3Edge& edge1 = obb1.m_edges[idx_edge1];
+		Vector3 edge1_vec = edge1.m_end1.m_vert - edge1.m_end2.m_vert;
+
+		bool overlap = false;
+		for (std::vector<OBB3Edge>::size_type idx_edge2 = 0; idx_edge2 < obb2.m_edges.size(); ++idx_edge2)
+		{
+			const OBB3Edge& edge2 = obb2.m_edges[idx_edge2];
+			Vector3 edge2_vec = edge2.m_end1.m_vert - edge2.m_end2.m_vert;
+
+			// we need to make sure normal is pointing away from obb1
+			Vector3 cross = edge2_vec.Cross(edge1_vec).GetNormalized();
+			Vector3 ref = edge1.m_end1.m_vert - obb1.GetCenter();
+			if (DotProduct(cross, ref) < 0.f)
+				cross *= -1.f;
+
+			// find edge separation
+			const Vector3& edge2_end1 = edge2.m_end1.m_vert;
+			const Vector3& edge1_end1 = edge1.m_end1.m_vert;
+			Vector3 to_edge2_end1 = edge2_end1 - edge1_end1;
+			float dot = DotProduct(to_edge2_end1, cross);
+			// if support point is not penetrating, two edges are separated
+			if (dot > 0.f)
+				continue;
+			
+			if (dot > shallowest)
+			{
+				overlap = true;
+
+				shallowest = dot;
+
+				std::get<0>(edge_edge_penetration) = edge2;
+				std::get<1>(edge_edge_penetration) = cross;
+				std::get<2>(edge_edge_penetration) = dot;
+			}
+		}
+
+		if (overlap)
+			edge_pen_record.emplace(std::make_pair(edge1, edge_edge_penetration));
+	}
+
+	bool edge_edge_has_win = (!edge_pen_record.empty());
+
+	// find the deepest among these: contact point, normal and distance
+	float edge_pen_deepest = INFINITY;
+	std::tuple<Vector3, Vector3, float> edge_edge_winner;		// <pt, normal, dist>
+	for (std::map<OBB3Edge, std::tuple<OBB3Edge, Vector3, float>>::iterator it = edge_pen_record.begin(); it != edge_pen_record.end(); ++it)
+	{
+		const OBB3Edge& edge1 = it->first;
+		const std::tuple<OBB3Edge, Vector3, float>& tup = it->second;
+		const OBB3Edge& edge2 = std::get<0>(tup);
+		const Vector3& n = std::get<1>(tup);
+		float dist = std::get<2>(tup);
+
+		if (dist < edge_pen_deepest)
+		{
+			edge_pen_deepest = dist;
+
+			// calculate pt
+			const Vector3& edge1_start = edge1.m_end1.m_vert;
+			const Vector3& edge1_end = edge1.m_end2.m_vert;
+			const Vector3& edge2_start = edge2.m_end1.m_vert;
+			const Vector3& edge2_end = edge2.m_end2.m_vert;
+			LineSegment3 line_seg1 = LineSegment3(edge1_start, edge1_end);
+			LineSegment3 line_seg2 = LineSegment3(edge2_start, edge2_end);
+			Vector3 close_pt1, close_pt2;
+			float closest_dist = LineSegment3::ClosestPointsSegmentsConstrained(line_seg1, line_seg2, close_pt1, close_pt2);
+			Vector3 close_pt = (close_pt1 + close_pt2) / 2.f;
+			
+			std::get<0>(edge_edge_winner) = close_pt;
+			std::get<1>(edge_edge_winner) = n;
+			std::get<2>(edge_edge_winner) = dist;
+		}
+	}
+
+	std::tuple<Vector3, Vector3, float> final_winner;		// <pt, normal, dist>
+	if (!pt_face_has_win && !edge_edge_has_win)
+		return false;
+	else if (pt_face_has_win && !edge_edge_has_win)
+		final_winner = pt_face_winner;
+	else if (edge_edge_has_win && !pt_face_has_win)
+		final_winner = edge_edge_winner;
+	else
+	{
+		// now we have the winner of face to face and edge to edge respectively, we get the deeper one
+		// NOTE: GPED claims to choose the deeper one, while the valve presentation uses the minimum pentrated one
+		// should test both, we start with testing the GPED method
+		const float& face_winner_dist = std::get<2>(pt_face_winner);
+		const float& edge_winner_dist = std::get<2>(edge_edge_winner);
+		// remember the dist is a negative value, smaller means deeper
+		if (face_winner_dist < edge_winner_dist)
+			final_winner = pt_face_winner;
+		else
+			final_winner = edge_edge_winner;
+	}
+
+	Contact3 theContact = Contact3(obb1.GetEntity(), obb2.GetEntity(), 
+		std::get<0>(final_winner), std::get<1>(final_winner), std::get<2>(final_winner));
+	contact = theContact;
+
+	return true;
 }
 
 uint CollisionDetector::OBB3VsOBB3Single(const OBB3& obb1, const OBB3& obb2, CollisionData3* data)

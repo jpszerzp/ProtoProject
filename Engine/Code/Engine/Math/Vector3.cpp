@@ -324,6 +324,7 @@ bool Vector3::EqualByTolerance(const float& tolerance, const Vector3& v1, const 
 {
 	if ((v1 - v2).GetLengthSquared() <= (tolerance * tolerance))
 		return true;
+	return false;
 }
 
 Vector3 GetMiddlePoint(const Vector3& min, const Vector3& max)

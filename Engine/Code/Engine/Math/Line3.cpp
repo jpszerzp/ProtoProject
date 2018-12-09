@@ -70,6 +70,33 @@ float LineSegment3::ClosestPointsSegments(const LineSegment3& seg1,
 	return DotProduct(p1 - p2, p1 - p2);			// return length squared
 }
 
+/*
+ * 
+ */
+float LineSegment3::ClosestPointsSegmentsConstrained(const LineSegment3& seg1, const LineSegment3& seg2, Vector3& v1, Vector3& v2)
+{
+	// see p147 of RTC
+	Vector3 dir1 = seg1.extent.GetNormalized();
+	Vector3 dir2 = seg2.extent.GetNormalized();
+
+	Vector3 r = seg1.start - seg2.start;
+
+	float a = DotProduct(dir1, dir1);
+	float b = DotProduct(dir1, dir2);
+	float c = DotProduct(dir1, r);
+	float e = DotProduct(dir2, dir2);
+	float f = DotProduct(dir2, r);
+	float d = a * e - b * b;
+
+	float s = (b * f - c * e) / d;
+	float t = (a * f - b * c) / d;
+
+	v1 = seg1.start + dir1 * s;
+	v2 = seg2.start + dir2 * t;
+
+	return (v1 - v2).GetLength();
+}
+
 Line3 Line3::FromVector3(const Vector3& dir)
 {
 	Line3 aixs;

@@ -9,13 +9,32 @@
 
 class Entity3;
 
+struct OBB3Vert
+{
+	Vector3 m_vert;
+
+	OBB3Vert(){}
+	OBB3Vert(const Vector3& vert) : m_vert(vert) {}
+};
+
+struct OBB3Edge
+{
+	OBB3Vert m_end1;
+	OBB3Vert m_end2;
+
+	OBB3Edge(){}
+	OBB3Edge(const OBB3Vert& v1, const OBB3Vert& v2) : m_end1(v1), m_end2(v2) {}
+
+	const bool operator<(const OBB3Edge& compared) const;
+};
+
 struct OBB3Face
 {
 	Vector3 m_normal;
 	Vector3 m_center;
 
-	OBB3Face(const Vector3& normal, const Vector3& center)
-		: m_normal(normal), m_center(center) {}
+	OBB3Face(){}
+	OBB3Face(const Vector3& normal, const Vector3& center) : m_normal(normal), m_center(center) {}
 };
 
 class OBB3
@@ -30,6 +49,8 @@ public:
 	Vector3 m_right;
 	Vector3 m_halfExt;			// halfway extends of OBB along basis 
 	std::vector<OBB3Face> m_faces;
+	std::vector<OBB3Edge> m_edges;
+	std::vector<OBB3Vert> m_verts;
 
 public:
 	OBB3(){}
