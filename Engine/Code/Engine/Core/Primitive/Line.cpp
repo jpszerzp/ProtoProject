@@ -16,13 +16,9 @@ Line::Line(Vector3 start, Vector3 end, float thickness, Rgba tint,
 
 	Material* material;
 	if (!multipass)
-	{
 		material = renderer->CreateOrGetMaterial(materialName);
-	}
 	else
-	{
 		material = renderer->CreateOrGetStagedMaterial(materialName);
-	}
 
 	Mesh* mesh = Mesh::CreateLineImmediate(VERT_PCU, start, end, tint);
 

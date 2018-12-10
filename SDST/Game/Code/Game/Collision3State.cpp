@@ -6,6 +6,7 @@
 #include "Engine/Core/Primitive/Sphere.hpp"
 #include "Engine/Core/Primitive/Quad.hpp"
 #include "Engine/Core/Primitive/Box.hpp"
+#include "Engine/Core/Primitive/Line.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/Math/MathUtils.hpp"
 #include "Engine/Physics/3D/Rigidbody3.hpp"
@@ -196,6 +197,18 @@ Collision3State::Collision3State()
 
 	ControlGroup* grp_3 = new ControlGroup(b_1, b_2, CONTROL_BOX_BOX, Vector3(21.f, 0.f, -7.f));
 	m_controlGrps.push_back(grp_3);
+
+	Vector3 start_line = Vector3(-5.f, 10.f, 0.f);
+	Vector3 end_line = Vector3(5.f, 10.f, 0.f);
+	Line* l_1 = new Line(start_line, end_line, 5.f, Rgba::WHITE, "white");
+	start_line = Vector3(-5.f, 7.f, 0.f);
+	end_line = Vector3(5.f, 7.f, 0.f);
+	Line* l_2 = new Line(start_line, end_line, 5.f, Rgba::WHITE, "white");
+	m_gameObjects.push_back(l_1);
+	m_gameObjects.push_back(l_2);
+
+	ControlGroup* grp_4 = new ControlGroup(l_1, l_2, CONTROL_LINE_LINE, Vector3(0.f, 8.f, -5.f));
+	m_controlGrps.push_back(grp_4);
 
 	// set the focused grp and the initial index
 	m_focusedIndex = 0;

@@ -4,13 +4,16 @@
 #include "Engine/Core/Primitive/Sphere.hpp"
 #include "Engine/Core/Primitive/Quad.hpp"
 #include "Engine/Core/Primitive/Box.hpp"
+#include "Engine/Core/Primitive/Line.hpp"
 #include "Engine/Core/Util/DataUtils.hpp"
 #include "Engine/Core/Util/RenderUtil.hpp"
+#include "Engine/Core/Primitive/Line.hpp"
 #include "Engine/Physics/3D/SphereRB3.hpp"
 #include "Engine/Physics/3D/QuadRb3.hpp"
 #include "Engine/Physics/3D/BoxRB3.hpp"
 #include "Engine/Renderer/DebugRenderer.hpp"
 #include "Engine/Renderer/Window.hpp"
+#include "Engine/Renderer/Renderable.hpp"
 
 ControlGroup::ControlGroup(GameObject* go1, GameObject* go2, const eControlID& id, const Vector3& observation)
 {
@@ -38,55 +41,129 @@ void ControlGroup::ProcessInput()
 	GameObject* g0 = m_gos[0];
 	GameObject* g1 = m_gos[1];
 
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_UP_ARROW))
-		g0->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, 5.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_DOWN_ARROW))
-		g0->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, -5.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_LEFT_ARROW))
-		g0->GetEntity()->SetLinearVelocity(Vector3(-5.f, 0.f, 0.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_RIGHT_ARROW))
-		g0->GetEntity()->SetLinearVelocity(Vector3(5.f, 0.f, 0.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEUP))
-		g0->GetEntity()->SetLinearVelocity(Vector3(0.f, 5.f, 0.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEDOWN))
-		g0->GetEntity()->SetLinearVelocity(Vector3(0.f, -5.f, 0.f));
-	else
-		g0->GetEntity()->SetLinearVelocity(Vector3::ZERO);
+	if (g0->GetEntity() != nullptr)
+	{
+		if (g_input->IsKeyDown(InputSystem::KEYBOARD_UP_ARROW))
+			g0->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, 5.f));
+		else if (g_input->IsKeyDown(InputSystem::KEYBOARD_DOWN_ARROW))
+			g0->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, -5.f));
+		else if (g_input->IsKeyDown(InputSystem::KEYBOARD_LEFT_ARROW))
+			g0->GetEntity()->SetLinearVelocity(Vector3(-5.f, 0.f, 0.f));
+		else if (g_input->IsKeyDown(InputSystem::KEYBOARD_RIGHT_ARROW))
+			g0->GetEntity()->SetLinearVelocity(Vector3(5.f, 0.f, 0.f));
+		else if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEUP))
+			g0->GetEntity()->SetLinearVelocity(Vector3(0.f, 5.f, 0.f));
+		else if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEDOWN))
+			g0->GetEntity()->SetLinearVelocity(Vector3(0.f, -5.f, 0.f));
+		else
+			g0->GetEntity()->SetLinearVelocity(Vector3::ZERO);
 
-	Rigidbody3* rb0 = static_cast<Rigidbody3*>(g0->GetEntity());
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_1))
-		rb0->SetAngularVelocity(Vector3(30.f, 0.f, 0.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_4))
-		rb0->SetAngularVelocity(Vector3(0.f, 30.f, 0.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_7))
-		rb0->SetAngularVelocity(Vector3(0.f, 0.f, 30.f));
+		Rigidbody3* rb0 = static_cast<Rigidbody3*>(g0->GetEntity());
+		if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_1))
+			rb0->SetAngularVelocity(Vector3(30.f, 0.f, 0.f));
+		else if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_4))
+			rb0->SetAngularVelocity(Vector3(0.f, 30.f, 0.f));
+		else if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_7))
+			rb0->SetAngularVelocity(Vector3(0.f, 0.f, 30.f));
+		else
+			rb0->SetAngularVelocity(Vector3::ZERO);
+	}
 	else
-		rb0->SetAngularVelocity(Vector3::ZERO);
+	{
+		// for line control
+		Line* line = static_cast<Line*>(g0);
+		if (line != nullptr)
+		{
+			if (g_input->IsKeyDown(InputSystem::KEYBOARD_UP_ARROW))
+			{
+				line->m_start += Vector3(0.f, 0.f, .01f);
+				if (line->m_renderable->m_mesh != nullptr)
+				{
+					delete line->m_renderable->m_mesh;
+					line->m_renderable->m_mesh = nullptr;
+				}
+				line->m_renderable->m_mesh = Mesh::CreateLineImmediate(VERT_PCU, line->m_start, line->m_end, Rgba::WHITE);
+			}
+			else if (g_input->IsKeyDown(InputSystem::KEYBOARD_DOWN_ARROW))
+			{
+				line->m_start -= Vector3(0.f, 0.f, .01f);
+				if (line->m_renderable->m_mesh != nullptr)
+				{
+					delete line->m_renderable->m_mesh;
+					line->m_renderable->m_mesh = nullptr;
+				}
+				line->m_renderable->m_mesh = Mesh::CreateLineImmediate(VERT_PCU, line->m_start, line->m_end, Rgba::WHITE);
+			}
+			else if (g_input->IsKeyDown(InputSystem::KEYBOARD_LEFT_ARROW))
+			{
+				line->m_start -= Vector3(.01f, 0.f, 0.f);
+				if (line->m_renderable->m_mesh != nullptr)
+				{
+					delete line->m_renderable->m_mesh;
+					line->m_renderable->m_mesh = nullptr;
+				}
+				line->m_renderable->m_mesh = Mesh::CreateLineImmediate(VERT_PCU, line->m_start, line->m_end, Rgba::WHITE);
+			}
+			else if (g_input->IsKeyDown(InputSystem::KEYBOARD_RIGHT_ARROW))
+			{
+				line->m_start += Vector3(.01f, 0.f, 0.f);
+				if (line->m_renderable->m_mesh != nullptr)
+				{
+					delete line->m_renderable->m_mesh;
+					line->m_renderable->m_mesh = nullptr;
+				}
+				line->m_renderable->m_mesh = Mesh::CreateLineImmediate(VERT_PCU, line->m_start, line->m_end, Rgba::WHITE);
+			}
+			else if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEUP))
+			{
+				line->m_start += Vector3(0.f, .01f, 0.f);
+				if (line->m_renderable->m_mesh != nullptr)
+				{
+					delete line->m_renderable->m_mesh;
+					line->m_renderable->m_mesh = nullptr;
+				}
+				line->m_renderable->m_mesh = Mesh::CreateLineImmediate(VERT_PCU, line->m_start, line->m_end, Rgba::WHITE);
+			}
+			else if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEDOWN))
+			{
+				line->m_start -= Vector3(0.f, .01f, 0.f);
+				if (line->m_renderable->m_mesh != nullptr)
+				{
+					delete line->m_renderable->m_mesh;
+					line->m_renderable->m_mesh = nullptr;
+				}
+				line->m_renderable->m_mesh = Mesh::CreateLineImmediate(VERT_PCU, line->m_start, line->m_end, Rgba::WHITE);
+			}
+		}
+	}
 
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_I))
-		g1->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, 5.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_K))
-		g1->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, -5.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_J))
-		g1->GetEntity()->SetLinearVelocity(Vector3(-5.f, 0.f, 0.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_L))
-		g1->GetEntity()->SetLinearVelocity(Vector3(5.f, 0.f, 0.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_U))
-		g1->GetEntity()->SetLinearVelocity(Vector3(0.f, 5.f, 0.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_O))
-		g1->GetEntity()->SetLinearVelocity(Vector3(0.f, -5.f, 0.f));
-	else
-		g1->GetEntity()->SetLinearVelocity(Vector3::ZERO);
+	if (g1->GetEntity() != nullptr)
+	{
+		if (g_input->IsKeyDown(InputSystem::KEYBOARD_I))
+			g1->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, 5.f));
+		else if (g_input->IsKeyDown(InputSystem::KEYBOARD_K))
+			g1->GetEntity()->SetLinearVelocity(Vector3(0.f, 0.f, -5.f));
+		else if (g_input->IsKeyDown(InputSystem::KEYBOARD_J))
+			g1->GetEntity()->SetLinearVelocity(Vector3(-5.f, 0.f, 0.f));
+		else if (g_input->IsKeyDown(InputSystem::KEYBOARD_L))
+			g1->GetEntity()->SetLinearVelocity(Vector3(5.f, 0.f, 0.f));
+		else if (g_input->IsKeyDown(InputSystem::KEYBOARD_U))
+			g1->GetEntity()->SetLinearVelocity(Vector3(0.f, 5.f, 0.f));
+		else if (g_input->IsKeyDown(InputSystem::KEYBOARD_O))
+			g1->GetEntity()->SetLinearVelocity(Vector3(0.f, -5.f, 0.f));
+		else
+			g1->GetEntity()->SetLinearVelocity(Vector3::ZERO);
 
-	Rigidbody3* rb1 = static_cast<Rigidbody3*>(g1->GetEntity());
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_2))
-		rb1->SetAngularVelocity(Vector3(30.f, 0.f, 0.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_5))
-		rb1->SetAngularVelocity(Vector3(0.f, 30.f, 0.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_8))
-		rb1->SetAngularVelocity(Vector3(0.f, 0.f, 30.f));
-	else 
-		rb1->SetAngularVelocity(Vector3::ZERO);
+		Rigidbody3* rb1 = static_cast<Rigidbody3*>(g1->GetEntity());
+		if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_2))
+			rb1->SetAngularVelocity(Vector3(30.f, 0.f, 0.f));
+		else if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_5))
+			rb1->SetAngularVelocity(Vector3(0.f, 30.f, 0.f));
+		else if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_8))
+			rb1->SetAngularVelocity(Vector3(0.f, 0.f, 30.f));
+		else 
+			rb1->SetAngularVelocity(Vector3::ZERO);
+	}
 }
 
 void ControlGroup::RenderCore(Renderer* renderer)
@@ -205,6 +282,11 @@ void ControlGroup::Update(float deltaTime)
 		bool intersected = CollisionDetector::OBB3VsOBB3Core(obb_0, obb_1, contact);
 		if (intersected)
 			m_contacts.push_back(contact);
+	}
+		break;
+	case CONTROL_LINE_LINE:
+	{
+
 	}
 		break;
 	default:
@@ -378,6 +460,55 @@ void ControlGroup::UpdateUI()
 			m_view.push_back(mesh);
 			min -= Vector2(0.f, m_textHeight);
 		}
+	}
+		break;
+	case CONTROL_LINE_LINE:
+	{
+		Vector2 min = m_startMin;
+
+		std::string cp_title = "Line v.s line";
+		Mesh* mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, cp_title, VERT_PCU);
+		m_view.push_back(mesh);
+		min -= Vector2(0.f, m_textHeight);
+
+		// for convenience, update closest point here directly so that we do not need class variables for 
+		Line* l_1 = static_cast<Line*>(m_gos[0]);
+		const Vector3& start_1 = l_1->m_start;
+		const Vector3& end_1 = l_1->m_end;
+		LineSegment3 seg_1 = LineSegment3(start_1, end_1);
+
+		Line* l_2 = static_cast<Line*>(m_gos[1]);
+		const Vector3& start_2 = l_2->m_start;
+		const Vector3& end_2 = l_2->m_end;
+		LineSegment3 seg_2 = LineSegment3(start_2, end_2);
+
+		Vector3 close_1, close_2;
+		float close_dist = LineSegment3::ClosestPointsSegmentsConstrained(seg_1, seg_2, close_1, close_2);
+		DebugRenderLine(0.1f, close_1, close_2, 5.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
+
+		Vector3 normal = close_1 - close_2;
+		float dot1 = DotProduct(seg_1.extent, normal);
+		float dot2 = DotProduct(seg_2.extent, normal);
+
+		std::string close_name1 = Stringf("Closest point on line 1: %f, %f, %f", close_1.x, close_1.y, close_1.z);
+		mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, close_name1, VERT_PCU);
+		m_view.push_back(mesh);
+		min -= Vector2(0.f, m_textHeight);
+
+		std::string close_name2 = Stringf("Closest point on line 2: %f, %f, %f", close_2.x, close_2.y, close_2.z);
+		mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, close_name2, VERT_PCU);
+		m_view.push_back(mesh);
+		min -= Vector2(0.f, m_textHeight);
+
+		std::string dot_str1 = Stringf("Close vector dot with line 1: %f", dot1);
+		mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, dot_str1, VERT_PCU);
+		m_view.push_back(mesh);
+		min -= Vector2(0.f, m_textHeight);
+
+		std::string dot_str2 = Stringf("Close vector dot with line 2: %f", dot2);
+		mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, dot_str2, VERT_PCU);
+		m_view.push_back(mesh);
+		min -= Vector2(0.f, m_textHeight);
 	}
 		break;
 	default:

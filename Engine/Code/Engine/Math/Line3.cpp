@@ -71,7 +71,7 @@ float LineSegment3::ClosestPointsSegments(const LineSegment3& seg1,
 }
 
 /*
- * 
+ * Need to consider special case where two segments are parallel
  */
 float LineSegment3::ClosestPointsSegmentsConstrained(const LineSegment3& seg1, const LineSegment3& seg2, Vector3& v1, Vector3& v2)
 {
@@ -88,13 +88,53 @@ float LineSegment3::ClosestPointsSegmentsConstrained(const LineSegment3& seg1, c
 	float f = DotProduct(dir2, r);
 	float d = a * e - b * b;
 
-	float s = (b * f - c * e) / d;
-	float t = (a * f - b * c) / d;
+	if (d != 0.f)
+	{
+		float s = (b * f - c * e) / d;
+		float t = (a * f - b * c) / d;
 
-	v1 = seg1.start + dir1 * s;
-	v2 = seg2.start + dir2 * t;
+		v1 = seg1.start + dir1 * s;
+		v2 = seg2.start + dir2 * t;
+	}
+	else
+	{
+		// two lines are parallel, pick a random one on line 1, then project that point to line 2
+		// in this case we pick the middle piont for line 1
+		Vector3 mid_projected;
+		Vector3 mid = seg1.start + seg1.extent / 2.f;
+		LineSegment3::ClosestPointPtSegment(mid, seg2, mid_projected);
+
+		v1 = mid;
+		v2 = mid_projected;
+	}
 
 	return (v1 - v2).GetLength();
+}
+
+float LineSegment3::ClosestPointPtSegment(const Vector3& pt, const LineSegment3& seg, Vector3& projected)
+{
+	float t = DotProduct(pt - seg.start, seg.extent);
+	if (t <= 0.f)
+	{
+		t = 0.f;
+		projected = seg.start;
+	}
+	else
+	{
+		float denom = DotProduct(seg.extent, seg.extent);
+		if (t >= denom)
+		{
+			t = 1.f;
+			projected = seg.start + seg.extent;
+		}
+		else
+		{
+			t = t / denom;
+			projected = seg.start + seg.extent * t;
+		}
+	}
+
+	return t;
 }
 
 Line3 Line3::FromVector3(const Vector3& dir)
