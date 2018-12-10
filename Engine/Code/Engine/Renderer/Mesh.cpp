@@ -697,6 +697,7 @@ Mesh* Mesh::CreateCone(eVertexType type, int base_side)
 {
 	// apex
 	Vector3 apex = Vector3(0.f, 1.f, 0.f);
+	Vector3 base = Vector3::ZERO;
 
 	MeshBuilder mb;
 
@@ -707,8 +708,14 @@ Mesh* Mesh::CreateCone(eVertexType type, int base_side)
 	float del_deg = 360.f / (float)(base_side);
 	for (int i = 0; i < base_side; ++i)
 	{
-		Vector3 bottom_vert_0 = Vector3(1.f * cosf(del_deg * i), 0.f, 1.f * sinf(del_deg * i));
-		Vector3 bottom_vert_1 = Vector3(1.f * cosf(del_deg * (i + 1)), 0.f, 1.f * sinf(del_deg * (i + 1)));
+		float first_angle = del_deg * i;
+		float next_angle = del_deg * (i + 1);
+		float first_x = 1.f * CosDegrees(first_angle);
+		float first_z = 1.f * SinDegrees(first_angle);
+		float next_x = 1.f * CosDegrees(next_angle);
+		float next_z = 1.f * SinDegrees(next_angle);
+		Vector3 bottom_vert_0 = Vector3(first_x, 0.f, first_z);
+		Vector3 bottom_vert_1 = Vector3(next_x, 0.f, next_z);
 
 		Vector3 tangentV3 = (bottom_vert_1 - bottom_vert_0).GetNormalized();
 		Vector4 tangent = tangentV3.ToVector4(1.f);
@@ -726,6 +733,21 @@ Mesh* Mesh::CreateCone(eVertexType type, int base_side)
 
 		mb.SetUV(Vector2(0.5f, 1.f));
 		mb.PushVertex(apex);
+
+		mb.AddTriangle(idx, idx + 1, idx + 2);
+
+		mb.SetTangent(tangent);
+
+		mb.SetNormal(Vector3(0.f, -1.f, 0.f));
+
+		mb.SetUV(Vector2(1.f, 0.f));
+		idx = mb.PushVertex(bottom_vert_1);
+
+		mb.SetUV(Vector2(0.f, 0.f));
+		mb.PushVertex(bottom_vert_0);
+
+		mb.SetUV(Vector2(0.5f, 1.f));
+		mb.PushVertex(base);
 
 		mb.AddTriangle(idx, idx + 1, idx + 2);
 	}

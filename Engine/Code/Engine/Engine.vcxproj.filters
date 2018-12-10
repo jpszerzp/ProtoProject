@@ -532,6 +532,9 @@
     <ClCompile Include="Core\Interval.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Primitive\Cone.cpp">
+      <Filter>Core\GameObject\Primitives</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -918,6 +921,9 @@
     <ClInclude Include="Physics\3D\CCDResolver.hpp" />
     <ClInclude Include="Core\Interval.hpp">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Primitive\Cone.hpp">
+      <Filter>Core\GameObject\Primitives</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

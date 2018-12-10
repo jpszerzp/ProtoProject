@@ -489,58 +489,38 @@ ShaderChannel* ShaderChannel::AcquireResource(const char* fp)
 				{
 					// operation
 					if (opAttr == "add")
-					{
 						res->m_state.m_colorBlendOp = COMPARE_ADD;
-					}
 
 					// source
 					if (srcAttr == "blend_one")
-					{
 						res->m_state.m_colorSrcFactor = BLEND_ONE;
-					}
 					else if (srcAttr == "blend_src_alpha")
-					{
 						res->m_state.m_colorSrcFactor = BLEND_SRC_ALPHA;
-					}
 
 					// destination
 					if (destAttr == "blend_zero")
-					{
 						res->m_state.m_colorDstFactor = BLEND_ZERO;
-					}
 					else if (destAttr == "blend_one_minus_src_alpha")
-					{
 						res->m_state.m_colorDstFactor = BLEND_ONE_MINUS_SRC_ALPHA;
-					}
 				}
 				// alpha
 				else if (blendProp.compare("alpha") == 0)
 				{
 					// operation
 					if (opAttr == "add")
-					{
 						res->m_state.m_alphaBlendOp = COMPARE_ADD;
-					}
 
 					// source
 					if (srcAttr == "blend_src_alpha")
-					{
 						res->m_state.m_alphaSrcFactor = BLEND_SRC_ALPHA;
-					}
 					else if (srcAttr == "blend_one")
-					{
 						res->m_state.m_alphaSrcFactor = BLEND_ONE;
-					}
 
 					// destination
 					if (destAttr == "blend_one_minus_src_alpha")
-					{
 						res->m_state.m_alphaDstFactor = BLEND_ONE_MINUS_SRC_ALPHA;
-					}
 					else if (destAttr == "blend_one")
-					{
 						res->m_state.m_alphaDstFactor = BLEND_ONE;
-					}
 				}
 			}
 		}
@@ -580,14 +560,6 @@ ShaderChannel* ShaderChannel::AcquireResource(const char* fp)
 		}
 		else if (prop.compare("wind") == 0)
 		{
-			/*
-			std::string orderStr = ParseXmlAttribute(*ele, "order", "");
-			if (orderStr.compare("ccw") == 0)
-			{
-				res->m_state.m_windOrder = WIND_COUNTER_CLOCKWISE;
-			}
-			*/
-
 			std::string orderStr = ParseXmlAttribute(*ele, "order", "");
 
 			size_t pos = orderStr.find_first_of("|");

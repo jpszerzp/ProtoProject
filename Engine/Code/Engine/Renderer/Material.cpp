@@ -213,9 +213,7 @@ Material* Material::AcquireShaderChannelResource(const char* fp)
 					sShaderTexture* stex = pInfo->FindDefaultTex(bindIdx);
 
 					if (stex != nullptr)
-					{
 						stex->m_bindSrc = bindSrc;
-					}
 					else
 					{
 						stex = new sShaderTexture(bindIdx, bindName, bindSrc);
@@ -240,9 +238,7 @@ Material* Material::AcquireShaderChannelResource(const char* fp)
 					sShaderProperty* sprop = pInfo->FindDefaultProperty(name);
 
 					if (sprop != nullptr)
-					{
 						sprop->m_bindValue = value;
-					}
 					else
 					{
 						sprop = new sShaderProperty(type, name, value);
@@ -267,9 +263,7 @@ Material* Material::AcquireShaderChannelResource(const char* fp)
 					sShaderProperty* sprop = pInfo->FindDefaultProperty(name);
 
 					if (sprop != nullptr)
-					{
 						sprop->m_bindValue = value;
-					}
 					else
 					{
 						sprop = new sShaderProperty(type, name, value);

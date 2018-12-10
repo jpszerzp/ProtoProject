@@ -12,6 +12,7 @@
 #include "Engine/Core/Primitive/Sphere.hpp"
 #include "Engine/Core/Primitive/Point.hpp"
 #include "Engine/Core/Primitive/Line.hpp"
+#include "Engine/Core/Primitive/Cone.hpp"
 #include "Engine/Core/Profiler/ProfileSystem.hpp"
 #include "Engine/Math/MathUtils.hpp"
 
@@ -186,6 +187,9 @@ ProtoState::ProtoState()
 	DirectionalLight* dl_0 = new DirectionalLight(lightPos, lightRot, lightScale, lightColor, attenuaion, specAttenuation, lightDir, innerAngle, outerAngle, directFac);
 	m_gameObjects.push_back(dl_0);
 	m_sceneGraph->AddLight(dl_0);
+
+	Cone* cone = new Cone(Vector3(-20.f, 0.f, 5.f), Vector3::ZERO, Vector3::ONE, Rgba::WHITE, "cone_pcu", "white", MOVE_STATIC, BODY_PARTICLE, false);
+	m_gameObjects.push_back(cone);
 
 	// debug
 	DebugRenderSet3DCamera(m_camera);

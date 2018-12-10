@@ -269,6 +269,7 @@
     <ClCompile Include="Core\Log\LogSystem.cpp" />
     <ClCompile Include="Core\MapChunk.cpp" />
     <ClCompile Include="Core\Primitive\Box.cpp" />
+    <ClCompile Include="Core\Primitive\Cone.cpp" />
     <ClCompile Include="Core\Profiler\ProfileLogScoped.cpp" />
     <ClCompile Include="Core\Profiler\ProfilerNode.cpp" />
     <ClCompile Include="Core\Profiler\ProfileSystem.cpp" />
@@ -433,6 +434,7 @@
     <ClInclude Include="Core\Log\LogSystem.hpp" />
     <ClInclude Include="Core\MapChunk.hpp" />
     <ClInclude Include="Core\Primitive\Box.hpp" />
+    <ClInclude Include="Core\Primitive\Cone.hpp" />
     <ClInclude Include="Core\Profiler\ProfileLogScoped.hpp" />
     <ClInclude Include="Core\Profiler\ProfilerNode.hpp" />
     <ClInclude Include="Core\Profiler\ProfileSystem.hpp" />

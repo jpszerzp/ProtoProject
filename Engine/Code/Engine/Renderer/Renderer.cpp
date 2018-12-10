@@ -542,51 +542,35 @@ Mesh* Renderer::CreateOrGetMesh(std::string meshName)
 		Mesh* mesh = nullptr;
 
 		if (meshName == "cube_pcu")
-		{
 			mesh = Mesh::CreateCube(VERT_PCU);
-		}
 		else if (meshName == "quad_pcu")
-		{
 			mesh = Mesh::CreateQuad(VERT_PCU);
-		}
 		else if (meshName == "sphere_pcu")
-		{
 			mesh = Mesh::CreateUVSphere(VERT_PCU, 18, 36);
-		}
 		else if (meshName == "ship_pcu")
 		{
 			std::string modelPath = "Data/Models/scifi_fighter_mk6.obj";
 			mesh = Mesh::CreateModel(modelPath, VERT_PCU);
 		}
 		else if (meshName == "point_pcu")
-		{
 			mesh = Mesh::CreatePoint(VERT_PCU);
-		}
+		else if (meshName == "cone_pcu")
+			mesh = Mesh::CreateCone(VERT_PCU, 100);
 		else if (meshName == "disc_pcu_2d")
-		{
 			mesh = Mesh::CreateDisc2D(VERT_PCU);
-		}
 		else if (meshName == "quad_pcu_2d")
-		{
 			mesh = Mesh::CreateQuad2D(VERT_PCU);
-		}
 		else if (meshName == "ship_lit")
 		{
 			std::string modelPath = "Data/Models/scifi_fighter_mk6.obj";
 			mesh = Mesh::CreateModel(modelPath, VERT_LIT);
 		}
 		else if (meshName == "quad_lit")
-		{
 			mesh = Mesh::CreateQuad(VERT_LIT);
-		}
 		else if (meshName == "sphere_lit")
-		{
 			mesh = Mesh::CreateUVSphere(VERT_LIT, 18, 36);
-		}
 		else if (meshName == "cube_lit")
-		{
 			mesh = Mesh::CreateCube(VERT_LIT);
-		}
 
 		m_loadedMeshes.emplace(meshName, mesh);
 
