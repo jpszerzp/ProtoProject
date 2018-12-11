@@ -10,6 +10,20 @@
 #include <algorithm>
 #include <set>
 
+enum eHullStep
+{
+	CONFLICT,
+	EYE,
+	HORIZON_START,
+	HORIZON_PROCESS,
+	OLD_FACE,
+	NEW_FACE,
+	ORPHAN,
+	TOPO_ERROR,
+	RESET,
+	COMPLETE
+};
+
 
 enum eQHFeature
 {
@@ -103,7 +117,7 @@ public:
 	QHFace(HalfEdge* he, const Vector3& head, const Vector3& eyePos);
 	~QHFace();
 
-	void AddConflictPoint(QHVert* pt);
+	void AddConflictPoint(QHVert* pt, QuickHull* hull);
 	QHVert* GetFarthestConflictPoint(float& dist) const;
 	QHVert* GetFarthestConflictPoint() const;
 	bool FindTwinAgainstFace(QHFace* face);
@@ -133,6 +147,7 @@ public:
 
 	void ConstructFeatureID() override;
 
+	void DrawFaceAndNormal(Renderer* renderer);
 	void DrawFace(Renderer* renderer);
 };
 
@@ -140,7 +155,7 @@ class QuickHull
 {
 public:
 	QuickHull(){}
-	QuickHull(uint num, const Vector3& min, const Vector3& max);
+	QuickHull(uint num, const Vector3& min, const Vector3& max, bool auto_gen = false);
 	~QuickHull();
 
 	// global list of verts that have a chance to sit on surface of hull
@@ -171,6 +186,11 @@ public:
 	// anchor point that is "inside" the hull generated in future rounds
 	// always valid for use to generate normals of new faces
 	Vector3 m_anchor = Vector3::INVALID;
+
+	//bool m_hull_complete = false;
+	bool m_auto_gen = false;
+	eHullStep m_gen_step;
+	int m_vertCount = 0;
 
 public:
 	bool AddConflictPointInitial(QHVert* vert);
@@ -215,7 +235,10 @@ public:
 	void ChangeCurrentHalfEdgeMesh();
 	void ChangeOtherFace();
 
+	void UpdateHull();
+
 	void RenderHull(Renderer* renderer);
+	void RenderFacesAndNormals(Renderer* renderer);
 	void RenderFaces(Renderer* renderer);
 	void RenderVerts(Renderer* renderer);
 	void RenderHorizon(Renderer* renderer);

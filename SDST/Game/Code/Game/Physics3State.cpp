@@ -76,8 +76,14 @@ Physics3State::Physics3State()
 	// quick hull
 	Vector3 qhMin = Vector3(-150.f, 0.f, 0.f);
 	Vector3 qhMax = Vector3(-50.f, 100.f, 100.f);
-	m_qh = new QuickHull(20, qhMin, qhMax);
-	g_hull = m_qh;
+	//m_qh = new QuickHull(20, qhMin, qhMax);
+	//g_hull = m_qh;
+	g_hull = new QuickHull(20, qhMin, qhMax);
+
+	// auto-gen qh 
+	qhMin = Vector3(-300.f, 0.f, 0.f);
+	qhMax = Vector3(-200, 100.f, 100.f);
+	m_qh = new QuickHull(20, qhMin, qhMax, true);
 
 	// bvh title
 	std::string bp_title = "Broadphase status: ";
@@ -1098,6 +1104,7 @@ void Physics3State::UpdateInput(float deltaTime)
 
 void Physics3State::UpdateGameobjects(float deltaTime)
 {
+	m_qh->UpdateHull();
 	UpdateForceRegistry(deltaTime);			// update force registry
 	UpdateGameobjectsCore(deltaTime);		// update GO core
 	UpdateBVH();							// update BVH 
@@ -1642,6 +1649,8 @@ void Physics3State::Render(Renderer* renderer)
 
 	renderer->SetCamera(m_camera);
 
+	// qh
+	g_hull->RenderHull(renderer);
 	m_qh->RenderHull(renderer);
 
 	renderer->DrawModel(m_assimp_0);
