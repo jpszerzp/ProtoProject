@@ -1023,7 +1023,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 				face->VerifyHalfEdgeTwin();
 			}
 
-			if (!g_hull->m_verts.empty())
+			if (!g_hull->m_conflict_verts.empty())
 			{
 				// conflict list should be adjusted correctly already; back to the step where we generate eye
 				SwapHullStatusMesh("Forming eye");
@@ -1653,6 +1653,8 @@ void Physics3State::Render(Renderer* renderer)
 	g_hull->RenderHull(renderer);
 	m_qh->RenderHull(renderer);
 
+	// make sure the model is not drifted
+	renderer->m_objectData.model = Matrix44::IDENTITY;
 	renderer->DrawModel(m_assimp_0);
 	RenderModelSamples(renderer);				// sample points for model
 

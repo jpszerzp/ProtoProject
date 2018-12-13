@@ -190,6 +190,7 @@ ProtoState::ProtoState()
 
 	Cone* cone = new Cone(Vector3(-20.f, 0.f, 5.f), Vector3::ZERO, Vector3::ONE, Rgba::WHITE, "cone_pcu", "white", MOVE_STATIC, BODY_PARTICLE, false);
 	m_gameObjects.push_back(cone);
+	m_sceneGraph->AddRenderable(cone);
 
 	// debug
 	DebugRenderSet3DCamera(m_camera);
@@ -576,29 +577,7 @@ void ProtoState::UpdateKeyboard(float deltaTime)
 	}
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_9))
 	{
-		// test normal that object should follow
-		m_normalTestAngle += 0.1f;
 
-		float x = CosDegrees(m_normalTestAngle);
-		float y = SinDegrees(m_normalTestAngle);
-
-		Vector3 start = Vector3::ZERO;
-		Vector3 normalTest = Vector3(x, y, 0.f).GetNormalized() * 5.f;
-		Vector3 end = start + normalTest;
-
-		m_normalTestStart = start;
-		m_normalTestEnd = end;
-
-		// update euler of object to follow the normal
-		Vector3 right = c_1->m_renderable->m_transform.GetLocalRight().GetNormalized();
-		Vector3 up = (m_normalTestEnd - m_normalTestStart).GetNormalized();
-		Vector3 forward = right.Cross(up);
-
-		Matrix44 rotationalMat = Matrix44::FromBasis(right, up, forward);
-
-		Vector3 euler = Matrix44::DecomposeMatrixIntoEuler(rotationalMat);
-
-		c_1->m_renderable->m_transform.SetLocalRotation(euler);
 	}
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_0) && DebugRenderOn())
 	{
@@ -657,15 +636,6 @@ void ProtoState::Render(Renderer* renderer)
 
 		gameobject->RenderBasis(renderer);
 	}
-
-	// normal following rotation test
-	Shader* basisShader = renderer->CreateOrGetShader("direct");
-	renderer->UseShader(basisShader);
-	Texture* basisTexture = renderer->CreateOrGetTexture("Data/Images/white.png");
-	renderer->SetTexture2D(0, basisTexture);
-	renderer->SetSampler2D(0, basisTexture->GetSampler());
-	renderer->m_objectData.model = Matrix44::IDENTITY;
-	renderer->DrawLine3D(m_normalTestStart, m_normalTestEnd, Rgba::CYAN, 5.f);
 
 	// fp
 	m_forwardPath->RenderScene(m_sceneGraph);

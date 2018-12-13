@@ -28,11 +28,6 @@ public:
 	Quad* q_0 = nullptr;
 	Sphere* s_0 = nullptr;
 	Point* p_0 = nullptr;
-	Ship* ship_0 = nullptr;
 	Line* l_0 = nullptr;
-
-	//Mesh* normalTestMesh = nullptr;
-	float   m_normalTestAngle = 0.f;
-	Vector3 m_normalTestStart;
-	Vector3 m_normalTestEnd;
+	Ship* ship_0 = nullptr;
 };

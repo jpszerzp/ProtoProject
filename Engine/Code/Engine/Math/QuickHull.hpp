@@ -21,6 +21,7 @@ enum eHullStep
 	ORPHAN,
 	TOPO_ERROR,
 	RESET,
+	PRE_COMPLETE,
 	COMPLETE
 };
 
@@ -105,6 +106,7 @@ public:
 	Rgba normColor;
 
 	Mesh* faceMesh = nullptr;
+	Mesh* unitMesh = nullptr;
 
 	// half edge structure
 	HalfEdge* m_entry = nullptr;		// linked list entry for half edges
@@ -137,6 +139,7 @@ public:
 	void CreateFaceNormalMesh(const Rgba& color);
 	void FlushFaceNormalMesh();
 	void FlushFaceMesh();
+	void FlushHEMesh();
 	void GenerateEdges();
 
 	bool IsTriangle() const { return vert_num == 3; }
@@ -149,6 +152,7 @@ public:
 
 	void DrawFaceAndNormal(Renderer* renderer);
 	void DrawFace(Renderer* renderer);
+	void DrawUnitFace(Renderer* renderer, const Transform& transform);
 };
 
 class QuickHull
@@ -160,7 +164,8 @@ public:
 
 	// global list of verts that have a chance to sit on surface of hull
 	// INVARIANT: m_verts = sum_of(face.conflicts)
-	std::vector<QHVert*> m_verts;
+	std::vector<QHVert*> m_conflict_verts;
+	std::vector<Vector3> m_vertices;
 
 	// face
 	std::vector<QHFace*> m_faces;
@@ -187,10 +192,15 @@ public:
 	// always valid for use to generate normals of new faces
 	Vector3 m_anchor = Vector3::INVALID;
 
-	//bool m_hull_complete = false;
 	bool m_auto_gen = false;
 	eHullStep m_gen_step;
 	int m_vertCount = 0;
+	bool m_unit_gen = false;
+
+	Vector3 m_centroid_pos;
+	Mesh* m_centroid_mesh = nullptr;
+
+	Transform m_transform;
 
 public:
 	bool AddConflictPointInitial(QHVert* vert);
@@ -201,6 +211,7 @@ public:
 	void AddHorizonInfo(HalfEdge* he);
 	void AddFace(QHFace* face) { m_faces.push_back(face); }
 	void AddNewFace(QHFace* face) { m_newFaces.push_back(face); }
+	void AddVertex(const Vector3& vert_pos) { m_vertices.push_back(vert_pos); }
 
 	void GeneratePointSet(uint num, const Vector3& min, const Vector3& max);
 	void GenerateInitialFace();
@@ -217,8 +228,8 @@ public:
 	const std::vector<QHFace*> FindFaceGivenSharedEdgeInitial(const QHEdge& edge, bool& found);
 	const std::vector<QHFace*> FindFaceGivenSharedEdgeGeneral(const QHEdge& edge, bool& found, const std::vector<QHFace*>& new_faces);
 	const std::vector<QHFace*> FindFaceGivenSharedVertInitial(const QHVert& vert, bool& found);
-	QHVert* GetVert(int idx) { return m_verts[idx]; }
-	size_t GetVertNum() const { return m_verts.size(); }
+	QHVert* GetVert(int idx) { return m_conflict_verts[idx]; }
+	size_t GetVertNum() const { return m_conflict_verts.size(); }
 	std::tuple<QHFace*, QHVert*> GetFarthestConflictPair(float& dist) const;
 	std::tuple<QHFace*, QHVert*> GetFarthestConflictPair() const;
 	std::set<Vector3> GetPointSet() const;
@@ -229,6 +240,7 @@ public:
 	void RemoveVisitedFrontier();
 	HalfEdge* PeekHorizonFrontier();
 	void RemoveHorizonFrontier();
+	Vector3 GetCentroid() const;
 
 	void ChangeCurrentHalfEdgeOldFace();
 	void ChangeCurrentHalfEdgeNewFace();
@@ -240,8 +252,10 @@ public:
 	void RenderHull(Renderer* renderer);
 	void RenderFacesAndNormals(Renderer* renderer);
 	void RenderFaces(Renderer* renderer);
+	void RenderUnitFaces(Renderer* renderer);
 	void RenderVerts(Renderer* renderer);
 	void RenderHorizon(Renderer* renderer);
+	void RenderCentroid(Renderer* renderer);
 	//void RenderAnchor(Renderer* renderer);
 	//void RenderCurrentHalfEdge(Renderer* renderer);
 
