@@ -264,6 +264,7 @@
     <ClCompile Include="Core\AssimpLoader.cpp" />
     <ClCompile Include="Core\Blackboard.cpp" />
     <ClCompile Include="Core\Delegate.cpp" />
+    <ClCompile Include="Core\HullObject.cpp" />
     <ClCompile Include="Core\Interval.cpp" />
     <ClCompile Include="Core\Log\FileUtils.cpp" />
     <ClCompile Include="Core\Log\LogSystem.cpp" />
@@ -429,6 +430,7 @@
     <ClInclude Include="Core\Blackboard.hpp" />
     <ClInclude Include="Core\Delegate.hpp" />
     <ClInclude Include="Core\GameInstance.hpp" />
+    <ClInclude Include="Core\HullObject.hpp" />
     <ClInclude Include="Core\Interval.hpp" />
     <ClInclude Include="Core\Log\FileUtils.hpp" />
     <ClInclude Include="Core\Log\LogSystem.hpp" />

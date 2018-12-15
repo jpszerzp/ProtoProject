@@ -124,7 +124,7 @@ void sTransform::SetScale(Vector3 s)
 
 ////////////////////////////////////////////// TRANSFORM ///////////////////////////////////////////////
 
-Transform::Transform(Vector3 pos, Vector3 euler, Vector3 scale)
+Transform::Transform(const Vector3& pos, const Vector3& euler, const Vector3& scale)
 {
 	m_localTransform = sTransform(pos, euler, scale);;
 }

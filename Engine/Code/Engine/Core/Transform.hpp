@@ -12,7 +12,7 @@ struct sTransform
 		, m_euler(Vector3::ZERO)
 		, m_scale(Vector3::ONE) {}
 
-	sTransform(Vector3 pos, Vector3 euler, Vector3 scale)
+	sTransform(const Vector3& pos, const Vector3& euler, const Vector3& scale)
 		: m_position(pos), m_euler(euler), m_scale(scale)
 	{
 		
@@ -51,7 +51,7 @@ class Transform
 {
 public:
 	Transform();
-	Transform(Vector3 pos, Vector3 euler, Vector3 scale);
+	Transform(const Vector3& pos, const Vector3& euler, const Vector3& scale);
 	~Transform();
 
 	// local mat

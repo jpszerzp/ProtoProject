@@ -110,7 +110,7 @@ QHFace::~QHFace()
 	conflicts.clear();
 	m_entry = nullptr;
 
-	// flush halfmesh accordingly
+	//// flush halfmesh accordingly
 	//delete m_entry->m_next->m_next;
 	//m_entry->m_next->m_next = nullptr;
 	//delete m_entry->m_next;
@@ -534,15 +534,34 @@ QuickHull::~QuickHull()
 	DeleteVector(m_faces);
 	DeleteVector(m_conflict_verts);
 
-	if (m_centroid_mesh != nullptr)
+	if (m_ref_mesh != nullptr)
 	{
-		delete m_centroid_mesh;
-		m_centroid_mesh = nullptr;
+		delete m_ref_mesh;
+		m_ref_mesh = nullptr;
+	}
+
+	if (m_forwardBasisMesh != nullptr)
+	{
+		delete m_forwardBasisMesh;
+		m_forwardBasisMesh = nullptr;
+	}
+
+	if (m_upBasisMesh != nullptr)
+	{
+		delete m_upBasisMesh;
+		m_upBasisMesh = nullptr;
+	}
+
+	if (m_rightBasisMesh != nullptr)
+	{
+		delete m_rightBasisMesh;
+		m_rightBasisMesh = nullptr;
 	}
 }
 
 void QuickHull::UpdateHull()
 {
+	// run once
 	if (m_auto_gen && m_gen_step != COMPLETE)
 	{
 		switch (m_gen_step)
@@ -592,7 +611,7 @@ void QuickHull::UpdateHull()
 				m_exploredFaces.push_back(m_otherFace);
 				m_visitedFaces.push_back(m_otherFace);
 
-				HalfEdge* expiring = m_current_he;
+				//HalfEdge* expiring = m_current_he;
 
 				ChangeCurrentHalfEdgeNewFace();
 				ChangeOtherFace();
@@ -631,7 +650,7 @@ void QuickHull::UpdateHull()
 						{
 							m_exploredFaces.pop_back();
 
-							HalfEdge* expiring = m_current_he;
+							//HalfEdge* expiring = m_current_he;
 
 							ChangeCurrentHalfEdgeNewFace();
 
@@ -639,7 +658,7 @@ void QuickHull::UpdateHull()
 						}
 						else
 						{
-							HalfEdge* expiring = m_current_he;
+							//HalfEdge* expiring = m_current_he;
 
 							ChangeCurrentHalfEdgeOldFace();
 
@@ -651,7 +670,7 @@ void QuickHull::UpdateHull()
 						m_exploredFaces.push_back(m_otherFace);
 						m_visitedFaces.push_back(m_otherFace);
 
-						HalfEdge* expiring = m_current_he;
+						//HalfEdge* expiring = m_current_he;
 
 						ChangeCurrentHalfEdgeNewFace();
 
@@ -849,13 +868,15 @@ void QuickHull::UpdateHull()
 				face->FlushHEMesh();
 
 			// we can generate centroid here
-			m_centroid_pos = GetCentroid();
-			m_centroid_mesh = Mesh::CreatePointImmediate(VERT_PCU, m_centroid_pos, Rgba::WHITE);
-
-			Vector3 center = m_centroid_pos;
-			Vector3 rot = Vector3(90.f, 0.f, 0.f);
-			Vector3 scale = Vector3::ONE;
-			m_transform = Transform(center, rot, scale);
+			if (m_go_ref != nullptr)
+			{
+				m_ref_pos = m_go_ref->m_renderable->m_transform.m_localTransform.m_position;
+				m_qh_rot = m_go_ref->m_renderable->m_transform.m_localTransform.m_euler;
+				m_qh_scale = m_go_ref->m_renderable->m_transform.m_localTransform.m_scale;
+			}
+			else
+				m_ref_pos = GetCentroid();
+			m_ref_mesh = Mesh::CreatePointImmediate(VERT_PCU, m_ref_pos, Rgba::WHITE);
 
 			m_gen_step= COMPLETE;
 		}
@@ -870,9 +891,10 @@ void QuickHull::UpdateHull()
 		}
 	}
 
+	// run once
 	if (m_auto_gen && m_gen_step == COMPLETE && !m_unit_gen)
 	{
-		Vector3 disp = m_centroid_pos - Vector3::ZERO;
+		Vector3 disp = m_ref_pos - Vector3::ZERO;
 
 		for (QHFace* face : m_faces)
 		{
@@ -884,10 +906,62 @@ void QuickHull::UpdateHull()
 				unitVerts.push_back(vert - disp);
 
 			// create unit mesh with unit verts
-			face->unitMesh = Mesh::CreateTriangleImmediate(VERT_PCU, Rgba::RED, unitVerts[0], unitVerts[1], unitVerts[2]);
+			face->unitMesh = Mesh::CreateTriangleImmediate(VERT_PCU, Rgba::WHITE, unitVerts[0], unitVerts[1], unitVerts[2]);
 		}
 
 		m_unit_gen = true;
+	}
+
+	// its transform should follow gameobject's
+	if (m_go_ref != nullptr)
+	{
+		m_ref_pos = m_go_ref->m_renderable->m_transform.m_localTransform.m_position;
+		m_qh_rot = m_go_ref->m_renderable->m_transform.m_localTransform.m_euler;
+		m_qh_scale = m_go_ref->m_renderable->m_transform.m_localTransform.m_scale;
+	}
+	
+	if (m_ref_mesh != nullptr)
+	{
+		delete m_ref_mesh;
+		m_ref_mesh = nullptr;
+	}
+	m_ref_mesh = Mesh::CreatePointImmediate(VERT_PCU, m_ref_pos, Rgba::WHITE);
+}
+
+void QuickHull::UpdateBasis()
+{
+	if (m_drawBasis)
+	{
+		Transform transform = Transform(m_ref_pos, m_qh_rot, m_qh_scale);
+
+		Vector3 world = transform.GetWorldPosition();
+		Vector3 worldRight = transform.GetWorldRight().GetNormalized() * 20.f;
+		Vector3 worldUp = transform.GetWorldUp().GetNormalized() * 20.f;
+		Vector3 worldForward = transform.GetWorldForward().GetNormalized() * 20.f;
+		Vector3 rightEnd = world + worldRight;
+		Vector3 upEnd = world + worldUp;
+		Vector3 forwardEnd = world + worldForward;
+
+		if (m_forwardBasisMesh != nullptr)
+		{
+			delete m_forwardBasisMesh;
+			m_forwardBasisMesh = nullptr;
+		}
+		m_forwardBasisMesh = Mesh::CreateLineImmediate(VERT_PCU, world, forwardEnd, Rgba::BLUE);
+
+		if (m_upBasisMesh != nullptr)
+		{
+			delete m_upBasisMesh;
+			m_upBasisMesh = nullptr;
+		}
+		m_upBasisMesh = Mesh::CreateLineImmediate(VERT_PCU, world, upEnd, Rgba::GREEN);
+
+		if (m_rightBasisMesh != nullptr)
+		{
+			delete m_rightBasisMesh;
+			m_rightBasisMesh = nullptr;
+		}
+		m_rightBasisMesh = Mesh::CreateLineImmediate(VERT_PCU, world, rightEnd, Rgba::RED);
 	}
 }
 
@@ -1924,6 +1998,10 @@ bool QuickHull::HasVisitedFace(QHFace* face)
 
 bool QuickHull::IsLastVisitedFace(QHFace* face)
 {
+	if (m_exploredFaces.size() == 1)
+		return false;
+		//return (face == m_exploredFaces[0]);
+
 	size_t end_index = m_exploredFaces.size() - 1U;
 	size_t last_index = end_index - 1U;
 	QHFace* last_face = m_exploredFaces[last_index];
@@ -2012,7 +2090,7 @@ void QuickHull::RenderHull(Renderer* renderer)
 		if (m_gen_step == COMPLETE)
 		{
 			// non-unit hull
-			RenderFaces(renderer);
+			//RenderFaces(renderer);
 			RenderCentroid(renderer);
 
 			// unit hull
@@ -2037,7 +2115,10 @@ void QuickHull::RenderFaces(Renderer* renderer)
 void QuickHull::RenderUnitFaces(Renderer* renderer)
 {
 	for (QHFace* face : m_faces)
-		face->DrawUnitFace(renderer, m_transform);
+	{
+		Transform transform = Transform(m_ref_pos, m_qh_rot, m_qh_scale);
+		face->DrawUnitFace(renderer, transform);
+	}
 }
 
 void QuickHull::RenderVerts(Renderer* renderer)
@@ -2056,7 +2137,7 @@ void QuickHull::RenderHorizon(Renderer* renderer)
 
 void QuickHull::RenderCentroid(Renderer* renderer)
 {
-	if (m_centroid_mesh != nullptr)
+	if (m_ref_mesh != nullptr)
 	{
 		Shader* shader = renderer->CreateOrGetShader("wireframe_color");
 		renderer->UseShader(shader);
@@ -2068,7 +2149,25 @@ void QuickHull::RenderCentroid(Renderer* renderer)
 
 		renderer->m_objectData.model = Matrix44::IDENTITY;
 
-		renderer->DrawMesh(m_centroid_mesh);
+		renderer->DrawMesh(m_ref_mesh);
+	}
+}
+
+void QuickHull::RenderBasis(Renderer* renderer)
+{
+	if (!(m_forwardBasisMesh == nullptr || m_upBasisMesh == nullptr || m_rightBasisMesh == nullptr) && m_drawBasis)
+	{
+		Shader* basisShader = renderer->CreateOrGetShader("direct");
+		renderer->UseShader(basisShader);
+		Texture* basisTexture = renderer->CreateOrGetTexture("Data/Images/white.png");
+		renderer->SetTexture2D(0, basisTexture);
+		renderer->SetSampler2D(0, basisTexture->GetSampler());
+
+		renderer->m_objectData.model = Matrix44::IDENTITY;
+		glLineWidth(10.f);
+		renderer->DrawMesh(m_forwardBasisMesh);
+		renderer->DrawMesh(m_upBasisMesh);
+		renderer->DrawMesh(m_rightBasisMesh);
 	}
 }
 

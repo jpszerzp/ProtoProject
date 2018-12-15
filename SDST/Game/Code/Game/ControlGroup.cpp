@@ -8,6 +8,7 @@
 #include "Engine/Core/Util/DataUtils.hpp"
 #include "Engine/Core/Util/RenderUtil.hpp"
 #include "Engine/Core/Primitive/Line.hpp"
+#include "Engine/Core/HullObject.hpp"
 #include "Engine/Physics/3D/SphereRB3.hpp"
 #include "Engine/Physics/3D/QuadRb3.hpp"
 #include "Engine/Physics/3D/BoxRB3.hpp"
@@ -71,7 +72,7 @@ void ControlGroup::ProcessInput()
 	else
 	{
 		// for line control
-		Line* line = static_cast<Line*>(g0);
+		Line* line = dynamic_cast<Line*>(g0);
 		if (line != nullptr)
 		{
 			if (g_input->IsKeyDown(InputSystem::KEYBOARD_UP_ARROW))
@@ -133,6 +134,66 @@ void ControlGroup::ProcessInput()
 					line->m_renderable->m_mesh = nullptr;
 				}
 				line->m_renderable->m_mesh = Mesh::CreateLineImmediate(VERT_PCU, line->m_start, line->m_end, Rgba::WHITE);
+			}
+		}
+
+		// the object may be a hull, handle it here
+		HullObject* hull = dynamic_cast<HullObject*>(g0);
+		if (hull != nullptr)
+		{
+			if (g_input->IsKeyDown(InputSystem::KEYBOARD_UP_ARROW))
+			{
+				Vector3 pos = hull->m_renderable->m_transform.GetLocalPosition();
+				pos += Vector3(0.f, 0.f, 1.f);
+				hull->m_renderable->m_transform.SetLocalPosition(pos);
+			}
+			if (g_input->IsKeyDown(InputSystem::KEYBOARD_DOWN_ARROW))
+			{
+				Vector3 pos = hull->m_renderable->m_transform.GetLocalPosition();
+				pos -= Vector3(0.f, 0.f, 1.f);
+				hull->m_renderable->m_transform.SetLocalPosition(pos);
+			}
+			if (g_input->IsKeyDown(InputSystem::KEYBOARD_LEFT_ARROW))
+			{
+				Vector3 pos = hull->m_renderable->m_transform.GetLocalPosition();
+				pos -= Vector3(1.f, 0.f, 0.f);
+				hull->m_renderable->m_transform.SetLocalPosition(pos);
+			}
+			if (g_input->IsKeyDown(InputSystem::KEYBOARD_RIGHT_ARROW))
+			{
+				Vector3 pos = hull->m_renderable->m_transform.GetLocalPosition();
+				pos += Vector3(1.f, 0.f, 0.f);
+				hull->m_renderable->m_transform.SetLocalPosition(pos);
+			}
+			if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEUP))
+			{
+				Vector3 pos = hull->m_renderable->m_transform.GetLocalPosition();
+				pos += Vector3(0.f, 1.f, 0.f);
+				hull->m_renderable->m_transform.SetLocalPosition(pos);
+			}
+			if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEDOWN))
+			{
+				Vector3 pos = hull->m_renderable->m_transform.GetLocalPosition();
+				pos -= Vector3(0.f, 1.f, 0.f);
+				hull->m_renderable->m_transform.SetLocalPosition(pos);
+			}
+			if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_1))
+			{
+				Vector3 rot = hull->m_renderable->m_transform.GetLocalRotation();
+				rot += Vector3(1.f, 0.f, 0.f);
+				hull->m_renderable->m_transform.SetLocalRotation(rot);
+			}
+			if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_4))
+			{
+				Vector3 rot = hull->m_renderable->m_transform.GetLocalRotation();
+				rot += Vector3(0.f, 1.f, 0.f);
+				hull->m_renderable->m_transform.SetLocalRotation(rot);
+			}
+			if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_7))
+			{
+				Vector3 rot = hull->m_renderable->m_transform.GetLocalRotation();
+				rot += Vector3(0.f, 0.f, 1.f);
+				hull->m_renderable->m_transform.SetLocalRotation(rot);
 			}
 		}
 	}
@@ -285,6 +346,11 @@ void ControlGroup::Update(float deltaTime)
 	}
 		break;
 	case CONTROL_LINE_LINE:
+	{
+
+	}
+		break;
+	case CONTROL_HULL_HULL:
 	{
 
 	}
@@ -507,6 +573,16 @@ void ControlGroup::UpdateUI()
 
 		std::string dot_str2 = Stringf("Close vector dot with line 2: %f", dot2);
 		mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, dot_str2, VERT_PCU);
+		m_view.push_back(mesh);
+		min -= Vector2(0.f, m_textHeight);
+	}
+		break;
+	case CONTROL_HULL_HULL:
+	{
+		Vector2 min = m_startMin;
+
+		std::string cp_title = "Hull v.s Hull";
+		Mesh* mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, cp_title, VERT_PCU);
 		m_view.push_back(mesh);
 		min -= Vector2(0.f, m_textHeight);
 	}

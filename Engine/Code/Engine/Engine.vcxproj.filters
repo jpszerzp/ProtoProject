@@ -535,6 +535,9 @@
     <ClCompile Include="Core\Primitive\Cone.cpp">
       <Filter>Core\GameObject\Primitives</Filter>
     </ClCompile>
+    <ClCompile Include="Core\HullObject.cpp">
+      <Filter>Core\GameObject</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -924,6 +927,9 @@
     </ClInclude>
     <ClInclude Include="Core\Primitive\Cone.hpp">
       <Filter>Core\GameObject\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\HullObject.hpp">
+      <Filter>Core\GameObject</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

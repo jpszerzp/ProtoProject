@@ -10,6 +10,8 @@
 #include <algorithm>
 #include <set>
 
+class GameObject;
+
 enum eHullStep
 {
 	CONFLICT,
@@ -192,15 +194,25 @@ public:
 	// always valid for use to generate normals of new faces
 	Vector3 m_anchor = Vector3::INVALID;
 
+	// for auto generation
 	bool m_auto_gen = false;
 	eHullStep m_gen_step;
 	int m_vertCount = 0;
 	bool m_unit_gen = false;
 
-	Vector3 m_centroid_pos;
-	Mesh* m_centroid_mesh = nullptr;
+	// centroid as reference point
+	//Transform m_transform;
+	Vector3 m_ref_pos;
+	Vector3 m_qh_rot = Vector3::ZERO;
+	Vector3 m_qh_scale = Vector3::ONE;
+	GameObject* m_go_ref = nullptr;
+	Mesh* m_ref_mesh = nullptr;
 
-	Transform m_transform;
+	// basis
+	bool m_drawBasis = false;
+	Mesh* m_forwardBasisMesh = nullptr;
+	Mesh* m_upBasisMesh = nullptr;
+	Mesh* m_rightBasisMesh = nullptr;
 
 public:
 	bool AddConflictPointInitial(QHVert* vert);
@@ -248,6 +260,7 @@ public:
 	void ChangeOtherFace();
 
 	void UpdateHull();
+	void UpdateBasis();
 
 	void RenderHull(Renderer* renderer);
 	void RenderFacesAndNormals(Renderer* renderer);
@@ -256,6 +269,7 @@ public:
 	void RenderVerts(Renderer* renderer);
 	void RenderHorizon(Renderer* renderer);
 	void RenderCentroid(Renderer* renderer);
+	void RenderBasis(Renderer* renderer);
 	//void RenderAnchor(Renderer* renderer);
 	//void RenderCurrentHalfEdge(Renderer* renderer);
 

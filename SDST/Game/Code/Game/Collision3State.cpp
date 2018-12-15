@@ -7,6 +7,7 @@
 #include "Engine/Core/Primitive/Quad.hpp"
 #include "Engine/Core/Primitive/Box.hpp"
 #include "Engine/Core/Primitive/Line.hpp"
+#include "Engine/Core/HullObject.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/Math/MathUtils.hpp"
 #include "Engine/Physics/3D/Rigidbody3.hpp"
@@ -24,7 +25,7 @@ Collision3State::Collision3State()
 	float height = window->GetWindowHeight();
 	float aspect = width / height;
 
-	m_cameraInitialPos = Vector3(0.f, 0.f, -7.f);
+	m_cameraInitialPos = Vector3(-110.f, 0.f, -7.f);
 	m_cameraRotationSpd = 50.f;
 
 	if (!m_camera)
@@ -51,7 +52,7 @@ Collision3State::Collision3State()
 	}
 
 	// cp 1
-	Vector3 pos = Vector3(-1.5f, 0.f, 0.f);
+	Vector3 pos = Vector3(-111.5f, 0.f, 0.f);
 	Vector3 rot = Vector3::ZERO;
 	Vector3 scale = Vector3::ONE;
 	Rgba tint = Rgba::WHITE;
@@ -72,7 +73,7 @@ Collision3State::Collision3State()
 	rigid->SetCanSleep(false);
 	m_gameObjects.push_back(sph);
 
-	pos = Vector3(1.5f, 0.f, 0.f);
+	pos = Vector3(-108.5f, 0.f, 0.f);
 	scale = Vector3(2.f, 2.f, 2.f);
 	Sphere* sph_0 = new Sphere(pos, rot, scale, tint, meshName, matName, stat, bid, multipass, compare, cull, wind, scheme);
 	rigid = static_cast<Rigidbody3*>(sph_0->GetEntity());
@@ -86,7 +87,7 @@ Collision3State::Collision3State()
 	m_controlGrps.push_back(grp);
 
 	// cp 2
-	pos = Vector3(0.f, -5.f, 0.f);
+	pos = Vector3(100.f, -105.f, 0.f);
 	scale = Vector3::ONE;
 	Sphere* sph_1 = new Sphere(pos, rot, scale, tint, meshName, matName, stat, bid, multipass, compare, cull, wind, scheme);
 	rigid = static_cast<Rigidbody3*>(sph_1->GetEntity());
@@ -96,7 +97,7 @@ Collision3State::Collision3State()
 	rigid->SetCanSleep(false);
 	m_gameObjects.push_back(sph_1);
 
-	pos = Vector3(0.f, -7.f, 0.f);
+	pos = Vector3(100.f, -107.f, 0.f);
 	rot = Vector3(90.f, 0.f, 0.f);
 	scale = Vector3(4.f, 4.f, 1.f);
 	stat = MOVE_KINEMATIC;
@@ -108,11 +109,11 @@ Collision3State::Collision3State()
 	rigid->SetCanSleep(false);
 	m_gameObjects.push_back(pl);
 
-	ControlGroup* grp_0 = new ControlGroup(sph_1, pl, CONTROL_SPHERE_PLANE, Vector3(0.f, -6.f, -7.f));
+	ControlGroup* grp_0 = new ControlGroup(sph_1, pl, CONTROL_SPHERE_PLANE, Vector3(100.f, -106.f, -7.f));
 	m_controlGrps.push_back(grp_0);
 
 	// cp 3
-	pos = Vector3(10.f, -5.f, 0.f);
+	pos = Vector3(110.f, -105.f, 0.f);
 	float rand_rot_x = GetRandomFloatInRange(0.f, 360.f);
 	float rand_rot_y = GetRandomFloatInRange(0.f, 360.f);
 	float rand_rot_z = GetRandomFloatInRange(0.f, 360.f);
@@ -126,7 +127,7 @@ Collision3State::Collision3State()
 	rigid->SetCanSleep(false);
 	m_gameObjects.push_back(b);
 
-	pos = Vector3(10.f, -7.f, 0.f);
+	pos = Vector3(110.f, -107.f, 0.f);
 	rot = Vector3(90.f, 0.f, 0.f);
 	scale = Vector3(4.f, 4.f, 1.f);
 	Quad* pl_0 = new Quad(pos, rot, scale, tint, "quad_pcu", matName, stat, bid, multipass, compare, CULLMODE_FRONT, wind, scheme);
@@ -137,11 +138,11 @@ Collision3State::Collision3State()
 	rigid->SetCanSleep(false);
 	m_gameObjects.push_back(pl_0);
 
-	ControlGroup* grp_1 = new ControlGroup(b, pl_0, CONTROL_BOX_PLANE, Vector3(10.f, -6.f, -7.f));
+	ControlGroup* grp_1 = new ControlGroup(b, pl_0, CONTROL_BOX_PLANE, Vector3(110.f, -106.f, -7.f));
 	m_controlGrps.push_back(grp_1);
 
 	// cp 4
-	pos = Vector3(10.f, 0.f, 0.f);
+	pos = Vector3(110.f, 0.f, 0.f);
 	rand_rot_x = GetRandomFloatInRange(0.f, 360.f);
 	rand_rot_y = GetRandomFloatInRange(0.f, 360.f);
 	rand_rot_z = GetRandomFloatInRange(0.f, 360.f);
@@ -155,7 +156,7 @@ Collision3State::Collision3State()
 	rigid->SetCanSleep(false);
 	m_gameObjects.push_back(b_0);
 
-	pos = Vector3(12.f, 0.f, 0.f);
+	pos = Vector3(112.f, 0.f, 0.f);
 	rot = Vector3::ZERO;
 	Sphere* sph_2 = new Sphere(pos, rot, scale, tint, meshName, matName, stat, bid, multipass, compare, cull, wind);
 	rigid = static_cast<Rigidbody3*>(sph_2->GetEntity());
@@ -165,11 +166,11 @@ Collision3State::Collision3State()
 	rigid->SetCanSleep(false);
 	m_gameObjects.push_back(sph_2);
 
-	ControlGroup* grp_2 = new ControlGroup(b_0, sph_2, CONTROL_BOX_SPHERE, Vector3(11.f, 0.f, -7.f));
+	ControlGroup* grp_2 = new ControlGroup(b_0, sph_2, CONTROL_BOX_SPHERE, Vector3(111.f, 0.f, -7.f));
 	m_controlGrps.push_back(grp_2);
 
 	// cp 5
-	pos = Vector3(20.f, 0.f, 0.f);
+	pos = Vector3(120.f, 0.f, 0.f);
 	rand_rot_x = GetRandomFloatInRange(0.f, 360.f);
 	rand_rot_y = GetRandomFloatInRange(0.f, 360.f);
 	rand_rot_z = GetRandomFloatInRange(0.f, 360.f);
@@ -182,7 +183,7 @@ Collision3State::Collision3State()
 	rigid->SetCanSleep(false);
 	m_gameObjects.push_back(b_1);
 
-	pos = Vector3(22.f, 0.f, 0.f);
+	pos = Vector3(122.f, 0.f, 0.f);
 	rand_rot_x = GetRandomFloatInRange(0.f, 360.f);
 	rand_rot_y = GetRandomFloatInRange(0.f, 360.f);
 	rand_rot_z = GetRandomFloatInRange(0.f, 360.f);
@@ -195,20 +196,37 @@ Collision3State::Collision3State()
 	rigid->SetCanSleep(false);
 	m_gameObjects.push_back(b_2);
 
-	ControlGroup* grp_3 = new ControlGroup(b_1, b_2, CONTROL_BOX_BOX, Vector3(21.f, 0.f, -7.f));
+	ControlGroup* grp_3 = new ControlGroup(b_1, b_2, CONTROL_BOX_BOX, Vector3(121.f, 0.f, -7.f));
 	m_controlGrps.push_back(grp_3);
 
-	Vector3 start_line = Vector3(-5.f, 10.f, 0.f);
-	Vector3 end_line = Vector3(5.f, 10.f, 0.f);
+	Vector3 start_line = Vector3(-150.f, 10.f, 0.f);
+	Vector3 end_line = Vector3(-140.f, 10.f, 0.f);
 	Line* l_1 = new Line(start_line, end_line, 5.f, Rgba::WHITE, "white");
-	start_line = Vector3(-5.f, 7.f, 0.f);
-	end_line = Vector3(5.f, 7.f, 0.f);
+	start_line = Vector3(-150.f, 7.f, 0.f);
+	end_line = Vector3(-140.f, 7.f, 0.f);
 	Line* l_2 = new Line(start_line, end_line, 5.f, Rgba::WHITE, "white");
 	m_gameObjects.push_back(l_1);
 	m_gameObjects.push_back(l_2);
 
-	ControlGroup* grp_4 = new ControlGroup(l_1, l_2, CONTROL_LINE_LINE, Vector3(0.f, 8.f, -5.f));
+	ControlGroup* grp_4 = new ControlGroup(l_1, l_2, CONTROL_LINE_LINE, Vector3(-145.f, 8.f, -5.f));
 	m_controlGrps.push_back(grp_4);
+
+	pos = Vector3(-55.f, 0.f, 0.f);
+	rot = Vector3::ZERO;
+	scale = Vector3::ONE;
+	Vector3 hull_ext = Vector3(15.f, 15.f, 15.f);
+	TODO("material needs to be adjusted so that it respects data imported from assimp");
+	HullObject* h_1 = new HullObject(pos, hull_ext, rot, scale, tint, "white", stat, bid, 20, "", multipass, compare, cull, wind);
+	pos = Vector3(55.f, 0.f, 0.f);
+	rot = Vector3(45.f, 0.f, 0.f);
+	HullObject* h_2 = new HullObject(pos, hull_ext, rot, scale, tint, "white", stat, bid, 10, "", multipass, compare, cull, wind);
+	h_1->SetHullObject();
+	h_2->SetHullObject();
+	m_gameObjects.push_back(h_1);
+	m_gameObjects.push_back(h_2);
+
+	ControlGroup* grp_5 = new ControlGroup(h_1, h_2, CONTROL_HULL_HULL, Vector3(0.f, 0.f, -80.f));
+	m_controlGrps.push_back(grp_5);
 
 	// set the focused grp and the initial index
 	m_focusedIndex = 0;

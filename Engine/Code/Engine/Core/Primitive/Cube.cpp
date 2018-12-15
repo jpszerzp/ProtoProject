@@ -25,6 +25,7 @@ Cube::Cube(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint,
 		material = renderer->CreateOrGetStagedMaterial(materialName);
 
 	Mesh* mesh = renderer->CreateOrGetMesh(meshName);
+
 	Transform transform = Transform(pos, rot, scale);
 
 	// Set tint

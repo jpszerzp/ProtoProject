@@ -577,9 +577,7 @@ Mesh* Renderer::CreateOrGetMesh(std::string meshName)
 		return mesh;
 	}
 	else 
-	{
 		return m_loadedMeshes[meshName];
-	}
 }
 
 

@@ -14,11 +14,14 @@ Renderable::~Renderable()
 	delete m_material;
 	m_material = nullptr;
 
-	if (m_mesh->m_immediate)
+	if (m_mesh != nullptr)
 	{
-		delete m_mesh;
+		if (m_mesh->m_immediate)
+		{
+			delete m_mesh;
+		}
+		m_mesh = nullptr;
 	}
-	m_mesh = nullptr;
 }
 
 Material* Renderable::GetMaterial()
