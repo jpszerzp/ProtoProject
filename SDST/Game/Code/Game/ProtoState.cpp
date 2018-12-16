@@ -580,33 +580,23 @@ void ProtoState::UpdateKeyboard(float deltaTime)
 
 	}
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_0) && DebugRenderOn())
-	{
 		g_renderer->m_debugModeData.mode.w = DEBUG_NONE;
-	}
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_1) && DebugRenderOn())
-	{
 		g_renderer->m_debugModeData.mode.w = DEBUG_COLOR;
-	}
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_2) && DebugRenderOn())
-	{
 		g_renderer->m_debugModeData.mode.w = DEBUG_UV;
-	}
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_3) && DebugRenderOn())
-	{
 		g_renderer->m_debugModeData.mode.w = DEBUG_SURFACE_NORMAL;
-	}
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_4) && DebugRenderOn())
-	{
 		g_renderer->m_debugModeData.mode.w = DEBUG_WORLD_NORMAL;
-	}
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_8) && DebugRenderOn())
-	{
 		g_renderer->m_debugModeData.mode.w = DEBUG_DIFFUSE;
-	}
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_9) && DebugRenderOn())
-	{
 		g_renderer->m_debugModeData.mode.w = DEBUG_SPECULAR;
-	}
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_5) && DebugRenderOn())
+		g_renderer->m_debugModeData.mode.w = DEBUG_NONLINEAR_DEPTH;		// 12
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_6) && DebugRenderOn())			
+		g_renderer->m_debugModeData.mode.w = DEBUG_LINEAR_DEPTH;		// 13
 
 	// camera update from input
 	Vector3 camForward = m_camera->GetLocalForward(); 

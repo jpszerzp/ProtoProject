@@ -94,6 +94,15 @@ vec3 WorldNormalToColor( vec3 normal )
    return (normal + vec3(1.0f)) * .5f; 
 }
 
+float near = 1.0;
+float far = 1000.0;
+float GetLinearDepth(float depth)
+{
+	float z = depth * 2.0 - 1.0;
+	float linear_depth = (2.0 * near * far) / (far + near - z * (far - near));
+	return linear_depth;
+}
+
 sLightFactor CalculateLightFactor(vec3 position, 
 	vec3 eyeDir,
 	vec3 normal,
@@ -221,6 +230,13 @@ void main()
       case 4: outColor = vec4(WorldNormalToColor(normalize(worldNormal)), 1); break;
 	  case 8: outColor = diffuseColor; break;
 	  case 9: outColor = specularColor; break;
+	  case 12: outColor = vec4(vec3(gl_FragCoord.z), 1.0); break;
+	  case 13: 
+	  {
+		  float depth = GetLinearDepth(gl_FragCoord.z) / far;
+		  outColor = vec4(vec3(depth), 1.0);
+	  }
+	  break;
 	  default: break;
    }
 }
