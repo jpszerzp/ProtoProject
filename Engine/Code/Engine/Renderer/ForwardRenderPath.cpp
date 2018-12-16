@@ -13,13 +13,13 @@ bool LayerCompare(Drawcall* dc_1, Drawcall* dc_2)
 }
 
 
-bool QueueCompare(Drawcall* dc_1, Drawcall* dc_2)
+bool QueueDepthCompare(Drawcall* dc_1, Drawcall* dc_2)
 {
 	return (dc_1->GetQueue() < dc_2->GetQueue());
 }
 
 
-bool LightIndexDistanceTupleCompare(Vector2 v1, Vector2 v2)
+bool LightIndexDistanceTupleDepthCompare(Vector2 v1, Vector2 v2)
 {
 	return (v1.y < v2.y);
 }
@@ -206,7 +206,7 @@ void ForwardRenderPath::ComputeMostContributingLights(uint& lightCount, int* lig
 		lightIndexAndDistanceTuples.push_back(tuple);
 	}
 
-	std::sort(lightIndexAndDistanceTuples.begin(), lightIndexAndDistanceTuples.end(), LightIndexDistanceTupleCompare);
+	std::sort(lightIndexAndDistanceTuples.begin(), lightIndexAndDistanceTuples.end(), LightIndexDistanceTupleDepthCompare);
 
 	// fill drawcall's light info 
 	for each (Vector2 tuple in lightIndexAndDistanceTuples)
@@ -259,7 +259,7 @@ std::vector<Drawcall*> ForwardRenderPath::SortDrawcalls(std::vector<Drawcall*>& 
 	{
 		std::vector<Drawcall*>& layeredDC = it->second;
 
-		std::sort(layeredDC.begin(), layeredDC.end(), QueueCompare);
+		std::sort(layeredDC.begin(), layeredDC.end(), QueueDepthCompare);
 	}
 
 	std::vector<Drawcall*> res;

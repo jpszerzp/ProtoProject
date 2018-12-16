@@ -13,7 +13,7 @@ Cube::Cube()
 Cube::Cube(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint,
 	std::string meshName, std::string materialName, 
 	eMoveStatus moveStat, eBodyIdentity bid, bool multipass,
-	eCompare compare, eCullMode cull, eWindOrder order)
+	eDepthCompare compare, eCullMode cull, eWindOrder order, bool drawBorder)
 {
 	Renderer* renderer = Renderer::GetInstance();
 
@@ -46,6 +46,9 @@ Cube::Cube(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint,
 		m_physEntity = new CubeEntity3(aabb3, moveStat);
 	TODO("cube rigid body");
 	m_physEntity->SetEntityForPrimitive();
+
+	// later for stencil test
+	m_drawBorder = drawBorder;
 }
 
 
@@ -72,89 +75,96 @@ void Cube::Update(float deltaTime)
 
 void Cube::Render(Renderer* renderer)
 {
-	Mesh* mesh = m_renderable->m_mesh;
-	Transform& transform = m_renderable->m_transform;
-
-	if (mesh != nullptr)
+	if (!m_drawBorder)
 	{
-		Shader* shader;
-		if (!m_debugOn)
-		{
-			shader = m_renderable->GetMaterial()->m_shader;
+		Mesh* mesh = m_renderable->m_mesh;
+		Transform& transform = m_renderable->m_transform;
 
-			std::map<int, Texture*>& boundTextures = m_renderable->GetMaterial()->m_textures;
-			for (std::map<int, Texture*>::iterator it = boundTextures.begin(); it != boundTextures.end(); ++it)
+		if (mesh != nullptr)
+		{
+			Shader* shader;
+			if (!m_debugOn)
 			{
-				int bindIdx = it->first;
-				Texture* texture = it->second;
+				shader = m_renderable->GetMaterial()->m_shader;
 
-				renderer->SetTexture2D(bindIdx, texture);
-				renderer->SetSampler2D(bindIdx, texture->GetSampler());
+				std::map<int, Texture*>& boundTextures = m_renderable->GetMaterial()->m_textures;
+				for (std::map<int, Texture*>::iterator it = boundTextures.begin(); it != boundTextures.end(); ++it)
+				{
+					int bindIdx = it->first;
+					Texture* texture = it->second;
+
+					renderer->SetTexture2D(bindIdx, texture);
+					renderer->SetSampler2D(bindIdx, texture->GetSampler());
+				}
 			}
-		}
-		else
-		{
-			shader = renderer->CreateOrGetShader("wireframe");
-
-			Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
-			renderer->SetTexture2D(0, texture);
-			renderer->SetSampler2D(0, texture->GetSampler());
-
-			glLineWidth(2.f);
-		}
-		renderer->UseShader(shader);
-
-		m_renderable->GetMaterial()->SetProperty("TINT", m_renderable->GetTint());
-
-		for (std::map<std::string, PropertyBlock*>::iterator it = m_renderable->GetMaterial()->m_blocks.begin();
-			it != m_renderable->GetMaterial()->m_blocks.end(); ++it)
-		{
-			PropertyBlock* block = it->second;
-			glBindBufferBase(GL_UNIFORM_BUFFER, block->m_blockInfo->blockIdx, block->GetHandle());
-
-			size_t size = block->m_blockInfo->blockSize;
-			block->CopyToGPU(size, block->m_dataBlock);
-		}
-
-		// Update object UBO values 
-		renderer->m_objectData.model = transform.GetWorldMatrix();
-		//renderer->m_objectData.model = transform.GetLocalMatrix();
-
-		// set desired compare
-		for each (eCompare c in renderer->m_currentShader->m_state.m_depthCompares)
-		{
-			if ( c == m_desiredCompare )
+			else
 			{
-				renderer->m_currentShader->m_state.m_depthCompare = m_desiredCompare;
-			}
-		}
-		// by default, if compare mode not found in those supported by shader, will use COMPRAE_LESS
+				shader = renderer->CreateOrGetShader("wireframe");
 
-		// set desired cull
-		for each (eCullMode c in renderer->m_currentShader->m_state.m_cullModes)
-		{
-			if (c == m_desiredCull)
+				Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
+				renderer->SetTexture2D(0, texture);
+				renderer->SetSampler2D(0, texture->GetSampler());
+
+				glLineWidth(2.f);
+			}
+			renderer->UseShader(shader);
+
+			m_renderable->GetMaterial()->SetProperty("TINT", m_renderable->GetTint());
+
+			for (std::map<std::string, PropertyBlock*>::iterator it = m_renderable->GetMaterial()->m_blocks.begin();
+				it != m_renderable->GetMaterial()->m_blocks.end(); ++it)
 			{
-				renderer->m_currentShader->m_state.m_cullMode = m_desiredCull;
-			}
-		}
-		// by default, if cull mode not found in those supported by shader, use CULLMODE_BACK
+				PropertyBlock* block = it->second;
+				glBindBufferBase(GL_UNIFORM_BUFFER, block->m_blockInfo->blockIdx, block->GetHandle());
 
-		// set desired order
-		for each (eWindOrder w in renderer->m_currentShader->m_state.m_windOrders)
-		{
-			if (w == m_desiredOrder)
+				size_t size = block->m_blockInfo->blockSize;
+				block->CopyToGPU(size, block->m_dataBlock);
+			}
+
+			// Update object UBO values 
+			renderer->m_objectData.model = transform.GetWorldMatrix();
+			//renderer->m_objectData.model = transform.GetLocalMatrix();
+
+			// set desired compare
+			for each (eDepthCompare c in renderer->m_currentShader->m_state.m_depthCompares)
 			{
-				renderer->m_currentShader->m_state.m_windOrder = m_desiredOrder;
+				if ( c == m_desiredCompare )
+				{
+					renderer->m_currentShader->m_state.m_depthCompare = m_desiredCompare;
+				}
 			}
-		}
-		// by default, if wind order not found in those supported by shader, use WIND_COUNTER_CLOCKWISE
+			// by default, if compare mode not found in those supported by shader, will use COMPRAE_LESS
 
-		renderer->DrawMesh(mesh);
+			// set desired cull
+			for each (eCullMode c in renderer->m_currentShader->m_state.m_cullModes)
+			{
+				if (c == m_desiredCull)
+				{
+					renderer->m_currentShader->m_state.m_cullMode = m_desiredCull;
+				}
+			}
+			// by default, if cull mode not found in those supported by shader, use CULLMODE_BACK
+
+			// set desired order
+			for each (eWindOrder w in renderer->m_currentShader->m_state.m_windOrders)
+			{
+				if (w == m_desiredOrder)
+				{
+					renderer->m_currentShader->m_state.m_windOrder = m_desiredOrder;
+				}
+			}
+			// by default, if wind order not found in those supported by shader, use WIND_COUNTER_CLOCKWISE
+
+			renderer->DrawMesh(mesh);
+		}
+
+		RenderBasis(renderer);
+
+		if (m_physEntity != nullptr)
+			m_physEntity->Render(renderer);
 	}
-
-	RenderBasis(renderer);
-
-	if (m_physEntity != nullptr)
-		m_physEntity->Render(renderer);
+	else
+	{
+		RenderWithBorder(renderer);
+	}
 }

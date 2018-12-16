@@ -116,7 +116,7 @@ void GameObject::Render(Renderer* renderer)
 		//renderer->m_objectData.model = transform.GetLocalMatrix();
 
 		// set desired compare
-		for each (eCompare c in renderer->m_currentShader->m_state.m_depthCompares)
+		for each (eDepthCompare c in renderer->m_currentShader->m_state.m_depthCompares)
 		{
 			if ( c == m_desiredCompare )
 			{
@@ -154,6 +154,99 @@ void GameObject::Render(Renderer* renderer)
 		m_physEntity->Render(renderer);
 }
 
+
+void GameObject::RenderWithBorder(Renderer* renderer)
+{
+	Mesh* mesh = m_renderable->m_mesh;
+
+	if (mesh != nullptr)
+	{
+		TODO("Consistency between local and world transform");
+		const Transform& transform_inner = m_renderable->m_transform;
+		const Vector3& scale_inner = transform_inner.GetLocalScale();
+		const Vector3& translation_inner = transform_inner.GetLocalPosition();
+		const Vector3& rot_inner = transform_inner.GetLocalRotation();
+		Vector3 scale_outer = scale_inner * 1.1f;
+		Transform transform_outer = Transform(translation_inner, rot_inner, scale_outer);
+
+		Shader* shader_inner = m_renderable->GetMaterial()->m_shader;
+		Shader* shader_outer = renderer->CreateOrGetShader("border");
+
+		std::map<int, Texture*>& texture_inner = m_renderable->GetMaterial()->m_textures;
+		Texture* texture_outer = renderer->CreateOrGetTexture("Data/Images/white.png");
+
+		// draw the inner object, normally
+		glEnable(GL_STENCIL_TEST);
+		glStencilFunc(GL_ALWAYS, 1, 0xFF);
+		glStencilMask(GL_TRUE);
+		for (std::map<int, Texture*>::iterator it = texture_inner.begin(); it != texture_inner.end(); ++it)
+		{
+			int bindIdx = it->first;
+			Texture* texture = it->second;
+
+			renderer->SetTexture2D(bindIdx, texture);
+			renderer->SetSampler2D(bindIdx, texture->GetSampler());
+		}
+		renderer->UseShader(shader_inner);
+
+		m_renderable->GetMaterial()->SetProperty("TINT", m_renderable->GetTint());
+
+		for (std::map<std::string, PropertyBlock*>::iterator it = m_renderable->GetMaterial()->m_blocks.begin();
+			it != m_renderable->GetMaterial()->m_blocks.end(); ++it)
+		{
+			PropertyBlock* block = it->second;
+			glBindBufferBase(GL_UNIFORM_BUFFER, block->m_blockInfo->blockIdx, block->GetHandle());
+
+			size_t size = block->m_blockInfo->blockSize;
+			block->CopyToGPU(size, block->m_dataBlock);
+		}
+		
+		renderer->m_objectData.model = transform_inner.GetWorldMatrix();
+
+		// set desired compare
+		for each (eDepthCompare c in renderer->m_currentShader->m_state.m_depthCompares)
+		{
+			if ( c == m_desiredCompare )
+				renderer->m_currentShader->m_state.m_depthCompare = m_desiredCompare;
+		}
+		// by default, if compare mode not found in those supported by shader, will use COMPRAE_LESS
+
+		// set desired cull
+		for each (eCullMode c in renderer->m_currentShader->m_state.m_cullModes)
+		{
+			if (c == m_desiredCull)
+				renderer->m_currentShader->m_state.m_cullMode = m_desiredCull;
+		}
+		// by default, if cull mode not found in those supported by shader, use CULLMODE_BACK
+
+		// set desired order
+		for each (eWindOrder w in renderer->m_currentShader->m_state.m_windOrders)
+		{
+			if (w == m_desiredOrder)
+				renderer->m_currentShader->m_state.m_windOrder = m_desiredOrder;
+		}
+		// by default, if wind order not found in those supported by shader, use WIND_COUNTER_CLOCKWISE
+
+		renderer->DrawMesh(mesh);
+
+		// draw outer border
+		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+		glStencilMask(GL_FALSE);				// disable writing to stencil buffer
+		glDisable(GL_DEPTH_TEST);				// we want the border to cover everything else
+		renderer->SetTexture2D(0, texture_outer);
+		renderer->SetSampler2D(0, texture_outer->GetSampler());
+		renderer->UseShader(shader_outer);
+
+		renderer->m_objectData.model = transform_outer.GetWorldMatrix();
+
+		renderer->DrawMesh(mesh);
+
+		// make sure to enable the depth test back on
+		glStencilMask(GL_TRUE);
+		glEnable(GL_DEPTH_TEST);
+		glDisable(GL_STENCIL_TEST);
+	}
+}
 
 void GameObject::RenderBasis(Renderer* renderer)
 {

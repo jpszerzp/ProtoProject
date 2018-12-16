@@ -105,7 +105,7 @@ void Fireworks::Render(Renderer* renderer)
 			//renderer->m_objectData.model = transform.GetLocalMatrix();
 
 			// set desired compare
-			for each (eCompare c in renderer->m_currentShader->m_state.m_depthCompares)
+			for each (eDepthCompare c in renderer->m_currentShader->m_state.m_depthCompares)
 			{
 				if ( c == m_desiredCompare )
 				{

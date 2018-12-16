@@ -61,7 +61,7 @@ Collision3State::Collision3State()
 	eMoveStatus stat = MOVE_KINEMATIC;
 	eBodyIdentity bid = BODY_RIGID;
 	bool multipass = false;
-	eCompare compare = COMPARE_LESS;
+	eDepthCompare compare = COMPARE_LESS;
 	eCullMode cull = CULLMODE_BACK;
 	eWindOrder wind = WIND_COUNTER_CLOCKWISE;
 	eDynamicScheme scheme = DISCRETE;

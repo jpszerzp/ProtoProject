@@ -123,7 +123,8 @@ ProtoState::ProtoState()
 	m_gameObjects.push_back(c_0);
 	m_sceneGraph->AddRenderable(c_0);
 
-	c_1 = new Cube(Vector3::ZERO, Vector3::ZERO, Vector3::ONE, Rgba::RED, "cube_pcu", "default", MOVE_STATIC, BODY_PARTICLE);
+	c_1 = new Cube(Vector3::ZERO, Vector3::ZERO, Vector3::ONE, Rgba::RED, "cube_pcu", "default", MOVE_STATIC, BODY_PARTICLE,
+		false, COMPARE_LESS, CULLMODE_BACK, WIND_COUNTER_CLOCKWISE, true);
 	m_gameObjects.push_back(c_1);
 
 	s_0 = new Sphere(Vector3(10.f, 0.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::WHITE, "sphere_pcu", "default", MOVE_STATIC, BODY_PARTICLE);

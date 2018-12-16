@@ -14,7 +14,7 @@ public:
 		eMoveStatus moveStat,
 		eBodyIdentity bid,
 		bool multipass = false, 
-		eCompare compare = COMPARE_LESS, 
+		eDepthCompare compare = COMPARE_LESS, 
 		eCullMode cull = CULLMODE_BACK,
 		eWindOrder order = WIND_COUNTER_CLOCKWISE,
 		eDynamicScheme scheme = DISCRETE);
@@ -23,7 +23,7 @@ public:
 		eMoveStatus moveStat,
 		eBodyIdentity bid,
 		bool multipass = false,
-		eCompare compare = COMPARE_LESS,
+		eDepthCompare compare = COMPARE_LESS,
 		eCullMode cull = CULLMODE_BACK,
 		eWindOrder order = WIND_COUNTER_CLOCKWISE,
 		eDynamicScheme scheme = DISCRETE);

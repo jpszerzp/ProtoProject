@@ -81,6 +81,9 @@ PFNGLGENERATEMIPMAPPROC glGenerateMipmap = nullptr;
 PFNGLSAMPLERPARAMETERFPROC glSamplerParameterf = nullptr;
 PFNGLTEXPARAMETERIPROC glTexParameteri = nullptr;
 PFNGLDRAWBUFFERPROC glDrawBuffer = nullptr;
+PFNGLSTENCILOPPROC glStencilOp = nullptr;
+PFNGLSTENCILMASKPROC glStencilMask = nullptr;
+PFNGLSTENCILFUNCPROC glStencilFunc = nullptr;
 
 PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB = nullptr;
 PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB = nullptr;
@@ -289,6 +292,9 @@ void BindGLFunctions()
 	GL_BIND_FUNCTION( glGetActiveUniformsiv		);
 	GL_BIND_FUNCTION( glGetActiveUniformName	);
 	GL_BIND_FUNCTION( glGetActiveUniform		);
+	GL_BIND_FUNCTION( glStencilOp				);
+	GL_BIND_FUNCTION( glStencilMask				);
+	GL_BIND_FUNCTION( glStencilFunc				);
 	GL_BIND_FUNCTION( glGetActiveUniformBlockName	);
 	GL_BIND_FUNCTION( glDeleteTextures				);
 	GL_BIND_FUNCTION( glDisable						);
@@ -380,6 +386,9 @@ bool AreGLFuncitonsBound()
 		glSamplerParameterf				==		nullptr	||
 		glTexParameteri					==		nullptr	||
 		glDrawBuffer					==		nullptr	||
+		glStencilOp						==		nullptr	||
+		glStencilMask					==		nullptr	||
+		glStencilFunc					==		nullptr	||
 		wglGetExtensionsStringARB		==		nullptr ||
 		wglChoosePixelFormatARB			==		nullptr ||
 		wglCreateContextAttribsARB		==		nullptr 

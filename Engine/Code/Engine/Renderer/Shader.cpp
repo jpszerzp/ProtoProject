@@ -173,17 +173,17 @@ Shader* Shader::AcquireResource(const char* fp)
 			size_t pos = compareStr.find_first_of("|");
 			while (pos != std::string::npos)
 			{
-				std::string trueCompareStr = compareStr.substr(0, pos);
-				eCompare trueCompare = SelectCompare(trueCompareStr);
-				if (trueCompare != NUM_COMPARE_MODE)
+				std::string trueDepthCompareStr = compareStr.substr(0, pos);
+				eDepthCompare trueDepthCompare = SelectCompare(trueDepthCompareStr);
+				if (trueDepthCompare != NUM_COMPARE_MODE)
 				{
-					res->m_state.m_depthCompares.push_back(trueCompare);
+					res->m_state.m_depthCompares.push_back(trueDepthCompare);
 				}
 
 				compareStr = compareStr.substr(pos + 1);
 				pos = compareStr.find_first_of("|");
 			}
-			eCompare compare = SelectCompare(compareStr);
+			eDepthCompare compare = SelectCompare(compareStr);
 			if (compare != NUM_COMPARE_MODE)
 			{
 				res->m_state.m_depthCompares.push_back(compare);
@@ -295,7 +295,7 @@ Shader* Shader::AcquireResource(const char* fp)
 }
 
 
-void Shader::SetDepth(eCompare compare, bool write)
+void Shader::SetDepth(eDepthCompare compare, bool write)
 {
 	m_state.m_depthWrite = write;
 	m_state.m_depthCompare = compare;
@@ -320,9 +320,9 @@ void Shader::SetWind(eWindOrder wind)
 }
 
 
-eCompare Shader::SelectCompare(std::string compareStr)
+eDepthCompare Shader::SelectCompare(std::string compareStr)
 {
-	eCompare res = NUM_COMPARE_MODE;
+	eDepthCompare res = NUM_COMPARE_MODE;
 
 	if (compareStr.compare("less") == 0)
 	{
@@ -531,17 +531,17 @@ ShaderChannel* ShaderChannel::AcquireResource(const char* fp)
 			size_t pos = compareStr.find_first_of("|");
 			while (pos != std::string::npos)
 			{
-				std::string trueCompareStr = compareStr.substr(0, pos);
-				eCompare trueCompare = SelectCompare(trueCompareStr);
-				if (trueCompare != NUM_COMPARE_MODE)
+				std::string trueDepthCompareStr = compareStr.substr(0, pos);
+				eDepthCompare trueDepthCompare = SelectCompare(trueDepthCompareStr);
+				if (trueDepthCompare != NUM_COMPARE_MODE)
 				{
-					res->m_state.m_depthCompares.push_back(trueCompare);
+					res->m_state.m_depthCompares.push_back(trueDepthCompare);
 				}
 
 				compareStr = compareStr.substr(pos + 1);
 				pos = compareStr.find_first_of("|");
 			}
-			eCompare compare = SelectCompare(compareStr);
+			eDepthCompare compare = SelectCompare(compareStr);
 			if (compare != NUM_COMPARE_MODE)
 			{
 				res->m_state.m_depthCompares.push_back(compare);
@@ -669,9 +669,9 @@ ShaderChannel* ShaderChannel::AcquireResource(const char* fp)
 }
 
 
-eCompare ShaderChannel::SelectCompare(std::string compareStr)
+eDepthCompare ShaderChannel::SelectCompare(std::string compareStr)
 {
-	eCompare res = NUM_COMPARE_MODE;
+	eDepthCompare res = NUM_COMPARE_MODE;
 
 	if (compareStr.compare("less") == 0)
 	{

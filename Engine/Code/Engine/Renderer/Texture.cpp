@@ -90,6 +90,8 @@ void Texture::PopulateFromData( unsigned char* imageData, const IntVector2& texe
 	glActiveTexture( GL_TEXTURE0 );
 	glBindTexture( GL_TEXTURE_2D, m_textureID );
 
+	GL_CHECK_ERROR();
+
 	// create the gpu buffer
 	// note: only this is needed for render targets
 	if (!mipmap)
@@ -101,17 +103,11 @@ void Texture::PopulateFromData( unsigned char* imageData, const IntVector2& texe
 	}
 	else
 	{
-		/*
-		glTexStorage2D(GL_TEXTURE_2D,
-			0, 
-			internalFormat,
-			m_dimensions.x, m_dimensions.y);
-			*/
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 
-			m_dimensions.x, m_dimensions.y, 0,
-			GL_RGB, GL_UNSIGNED_BYTE, m_data);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_dimensions.x, m_dimensions.y, 0, GL_RGB, GL_UNSIGNED_BYTE, m_data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
+
+	GL_CHECK_ERROR();
 
 	// copies cpu memory to the gpu - needed for texture resources
 	glTexSubImage2D( GL_TEXTURE_2D,

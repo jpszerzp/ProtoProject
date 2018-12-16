@@ -17,7 +17,7 @@ public:
 		eMoveStatus moveStat,
 		eBodyIdentity bid,
 		bool multiPass = false,
-		eCompare compare = COMPARE_LESS,
+		eDepthCompare compare = COMPARE_LESS,
 		eCullMode cull = CULLMODE_BACK,
 		eWindOrder order = WIND_COUNTER_CLOCKWISE);
 	~Point();

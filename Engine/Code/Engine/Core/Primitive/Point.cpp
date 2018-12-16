@@ -15,7 +15,7 @@ Point::Point()
 Point::Point(Vector3 pos, Vector3 rot, float size, Rgba tint,
 	std::string meshName, std::string materialName,
 	eMoveStatus moveStat, eBodyIdentity bid, bool multiPass,
-	eCompare compare, eCullMode cull, eWindOrder order)
+	eDepthCompare compare, eCullMode cull, eWindOrder order)
 {
 	Renderer* renderer = Renderer::GetInstance();
 
@@ -142,7 +142,7 @@ void Point::Render(Renderer* renderer)
 		//renderer->m_objectData.model = transform.GetLocalMatrix();
 
 		// set desired compare
-		for each (eCompare c in renderer->m_currentShader->m_state.m_depthCompares)
+		for each (eDepthCompare c in renderer->m_currentShader->m_state.m_depthCompares)
 		{
 			if ( c == m_desiredCompare )
 			{

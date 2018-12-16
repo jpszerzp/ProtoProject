@@ -28,7 +28,20 @@ enum eWindOrder
 	NUM_WIND_ORDER
 };
 
-enum eCompare
+enum eStencilCompare
+{
+	STC_COMPARE_NEVER,
+	STC_COMPARE_LESS,
+	STC_COMPARE_LEQUAL,
+	STC_COMPARE_GREATER,
+	STC_COMPARE_GEQUAL,
+	STC_COMPARE_EQUAL,
+	STC_COMPARE_NOTEQUAL,
+	STC_COMPARE_ALWAYS,
+	NUM_STC_COMPARE_MODE
+};
+
+enum eDepthCompare
 {
 	COMPARE_NEVER,       // GL_NEVER
 	COMPARE_LESS,        // GL_LESS
@@ -75,10 +88,12 @@ struct sRenderState
 	std::vector<eWindOrder> m_windOrders;
 
 	// Depth State Control
-	eCompare m_depthCompare = COMPARE_LESS;		// COMPARE_LESS
-	std::vector<eCompare> m_depthCompares;   
-	bool	 m_depthWrite = true;				  // true
+	eDepthCompare m_depthCompare = COMPARE_LESS;		// COMPARE_LESS
+	std::vector<eDepthCompare> m_depthCompares;   
+	bool m_depthWrite = true;				  // true
 
+	// stencil
+	
 	// Blend
 	eBlendOp	 m_colorBlendOp = COMPARE_ADD;          // COMPARE_ADD
 	eBlendFactor m_colorSrcFactor = BLEND_ONE;    // BLEND_ONE
@@ -108,12 +123,12 @@ public:
 	//void DisableBlending();
 
 	//void DisableDepth() { SetDepth( COMPARE_ALWAYS, false ); }
-	void SetDepth( eCompare compare, bool write ); 
+	void SetDepth( eDepthCompare compare, bool write ); 
 	void SetCull( eCullMode cull ); 
 	void SetFill( eFillMode fill ); 
 	void SetWind( eWindOrder wind ); 
 
-	static eCompare SelectCompare(std::string compareStr);
+	static eDepthCompare SelectCompare(std::string compareStr);
 	static eCullMode SelectCull(std::string cullStr);
 	static eWindOrder SelectOrder(std::string orderStr);
 
@@ -150,7 +165,7 @@ class ShaderChannel
 {
 public:
 	static ShaderChannel* AcquireResource(const char* fp);
-	static eCompare SelectCompare(std::string compareStr);
+	static eDepthCompare SelectCompare(std::string compareStr);
 	static eCullMode SelectCull(std::string cullStr);
 	static eWindOrder SelectOrder(std::string orderStr);
 

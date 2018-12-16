@@ -53,7 +53,7 @@ void Cone::Render(Renderer* renderer)
 		//renderer->m_objectData.model = transform.GetLocalMatrix();
 
 		// set desired compare
-		for each (eCompare c in renderer->m_currentShader->m_state.m_depthCompares)
+		for each (eDepthCompare c in renderer->m_currentShader->m_state.m_depthCompares)
 		{
 			if ( c == m_desiredCompare )
 				renderer->m_currentShader->m_state.m_depthCompare = m_desiredCompare;
@@ -85,7 +85,7 @@ void Cone::Update(float deltaTime)
 
 }
 
-Cone::Cone(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint, std::string meshName, std::string materialName, eMoveStatus moveStat, eBodyIdentity bid, bool multipass /*= false*/, eCompare compare /*= COMPARE_LESS*/, eCullMode cull /*= CULLMODE_BACK*/, eWindOrder wind /*= WIND_COUNTER_CLOCKWISE*/)
+Cone::Cone(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint, std::string meshName, std::string materialName, eMoveStatus moveStat, eBodyIdentity bid, bool multipass /*= false*/, eDepthCompare compare /*= COMPARE_LESS*/, eCullMode cull /*= CULLMODE_BACK*/, eWindOrder wind /*= WIND_COUNTER_CLOCKWISE*/)
 {
 	Renderer* r = Renderer::GetInstance();
 

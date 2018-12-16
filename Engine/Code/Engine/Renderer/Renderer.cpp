@@ -85,7 +85,7 @@ static const char* builtinInvalidSPFS =
 "}\n";
 
 
-static GLenum ToGLCompare( eCompare compare ) 
+static GLenum ToGLCompare( eDepthCompare compare ) 
 {
 	// Convert our engine to GL enum 
 	switch (compare)
@@ -434,10 +434,8 @@ void Renderer::PostStartup(float startupWidth, float startupHeight)
 	uint window_height = static_cast<uint>(startupHeight);
 
 	// create our output textures
-	m_defaultColorTarget = CreateRenderTarget( window_width, 
-		window_height );
-	m_defaultDepthTarget = CreateDepthStencilTarget( window_width, 
-		window_height ); 
+	m_defaultColorTarget = CreateRenderTarget( window_width, window_height );
+	m_defaultDepthTarget = CreateDepthStencilTarget( window_width, window_height ); 
 
 	// setup the initial camera
 	m_defaultCamera->SetColorTarget( m_defaultColorTarget ); 
@@ -453,6 +451,7 @@ void Renderer::ClearScreen(const Rgba& clearColor)
 	// Clear all screen (backbuffer) pixels to medium-blue
 	ClearColor(clearColor);
 	ClearDepth();
+	ClearStencil();
 }
 
 
@@ -1826,7 +1825,7 @@ bool Renderer::CopyFrameBuffer( FrameBuffer *dst, FrameBuffer *src )
 }
 
 
-void Renderer::EnableDepth(eCompare compare, bool overwrite)
+void Renderer::EnableDepth(eDepthCompare compare, bool overwrite)
 {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(ToGLCompare(compare));
@@ -1860,6 +1859,17 @@ void Renderer::ClearColor(Rgba color)
 	GL_CHECK_ERROR();
 }
 
+
+void Renderer::ClearStencil()
+{
+	//glEnable(GL_STENCIL_TEST);
+	//glDisable(GL_STENCIL_TEST);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+	glClear(GL_STENCIL_BUFFER_BIT);
+	glStencilMask(GL_FALSE);			// close writing to stencil buffer by default
+
+	GL_CHECK_ERROR();
+}
 
 void Renderer::ApplyEffects(ShaderProgram*)
 {

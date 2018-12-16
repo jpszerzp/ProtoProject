@@ -15,7 +15,7 @@ Quad::Quad()
 Quad::Quad(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint, std::string meshName,
 	std::string materialName, Vector2 uvBL, Vector2 uvBR, Vector2 uvTL, Vector2 uvTR,
 	eMoveStatus moveStat, eBodyIdentity bid, bool multipass, 
-	eCompare compare, eCullMode cull, eWindOrder order, eDynamicScheme scheme)
+	eDepthCompare compare, eCullMode cull, eWindOrder order, eDynamicScheme scheme)
 {
 	Renderer* renderer = Renderer::GetInstance();
 
@@ -51,7 +51,7 @@ Quad::Quad(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint, std::string meshN
 
 Quad::Quad(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint, std::string meshName,
 	std::string materialName, eMoveStatus moveStat, eBodyIdentity bid, bool multipass,
-	eCompare compare, eCullMode cull, eWindOrder order, eDynamicScheme scheme)
+	eDepthCompare compare, eCullMode cull, eWindOrder order, eDynamicScheme scheme)
 {
 	Renderer* renderer = Renderer::GetInstance();
 
@@ -161,7 +161,7 @@ void Quad::Render(Renderer* renderer)
 		//renderer->m_objectData.model = transform.GetLocalMatrix();
 
 		// set desired compare
-		for each (eCompare c in renderer->m_currentShader->m_state.m_depthCompares)
+		for each (eDepthCompare c in renderer->m_currentShader->m_state.m_depthCompares)
 		{
 			if ( c == m_desiredCompare )
 			{

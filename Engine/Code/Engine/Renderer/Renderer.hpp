@@ -172,9 +172,10 @@ public:
 	
 	void ClearScreen(const Rgba& clearColor);
 	void ClearDepth(float depth = 1.f);
-	void EnableDepth(eCompare compare, bool overwrite);
+	void EnableDepth(eDepthCompare compare, bool overwrite);
 	void DisableDepth();
 	void ClearColor(Rgba color = Rgba::BLACK);
+	void ClearStencil();
 
 	// Camera
 	Camera* GetDefaultCamera() const { return m_defaultCamera; }

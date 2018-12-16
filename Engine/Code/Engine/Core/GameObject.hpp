@@ -12,11 +12,12 @@ public:
 	bool		m_physDriven = false;
 	bool		m_dead = false;
 
+	bool		m_drawBorder = false;
 	bool		m_drawBasis = false;
 	bool		m_debugOn = false;
 	bool		m_isInForwardPath = false;
 	bool		m_renderableDelayedDelete = false;
-	eCompare	m_desiredCompare;
+	eDepthCompare	m_desiredCompare;
 	eCullMode	m_desiredCull;
 	eWindOrder	m_desiredOrder;
 
@@ -36,6 +37,7 @@ public:
 	virtual void UpdateBasis();
 
 	virtual void Render(Renderer* renderer);
+	virtual void RenderWithBorder(Renderer* renderer);
     void RenderBasis(Renderer* renderer);
 
 	void ToggleBoundSphereDebugDraw();
