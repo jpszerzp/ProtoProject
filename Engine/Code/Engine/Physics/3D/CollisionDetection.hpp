@@ -149,6 +149,7 @@ public:
 
 	// obb3 vs obb3
 	static bool OBB3VsOBB3Intersected(const OBB3& obb_0, const OBB3& obb_1);
+	static void OBB3VsOBB3CoreBreakdownPtVsFace(const OBB3& obb_0, const OBB3& obb_1, Vector3& pt, Vector3& face_center);
 	static bool OBB3VsOBB3Core(const OBB3& obb_0, const OBB3& obb_1, Contact3& contact);
 	static uint OBB3VsOBB3Single(const OBB3& obb1, const OBB3& obb2, CollisionData3* data);
 	static uint OBB3VsOBB3Coherent(const OBB3& obb1, const OBB3& obb2, CollisionData3* data);
@@ -173,3 +174,18 @@ public:
 	static uint AABB3VsAABB3Coherent(const AABB3& aabb3_1, const AABB3& aabb3_2, CollisionData3* data);
 };
 
+extern Mesh* obb2_vert_to_obb1_face_0;
+extern Mesh* obb2_vert_to_obb1_face_1;
+extern Mesh* obb2_vert_to_obb1_face_2;
+extern Mesh* obb2_vert_to_obb1_face_3;
+extern Mesh* obb2_vert_to_obb1_face_4;
+extern Mesh* obb2_vert_to_obb1_face_5;
+extern Mesh* obb2_vert_0_winner;
+extern Mesh* obb2_vert_1_winner;
+extern Mesh* obb2_vert_2_winner;
+extern Mesh* obb2_vert_3_winner;
+extern Mesh* obb2_vert_4_winner;
+extern Mesh* obb2_vert_5_winner;
+extern Mesh* obb2_vert_6_winner;
+extern Mesh* obb2_vert_7_winner;
+extern Mesh* obb2_pt_obb1_face_winner;

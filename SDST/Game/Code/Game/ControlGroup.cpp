@@ -16,6 +16,9 @@
 #include "Engine/Renderer/Window.hpp"
 #include "Engine/Renderer/Renderable.hpp"
 
+static Mesh* obb3_obb3_pt_pos = nullptr;
+static Mesh* obb3_obb3_face_center = nullptr;
+
 ControlGroup::ControlGroup(GameObject* go1, GameObject* go2, const eControlID& id, const Vector3& observation)
 {
 	m_gos.push_back(go1);
@@ -234,6 +237,72 @@ void ControlGroup::RenderCore(Renderer* renderer)
 		if (!m_gos[idx]->m_isInForwardPath)
 			m_gos[idx]->Render(renderer);
 	}
+
+	////////////////////////////// FOR OBB3 COLLISION DEBUG ONLY /////////////////////////////////
+	Shader* shader = renderer->CreateOrGetShader("wireframe_color");
+	renderer->UseShader(shader);
+
+	Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
+	renderer->SetTexture2D(0, texture);
+	renderer->SetSampler2D(0, texture->GetSampler());
+	glPointSize(10.f);
+
+	renderer->m_objectData.model = Matrix44::IDENTITY;
+
+	if (obb3_obb3_pt_pos != nullptr)
+		renderer->DrawMesh(obb3_obb3_pt_pos);
+
+	if (obb3_obb3_face_center != nullptr)
+		renderer->DrawMesh(obb3_obb3_face_center);
+
+	if (obb2_vert_to_obb1_face_0 != nullptr)
+		renderer->DrawMesh(obb2_vert_to_obb1_face_0);
+
+	if (obb2_vert_to_obb1_face_1 != nullptr)
+		renderer->DrawMesh(obb2_vert_to_obb1_face_1);
+
+	if (obb2_vert_to_obb1_face_2 != nullptr)
+		renderer->DrawMesh(obb2_vert_to_obb1_face_2);
+
+	if (obb2_vert_to_obb1_face_3 != nullptr)
+		renderer->DrawMesh(obb2_vert_to_obb1_face_3);
+
+	if (obb2_vert_to_obb1_face_4 != nullptr)
+		renderer->DrawMesh(obb2_vert_to_obb1_face_4);
+
+	if (obb2_vert_to_obb1_face_5 != nullptr)
+		renderer->DrawMesh(obb2_vert_to_obb1_face_5);
+
+	if (obb2_vert_0_winner != nullptr)
+		renderer->DrawMesh(obb2_vert_0_winner);
+
+	if (obb2_vert_1_winner != nullptr)
+		renderer->DrawMesh(obb2_vert_1_winner);
+
+	if (obb2_vert_2_winner != nullptr)
+		renderer->DrawMesh(obb2_vert_2_winner);
+
+	if (obb2_vert_3_winner != nullptr)
+		renderer->DrawMesh(obb2_vert_3_winner);
+
+	if (obb2_vert_4_winner != nullptr)
+		renderer->DrawMesh(obb2_vert_4_winner);
+
+	if (obb2_vert_5_winner != nullptr)
+		renderer->DrawMesh(obb2_vert_5_winner);
+
+	if (obb2_vert_6_winner != nullptr)
+		renderer->DrawMesh(obb2_vert_6_winner);
+
+	if (obb2_vert_7_winner != nullptr)
+		renderer->DrawMesh(obb2_vert_7_winner);
+
+	if (obb2_pt_obb1_face_winner != nullptr)
+	{
+		glLineWidth(5.f);
+		renderer->DrawMesh(obb2_pt_obb1_face_winner);
+		glLineWidth(2.f);
+	}
 }
 
 void ControlGroup::RenderUI()
@@ -339,10 +408,27 @@ void ControlGroup::Update(float deltaTime)
 		const OBB3& obb_0 = rbb_0->m_primitive;
 		const OBB3& obb_1 = rbb_1->m_primitive;
 
-		TODO("contact point is not correct - it is set to center of an entity, see Core for detail");
-		bool intersected = CollisionDetector::OBB3VsOBB3Core(obb_0, obb_1, contact);
-		if (intersected)
-			m_contacts.push_back(contact);
+		//TODO("contact point is not correct - it is set to center of an entity, see Core for detail");
+		//bool intersected = CollisionDetector::OBB3VsOBB3Core(obb_0, obb_1, contact);
+		//if (intersected)
+		//	m_contacts.push_back(contact);
+
+		// debug
+		Vector3 vert_pos;
+		Vector3 face_center;
+		CollisionDetector::OBB3VsOBB3CoreBreakdownPtVsFace(obb_0, obb_1, vert_pos, face_center);
+		if (obb3_obb3_pt_pos != nullptr)
+		{
+			delete obb3_obb3_pt_pos;
+			obb3_obb3_pt_pos = nullptr;
+		}
+		obb3_obb3_pt_pos = Mesh::CreatePointImmediate(VERT_PCU, vert_pos, Rgba::MEGENTA);
+		if (obb3_obb3_face_center != nullptr)
+		{
+			delete obb3_obb3_face_center;
+			obb3_obb3_face_center = nullptr;
+		}
+		obb3_obb3_face_center = Mesh::CreatePointImmediate(VERT_PCU, face_center, Rgba::BLUE);
 	}
 		break;
 	case CONTROL_LINE_LINE:

@@ -3,22 +3,28 @@
 OBB3::OBB3(Vector3 center, Vector3 forward, Vector3 up, Vector3 right, Vector3 halfExt)
 	: m_center(center), m_forward(forward), m_up(up), m_right(right), m_halfExt(halfExt) 
 {
-	Vector3 front_center = center + Vector3(0.f, 0.f, halfExt.z);
+	//Vector3 front_center = center + Vector3(0.f, 0.f, halfExt.z);
+	Vector3 front_center = center + m_forward * halfExt.z;
 	OBB3Face front_face = OBB3Face(m_forward, front_center);
 
-	Vector3 back_center = center + Vector3(0.f, 0.f, -halfExt.z);
+	//Vector3 back_center = center + Vector3(0.f, 0.f, -halfExt.z);
+	Vector3 back_center = center + (-forward) * halfExt.z;
 	OBB3Face back_face = OBB3Face(-m_forward, back_center);
 
-	Vector3 right_center = center + Vector3(halfExt.x, 0.f, 0.f);
+	//Vector3 right_center = center + Vector3(halfExt.x, 0.f, 0.f);
+	Vector3 right_center = center + m_right * halfExt.x;
 	OBB3Face right_face = OBB3Face(m_right, right_center);
 
-	Vector3 left_center = center + Vector3(-halfExt.x, 0.f, 0.f);
+	//Vector3 left_center = center + Vector3(-halfExt.x, 0.f, 0.f);
+	Vector3 left_center = center + (-right) * halfExt.x;
 	OBB3Face left_face = OBB3Face(-m_right, left_center);
 
-	Vector3 up_center = center + Vector3(0.f, halfExt.y, 0.f);
+	//Vector3 up_center = center + Vector3(0.f, halfExt.y, 0.f);
+	Vector3 up_center = center + m_up * halfExt.y;
 	OBB3Face up_face = OBB3Face(m_up, up_center);
 	
-	Vector3 down_center = center + Vector3(0.f, -halfExt.y, 0.f);
+	//Vector3 down_center = center + Vector3(0.f, -halfExt.y, 0.f);
+	Vector3 down_center = center + (-up) * halfExt.y;
 	OBB3Face down_face = OBB3Face(-m_up, down_center);
 
 	m_faces.push_back(front_face);
@@ -28,14 +34,14 @@ OBB3::OBB3(Vector3 center, Vector3 forward, Vector3 up, Vector3 right, Vector3 h
 	m_faces.push_back(up_face);
 	m_faces.push_back(down_face);
 
-	Vector3 ftl = m_center - m_right * halfExt.x + m_up * halfExt.y - m_forward * halfExt.z;
-	Vector3 fbl = m_center - m_right * halfExt.x - m_up * halfExt.y - m_forward * halfExt.z;
-	Vector3 fbr = m_center + m_right * halfExt.x - m_up * halfExt.y - m_forward * halfExt.z;
-	Vector3 ftr = m_center + m_right * halfExt.x + m_up * halfExt.y - m_forward * halfExt.z;
-	Vector3 btl = m_center - m_right * halfExt.x + m_up * halfExt.y + m_forward * halfExt.z;
-	Vector3 bbl = m_center - m_right * halfExt.x - m_up * halfExt.y + m_forward * halfExt.z;
-	Vector3 bbr = m_center + m_right * halfExt.x - m_up * halfExt.y + m_forward * halfExt.z;
-	Vector3 btr = m_center + m_right * halfExt.x + m_up * halfExt.y + m_forward * halfExt.z;
+	Vector3 btl = m_center - m_right * halfExt.x + m_up * halfExt.y - m_forward * halfExt.z;
+	Vector3 bbl = m_center - m_right * halfExt.x - m_up * halfExt.y - m_forward * halfExt.z;
+	Vector3 bbr = m_center + m_right * halfExt.x - m_up * halfExt.y - m_forward * halfExt.z;
+	Vector3 btr = m_center + m_right * halfExt.x + m_up * halfExt.y - m_forward * halfExt.z;
+	Vector3 ftl = m_center - m_right * halfExt.x + m_up * halfExt.y + m_forward * halfExt.z;
+	Vector3 fbl = m_center - m_right * halfExt.x - m_up * halfExt.y + m_forward * halfExt.z;
+	Vector3 fbr = m_center + m_right * halfExt.x - m_up * halfExt.y + m_forward * halfExt.z;
+	Vector3 ftr = m_center + m_right * halfExt.x + m_up * halfExt.y + m_forward * halfExt.z;
 	OBB3Vert vert_ftl = OBB3Vert(ftl);
 	OBB3Vert vert_fbl = OBB3Vert(fbl);
 	OBB3Vert vert_fbr = OBB3Vert(fbr);

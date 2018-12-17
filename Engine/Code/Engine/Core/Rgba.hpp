@@ -48,6 +48,7 @@ public:
 	static const Rgba LIME;
 	static const Rgba PURPLE;
 	static const Rgba LIGHT_BLUE;
+	static const Rgba GOLD;
 	static const Rgba BLACK_HALF_OPACITY;
 	static const Rgba WHITE_HALF_OPACITY;
 	static const Rgba BLUE_HALF_OPACITY;

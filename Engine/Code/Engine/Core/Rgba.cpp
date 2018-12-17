@@ -22,6 +22,7 @@ const Rgba Rgba::NAVY = Rgba(0, 0, 128);
 const Rgba Rgba::LIME = Rgba(0, 128, 0);
 const Rgba Rgba::PURPLE = Rgba(128, 0, 128);
 const Rgba Rgba::LIGHT_BLUE = Rgba(102, 178, 255);
+const Rgba Rgba::GOLD = Rgba(255, 215, 0);
 const Rgba Rgba::BLACK_HALF_OPACITY = Rgba(0, 0, 0, 127);
 const Rgba Rgba::WHITE_HALF_OPACITY = Rgba(255, 255, 255, 127);
 const Rgba Rgba::BLUE_HALF_OPACITY = Rgba(0, 0, 255, 127);

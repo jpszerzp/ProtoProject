@@ -11,9 +11,20 @@
 #include "Engine/Math/MathUtils.hpp"
 #include "Engine/Math/Line3.hpp"
 #include "Engine/Renderer/DebugRenderer.hpp"
+#include "Engine/Input/InputSystem.hpp"
 
 #define INVALID_DEPTH_BOX_TO_POINT -1.f
 #define INVALID_DEPTH_EDGE_TO_EDGE -1.f
+
+enum eBoxBoxDebug
+{
+	SECOND_OBB_VERTS,
+	FIRST_OBB_VERTS
+};
+
+static eBoxBoxDebug debug_stat = SECOND_OBB_VERTS;
+static int obb2_vert_idx = 0;
+static int obb1_face_idx = 0;
 
 Contact3::Contact3()
 {
@@ -1330,6 +1341,451 @@ bool CollisionDetector::OBB3VsOBB3Intersected(const OBB3& obb1, const OBB3& obb2
 
 	// no SAT, mush intersect
 	return true;
+}
+
+static float shallowest = -INFINITY;
+static float deepest = INFINITY;
+static int shallowest_pair_obb2_vert_idx;
+static int shallowest_pair_obb1_face_idx;
+static int deepest_pair_obb2_vert_idx = -1;
+static int deepest_pair_obb1_face_idx = -1;
+Mesh* obb2_vert_to_obb1_face_0 = nullptr;
+Mesh* obb2_vert_to_obb1_face_1 = nullptr;
+Mesh* obb2_vert_to_obb1_face_2 = nullptr;
+Mesh* obb2_vert_to_obb1_face_3 = nullptr;
+Mesh* obb2_vert_to_obb1_face_4 = nullptr;
+Mesh* obb2_vert_to_obb1_face_5 = nullptr;
+Mesh* obb2_vert_0_winner = nullptr;
+Mesh* obb2_vert_1_winner = nullptr;
+Mesh* obb2_vert_2_winner = nullptr;
+Mesh* obb2_vert_3_winner = nullptr;
+Mesh* obb2_vert_4_winner = nullptr;
+Mesh* obb2_vert_5_winner = nullptr;
+Mesh* obb2_vert_6_winner = nullptr;
+Mesh* obb2_vert_7_winner = nullptr;
+Mesh* obb2_pt_obb1_face_winner = nullptr;
+void CollisionDetector::OBB3VsOBB3CoreBreakdownPtVsFace(const OBB3& obb1, const OBB3& obb2, Vector3& pt, Vector3& face_center)
+{
+	InputSystem* input = InputSystem::GetInstance();
+	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_0) && debug_stat == SECOND_OBB_VERTS)
+	{
+		const OBB3Vert& obb2_vert = obb2.m_verts[obb2_vert_idx];
+		const OBB3Face& obb1_face = obb1.m_faces[obb1_face_idx];
+
+		Vector3 toPt = obb2_vert.m_vert - obb1_face.m_center;
+		float ext = DotProduct(toPt, obb1_face.m_normal);
+
+		// if this ext is bigger than 0, meaning this vert from obb2 goes beyond certain face, abort
+		// by abort we want to visit next vert of obb2; this current one is meaningless to investigate
+		if (ext > 0.f)
+		{
+			shallowest = -INFINITY;
+			obb1_face_idx = 0;
+			obb2_vert_idx++;
+
+			// this vert is the last vert of obb2 we check
+			if (obb2_vert_idx == 8)
+			{
+				if (deepest_pair_obb2_vert_idx != -1 && deepest_pair_obb1_face_idx != -1)
+				{
+					const OBB3Vert& deep_obb2_vert = obb2.m_verts[deepest_pair_obb2_vert_idx];
+					const OBB3Face& deep_obb1_face = obb1.m_faces[deepest_pair_obb1_face_idx];
+
+					Vector3 deep_toPt = deep_obb2_vert.m_vert - deep_obb1_face.m_center;
+					float deep_ext = DotProduct(deep_toPt, deep_obb1_face.m_normal);
+
+					if (obb2_pt_obb1_face_winner != nullptr)
+					{
+						delete obb2_pt_obb1_face_winner;
+						obb2_pt_obb1_face_winner = nullptr;
+					}
+					obb2_pt_obb1_face_winner = Mesh::CreateLineImmediate(VERT_PCU, deep_obb1_face.m_center,
+						deep_obb1_face.m_center + deep_obb1_face.m_normal * deep_ext, Rgba::GOLD);
+				}
+				if (obb2_vert_0_winner != nullptr)
+				{
+					delete obb2_vert_0_winner;
+					obb2_vert_0_winner = nullptr;
+				}
+				if (obb2_vert_1_winner != nullptr)
+				{
+					delete obb2_vert_1_winner;
+					obb2_vert_1_winner = nullptr;
+				}
+				if (obb2_vert_2_winner != nullptr)
+				{
+					delete obb2_vert_2_winner;
+					obb2_vert_2_winner = nullptr;
+				}
+				if (obb2_vert_3_winner != nullptr)
+				{
+					delete obb2_vert_3_winner;
+					obb2_vert_3_winner = nullptr;
+				}
+				if (obb2_vert_4_winner != nullptr)
+				{
+					delete obb2_vert_4_winner;
+					obb2_vert_4_winner = nullptr;
+				}
+				if (obb2_vert_5_winner != nullptr)
+				{
+					delete obb2_vert_5_winner;
+					obb2_vert_5_winner = nullptr;
+				}
+				if (obb2_vert_6_winner != nullptr)
+				{
+					delete obb2_vert_6_winner;
+					obb2_vert_6_winner = nullptr;
+				}
+				if (obb2_vert_7_winner != nullptr)
+				{
+					delete obb2_vert_7_winner;
+					obb2_vert_7_winner = nullptr;
+				}
+
+				deepest = INFINITY;
+				deepest_pair_obb1_face_idx = 0;
+				deepest_pair_obb2_vert_idx = 0;
+				debug_stat = FIRST_OBB_VERTS;
+			}
+
+			if (obb2_vert_to_obb1_face_0 != nullptr)
+			{
+				delete obb2_vert_to_obb1_face_0;
+				obb2_vert_to_obb1_face_0 = nullptr;
+			}
+			if (obb2_vert_to_obb1_face_1 != nullptr)
+			{
+				delete obb2_vert_to_obb1_face_1;
+				obb2_vert_to_obb1_face_1 = nullptr;
+			}
+			if (obb2_vert_to_obb1_face_2 != nullptr)
+			{
+				delete obb2_vert_to_obb1_face_2;
+				obb2_vert_to_obb1_face_2 = nullptr;
+			}
+			if (obb2_vert_to_obb1_face_3 != nullptr)
+			{
+				delete obb2_vert_to_obb1_face_3;
+				obb2_vert_to_obb1_face_3 = nullptr;
+			}
+			if (obb2_vert_to_obb1_face_4 != nullptr)
+			{
+				delete obb2_vert_to_obb1_face_4;
+				obb2_vert_to_obb1_face_4 = nullptr;
+			}
+			if (obb2_vert_to_obb1_face_5 != nullptr)
+			{
+				delete obb2_vert_to_obb1_face_5;
+				obb2_vert_to_obb1_face_5 = nullptr;
+			}
+
+			shallowest_pair_obb2_vert_idx = 0;
+			shallowest_pair_obb1_face_idx = 0;
+		}
+		else
+		{
+			// otherwise the point (from obb2) is inside obb1, we need to record the shallowest pen
+			// also, we can render the debug line from face to the point
+			if (ext > shallowest)
+			{
+				shallowest = ext;
+
+				shallowest_pair_obb2_vert_idx = obb2_vert_idx;
+				shallowest_pair_obb1_face_idx = obb1_face_idx;
+			}
+
+			const Rgba& color = color_list[color_index];
+			color_index = (color_index + 1) % COLOR_LIST_SIZE;
+			if (obb1_face_idx == 0)
+			{
+				if (obb2_vert_to_obb1_face_0 != nullptr)
+				{
+					delete obb2_vert_to_obb1_face_0;
+					obb2_vert_to_obb1_face_0 = nullptr;
+				}
+				obb2_vert_to_obb1_face_0 = Mesh::CreateLineImmediate(VERT_PCU, obb1_face.m_center, obb1_face.m_center + obb1_face.m_normal * ext, color);
+			}
+			else if (obb1_face_idx == 1)
+			{
+				if (obb2_vert_to_obb1_face_1 != nullptr)
+				{
+					delete obb2_vert_to_obb1_face_1;
+					obb2_vert_to_obb1_face_1 = nullptr;
+				}
+				obb2_vert_to_obb1_face_1 = Mesh::CreateLineImmediate(VERT_PCU, obb1_face.m_center, obb1_face.m_center + obb1_face.m_normal * ext, color);
+			}
+			else if (obb1_face_idx == 2)
+			{
+				if (obb2_vert_to_obb1_face_2 != nullptr)
+				{
+					delete obb2_vert_to_obb1_face_2;
+					obb2_vert_to_obb1_face_2 = nullptr;
+				}
+				obb2_vert_to_obb1_face_2 = Mesh::CreateLineImmediate(VERT_PCU, obb1_face.m_center, obb1_face.m_center + obb1_face.m_normal * ext, color);
+			}
+			else if (obb1_face_idx == 3)
+			{
+				if (obb2_vert_to_obb1_face_3 != nullptr)
+				{
+					delete obb2_vert_to_obb1_face_3;
+					obb2_vert_to_obb1_face_3 = nullptr;
+				}
+				obb2_vert_to_obb1_face_3 = Mesh::CreateLineImmediate(VERT_PCU, obb1_face.m_center, obb1_face.m_center + obb1_face.m_normal * ext, color);
+			}
+			else if (obb1_face_idx == 4)
+			{
+				if (obb2_vert_to_obb1_face_4 != nullptr)
+				{
+					delete obb2_vert_to_obb1_face_4;
+					obb2_vert_to_obb1_face_4 = nullptr;
+				}
+				obb2_vert_to_obb1_face_4 = Mesh::CreateLineImmediate(VERT_PCU, obb1_face.m_center, obb1_face.m_center + obb1_face.m_normal * ext, color);
+			}
+			else if (obb1_face_idx == 5)
+			{
+				if (obb2_vert_to_obb1_face_5 != nullptr)
+				{
+					delete obb2_vert_to_obb1_face_5;
+					obb2_vert_to_obb1_face_5 = nullptr;
+				}
+				obb2_vert_to_obb1_face_5 = Mesh::CreateLineImmediate(VERT_PCU, obb1_face.m_center, obb1_face.m_center + obb1_face.m_normal * ext, color);
+			}
+			//DebugRenderLine(1000000.f, obb1_face.m_center, 
+			//	obb1_face.m_center + obb1_face.m_normal * ext, 
+			//	3.f, color, color, DEBUG_RENDER_USE_DEPTH);
+
+			obb1_face_idx = (obb1_face_idx + 1) % 6;
+
+			// now we are done with render all candidate for this vert of obb2
+			// we need to select the shallowest one from record
+			if (obb1_face_idx == 0)
+			{
+				// decide on winner of this vert of obb2 against all faces of obb1
+				const OBB3Vert& shallow_obb2_vert = obb2.m_verts[shallowest_pair_obb2_vert_idx];
+				const OBB3Face& shallow_obb1_face = obb1.m_faces[shallowest_pair_obb1_face_idx];
+				Vector3 shallow_toPt = shallow_obb2_vert.m_vert - shallow_obb1_face.m_center;
+				float shallow_ext = DotProduct(shallow_toPt, shallow_obb1_face.m_normal);
+
+				// at the same time we prepare for the final deepest pen check for all vertices
+				if (shallow_ext < deepest)
+				{
+					deepest = shallow_ext;
+
+					deepest_pair_obb2_vert_idx = shallowest_pair_obb2_vert_idx;
+					deepest_pair_obb1_face_idx = shallowest_pair_obb1_face_idx;
+				}
+
+				if (shallowest_pair_obb2_vert_idx == 0)
+				{
+					if (obb2_vert_0_winner != nullptr)
+					{
+						delete obb2_vert_0_winner;
+						obb2_vert_0_winner = nullptr;
+					}
+					obb2_vert_0_winner = Mesh::CreateLineImmediate(VERT_PCU, shallow_obb1_face.m_center,
+						shallow_obb1_face.m_center + shallow_obb1_face.m_normal * shallow_ext, Rgba::GOLD);
+				}
+				if (shallowest_pair_obb2_vert_idx == 1)
+				{
+					if (obb2_vert_1_winner != nullptr)
+					{
+						delete obb2_vert_1_winner;
+						obb2_vert_1_winner = nullptr;
+					}
+					obb2_vert_1_winner = Mesh::CreateLineImmediate(VERT_PCU, shallow_obb1_face.m_center,
+						shallow_obb1_face.m_center + shallow_obb1_face.m_normal * shallow_ext, Rgba::GOLD);
+				}
+				if (shallowest_pair_obb2_vert_idx == 2)
+				{
+					if (obb2_vert_2_winner != nullptr)
+					{
+						delete obb2_vert_2_winner;
+						obb2_vert_2_winner = nullptr;
+					}
+					obb2_vert_2_winner = Mesh::CreateLineImmediate(VERT_PCU, shallow_obb1_face.m_center,
+						shallow_obb1_face.m_center + shallow_obb1_face.m_normal * shallow_ext, Rgba::GOLD);
+				}
+				if (shallowest_pair_obb2_vert_idx == 3)
+				{
+					if (obb2_vert_3_winner != nullptr)
+					{
+						delete obb2_vert_3_winner;
+						obb2_vert_3_winner = nullptr;
+					}
+					obb2_vert_3_winner = Mesh::CreateLineImmediate(VERT_PCU, shallow_obb1_face.m_center,
+						shallow_obb1_face.m_center + shallow_obb1_face.m_normal * shallow_ext, Rgba::GOLD);
+				}
+				if (shallowest_pair_obb2_vert_idx == 4)
+				{
+					if (obb2_vert_4_winner != nullptr)
+					{
+						delete obb2_vert_4_winner;
+						obb2_vert_4_winner = nullptr;
+					}
+					obb2_vert_4_winner = Mesh::CreateLineImmediate(VERT_PCU, shallow_obb1_face.m_center,
+						shallow_obb1_face.m_center + shallow_obb1_face.m_normal * shallow_ext, Rgba::GOLD);
+				}
+				if (shallowest_pair_obb2_vert_idx == 5)
+				{
+					if (obb2_vert_5_winner != nullptr)
+					{
+						delete obb2_vert_5_winner;
+						obb2_vert_5_winner = nullptr;
+					}
+					obb2_vert_5_winner = Mesh::CreateLineImmediate(VERT_PCU, shallow_obb1_face.m_center,
+						shallow_obb1_face.m_center + shallow_obb1_face.m_normal * shallow_ext, Rgba::GOLD);
+				}
+				if (shallowest_pair_obb2_vert_idx == 6)
+				{
+					if (obb2_vert_6_winner != nullptr)
+					{
+						delete obb2_vert_6_winner;
+						obb2_vert_6_winner = nullptr;
+					}
+					obb2_vert_6_winner = Mesh::CreateLineImmediate(VERT_PCU, shallow_obb1_face.m_center,
+						shallow_obb1_face.m_center + shallow_obb1_face.m_normal * shallow_ext, Rgba::GOLD);
+				}
+				if (shallowest_pair_obb2_vert_idx == 7)
+				{
+					if (obb2_vert_7_winner != nullptr)
+					{
+						delete obb2_vert_7_winner;
+						obb2_vert_7_winner = nullptr;
+					}
+					obb2_vert_7_winner = Mesh::CreateLineImmediate(VERT_PCU, shallow_obb1_face.m_center,
+						shallow_obb1_face.m_center + shallow_obb1_face.m_normal * shallow_ext, Rgba::GOLD);
+				}
+
+				shallowest_pair_obb2_vert_idx = 0;
+				shallowest_pair_obb1_face_idx = 0;
+
+				///////////////////////////////////////////////////////////////////
+				// old debug lines are flushed when picking the winner
+				if (obb2_vert_to_obb1_face_0 != nullptr)
+				{
+					delete obb2_vert_to_obb1_face_0;
+					obb2_vert_to_obb1_face_0 = nullptr;
+				}
+				if (obb2_vert_to_obb1_face_1 != nullptr)
+				{
+					delete obb2_vert_to_obb1_face_1;
+					obb2_vert_to_obb1_face_1 = nullptr;
+				}
+				if (obb2_vert_to_obb1_face_2 != nullptr)
+				{
+					delete obb2_vert_to_obb1_face_2;
+					obb2_vert_to_obb1_face_2 = nullptr;
+				}
+				if (obb2_vert_to_obb1_face_3 != nullptr)
+				{
+					delete obb2_vert_to_obb1_face_3;
+					obb2_vert_to_obb1_face_3 = nullptr;
+				}
+				if (obb2_vert_to_obb1_face_4 != nullptr)
+				{
+					delete obb2_vert_to_obb1_face_4;
+					obb2_vert_to_obb1_face_4 = nullptr;
+				}
+				if (obb2_vert_to_obb1_face_5 != nullptr)
+				{
+					delete obb2_vert_to_obb1_face_5;
+					obb2_vert_to_obb1_face_5 = nullptr;
+				}
+
+				obb2_vert_idx++;
+				shallowest = -INFINITY;
+
+				// we are done checking all vertices of obb2, hence done with obb2 itself
+				if (obb2_vert_idx == 8)
+				{
+					const OBB3Vert& deep_obb2_vert = obb2.m_verts[deepest_pair_obb2_vert_idx];
+					const OBB3Face& deep_obb1_face = obb1.m_faces[deepest_pair_obb1_face_idx];
+
+					Vector3 deep_toPt = deep_obb2_vert.m_vert - deep_obb1_face.m_center;
+					float deep_ext = DotProduct(deep_toPt, deep_obb1_face.m_normal);
+
+					if (obb2_pt_obb1_face_winner != nullptr)
+					{
+						delete obb2_pt_obb1_face_winner;
+						obb2_pt_obb1_face_winner = nullptr;
+					}
+					obb2_pt_obb1_face_winner = Mesh::CreateLineImmediate(VERT_PCU, deep_obb1_face.m_center,
+						deep_obb1_face.m_center + deep_obb1_face.m_normal * deep_ext, Rgba::GOLD);
+
+					if (obb2_vert_0_winner != nullptr)
+					{
+						delete obb2_vert_0_winner;
+						obb2_vert_0_winner = nullptr;
+					}
+					if (obb2_vert_1_winner != nullptr)
+					{
+						delete obb2_vert_1_winner;
+						obb2_vert_1_winner = nullptr;
+					}
+					if (obb2_vert_2_winner != nullptr)
+					{
+						delete obb2_vert_2_winner;
+						obb2_vert_2_winner = nullptr;
+					}
+					if (obb2_vert_3_winner != nullptr)
+					{
+						delete obb2_vert_3_winner;
+						obb2_vert_3_winner = nullptr;
+					}
+					if (obb2_vert_4_winner != nullptr)
+					{
+						delete obb2_vert_4_winner;
+						obb2_vert_4_winner = nullptr;
+					}
+					if (obb2_vert_5_winner != nullptr)
+					{
+						delete obb2_vert_5_winner;
+						obb2_vert_5_winner = nullptr;
+					}
+					if (obb2_vert_6_winner != nullptr)
+					{
+						delete obb2_vert_6_winner;
+						obb2_vert_6_winner = nullptr;
+					}
+					if (obb2_vert_7_winner != nullptr)
+					{
+						delete obb2_vert_7_winner;
+						obb2_vert_7_winner = nullptr;
+					}
+
+					deepest = INFINITY;
+					deepest_pair_obb1_face_idx = 0;
+					deepest_pair_obb2_vert_idx = 0;
+					debug_stat = FIRST_OBB_VERTS;
+				}
+			}
+		}
+	}
+
+	switch (debug_stat)
+	{
+	case SECOND_OBB_VERTS:
+	{
+		const OBB3Vert& obb2_vert = obb2.m_verts[obb2_vert_idx];
+		const OBB3Face& obb1_face = obb1.m_faces[obb1_face_idx];
+
+		Vector3 toPt = obb2_vert.m_vert - obb1_face.m_center;
+		float ext = DotProduct(toPt, obb1_face.m_normal);
+
+		DebugRenderLine(0.1f, obb1_face.m_center, 
+			obb1_face.m_center + obb1_face.m_normal * ext, 
+			3.f, Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+
+		pt = obb2_vert.m_vert;
+		face_center = obb1_face.m_center;
+	}
+		break;
+	case FIRST_OBB_VERTS:
+		break;
+	default:
+		break;
+	}
 }
 
 bool CollisionDetector::OBB3VsOBB3Core(const OBB3& obb1, const OBB3& obb2, Contact3& contact)
