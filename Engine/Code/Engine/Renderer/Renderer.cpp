@@ -664,6 +664,25 @@ Shader* Renderer::CreateOrGetShader(std::string shaderName)
 	}
 }
 
+Shader* Renderer::MakeShader(std::string shaderName)
+{
+	bool shaderLoaded = (m_loadedShaders.count(shaderName) > 0);
+
+	if (!shaderLoaded)
+	{
+		std::string header = "Data/Shaders/" + shaderName + ".xml";
+		Shader* shader = Shader::MakeShader(header.c_str());
+		m_loadedShaders.emplace(shaderName, shader);
+
+		return shader;
+	}
+	else
+	{
+		Shader* shader = m_loadedShaders[shaderName];
+		return shader;
+	}
+}
+
 
 Material* Renderer::CreateOrGetMaterial(std::string matName)
 {
@@ -1293,6 +1312,33 @@ void Renderer::Draw(const Drawcall& dc)
 	GL_CHECK_ERROR();
 }
 
+void Renderer::Draw(Mesh* mesh)
+{
+	GLuint programHandle = m_currentShader->GetShaderProgram()->GetHandle();
+	glUseProgram(programHandle);
+
+	SetObjectUBO(programHandle);
+	SetCameraUBO(programHandle);
+	SetColorUBO(programHandle);
+
+	BindRenderState(m_currentShader->m_state);
+	glBindBuffer(GL_ARRAY_BUFFER, mesh->m_vbo.GetHandle());
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->m_ibo.GetHandle());
+	BindLayoutToProgram( programHandle, mesh->GetLayout() ); 
+
+	// Now that it is described and bound, draw using our program
+	if ( mesh->GetDrawInstruction().using_indices )
+	{
+		glDrawElements( ToGLPrimitiveType(mesh->GetDrawInstruction().primitive_type), 
+			mesh->GetIndexCount(), GL_UNSIGNED_INT, 0 );
+	}
+	else
+	{
+		glDrawArrays( ToGLPrimitiveType(mesh->GetDrawInstruction().primitive_type),
+			0, mesh->GetVertexCount() );
+	}
+}
+
 // Not using forward path or material - for example, see the use of SetObjectColorUBO
 void Renderer::DrawMesh(Mesh* mesh, bool culling, bool depth_test)
 {
@@ -1508,7 +1554,6 @@ void Renderer::SetFogInfoUBO(GLuint)
 void Renderer::SetCameraUniforms()
 {
 	m_cameraData.eyePosition	=	m_currentCamera->GetTransform().GetWorldPosition();
-	//m_cameraData.eyePosition	=	m_currentCamera->GetTransform().GetLocalPosition();
 	m_cameraData.view			=	m_currentCamera->GetView();
 	m_cameraData.proj			=	m_currentCamera->GetProjection();
 }
@@ -2075,6 +2120,7 @@ void Renderer::DrawModel(AssimpLoader* loader)
 	for (uint i = 0; i < loader->m_meshes.size(); ++i)
 		DrawMesh(loader->m_meshes[i]);
 }
+
 
 void Renderer::BindMaterial(const Drawcall& dc)
 {

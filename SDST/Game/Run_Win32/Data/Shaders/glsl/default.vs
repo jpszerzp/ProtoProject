@@ -26,7 +26,7 @@ void main()
    vec4 local_pos = vec4(POSITION, 1);
    vec4 clip_pos = PROJECTION * VIEW * MODEL * local_pos;
 
-   passColor = COLOR;
+   passColor = COLOR;       // vert color
    passUV = UV;
    gl_Position = clip_pos; 
 }

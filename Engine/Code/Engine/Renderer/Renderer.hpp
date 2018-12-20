@@ -300,6 +300,10 @@ public:
 	// assimp
 	void DrawModel(AssimpLoader* loader);
 
+	// REFACTOR
+	Shader*			MakeShader(std::string shaderName);
+	void Draw(Mesh* mesh);
+
 public:
 	const static int DIFFUSE_MAP_BIND_IDX = 0;
 	const static int NORMAL_MAP_BIND_IDX = 1;

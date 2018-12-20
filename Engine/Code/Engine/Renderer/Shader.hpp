@@ -80,20 +80,12 @@ struct sRenderState
 {
 	// Raster State Control
 	eCullMode  m_cullMode = CULLMODE_BACK;      // CULL_BACK
-	std::vector<eCullMode> m_cullModes;
-
 	eFillMode  m_fillMode = FILLMODE_SOLID;      // FILL_SOLID
-
 	eWindOrder m_windOrder = WIND_COUNTER_CLOCKWISE;    // WIND_COUNTER_CLOCKWISE
-	std::vector<eWindOrder> m_windOrders;
-
-	// Depth State Control
 	eDepthCompare m_depthCompare = COMPARE_LESS;		// COMPARE_LESS
-	std::vector<eDepthCompare> m_depthCompares;   
 	bool m_depthWrite = true;				  // true
-
 	// stencil
-	
+
 	// Blend
 	eBlendOp	 m_colorBlendOp = COMPARE_ADD;          // COMPARE_ADD
 	eBlendFactor m_colorSrcFactor = BLEND_ONE;    // BLEND_ONE
@@ -102,6 +94,10 @@ struct sRenderState
 	eBlendOp	 m_alphaBlendOp = COMPARE_ADD;          // COMPARE_ADD
 	eBlendFactor m_alphaSrcFactor = BLEND_ONE;    // BLEND_ONE
 	eBlendFactor m_alphaDstFactor = BLEND_ZERO;    // BLEND_ONE
+
+	std::vector<eCullMode> m_cullModes;
+	std::vector<eWindOrder> m_windOrders;
+	std::vector<eDepthCompare> m_depthCompares;   
 }; 
 
 // This is the part of Shader.hpp
@@ -112,6 +108,7 @@ class Shader
 public:
 	// Bind shader program and render state from xml
 	static Shader* AcquireResource(const char* fp);
+	static Shader* MakeShader(const char* fp);
 
 	// none of these call GL calls, just sets the internal state
 	void SetProgram( ShaderProgram* program ) { m_program = program; }
@@ -136,12 +133,14 @@ public:
 	~Shader();
 
 public:
-	ShaderProgram*		m_program = nullptr; 
 	ShaderProgramInfo*	m_programInfo = nullptr;
-	sRenderState		m_state;
 
 	uint		 m_layer;
 	eRenderQueue m_queue;
+
+	/////////////////////////////////////////////////
+	ShaderProgram*		m_program = nullptr; 
+	sRenderState		m_state;
 }; 
 
 // attempt on multi-pass shader

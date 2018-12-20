@@ -26,7 +26,7 @@ public:
 
 	std::vector<GameObject*> m_gameObjects;
 
-	ePrimitiveControl m_control;
+	//ePrimitiveControl m_control;
 
 public:
 	GameState(){}

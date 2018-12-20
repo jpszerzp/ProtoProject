@@ -18,5 +18,7 @@ public:
 		eCullMode cull = CULLMODE_BACK, 
 		eWindOrder order = WIND_COUNTER_CLOCKWISE,
 		bool drawBorder = false);
+	Cube(const Vector3& pos, const Vector3& rot, const Vector3& scale, const Rgba& tint,
+		std::string fp, std::string sp, bool db);
 	~Cube();
 };

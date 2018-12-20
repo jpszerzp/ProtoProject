@@ -9,6 +9,14 @@ Renderable::Renderable(const Material* mat, Mesh* mesh, Transform& transform, Ve
 	m_tint = tint;
 }
 
+Renderable::Renderable(Shader* shader, Mesh* mesh, const Transform& transform, const Vector4& tint)
+{
+	m_non_mat_shader = shader;
+	m_mesh = mesh;
+	m_transform = transform;
+	m_tint = tint;
+}
+
 Renderable::~Renderable()
 {
 	delete m_material;

@@ -1,0 +1,6 @@
+<shader name="default">
+	<program>
+		<vertex file="Shaders/glsl/default.vs" />
+		<fragment file="Shaders/glsl/default.fs" />
+	</program>
+</shader>

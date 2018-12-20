@@ -57,147 +57,147 @@ ProtoState::ProtoState()
 		m_sceneGraph->m_camera2D = m_UICamera;
 	}
 
-	q_0 = new Quad(Vector3(-10.f, 0.f, 0.f), Vector3(0.f, 0.f, 0.f), Vector3(1.f, 1.f, 1.f), Rgba::MEGENTA, "quad_pcu", "default", MOVE_STATIC, BODY_PARTICLE, false);
-	m_gameObjects.push_back(q_0);
+	//q_0 = new Quad(Vector3(-10.f, 0.f, 0.f), Vector3(0.f, 0.f, 0.f), Vector3(1.f, 1.f, 1.f), Rgba::MEGENTA, "quad_pcu", "default", MOVE_STATIC, BODY_PARTICLE, false);
+	//m_gameObjects.push_back(q_0);
 
-	Quad* q_1 = new Quad(Vector3(-10.f, 0.f, 5.f), Vector3::ZERO, Vector3(3.f, 0.2f, 1.f), Rgba::CYAN, "quad_pcu", "white", MOVE_STATIC, BODY_PARTICLE, false);
-	m_gameObjects.push_back(q_1);
+	//Quad* q_1 = new Quad(Vector3(-10.f, 0.f, 5.f), Vector3::ZERO, Vector3(3.f, 0.2f, 1.f), Rgba::CYAN, "quad_pcu", "white", MOVE_STATIC, BODY_PARTICLE, false);
+	//m_gameObjects.push_back(q_1);
 
-	Quad* q_2 = new Quad(Vector3(-10.f, 0.5f, 5.f), Vector3::ZERO, Vector3(3.f, 0.2f, 1.f), Rgba::GREEN, "quad_pcu", "white", MOVE_STATIC, BODY_PARTICLE, false, COMPARE_GREATER);
-	m_gameObjects.push_back(q_2);
-	
-	Quad* q_3 = new Quad(Vector3(-10.f, -0.5f, 5.f), Vector3::ZERO, Vector3(3.f, 0.2f, 1.f), Rgba::BLUE, "quad_pcu", "white", MOVE_STATIC, BODY_PARTICLE, false, COMPARE_ALWAYS);
-	m_gameObjects.push_back(q_3);
+	//Quad* q_2 = new Quad(Vector3(-10.f, 0.5f, 5.f), Vector3::ZERO, Vector3(3.f, 0.2f, 1.f), Rgba::GREEN, "quad_pcu", "white", MOVE_STATIC, BODY_PARTICLE, false, COMPARE_GREATER);
+	//m_gameObjects.push_back(q_2);
+	//
+	//Quad* q_3 = new Quad(Vector3(-10.f, -0.5f, 5.f), Vector3::ZERO, Vector3(3.f, 0.2f, 1.f), Rgba::BLUE, "quad_pcu", "white", MOVE_STATIC, BODY_PARTICLE, false, COMPARE_ALWAYS);
+	//m_gameObjects.push_back(q_3);
 
-	////////////////////////////////////////////////
-	// quad surrounding point light, face up
-	Quad* q_4 = new Quad(Vector3(0.f, 4.7f, 10.f), Vector3(-90.f, 0.f, 0.f), Vector3::ONE, Rgba::WHITE, "quad_lit", "lit", MOVE_STATIC, BODY_PARTICLE, true);
-	q_4->m_renderable->GetMaterial()->m_useLight = true;
-	m_gameObjects.push_back(q_4);
-	m_sceneGraph->AddRenderable(q_4);		// lit in forward path
+	//////////////////////////////////////////////////
+	//// quad surrounding point light, face up
+	//Quad* q_4 = new Quad(Vector3(0.f, 4.7f, 10.f), Vector3(-90.f, 0.f, 0.f), Vector3::ONE, Rgba::WHITE, "quad_lit", "lit", MOVE_STATIC, BODY_PARTICLE, true);
+	//q_4->m_renderable->GetMaterial()->m_useLight = true;
+	//m_gameObjects.push_back(q_4);
+	//m_sceneGraph->AddRenderable(q_4);		// lit in forward path
 
-	// face down
-	Quad* q_5 = new Quad(Vector3(0.f, 6.3f, 10.f), Vector3(90.f, 0.f, 0.f), Vector3::ONE, Rgba::WHITE, "quad_lit", "lit", MOVE_STATIC, BODY_PARTICLE, true);
-	q_5->m_renderable->GetMaterial()->m_useLight = true;
-	m_gameObjects.push_back(q_5);
-	m_sceneGraph->AddRenderable(q_5);		// lit in forward path
+	//// face down
+	//Quad* q_5 = new Quad(Vector3(0.f, 6.3f, 10.f), Vector3(90.f, 0.f, 0.f), Vector3::ONE, Rgba::WHITE, "quad_lit", "lit", MOVE_STATIC, BODY_PARTICLE, true);
+	//q_5->m_renderable->GetMaterial()->m_useLight = true;
+	//m_gameObjects.push_back(q_5);
+	//m_sceneGraph->AddRenderable(q_5);		// lit in forward path
 
-	// face backward
-	Quad* q_6 = new Quad(Vector3(0.f, 5.5f, 10.8f), Vector3(0.f, 0.f, 0.f), Vector3::ONE, Rgba::WHITE, "quad_lit", "lit", MOVE_STATIC, BODY_PARTICLE, true);
-	q_6->m_renderable->GetMaterial()->m_useLight = true;
-	m_gameObjects.push_back(q_6);
-	m_sceneGraph->AddRenderable(q_6);		// lit in forward path
+	//// face backward
+	//Quad* q_6 = new Quad(Vector3(0.f, 5.5f, 10.8f), Vector3(0.f, 0.f, 0.f), Vector3::ONE, Rgba::WHITE, "quad_lit", "lit", MOVE_STATIC, BODY_PARTICLE, true);
+	//q_6->m_renderable->GetMaterial()->m_useLight = true;
+	//m_gameObjects.push_back(q_6);
+	//m_sceneGraph->AddRenderable(q_6);		// lit in forward path
 
-	// face forward
-	Quad* q_7 = new Quad(Vector3(0.f, 5.5f, 9.2f), Vector3(0.f, 180.f, 0.f), Vector3::ONE, Rgba::WHITE, "quad_lit", "lit", MOVE_STATIC, BODY_PARTICLE, true);
-	q_7->m_renderable->GetMaterial()->m_useLight = true;
-	m_gameObjects.push_back(q_7);
-	m_sceneGraph->AddRenderable(q_7);		// lit in forward path
+	//// face forward
+	//Quad* q_7 = new Quad(Vector3(0.f, 5.5f, 9.2f), Vector3(0.f, 180.f, 0.f), Vector3::ONE, Rgba::WHITE, "quad_lit", "lit", MOVE_STATIC, BODY_PARTICLE, true);
+	//q_7->m_renderable->GetMaterial()->m_useLight = true;
+	//m_gameObjects.push_back(q_7);
+	//m_sceneGraph->AddRenderable(q_7);		// lit in forward path
 
-	// face left
-	Quad* q_8 = new Quad(Vector3(0.8f, 5.5f, 10.f), Vector3(0.f, -90.f, 0.f), Vector3::ONE, Rgba::WHITE, "quad_lit", "lit", MOVE_STATIC, BODY_PARTICLE, true);
-	q_8->m_renderable->GetMaterial()->m_useLight = true;
-	m_gameObjects.push_back(q_8);
-	m_sceneGraph->AddRenderable(q_8);		// lit in forward path
+	//// face left
+	//Quad* q_8 = new Quad(Vector3(0.8f, 5.5f, 10.f), Vector3(0.f, -90.f, 0.f), Vector3::ONE, Rgba::WHITE, "quad_lit", "lit", MOVE_STATIC, BODY_PARTICLE, true);
+	//q_8->m_renderable->GetMaterial()->m_useLight = true;
+	//m_gameObjects.push_back(q_8);
+	//m_sceneGraph->AddRenderable(q_8);		// lit in forward path
 
-	// face right
-	Quad* q_9 = new Quad(Vector3(-0.8f, 5.5f, 10.f), Vector3(0.f, 90.f, 0.f), Vector3::ONE, Rgba::WHITE, "quad_lit", "lit", MOVE_STATIC, BODY_PARTICLE, true);
-	q_9->m_renderable->GetMaterial()->m_useLight = true;
-	m_gameObjects.push_back(q_9);
-	m_sceneGraph->AddRenderable(q_9);		// lit in forward path
-	////////////////////////////////////////////////////////////////////
+	//// face right
+	//Quad* q_9 = new Quad(Vector3(-0.8f, 5.5f, 10.f), Vector3(0.f, 90.f, 0.f), Vector3::ONE, Rgba::WHITE, "quad_lit", "lit", MOVE_STATIC, BODY_PARTICLE, true);
+	//q_9->m_renderable->GetMaterial()->m_useLight = true;
+	//m_gameObjects.push_back(q_9);
+	//m_sceneGraph->AddRenderable(q_9);		// lit in forward path
+	//////////////////////////////////////////////////////////////////////
 
-	// spot light test quad
-	Quad* q_10 = new Quad(Vector3(-10.f, 4.5f, 10.f), Vector3(0.f, 0.f, 0.f), Vector3(5.f, 5.f, 5.f), Rgba::WHITE, "quad_lit", "lit", MOVE_STATIC, BODY_PARTICLE, true);
-	q_10->m_renderable->GetMaterial()->m_useLight = true;
-	m_gameObjects.push_back(q_10);
-	m_sceneGraph->AddRenderable(q_10);
+	//// spot light test quad
+	//Quad* q_10 = new Quad(Vector3(-10.f, 4.5f, 10.f), Vector3(0.f, 0.f, 0.f), Vector3(5.f, 5.f, 5.f), Rgba::WHITE, "quad_lit", "lit", MOVE_STATIC, BODY_PARTICLE, true);
+	//q_10->m_renderable->GetMaterial()->m_useLight = true;
+	//m_gameObjects.push_back(q_10);
+	//m_sceneGraph->AddRenderable(q_10);
 
-	// directional light test quad
-	Quad* q_11 = new Quad(Vector3(-15.f, 4.5f, 10.f), Vector3(-90.f, 0.f, 0.f), Vector3(3.f, 3.f, 3.f), Rgba::WHITE, "quad_lit", "lit", MOVE_STATIC, BODY_PARTICLE, true);
-	q_11->m_renderable->GetMaterial()->m_useLight = true;
-	m_gameObjects.push_back(q_11);
-	m_sceneGraph->AddRenderable(q_11);
+	//// directional light test quad
+	//Quad* q_11 = new Quad(Vector3(-15.f, 4.5f, 10.f), Vector3(-90.f, 0.f, 0.f), Vector3(3.f, 3.f, 3.f), Rgba::WHITE, "quad_lit", "lit", MOVE_STATIC, BODY_PARTICLE, true);
+	//q_11->m_renderable->GetMaterial()->m_useLight = true;
+	//m_gameObjects.push_back(q_11);
+	//m_sceneGraph->AddRenderable(q_11);
 
-	c_0 = new Cube(Vector3(-5.f, 0.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::GREEN, "cube_pcu", "default", MOVE_STATIC, BODY_PARTICLE);
+	c_0 = new Cube(Vector3::ZERO, Vector3::ZERO, Vector3::ONE, Rgba::GREEN, "cube_pcu", "shader/default", false);
 	m_gameObjects.push_back(c_0);
-	m_sceneGraph->AddRenderable(c_0);
+	//m_sceneGraph->AddRenderable(c_0);
 
-	c_1 = new Cube(Vector3::ZERO, Vector3::ZERO, Vector3::ONE, Rgba::RED, "cube_pcu", "default", MOVE_STATIC, BODY_PARTICLE,
-		false, COMPARE_LESS, CULLMODE_BACK, WIND_COUNTER_CLOCKWISE, true);
-	m_gameObjects.push_back(c_1);
+	//c_1 = new Cube(Vector3::ZERO, Vector3::ZERO, Vector3::ONE, Rgba::RED, "cube_pcu", "default", MOVE_STATIC, BODY_PARTICLE,
+	//	false, COMPARE_LESS, CULLMODE_BACK, WIND_COUNTER_CLOCKWISE, true);
+	//m_gameObjects.push_back(c_1);
 
-	s_0 = new Sphere(Vector3(10.f, 0.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::WHITE, "sphere_pcu", "default", MOVE_STATIC, BODY_PARTICLE);
-	m_gameObjects.push_back(s_0);
+	//s_0 = new Sphere(Vector3(10.f, 0.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::WHITE, "sphere_pcu", "default", MOVE_STATIC, BODY_PARTICLE);
+	//m_gameObjects.push_back(s_0);
 
-	ship_0 = new Ship(Vector3(10.f, 0.f, 10.f), Vector3::ZERO, Vector3(0.3f, 0.3f, 0.3f), Rgba::WHITE, "ship_lit", "ship_multipass", true);
-	ship_0->m_renderable->GetMaterial()->m_useLight = true;
-	m_gameObjects.push_back(ship_0);
-	m_sceneGraph->AddRenderable(ship_0);
+	//ship_0 = new Ship(Vector3(10.f, 0.f, 10.f), Vector3::ZERO, Vector3(0.3f, 0.3f, 0.3f), Rgba::WHITE, "ship_lit", "ship_multipass", true);
+	//ship_0->m_renderable->GetMaterial()->m_useLight = true;
+	//m_gameObjects.push_back(ship_0);
+	//m_sceneGraph->AddRenderable(ship_0);
 
-	Ship* ship_1 = new Ship(Vector3(0.f, 0.f, 10.f), Vector3::ZERO, Vector3(0.5f, 0.5f, 0.5f), Rgba::WHITE, "ship_pcu", "ship");
-	m_gameObjects.push_back(ship_1);
+	//Ship* ship_1 = new Ship(Vector3(0.f, 0.f, 10.f), Vector3::ZERO, Vector3(0.5f, 0.5f, 0.5f), Rgba::WHITE, "ship_pcu", "ship");
+	//m_gameObjects.push_back(ship_1);
 
-	// point
-	p_0 = new Point(Vector3(5.f, 0.f, 0.f), Vector3::ZERO, 10.f, Rgba::WHITE, "point_pcu", "white", MOVE_STATIC, BODY_PARTICLE);
-	m_gameObjects.push_back(p_0);
+	//// point
+	//p_0 = new Point(Vector3(5.f, 0.f, 0.f), Vector3::ZERO, 10.f, Rgba::WHITE, "point_pcu", "white", MOVE_STATIC, BODY_PARTICLE);
+	//m_gameObjects.push_back(p_0);
 
-	// line
-	l_0 = new Line(Vector3(0.f, 5.f, 0.f), Vector3(5.f, 5.f, 0.f), 3.f, Rgba::WHITE, "white");
-	m_gameObjects.push_back(l_0);
+	//// line
+	//l_0 = new Line(Vector3(0.f, 5.f, 0.f), Vector3(5.f, 5.f, 0.f), 3.f, Rgba::WHITE, "white");
+	//m_gameObjects.push_back(l_0);
 
-	// lights 
-	Vector3 lightPos = Vector3(0.f, 5.5f, 10.f);
-	Vector3 lightRot = Vector3::ZERO;
-	Vector3 lightScale = Vector3(0.05f, 0.05f, 0.05f);
-	Rgba lightColor = Rgba::WHITE;
-	Vector3 attenuaion = Vector3(0.f, 0.f, .001f);
-	Vector3 specAttenuation = Vector3(0.f, 0.f, .001f);
-	Vector3 lightDir = Vector3::ONE;
-	float innerAngle = -1.f;
-	float outerAngle = -1.f;
-	float directFac = 0.f;
-	PointLight* pl_0 = new PointLight(lightPos, lightRot, lightScale, lightColor, attenuaion, specAttenuation, lightDir, innerAngle, outerAngle, directFac);
-	m_gameObjects.push_back(pl_0);
-	m_sceneGraph->AddLight(pl_0);
+	//// lights 
+	//Vector3 lightPos = Vector3(0.f, 5.5f, 10.f);
+	//Vector3 lightRot = Vector3::ZERO;
+	//Vector3 lightScale = Vector3(0.05f, 0.05f, 0.05f);
+	//Rgba lightColor = Rgba::WHITE;
+	//Vector3 attenuaion = Vector3(0.f, 0.f, .001f);
+	//Vector3 specAttenuation = Vector3(0.f, 0.f, .001f);
+	//Vector3 lightDir = Vector3::ONE;
+	//float innerAngle = -1.f;
+	//float outerAngle = -1.f;
+	//float directFac = 0.f;
+	//PointLight* pl_0 = new PointLight(lightPos, lightRot, lightScale, lightColor, attenuaion, specAttenuation, lightDir, innerAngle, outerAngle, directFac);
+	//m_gameObjects.push_back(pl_0);
+	//m_sceneGraph->AddLight(pl_0);
 
-	lightPos = Vector3(10.f, 5.f, 10.f);
-	lightColor = Rgba::RED;
-	PointLight* pl_1 = new PointLight(lightPos, lightRot, lightScale, lightColor, attenuaion, specAttenuation, lightDir, innerAngle, outerAngle, directFac);
-	m_gameObjects.push_back(pl_1);
-	m_sceneGraph->AddLight(pl_1);
+	//lightPos = Vector3(10.f, 5.f, 10.f);
+	//lightColor = Rgba::RED;
+	//PointLight* pl_1 = new PointLight(lightPos, lightRot, lightScale, lightColor, attenuaion, specAttenuation, lightDir, innerAngle, outerAngle, directFac);
+	//m_gameObjects.push_back(pl_1);
+	//m_sceneGraph->AddLight(pl_1);
 
-	lightPos = Vector3(-10.f, 4.5f, 8.f);
-	lightColor = Rgba::GREEN;
-	lightDir = Vector3(0.f, 0.f, 1.f);
-	innerAngle = 1.f;
-	outerAngle = CosDegrees(30.f);
-	directFac = 0.f;
-	SpotLight* sl_0 = new SpotLight(lightPos, lightRot, lightScale, lightColor, attenuaion, specAttenuation, lightDir, innerAngle, outerAngle, directFac);
-	m_gameObjects.push_back(sl_0);
-	m_sceneGraph->AddLight(sl_0);
+	//lightPos = Vector3(-10.f, 4.5f, 8.f);
+	//lightColor = Rgba::GREEN;
+	//lightDir = Vector3(0.f, 0.f, 1.f);
+	//innerAngle = 1.f;
+	//outerAngle = CosDegrees(30.f);
+	//directFac = 0.f;
+	//SpotLight* sl_0 = new SpotLight(lightPos, lightRot, lightScale, lightColor, attenuaion, specAttenuation, lightDir, innerAngle, outerAngle, directFac);
+	//m_gameObjects.push_back(sl_0);
+	//m_sceneGraph->AddLight(sl_0);
 
-	lightPos = Vector3(-15.f, 6.5f, 10.f);
-	lightColor = Rgba::CYAN;
-	attenuaion = Vector3(1.f, 0.f, 0.f);
-	specAttenuation = Vector3(1.f, 0.f, 0.f);
-	lightDir = Vector3(0.f, -1.f, 0.f);
-	innerAngle = -1.f;
-	outerAngle = -1.f;
-	directFac = 1.f;
-	DirectionalLight* dl_0 = new DirectionalLight(lightPos, lightRot, lightScale, lightColor, attenuaion, specAttenuation, lightDir, innerAngle, outerAngle, directFac);
-	m_gameObjects.push_back(dl_0);
-	m_sceneGraph->AddLight(dl_0);
+	//lightPos = Vector3(-15.f, 6.5f, 10.f);
+	//lightColor = Rgba::CYAN;
+	//attenuaion = Vector3(1.f, 0.f, 0.f);
+	//specAttenuation = Vector3(1.f, 0.f, 0.f);
+	//lightDir = Vector3(0.f, -1.f, 0.f);
+	//innerAngle = -1.f;
+	//outerAngle = -1.f;
+	//directFac = 1.f;
+	//DirectionalLight* dl_0 = new DirectionalLight(lightPos, lightRot, lightScale, lightColor, attenuaion, specAttenuation, lightDir, innerAngle, outerAngle, directFac);
+	//m_gameObjects.push_back(dl_0);
+	//m_sceneGraph->AddLight(dl_0);
 
-	Cone* cone = new Cone(Vector3(-20.f, 0.f, 5.f), Vector3::ZERO, Vector3::ONE, Rgba::WHITE, "cone_pcu", "white", MOVE_STATIC, BODY_PARTICLE, false);
-	m_gameObjects.push_back(cone);
-	m_sceneGraph->AddRenderable(cone);
+	//Cone* cone = new Cone(Vector3(-20.f, 0.f, 5.f), Vector3::ZERO, Vector3::ONE, Rgba::WHITE, "cone_pcu", "white", MOVE_STATIC, BODY_PARTICLE, false);
+	//m_gameObjects.push_back(cone);
+	//m_sceneGraph->AddRenderable(cone);
 
 	// debug
 	DebugRenderSet3DCamera(m_camera);
 	DebugRenderSet2DCamera(m_UICamera);
 
-	m_control = CONTROL_CUBE;
+	//m_control = CONTROL_CUBE;
 }
 
 
@@ -210,9 +210,7 @@ ProtoState::~ProtoState()
 void ProtoState::Update(float deltaTime)
 {
 	for each (GameObject* gameobject in m_gameObjects)
-	{
 		gameobject->Update(deltaTime);
-	}
 
 	if (!DevConsoleIsOpen())
 	{
@@ -257,17 +255,17 @@ void ProtoState::UpdateKeyboard(float deltaTime)
 	float forwardBack = 0.f;
 	float upDown = 0.f; 
 	
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_B))
-	{
-		if (m_control != (NUM_PRIMITIVE_CONTROL - 1))
-		{
-			m_control = static_cast<ePrimitiveControl>(m_control + 1);
-		}
-		else
-		{
-			m_control = CONTROL_CUBE;
-		}
-	}
+	//if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_B))
+	//{
+	//	if (m_control != (NUM_PRIMITIVE_CONTROL - 1))
+	//	{
+	//		m_control = static_cast<ePrimitiveControl>(m_control + 1);
+	//	}
+	//	else
+	//	{
+	//		m_control = CONTROL_CUBE;
+	//	}
+	//}
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_C))
 	{
 		for each (GameObject* gameobject in m_gameObjects)
@@ -313,150 +311,150 @@ void ProtoState::UpdateKeyboard(float deltaTime)
 		m_camera->GetTransform().SetLocalRotation(Vector3::ZERO);
 		m_camera->GetTransform().SetLocalScale(Vector3::ONE);
 	}
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_R))
-	{
-		if (m_control == CONTROL_CUBE)
-		{
-			c_1->m_renderable->m_transform.SetLocalRotation(Vector3::ZERO);
-		}
-		else if (m_control == CONTROL_SHPERE)
-		{
-			s_0->m_renderable->m_transform.SetLocalRotation(Vector3::ZERO);
-		}
-	}
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_LEFT_ARROW))
-	{
-		// rotate around y
-		if (m_control == CONTROL_CUBE)
-		{
-			c_1->m_renderable->m_transform.RotateLocal(Vector3(0.f, 1.f, 0.f));
-		}
-		else if (m_control == CONTROL_SHPERE)
-		{
-			s_0->m_renderable->m_transform.RotateLocal(Vector3(0.f, 1.f, 0.f));
-		}
-	}
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_RIGHT_ARROW))
-	{
-		if (m_control == CONTROL_CUBE)
-		{
-			c_1->m_renderable->m_transform.RotateLocal(Vector3(0.f, -1.f, 0.f));
-		}
-		else if (m_control == CONTROL_SHPERE)
-		{
-			s_0->m_renderable->m_transform.RotateLocal(Vector3(0.f, -1.f, 0.f));
-		}
-	}
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_UP_ARROW))
-	{
-		if (m_control == CONTROL_CUBE)
-		{
-			c_1->m_renderable->m_transform.RotateLocal(Vector3(1.f, 0.f, 0.f));
-		}
-		else if (m_control == CONTROL_SHPERE)
-		{
-			s_0->m_renderable->m_transform.RotateLocal(Vector3(1.f, 0.f, 0.f));
-		}
-	}
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_DOWN_ARROW))
-	{
-		if (m_control == CONTROL_CUBE)
-		{
-			c_1->m_renderable->m_transform.RotateLocal(Vector3(-1.f, 0.f, 0.f));
-		}
-		else if (m_control == CONTROL_SHPERE)
-		{
-			s_0->m_renderable->m_transform.RotateLocal(Vector3(-1.f, 0.f, 0.f));
-		}
-	}
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEUP))
-	{
-		if (m_control == CONTROL_CUBE)
-		{
-			c_1->m_renderable->m_transform.RotateLocal(Vector3(0.f, 0.f, 1.f));
-		}
-		else if (m_control == CONTROL_SHPERE)
-		{
-			s_0->m_renderable->m_transform.RotateLocal(Vector3(0.f, 0.f, 1.f));
-		}
-	}
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEDOWN))
-	{
-		if (m_control == CONTROL_CUBE)
-		{
-			c_1->m_renderable->m_transform.RotateLocal(Vector3(0.f, 0.f, -1.f));
-		}
-		else if (m_control == CONTROL_SHPERE)
-		{
-			s_0->m_renderable->m_transform.RotateLocal(Vector3(0.f, 0.f, -1.f));
-		}
-	}
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_I))
-	{
-		if (m_control == CONTROL_CUBE)
-		{
-			c_1->m_renderable->m_transform.TranslateLocal(Vector3(0.f, 0.f, .05f));
-		}
-		else if (m_control == CONTROL_SHPERE)
-		{
-			s_0->m_renderable->m_transform.TranslateLocal(Vector3(0.f, 0.f, .05f));
-		}
-	}
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_K))
-	{
-		if (m_control == CONTROL_CUBE)
-		{
-			c_1->m_renderable->m_transform.TranslateLocal(Vector3(0.f, 0.f, -.05f));
-		}
-		else if (m_control == CONTROL_SHPERE)
-		{
-			s_0->m_renderable->m_transform.TranslateLocal(Vector3(0.f, 0.f, -.05f));
-		}
-	}
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_J))
-	{
-		if (m_control == CONTROL_CUBE)
-		{
-			c_1->m_renderable->m_transform.TranslateLocal(Vector3(-0.05f, 0.f, 0.f));
-		}
-		else if (m_control == CONTROL_SHPERE)
-		{
-			s_0->m_renderable->m_transform.TranslateLocal(Vector3(-0.05f, 0.f, 0.f));
-		}
-	}
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_L))
-	{
-		if (m_control == CONTROL_CUBE)
-		{
-			c_1->m_renderable->m_transform.TranslateLocal(Vector3(0.05f, 0.f, 0.f));
-		}
-		else if (m_control == CONTROL_SHPERE)
-		{
-			s_0->m_renderable->m_transform.TranslateLocal(Vector3(0.05f, 0.f, 0.f));
-		}
-	}
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_U))
-	{
-		if (m_control == CONTROL_CUBE)
-		{
-			c_1->m_renderable->m_transform.TranslateLocal(Vector3(0.f, 0.05f, 0.f));
-		}
-		else if (m_control == CONTROL_SHPERE)
-		{
-			s_0->m_renderable->m_transform.TranslateLocal(Vector3(0.f, 0.05f, 0.f));
-		}
-	}
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_O))
-	{
-		if (m_control == CONTROL_CUBE)
-		{
-			c_1->m_renderable->m_transform.TranslateLocal(Vector3(0.f, -0.05f, 0.f));
-		}
-		else if (m_control == CONTROL_SHPERE)
-		{
-			s_0->m_renderable->m_transform.TranslateLocal(Vector3(0.f, -0.05f, 0.f));
-		}
-	}
+	//if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_R))
+	//{
+	//	if (m_control == CONTROL_CUBE)
+	//	{
+	//		c_1->m_renderable->m_transform.SetLocalRotation(Vector3::ZERO);
+	//	}
+	//	else if (m_control == CONTROL_SHPERE)
+	//	{
+	//		s_0->m_renderable->m_transform.SetLocalRotation(Vector3::ZERO);
+	//	}
+	//}
+	//if (g_input->IsKeyDown(InputSystem::KEYBOARD_LEFT_ARROW))
+	//{
+	//	// rotate around y
+	//	if (m_control == CONTROL_CUBE)
+	//	{
+	//		c_1->m_renderable->m_transform.RotateLocal(Vector3(0.f, 1.f, 0.f));
+	//	}
+	//	else if (m_control == CONTROL_SHPERE)
+	//	{
+	//		s_0->m_renderable->m_transform.RotateLocal(Vector3(0.f, 1.f, 0.f));
+	//	}
+	//}
+	//if (g_input->IsKeyDown(InputSystem::KEYBOARD_RIGHT_ARROW))
+	//{
+	//	if (m_control == CONTROL_CUBE)
+	//	{
+	//		c_1->m_renderable->m_transform.RotateLocal(Vector3(0.f, -1.f, 0.f));
+	//	}
+	//	else if (m_control == CONTROL_SHPERE)
+	//	{
+	//		s_0->m_renderable->m_transform.RotateLocal(Vector3(0.f, -1.f, 0.f));
+	//	}
+	//}
+	//if (g_input->IsKeyDown(InputSystem::KEYBOARD_UP_ARROW))
+	//{
+	//	if (m_control == CONTROL_CUBE)
+	//	{
+	//		c_1->m_renderable->m_transform.RotateLocal(Vector3(1.f, 0.f, 0.f));
+	//	}
+	//	else if (m_control == CONTROL_SHPERE)
+	//	{
+	//		s_0->m_renderable->m_transform.RotateLocal(Vector3(1.f, 0.f, 0.f));
+	//	}
+	//}
+	//if (g_input->IsKeyDown(InputSystem::KEYBOARD_DOWN_ARROW))
+	//{
+	//	if (m_control == CONTROL_CUBE)
+	//	{
+	//		c_1->m_renderable->m_transform.RotateLocal(Vector3(-1.f, 0.f, 0.f));
+	//	}
+	//	else if (m_control == CONTROL_SHPERE)
+	//	{
+	//		s_0->m_renderable->m_transform.RotateLocal(Vector3(-1.f, 0.f, 0.f));
+	//	}
+	//}
+	//if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEUP))
+	//{
+	//	if (m_control == CONTROL_CUBE)
+	//	{
+	//		c_1->m_renderable->m_transform.RotateLocal(Vector3(0.f, 0.f, 1.f));
+	//	}
+	//	else if (m_control == CONTROL_SHPERE)
+	//	{
+	//		s_0->m_renderable->m_transform.RotateLocal(Vector3(0.f, 0.f, 1.f));
+	//	}
+	//}
+	//if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEDOWN))
+	//{
+	//	if (m_control == CONTROL_CUBE)
+	//	{
+	//		c_1->m_renderable->m_transform.RotateLocal(Vector3(0.f, 0.f, -1.f));
+	//	}
+	//	else if (m_control == CONTROL_SHPERE)
+	//	{
+	//		s_0->m_renderable->m_transform.RotateLocal(Vector3(0.f, 0.f, -1.f));
+	//	}
+	//}
+	//if (g_input->IsKeyDown(InputSystem::KEYBOARD_I))
+	//{
+	//	if (m_control == CONTROL_CUBE)
+	//	{
+	//		c_1->m_renderable->m_transform.TranslateLocal(Vector3(0.f, 0.f, .05f));
+	//	}
+	//	else if (m_control == CONTROL_SHPERE)
+	//	{
+	//		s_0->m_renderable->m_transform.TranslateLocal(Vector3(0.f, 0.f, .05f));
+	//	}
+	//}
+	//if (g_input->IsKeyDown(InputSystem::KEYBOARD_K))
+	//{
+	//	if (m_control == CONTROL_CUBE)
+	//	{
+	//		c_1->m_renderable->m_transform.TranslateLocal(Vector3(0.f, 0.f, -.05f));
+	//	}
+	//	else if (m_control == CONTROL_SHPERE)
+	//	{
+	//		s_0->m_renderable->m_transform.TranslateLocal(Vector3(0.f, 0.f, -.05f));
+	//	}
+	//}
+	//if (g_input->IsKeyDown(InputSystem::KEYBOARD_J))
+	//{
+	//	if (m_control == CONTROL_CUBE)
+	//	{
+	//		c_1->m_renderable->m_transform.TranslateLocal(Vector3(-0.05f, 0.f, 0.f));
+	//	}
+	//	else if (m_control == CONTROL_SHPERE)
+	//	{
+	//		s_0->m_renderable->m_transform.TranslateLocal(Vector3(-0.05f, 0.f, 0.f));
+	//	}
+	//}
+	//if (g_input->IsKeyDown(InputSystem::KEYBOARD_L))
+	//{
+	//	if (m_control == CONTROL_CUBE)
+	//	{
+	//		c_1->m_renderable->m_transform.TranslateLocal(Vector3(0.05f, 0.f, 0.f));
+	//	}
+	//	else if (m_control == CONTROL_SHPERE)
+	//	{
+	//		s_0->m_renderable->m_transform.TranslateLocal(Vector3(0.05f, 0.f, 0.f));
+	//	}
+	//}
+	//if (g_input->IsKeyDown(InputSystem::KEYBOARD_U))
+	//{
+	//	if (m_control == CONTROL_CUBE)
+	//	{
+	//		c_1->m_renderable->m_transform.TranslateLocal(Vector3(0.f, 0.05f, 0.f));
+	//	}
+	//	else if (m_control == CONTROL_SHPERE)
+	//	{
+	//		s_0->m_renderable->m_transform.TranslateLocal(Vector3(0.f, 0.05f, 0.f));
+	//	}
+	//}
+	//if (g_input->IsKeyDown(InputSystem::KEYBOARD_O))
+	//{
+	//	if (m_control == CONTROL_CUBE)
+	//	{
+	//		c_1->m_renderable->m_transform.TranslateLocal(Vector3(0.f, -0.05f, 0.f));
+	//	}
+	//	else if (m_control == CONTROL_SHPERE)
+	//	{
+	//		s_0->m_renderable->m_transform.TranslateLocal(Vector3(0.f, -0.05f, 0.f));
+	//	}
+	//}
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_F))
 	{
 		DebugRenderTasksFlush();
@@ -621,13 +619,11 @@ void ProtoState::Render(Renderer* renderer)
 	for each (GameObject* gameobject in m_gameObjects)
 	{
 		if (!gameobject->m_isInForwardPath)
-		{
 			gameobject->Render(renderer);
-		}
 
-		gameobject->RenderBasis(renderer);
+		//gameobject->RenderBasis(renderer);
 	}
 
 	// fp
-	m_forwardPath->RenderScene(m_sceneGraph);
+	//m_forwardPath->RenderScene(m_sceneGraph);
 }

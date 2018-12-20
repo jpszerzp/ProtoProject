@@ -295,6 +295,53 @@ Shader* Shader::AcquireResource(const char* fp)
 }
 
 
+Shader* Shader::MakeShader(const char* fp)
+{
+	Shader* res = new Shader();
+
+	XMLDocument shaderDoc;
+	shaderDoc.LoadFile(fp);
+
+	for (XMLElement* ele = shaderDoc.FirstChildElement()->FirstChildElement(); ele != 0; ele = ele->NextSiblingElement())
+	{
+		std::string prop = ele->Value();
+		if (prop.compare("program") == 0)
+		{
+			std::string vsPath;
+			std::string fsPath;
+			ShaderProgram* shaderProgram = new ShaderProgram();
+			//ShaderProgramInfo* shaderProgramInfo = new ShaderProgramInfo();
+
+			for (XMLElement* spHeader = ele->FirstChildElement(); 
+				spHeader != 0; spHeader = spHeader->NextSiblingElement())
+			{
+				std::string spHeaderStr = spHeader->Value();
+				if (spHeaderStr.compare("vertex") == 0)
+				{
+					vsPath = ParseXmlAttribute(*spHeader, "file", "");
+				}
+				else if (spHeaderStr.compare("fragment") == 0)
+				{
+					fsPath = ParseXmlAttribute(*spHeader, "file", "");
+				}
+			}
+
+			vsPath = "Data/" + vsPath;
+			fsPath = "Data/" + fsPath;
+			bool programLinked = shaderProgram->LoadFromFiles(vsPath.c_str(), fsPath.c_str(), "");
+			if (!programLinked)
+			{
+				TODO("Load the invalid shader program");
+				res->m_program = nullptr;
+			}
+			else
+				res->m_program = shaderProgram;
+		}
+	}
+
+	return res;
+}
+
 void Shader::SetDepth(eDepthCompare compare, bool write)
 {
 	m_state.m_depthWrite = write;
