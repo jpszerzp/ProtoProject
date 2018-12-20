@@ -1,0 +1,6 @@
+<shader name="lit">
+	<program>
+		<vertex file="Shaders/glsl/light.vs" />
+		<fragment file="Shaders/glsl/light.fs" />
+	</program>
+</shader>

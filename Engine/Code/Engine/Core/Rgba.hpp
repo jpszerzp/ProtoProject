@@ -28,6 +28,8 @@ public:
 
 	void SetFromText( const char* text );
 
+	Vector4 ToVec4();
+
 	bool operator==( const Rgba& compare ) const;
 
 	static const Rgba WHITE;

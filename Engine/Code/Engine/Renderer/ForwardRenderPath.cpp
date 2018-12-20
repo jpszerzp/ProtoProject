@@ -42,9 +42,7 @@ void ForwardRenderPath::RenderScene(RenderSceneGraph* scene)
 	*/
 
 	for each(Camera* cam in scene->m_cameras)
-	{
 		RenderSceneForCamera(cam, scene);
-	}
 
 	//Camera* debugCamera2D = GetDebugRender2DCamera();
 	RenderDebug2DObjects(scene->m_camera2D);
@@ -53,6 +51,25 @@ void ForwardRenderPath::RenderScene(RenderSceneGraph* scene)
 
 void ForwardRenderPath::RenderSceneForCamera(Camera* camera, RenderSceneGraph* scene)
 {
+	std::vector<Drawcall*> dcs;
+
+	for each (Renderable* rdb in scene->m_renderables)
+	{
+		Drawcall* dc = rdb->ComposeDrawcall();
+		dcs.push_back(dc);
+	}
+
+	for each (Drawcall* dc in dcs)
+		m_renderer->Draw(*dc);
+
+	for each (Drawcall* dc in dcs)
+	{
+		delete dc;
+		dc = nullptr;
+	}
+	dcs.clear();
+
+	/*
 	//ClearBasedOnCameraOptions(camera);
 	std::vector<Drawcall*> drawcalls;
 
@@ -145,6 +162,7 @@ void ForwardRenderPath::RenderSceneForCamera(Camera* camera, RenderSceneGraph* s
 	//	m_renderer->ApplyEffect(effect);
 	//}
 	//m_renderer->FinishEffects();
+	*/
 
 	//Camera* debugCamera3D = GetDebugRender3DCamera();
 	//RenderDebug3DObjectsForCamera(debugCamera3D);

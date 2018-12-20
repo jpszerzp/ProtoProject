@@ -23,6 +23,7 @@ public:
 public:
 	std::vector<Renderable*> m_renderables;
 	std::vector<Light*> m_lights;
+
 	std::vector<Camera*> m_cameras;	
 	Camera* m_camera2D = nullptr;
 };

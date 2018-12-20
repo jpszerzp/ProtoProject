@@ -1175,6 +1175,46 @@ void Renderer::DrawLine3D( const Vector3& start, const Vector3& end, const Rgba&
 
 void Renderer::Draw(const Drawcall& dc)
 {
+	UseShader(dc.m_shader);
+
+	GLuint programHandle = m_currentShader->GetShaderProgram()->GetHandle();
+	glUseProgram(programHandle);
+	GL_CHECK_ERROR();
+
+	m_objectData.model = dc.m_model;
+	SetObjectUBO(programHandle);
+	GL_CHECK_ERROR();
+
+	SetCameraUBO(programHandle);
+	GL_CHECK_ERROR();
+
+	m_colorData.rgba = dc.m_tint;
+	SetColorUBO(programHandle);
+	GL_CHECK_ERROR();
+
+	Rgba light_color = Rgba::WHITE;
+	SetUniform("lightColor", light_color.ToVec4());
+	GL_CHECK_ERROR();
+
+	Mesh* mesh = dc.m_mesh;
+	BindRenderState(m_currentShader->m_state);
+	glBindBuffer(GL_ARRAY_BUFFER, mesh->m_vbo.GetHandle());
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->m_ibo.GetHandle());
+	BindLayoutToProgram( programHandle, mesh->GetLayout() ); 
+
+	// Now that it is described and bound, draw using our program
+	if ( mesh->GetDrawInstruction().using_indices )
+	{
+		glDrawElements( ToGLPrimitiveType(mesh->GetDrawInstruction().primitive_type), 
+			mesh->GetIndexCount(), GL_UNSIGNED_INT, 0 );
+	}
+	else
+	{
+		glDrawArrays( ToGLPrimitiveType(mesh->GetDrawInstruction().primitive_type),
+			0, mesh->GetVertexCount() );
+	}
+
+	/*
 	//EnableLights(dc);
 
 	ShaderChannel* channel = dc.m_material->m_channel;
@@ -1310,6 +1350,7 @@ void Renderer::Draw(const Drawcall& dc)
 	}
 
 	GL_CHECK_ERROR();
+	*/
 }
 
 void Renderer::Draw(Mesh* mesh)
@@ -1445,49 +1486,38 @@ void Renderer::BindRenderState(const sRenderState& state, bool culling, bool dep
 
 void Renderer::SetUniform(const char* name, float f)
 {
-	int bindIdx = glGetUniformLocation( 
-		m_currentShader->GetShaderProgram()->GetHandle(), 
-		name ); 
+	int bindIdx = glGetUniformLocation( m_currentShader->GetShaderProgram()->GetHandle(), name ); 
 	if (bindIdx >= 0)
-	{
 		glUniform1fv( bindIdx, 1, &f );
-	}
 }
 
 
 void Renderer::SetUniform(const char* name, Vector3 v3)
 {
-	int bindIdx = glGetUniformLocation( 
-		m_currentShader->GetShaderProgram()->GetHandle(), 
-		name ); 
+	int bindIdx = glGetUniformLocation(m_currentShader->GetShaderProgram()->GetHandle(),name ); 
 	if (bindIdx >= 0)
-	{
 		glUniform3fv( bindIdx, 1, (GLfloat*)&v3 );
-	}
 }
 
 
 void Renderer::SetUniform(const char* name, Vector4 v4)
 {
-	int bindIdx = glGetUniformLocation( 
-		m_currentShader->GetShaderProgram()->GetHandle(), 
-		name ); 
+	int bindIdx = glGetUniformLocation( m_currentShader->GetShaderProgram()->GetHandle(), name ); 
+	GL_CHECK_ERROR();
+
 	if (bindIdx >= 0)
-	{
 		glUniform4fv( bindIdx, 1, (GLfloat*)&v4 );
-	}
+	GL_CHECK_ERROR();
 }
 
 
 void Renderer::SetUniform(const char* name, Matrix44 m44)
 {
-	int bindIdx = glGetUniformLocation( 
-		m_currentShader->GetShaderProgram()->GetHandle(), 
-		name ); 
+	int bindIdx = glGetUniformLocation( m_currentShader->GetShaderProgram()->GetHandle(), name ); 
+	GL_CHECK_ERROR();
 	if (bindIdx >= 0)
-	{
 		glUniformMatrix4fv( bindIdx, 1, GL_FALSE, ( GLfloat* )&m44 );
-	}
+	GL_CHECK_ERROR();
 }
 
 

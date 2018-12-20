@@ -123,9 +123,9 @@ ProtoState::ProtoState()
 	m_gameObjects.push_back(c_0);
 	//m_sceneGraph->AddRenderable(c_0);
 
-	//c_1 = new Cube(Vector3::ZERO, Vector3::ZERO, Vector3::ONE, Rgba::RED, "cube_pcu", "default", MOVE_STATIC, BODY_PARTICLE,
-	//	false, COMPARE_LESS, CULLMODE_BACK, WIND_COUNTER_CLOCKWISE, true);
-	//m_gameObjects.push_back(c_1);
+	c_1 = new Cube(Vector3(5.f, 0.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::RED, "cube_lit", "shader/lit", false);
+	m_gameObjects.push_back(c_1);
+	m_sceneGraph->AddRenderable(c_1);
 
 	//s_0 = new Sphere(Vector3(10.f, 0.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::WHITE, "sphere_pcu", "default", MOVE_STATIC, BODY_PARTICLE);
 	//m_gameObjects.push_back(s_0);
@@ -625,5 +625,5 @@ void ProtoState::Render(Renderer* renderer)
 	}
 
 	// fp
-	//m_forwardPath->RenderScene(m_sceneGraph);
+	m_forwardPath->RenderScene(m_sceneGraph);
 }

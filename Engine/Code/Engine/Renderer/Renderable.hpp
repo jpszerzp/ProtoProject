@@ -30,4 +30,6 @@ public:
 	Mesh*			GetMesh() { return m_mesh; }
 	Vector4			GetTint() const {return m_tint;}
 	Shader*			GetShader() { return m_non_mat_shader; }
+
+	Drawcall* ComposeDrawcall();
 };

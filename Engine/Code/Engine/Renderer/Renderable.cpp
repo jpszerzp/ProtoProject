@@ -1,4 +1,5 @@
 #include "Engine/Renderer/Renderable.hpp"
+#include "Engine/Renderer/Drawcall.hpp"
 
 Renderable::Renderable(const Material* mat, Mesh* mesh, Transform& transform, Vector4 tint)
 {
@@ -40,5 +41,17 @@ Material* Renderable::GetMaterial()
 	}
 
 	return m_material;
+}
+
+Drawcall* Renderable::ComposeDrawcall()
+{
+	Drawcall* dc = new Drawcall();
+
+	dc->m_mesh = m_mesh;
+	dc->m_model = m_transform.GetWorldMatrix();
+	dc->m_shader = m_non_mat_shader;
+	dc->m_tint = m_tint;
+
+	return dc;
 }
 

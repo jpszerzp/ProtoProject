@@ -130,6 +130,13 @@ void Rgba::SetFromText( const char* text )
 }
 
 
+Vector4 Rgba::ToVec4()
+{
+	Vector4 tintVec4;
+	GetAsFloats(tintVec4.x, tintVec4.y, tintVec4.z, tintVec4.w);
+	return tintVec4;
+}
+
 bool Rgba::operator==( const Rgba& compare ) const
 {
 	if ((r == compare.r) && (g == compare.g) && (b == compare.b) && (a == compare.a))

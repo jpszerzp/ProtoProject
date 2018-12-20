@@ -12,8 +12,10 @@ public:
 	~Drawcall();
 
 	//Submesh* m_submesh;
-	Mesh*		m_mesh;
 	Material*	m_material;
+
+	Mesh*		m_mesh;
+	Shader*		m_shader;
 	Matrix44	m_model;
 	Vector4		m_tint;
 	// int m_passIdx;
