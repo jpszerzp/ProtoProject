@@ -82,6 +82,10 @@ void BoxRB3::UpdatePrimitives()
 	m_primitive.SetForward(m_entityTransform.GetWorldForward());
 	m_primitive.SetUp(m_entityTransform.GetWorldUp());
 	m_primitive.SetRight(m_entityTransform.GetWorldRight());
+
+	// update face vert and edge
+	m_primitive.UpdateFace();
+	m_primitive.UpdateVertAndEdge();
 }
 
 void BoxRB3::UpdateInput(float)

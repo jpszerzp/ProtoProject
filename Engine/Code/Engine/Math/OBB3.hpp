@@ -87,4 +87,7 @@ public:
 	void SetForward(const Vector3& forward) { m_forward = forward; }
 	void SetUp(const Vector3& up) { m_up = up; }
 	void SetRight(const Vector3& right) { m_right = right; }
+
+	void UpdateFace();
+	void UpdateVertAndEdge();
 };
