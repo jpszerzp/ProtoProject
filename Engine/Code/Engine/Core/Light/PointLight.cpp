@@ -10,6 +10,12 @@ PointLight::PointLight(Vector3 pos, Vector3 rot, Vector3 scale, Rgba color, Vect
 }
 
 
+PointLight::PointLight(const Vector3& pos, const Vector3& rot, const Vector3& scale, const Rgba& color)
+	: Light(pos, rot, scale, color, Vector3::ZERO, Vector3::ZERO, Vector3::ZERO, 0.f, 0.f, 0.f)
+{
+
+}
+
 PointLight::~PointLight()
 {
 

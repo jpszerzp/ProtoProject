@@ -123,7 +123,7 @@ ProtoState::ProtoState()
 	m_gameObjects.push_back(c_0);
 	//m_sceneGraph->AddRenderable(c_0);
 
-	c_1 = new Cube(Vector3(5.f, 0.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::RED, "cube_lit", "shader/lit", false);
+	c_1 = new Cube(Vector3(5.f, 0.f, 0.f), Vector3(45.f), Vector3(1.f, 1.5f, 1.f), Rgba::RED, "cube_lit", "shader/lit", false);
 	m_gameObjects.push_back(c_1);
 	m_sceneGraph->AddRenderable(c_1);
 
@@ -146,11 +146,11 @@ ProtoState::ProtoState()
 	//l_0 = new Line(Vector3(0.f, 5.f, 0.f), Vector3(5.f, 5.f, 0.f), 3.f, Rgba::WHITE, "white");
 	//m_gameObjects.push_back(l_0);
 
-	//// lights 
-	//Vector3 lightPos = Vector3(0.f, 5.5f, 10.f);
-	//Vector3 lightRot = Vector3::ZERO;
-	//Vector3 lightScale = Vector3(0.05f, 0.05f, 0.05f);
-	//Rgba lightColor = Rgba::WHITE;
+	// lights 
+	Vector3 lightPos = Vector3(5.f, 5.f, -3.f);
+	Vector3 lightRot = Vector3::ZERO;
+	Vector3 lightScale = Vector3(0.05f, 0.05f, 0.05f);
+	Rgba lightColor = Rgba::WHITE;
 	//Vector3 attenuaion = Vector3(0.f, 0.f, .001f);
 	//Vector3 specAttenuation = Vector3(0.f, 0.f, .001f);
 	//Vector3 lightDir = Vector3::ONE;
@@ -158,8 +158,11 @@ ProtoState::ProtoState()
 	//float outerAngle = -1.f;
 	//float directFac = 0.f;
 	//PointLight* pl_0 = new PointLight(lightPos, lightRot, lightScale, lightColor, attenuaion, specAttenuation, lightDir, innerAngle, outerAngle, directFac);
-	//m_gameObjects.push_back(pl_0);
-	//m_sceneGraph->AddLight(pl_0);
+	PointLight* pl_0 = new PointLight(lightPos, lightRot, lightScale, lightColor);
+	m_gameObjects.push_back(pl_0);
+	m_sceneGraph->AddLight(pl_0);
+	theRenderer->m_singleLightData.lightPos = pl_0->GetWorldPosition();
+	theRenderer->m_singleLightData.lightColor = pl_0->GetColor().ToVec4();
 
 	//lightPos = Vector3(10.f, 5.f, 10.f);
 	//lightColor = Rgba::RED;

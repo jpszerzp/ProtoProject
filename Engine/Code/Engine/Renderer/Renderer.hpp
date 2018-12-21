@@ -79,6 +79,13 @@ struct sCameraData
 	Matrix44 proj;
 };
 
+struct sSingleLightData
+{
+	Vector3 lightPos;
+	float	pad;
+	Vector4 lightColor;
+};
+
 struct sLightData
 {
 	Vector4  lightColor;
@@ -117,6 +124,7 @@ struct sLightConstData
 struct sOjbectData
 {
 	Matrix44 model;
+	Matrix44 inv_model;
 };
 
 struct sColorData
@@ -276,6 +284,7 @@ public:
 	void SetLightsUBO(GLuint handle);
 	void SetObjectUBO(GLuint handle);
 	void SetColorUBO(GLuint handle);
+	void SetSingleLightUBO(GLuint handle);
 	void SetDebugModeUBO(GLuint handle);
 	void SetGameTimeUBO(GLuint handle);
 	void SetFogInfoUBO(GLuint handle);
@@ -310,7 +319,8 @@ public:
 	const static int SHADOW_MAP_BIND_IDX = 11;
 
 	const static int CAMERA_BUFFER_BIND_IDX = 2;
-	const static int LIGHTS_BUFFER_BIND_IDX = 3;
+	//const static int LIGHTS_BUFFER_BIND_IDX = 3;
+	const static int SINGLE_LIGHT_BUFFER_BIND_IDX = 3;
 	const static int LIGHT_CONST_BUFFER_BIND_IDX = 4;
 	const static int OBJECT_BUFFER_BIND_IDX = 5;
 	const static int DEBUG_MODE_BUFFER_BIND_IDX = 6;
@@ -353,6 +363,7 @@ public:
 	UniformBuffer* m_uboDebugMode;
 	UniformBuffer* m_uboGameTime;
 	UniformBuffer* m_uboFogInfo;
+	UniformBuffer* m_uboSingleLight;
 
 	sCameraData		m_cameraData;			
 	sAllLightsData  m_lightsData;
@@ -362,6 +373,7 @@ public:
 	sDebugMode		m_debugModeData;
 	sGameTime		m_timeData;
 	sFogInfo		m_fogData;
+	sSingleLightData	m_singleLightData;
 
 	Light* m_lights[MAX_LIGHTS];
 };

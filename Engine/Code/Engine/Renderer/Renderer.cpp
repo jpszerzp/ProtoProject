@@ -265,6 +265,7 @@ Renderer::Renderer()
 	m_uboDebugMode = new UniformBuffer();
 	m_uboFogInfo = new UniformBuffer();
 	m_uboGameTime = new UniformBuffer();
+	m_uboSingleLight = new UniformBuffer();
 	m_defaultCamera = new Camera();
 	m_currentCamera = new Camera();
 	m_effectCamera = nullptr;
@@ -1181,7 +1182,9 @@ void Renderer::Draw(const Drawcall& dc)
 	glUseProgram(programHandle);
 	GL_CHECK_ERROR();
 
-	m_objectData.model = dc.m_model;
+	const Matrix44& model = dc.m_model;
+	m_objectData.model = model;
+	m_objectData.inv_model = model.Invert();
 	SetObjectUBO(programHandle);
 	GL_CHECK_ERROR();
 
@@ -1192,8 +1195,7 @@ void Renderer::Draw(const Drawcall& dc)
 	SetColorUBO(programHandle);
 	GL_CHECK_ERROR();
 
-	Rgba light_color = Rgba::WHITE;
-	SetUniform("lightColor", light_color.ToVec4());
+	SetSingleLightUBO(programHandle);
 	GL_CHECK_ERROR();
 
 	Mesh* mesh = dc.m_mesh;
@@ -1538,14 +1540,14 @@ void Renderer::SetCameraUBO(GLuint handle)
 
 void Renderer::SetLightsUBO(GLuint handle)
 {
-	m_uboLights->CopyToGPU(sizeof(sAllLightsData), &m_lightsData);
-	glBindBufferBase(GL_UNIFORM_BUFFER, LIGHTS_BUFFER_BIND_IDX, m_uboLights->GetHandle());
+	//m_uboLights->CopyToGPU(sizeof(sAllLightsData), &m_lightsData);
+	//glBindBufferBase(GL_UNIFORM_BUFFER, LIGHTS_BUFFER_BIND_IDX, m_uboLights->GetHandle());
 
-	GLint uniformBlockIndex = glGetUniformBlockIndex(handle, "uboLights");
-	if (uniformBlockIndex >= 0)
-	{
-		glUniformBlockBinding(handle, uniformBlockIndex, LIGHTS_BUFFER_BIND_IDX);
-	}
+	//GLint uniformBlockIndex = glGetUniformBlockIndex(handle, "uboLights");
+	//if (uniformBlockIndex >= 0)
+	//{
+	//	glUniformBlockBinding(handle, uniformBlockIndex, LIGHTS_BUFFER_BIND_IDX);
+	//}
 }
 
 void Renderer::SetObjectUBO(GLuint)
@@ -1561,6 +1563,12 @@ void Renderer::SetColorUBO( GLuint )
 	glBindBufferBase(GL_UNIFORM_BUFFER, COLOR_BIND_IDX, m_uboColors->GetHandle());
 }
 
+
+void Renderer::SetSingleLightUBO(GLuint handle)
+{
+	m_uboSingleLight->CopyToGPU(sizeof(sSingleLightData), &m_singleLightData);
+	glBindBufferBase(GL_UNIFORM_BUFFER, SINGLE_LIGHT_BUFFER_BIND_IDX, m_uboSingleLight->GetHandle());
+}
 
 void Renderer::SetDebugModeUBO(GLuint)
 {

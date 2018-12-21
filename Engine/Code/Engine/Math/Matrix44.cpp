@@ -523,7 +523,7 @@ Vector4 Matrix44::operator*(const Vector4& rhs) const
 }
 
 
-Matrix44 Matrix44::Invert()
+Matrix44 Matrix44::Invert() const
 {
 	float inv[16];
 	float det;

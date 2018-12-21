@@ -61,7 +61,7 @@ public:
 	//static Matrix44 LookAt(Vector3 position, Vector3 target, Vector3 up);
 
 	// inverse
-	Matrix44 Invert();
+	Matrix44 Invert() const;
 	bool Invert(const float m[16], float invOut[16]);
 
 	// transpose

@@ -11,6 +11,7 @@ layout(binding=2, std140) uniform uboCamera
 layout(binding=5, std140) uniform uboObject
 {
 	mat4 MODEL;
+    mat4 INV_MODEL;
 };
 
 // Attributes - input to this shasder stage (constant as far as the code is concerned)
@@ -22,6 +23,8 @@ in vec2 UV;
 
 out vec2 passUV;
 out vec4 passColor;
+out vec3 passNormal;
+out vec3 passFragPos;
 
 void main()
 {
@@ -32,6 +35,8 @@ void main()
 
    passUV = UV;
    passColor = COLOR;
+   passNormal = mat3(transpose(INV_MODEL)) * NORMAL;
+   passFragPos = vec3(MODEL * local_pos);
 
    gl_Position = clip_pos; 
 }
