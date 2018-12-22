@@ -114,7 +114,7 @@ float LineSegment3::ClosestPointsSegmentsUnconstrained(const LineSegment3& seg1,
 		v2 = mid_projected;
 	}
 
-	return (v1 - v2).GetLength();
+	return (v1 - v2).GetLengthSquared();
 }
 
 float LineSegment3::ClosestPointPtSegment(const Vector3& pt, const LineSegment3& seg, Vector3& projected)
@@ -141,6 +141,21 @@ float LineSegment3::ClosestPointPtSegment(const Vector3& pt, const LineSegment3&
 	}
 
 	return t;
+}
+
+bool LineSegment3::WithinSegment(const Vector3& pt)
+{
+	Vector3 toPt = pt - start;
+	
+	// if the pt is on the opposite side of extension
+	if (DotProduct(toPt, extent) < 0.f)
+		return false;
+
+	// if the pt is on the same side of extension but beyond extension
+	if (toPt.GetLengthSquared() > extent.GetLengthSquared())
+		return false;
+
+	return true;
 }
 
 Line3 Line3::FromVector3(const Vector3& dir)

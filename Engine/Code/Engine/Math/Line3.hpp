@@ -19,6 +19,8 @@ public:
 	static float ClosestPointsSegments(const LineSegment3& seg1, const LineSegment3& seg2, float& t1, float& t2, Vector3& p1, Vector3& p2);
 	static float ClosestPointsSegmentsUnconstrained(const LineSegment3& seg1, const LineSegment3& seg2, Vector3& v1, Vector3& v2);
 	static float ClosestPointPtSegment(const Vector3& pt, const LineSegment3& seg, Vector3& projected);
+
+	bool WithinSegment(const Vector3& pt);
 };
 
 class Line3
