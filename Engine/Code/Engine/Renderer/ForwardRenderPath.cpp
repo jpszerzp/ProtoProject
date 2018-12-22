@@ -56,6 +56,9 @@ void ForwardRenderPath::RenderSceneForCamera(Camera* camera, RenderSceneGraph* s
 	for each (Renderable* rdb in scene->m_renderables)
 	{
 		Drawcall* dc = rdb->ComposeDrawcall();
+		dc->m_light_mat_ambient = scene->m_single_light->m_mat_amb;
+		dc->m_light_mat_diff = scene->m_single_light->m_mat_diff;
+		dc->m_light_mat_spec = scene->m_single_light->m_mat_spec;
 		dcs.push_back(dc);
 	}
 

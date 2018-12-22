@@ -25,6 +25,10 @@ public:
 	bool		m_shadowCast = false;
 	Matrix44	m_shadowVP;
 
+	Vector3 m_mat_amb;
+	Vector3 m_mat_diff;
+	Vector3 m_mat_spec;
+
 public:
 	Light(Vector3 pos, Vector3 rot, Vector3 scale, Rgba color,
 		Vector3 attenuation, Vector3 specAttenuation, Vector3 direction,

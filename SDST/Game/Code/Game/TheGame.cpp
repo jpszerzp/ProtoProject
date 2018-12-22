@@ -101,6 +101,7 @@ void TheGame::Update()
 
 void TheGame::UpdateTime()
 {
+	PassTimeToRenderer();
 	m_deltaTime = m_clock->frame.seconds;
 }
 
@@ -108,7 +109,6 @@ void TheGame::UpdateTime()
 void TheGame::PassTimeToRenderer()
 {
 	Renderer* renderer = Renderer::GetInstance();
-
 	renderer->m_timeData.gameTime = m_clock->total.seconds;
 }
 

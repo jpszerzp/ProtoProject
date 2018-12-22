@@ -111,6 +111,38 @@ static GLenum ToGLCompare( eDepthCompare compare )
 	}
 }
 
+Vector3 ToGLMaterialAmbient(const Vector4& v)
+{
+	Rgba rgba;
+	rgba.SetAsFloats(v.x, v.y, v.z, v.w);
+
+	// see http://devernay.free.fr/cours/opengl/materials.html
+
+	if (rgba == Rgba::GOLD)
+		return Vector3(0.24725, 0.1995, 0.0745);
+}
+
+Vector3 ToGLMaterialDiffuse(const Vector4& v)
+{
+	Rgba rgba;
+	rgba.SetAsFloats(v.x, v.y, v.z, v.w);
+
+	// see http://devernay.free.fr/cours/opengl/materials.html
+
+	if (rgba == Rgba::GOLD)
+		return Vector3(0.75164,	0.60648, 0.22648);
+}
+
+Vector3 ToGLMaterialSpec(const Vector4& v)
+{
+	Rgba rgba;
+	rgba.SetAsFloats(v.x, v.y, v.z, v.w);
+
+	// see http://devernay.free.fr/cours/opengl/materials.html
+
+	if (rgba == Rgba::GOLD)
+		return Vector3(0.628281,0.555802,0.366065);
+}
 
 GLenum ToGLBlendOp(eBlendOp op)
 {
@@ -1196,6 +1228,24 @@ void Renderer::Draw(const Drawcall& dc)
 	GL_CHECK_ERROR();
 
 	SetSingleLightUBO(programHandle);
+	GL_CHECK_ERROR();
+
+	const Vector3& matAmbient = ToGLMaterialAmbient(dc.m_tint);
+	const Vector3& matDiffuse = ToGLMaterialDiffuse(dc.m_tint);
+	const Vector3& matSpec = ToGLMaterialSpec(dc.m_tint);
+	float matShin = 256.f;
+	SetUniform("material.ambient", matAmbient);
+	SetUniform("material.diffuse", matDiffuse);
+	SetUniform("material.specular", matSpec);
+	SetUniform("material.shininess", matShin);
+	GL_CHECK_ERROR();
+
+	SetUniform("light_mat.ambient", dc.m_light_mat_ambient);				// this is for object using material system, values are user-specified, distinct from the light_color above
+	SetUniform("light_mat.diffuse", dc.m_light_mat_diff);
+	SetUniform("light_mat.spec", dc.m_light_mat_spec);
+	GL_CHECK_ERROR();
+
+	SetGameTimeUBO(programHandle);
 	GL_CHECK_ERROR();
 
 	Mesh* mesh = dc.m_mesh;

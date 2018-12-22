@@ -20,6 +20,11 @@ public:
 	Vector4		m_tint;
 	// int m_passIdx;
 
+	// single light
+	Vector3 m_light_mat_ambient;
+	Vector3 m_light_mat_diff;
+	Vector3 m_light_mat_spec;
+
 	uint m_lightCount;
 	int m_lightIndices[MAX_LIGHTS];
 

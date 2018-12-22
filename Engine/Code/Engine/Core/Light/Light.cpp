@@ -28,6 +28,10 @@ Light::Light(Vector3 pos, Vector3 rot, Vector3 scale,
 	m_innerAngle = innerAngle;
 	m_outerAngle = outerAngle;
 	m_directionFac = directionFac;
+
+	m_mat_amb = Vector3(1.f);
+	m_mat_diff = Vector3(1.f);
+	m_mat_spec = Vector3::ONE;
 }
 
 

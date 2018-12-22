@@ -123,9 +123,15 @@ ProtoState::ProtoState()
 	m_gameObjects.push_back(c_0);
 	//m_sceneGraph->AddRenderable(c_0);
 
-	c_1 = new Cube(Vector3(5.f, 0.f, 0.f), Vector3(45.f), Vector3(1.f, 1.5f, 1.f), Rgba::RED, "cube_lit", "shader/lit", false);
+	// do not use material, will use the object color and tint
+	c_1 = new Cube(Vector3(5.f, 0.f, 0.f), Vector3(45.f), Vector3(1.f, 1.5f, 1.f), Rgba::WHITE, "cube_lit", "shader/lit", false);
 	m_gameObjects.push_back(c_1);
 	m_sceneGraph->AddRenderable(c_1);
+
+	// ignore tint, use material instead
+	Cube* c_2 = new Cube(Vector3(8.f, 0.f, 0.f), Vector3(45.f), Vector3(1.f, 1.f, 1.f), Rgba::GOLD, "cube_lit", "shader/material_lit", false);
+	m_gameObjects.push_back(c_2);
+	m_sceneGraph->AddRenderable(c_2);
 
 	//s_0 = new Sphere(Vector3(10.f, 0.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::WHITE, "sphere_pcu", "default", MOVE_STATIC, BODY_PARTICLE);
 	//m_gameObjects.push_back(s_0);
@@ -147,7 +153,7 @@ ProtoState::ProtoState()
 	//m_gameObjects.push_back(l_0);
 
 	// lights 
-	Vector3 lightPos = Vector3(5.f, 5.f, -3.f);
+	Vector3 lightPos = Vector3(6.f, 5.f, -3.f);
 	Vector3 lightRot = Vector3::ZERO;
 	Vector3 lightScale = Vector3(0.05f, 0.05f, 0.05f);
 	Rgba lightColor = Rgba::WHITE;
@@ -161,8 +167,12 @@ ProtoState::ProtoState()
 	PointLight* pl_0 = new PointLight(lightPos, lightRot, lightScale, lightColor);
 	m_gameObjects.push_back(pl_0);
 	m_sceneGraph->AddLight(pl_0);
+	m_sceneGraph->m_single_light = pl_0;
 	theRenderer->m_singleLightData.lightPos = pl_0->GetWorldPosition();
-	theRenderer->m_singleLightData.lightColor = pl_0->GetColor().ToVec4();
+	theRenderer->m_singleLightData.lightColor = pl_0->GetColor().ToVec4();		// this is using the light color
+	//theRenderer->SetUniform("light_mat.ambient", Vector3::ONE);				// this is for object using material system, values are user-specified, distinct from the light_color above
+	//theRenderer->SetUniform("light_mat.diffuse", Vector3::ONE);
+	//theRenderer->SetUniform("light_mat.spec", Vector3::ONE);
 
 	//lightPos = Vector3(10.f, 5.f, 10.f);
 	//lightColor = Rgba::RED;
