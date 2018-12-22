@@ -16,8 +16,6 @@
 #include "Engine/Renderer/Window.hpp"
 #include "Engine/Renderer/Renderable.hpp"
 
-static Mesh* obb3_obb3_pt_pos = nullptr;
-static Mesh* obb3_obb3_face_center = nullptr;
 
 ControlGroup::ControlGroup(GameObject* go1, GameObject* go2, const eControlID& id, const Vector3& observation)
 {
@@ -230,6 +228,8 @@ void ControlGroup::ProcessInput()
 	}
 }
 
+static Mesh* obb3_obb3_pt_pos = nullptr;
+static Mesh* obb3_obb3_face_center = nullptr;
 void ControlGroup::RenderCore(Renderer* renderer)
 {
 	for (std::vector<GameObject*>::size_type idx = 0; idx < m_gos.size(); ++idx)
@@ -238,6 +238,7 @@ void ControlGroup::RenderCore(Renderer* renderer)
 			m_gos[idx]->Render(renderer);
 	}
 
+	/*
 	////////////////////////////// FOR OBB3 COLLISION DEBUG ONLY /////////////////////////////////
 	Shader* shader = renderer->CreateOrGetShader("wireframe_color");
 	renderer->UseShader(shader);
@@ -273,6 +274,24 @@ void ControlGroup::RenderCore(Renderer* renderer)
 	if (obb2_vert_to_obb1_face_5 != nullptr)
 		renderer->DrawMesh(obb2_vert_to_obb1_face_5);
 
+	if (obb1_vert_to_obb2_face_0 != nullptr)
+		renderer->DrawMesh(obb1_vert_to_obb2_face_0);
+
+	if (obb1_vert_to_obb2_face_1 != nullptr)
+		renderer->DrawMesh(obb1_vert_to_obb2_face_1);
+
+	if (obb1_vert_to_obb2_face_2 != nullptr)
+		renderer->DrawMesh(obb1_vert_to_obb2_face_2);
+
+	if (obb1_vert_to_obb2_face_3 != nullptr)
+		renderer->DrawMesh(obb1_vert_to_obb2_face_3);
+
+	if (obb1_vert_to_obb2_face_4 != nullptr)
+		renderer->DrawMesh(obb1_vert_to_obb2_face_4);
+
+	if (obb1_vert_to_obb2_face_5 != nullptr)
+		renderer->DrawMesh(obb1_vert_to_obb2_face_5);
+
 	if (obb2_vert_0_winner != nullptr)
 		renderer->DrawMesh(obb2_vert_0_winner);
 
@@ -297,12 +316,44 @@ void ControlGroup::RenderCore(Renderer* renderer)
 	if (obb2_vert_7_winner != nullptr)
 		renderer->DrawMesh(obb2_vert_7_winner);
 
+	if (obb1_vert_0_winner != nullptr)
+		renderer->DrawMesh(obb1_vert_0_winner);
+
+	if (obb1_vert_1_winner != nullptr)
+		renderer->DrawMesh(obb1_vert_1_winner);
+
+	if (obb1_vert_2_winner != nullptr)
+		renderer->DrawMesh(obb1_vert_2_winner);
+
+	if (obb1_vert_3_winner != nullptr)
+		renderer->DrawMesh(obb1_vert_3_winner);
+
+	if (obb1_vert_4_winner != nullptr)
+		renderer->DrawMesh(obb1_vert_4_winner);
+
+	if (obb1_vert_5_winner != nullptr)
+		renderer->DrawMesh(obb1_vert_5_winner);
+
+	if (obb1_vert_6_winner != nullptr)
+		renderer->DrawMesh(obb1_vert_6_winner);
+
+	if (obb1_vert_7_winner != nullptr)
+		renderer->DrawMesh(obb1_vert_7_winner);
+
 	if (obb2_pt_obb1_face_winner != nullptr)
 	{
 		glLineWidth(5.f);
 		renderer->DrawMesh(obb2_pt_obb1_face_winner);
 		glLineWidth(2.f);
 	}
+
+	if (obb1_pt_obb2_face_winner != nullptr)
+	{
+		glLineWidth(5.f);
+		renderer->DrawMesh(obb1_pt_obb2_face_winner);
+		glLineWidth(2.f);
+	}
+	*/
 }
 
 void ControlGroup::RenderUI()
@@ -413,22 +464,26 @@ void ControlGroup::Update(float deltaTime)
 		//if (intersected)
 		//	m_contacts.push_back(contact);
 
-		// debug
-		Vector3 vert_pos;
-		Vector3 face_center;
-		CollisionDetector::OBB3VsOBB3CoreBreakdownPtVsFace(obb_0, obb_1, vert_pos, face_center);
-		if (obb3_obb3_pt_pos != nullptr)
-		{
-			delete obb3_obb3_pt_pos;
-			obb3_obb3_pt_pos = nullptr;
-		}
-		obb3_obb3_pt_pos = Mesh::CreatePointImmediate(VERT_PCU, vert_pos, Rgba::MEGENTA);
-		if (obb3_obb3_face_center != nullptr)
-		{
-			delete obb3_obb3_face_center;
-			obb3_obb3_face_center = nullptr;
-		}
-		obb3_obb3_face_center = Mesh::CreatePointImmediate(VERT_PCU, face_center, Rgba::BLUE);
+		//// debug
+		//Vector3 vert_pos;
+		//Vector3 face_center;
+		//CollisionDetector::OBB3VsOBB3CoreBreakdownPtVsFace(obb_0, obb_1, vert_pos, face_center);
+		//if (obb3_obb3_pt_pos != nullptr)
+		//{
+		//	delete obb3_obb3_pt_pos;
+		//	obb3_obb3_pt_pos = nullptr;
+		//}
+		//obb3_obb3_pt_pos = Mesh::CreatePointImmediate(VERT_PCU, vert_pos, Rgba::MEGENTA);
+		//if (obb3_obb3_face_center != nullptr)
+		//{
+		//	delete obb3_obb3_face_center;
+		//	obb3_obb3_face_center = nullptr;
+		//}
+		//obb3_obb3_face_center = Mesh::CreatePointImmediate(VERT_PCU, face_center, Rgba::BLUE);
+
+		CollisionDetector::OBB3VsOBB3StepOne(obb_0, obb_1);
+		CollisionDetector::OBB3VsOBB3StepTwo(obb_0, obb_1);
+		CollisionDetector::OBB3VsOBB3StepThree(obb_0, obb_1);
 	}
 		break;
 	case CONTROL_LINE_LINE:
@@ -635,7 +690,9 @@ void ControlGroup::UpdateUI()
 		LineSegment3 seg_2 = LineSegment3(start_2, end_2);
 
 		Vector3 close_1, close_2;
-		float close_dist = LineSegment3::ClosestPointsSegmentsConstrained(seg_1, seg_2, close_1, close_2);
+		float t1, t2;
+		//float close_dist = LineSegment3::ClosestPointsSegmentsConstrained(seg_1, seg_2, close_1, close_2);
+		float close_dist_sqr = LineSegment3::ClosestPointsSegments(seg_1, seg_2, t1, t2, close_1, close_2);
 		DebugRenderLine(0.1f, close_1, close_2, 5.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
 
 		Vector3 normal = close_1 - close_2;

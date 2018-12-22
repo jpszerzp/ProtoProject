@@ -1,6 +1,11 @@
 #include "Engine/Math/Line3.hpp"
 #include "Engine/Math/MathUtils.hpp"
 
+/*
+ * Computes closest points among two line segments, seg1 and seg2 are the segments,
+ * t1 and t2 are extension param, whereas p1 and p2 are the closest points themselves
+ * return value is square of the closest distance
+ */
 float LineSegment3::ClosestPointsSegments(const LineSegment3& seg1,
 	const LineSegment3& seg2, float& t1, float& t2, Vector3& p1, Vector3& p2)
 {
@@ -73,6 +78,7 @@ float LineSegment3::ClosestPointsSegments(const LineSegment3& seg1,
 /*
  * Need to consider special case where two segments are parallel
  */
+/*
 float LineSegment3::ClosestPointsSegmentsConstrained(const LineSegment3& seg1, const LineSegment3& seg2, Vector3& v1, Vector3& v2)
 {
 	// see p147 of RTC
@@ -110,6 +116,7 @@ float LineSegment3::ClosestPointsSegmentsConstrained(const LineSegment3& seg1, c
 
 	return (v1 - v2).GetLength();
 }
+*/
 
 float LineSegment3::ClosestPointPtSegment(const Vector3& pt, const LineSegment3& seg, Vector3& projected)
 {
@@ -141,8 +148,8 @@ Line3 Line3::FromVector3(const Vector3& dir)
 {
 	Line3 aixs;
 
-	aixs.one_end = Vector3::ZERO;
-	aixs.the_other_end = aixs.one_end + dir;
+	aixs.one = Vector3::ZERO;
+	aixs.the_other = aixs.one + dir;
 
 	return aixs;
 }

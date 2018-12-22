@@ -788,8 +788,8 @@ bool ProjectPlaneToSphere(Vector2 pos, float r, Vector3& out_pos)
 Vector3 ProjectPointToLine(const Vector3& point, const Line3& line, float& ext)
 {
 	// extension is based 'one_end' of the line
-	const Vector3& one_end = line.one_end;
-	const Vector3& the_other_end = line.the_other_end;
+	const Vector3& one_end = line.one;
+	const Vector3& the_other_end = line.the_other;
 
 	Vector3 one_end_to_point = point - one_end;
 	Vector3 dir = (the_other_end - one_end).GetNormalized();
@@ -1234,8 +1234,8 @@ bool AABB3VsAABB3Intersection(const AABB3& aabb_1, const AABB3& aabb_2, Vector3&
 DirectionalInterval GetIntervalOfBoxAcrossAxis(const OBB3& obb, const Line3& line)
 {
 	// first we get the direction of line, because the extremal problem is subject to the direction
-	const Vector3& one_end = line.one_end;
-	const Vector3& the_other = line.the_other_end;
+	const Vector3& one_end = line.one;
+	const Vector3& the_other = line.the_other;
 
 	// two directions
 	Vector3 dir = (the_other - one_end).GetNormalized();		// the direction for max winner

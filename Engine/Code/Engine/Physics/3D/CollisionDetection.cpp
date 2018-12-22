@@ -19,12 +19,9 @@
 enum eBoxBoxDebug
 {
 	SECOND_OBB_VERTS,
-	FIRST_OBB_VERTS
+	FIRST_OBB_VERTS,
+	TWO_OBB_EDGES
 };
-
-static eBoxBoxDebug debug_stat = SECOND_OBB_VERTS;
-static int obb2_vert_idx = 0;
-static int obb1_face_idx = 0;
 
 Contact3::Contact3()
 {
@@ -1343,18 +1340,33 @@ bool CollisionDetector::OBB3VsOBB3Intersected(const OBB3& obb1, const OBB3& obb2
 	return true;
 }
 
+static eBoxBoxDebug debug_stat = SECOND_OBB_VERTS;
+static int obb2_vert_idx = 0;
+static int obb1_face_idx = 0;
+static int obb1_vert_idx = 0;
+static int obb2_face_idx = 0;
 static float shallowest = -INFINITY;
 static float deepest = INFINITY;
 static int shallowest_pair_obb2_vert_idx;
 static int shallowest_pair_obb1_face_idx;
+static int shallowest_pair_obb1_vert_idx;
+static int shallowest_pair_obb2_face_idx;
 static int deepest_pair_obb2_vert_idx = -1;
 static int deepest_pair_obb1_face_idx = -1;
+static int deepest_pair_obb1_vert_idx = -1;
+static int deepest_pair_obb2_face_idx = -1;
 Mesh* obb2_vert_to_obb1_face_0 = nullptr;
 Mesh* obb2_vert_to_obb1_face_1 = nullptr;
 Mesh* obb2_vert_to_obb1_face_2 = nullptr;
 Mesh* obb2_vert_to_obb1_face_3 = nullptr;
 Mesh* obb2_vert_to_obb1_face_4 = nullptr;
 Mesh* obb2_vert_to_obb1_face_5 = nullptr;
+Mesh* obb1_vert_to_obb2_face_0 = nullptr;
+Mesh* obb1_vert_to_obb2_face_1 = nullptr;
+Mesh* obb1_vert_to_obb2_face_2 = nullptr;
+Mesh* obb1_vert_to_obb2_face_3 = nullptr;
+Mesh* obb1_vert_to_obb2_face_4 = nullptr;
+Mesh* obb1_vert_to_obb2_face_5 = nullptr;
 Mesh* obb2_vert_0_winner = nullptr;
 Mesh* obb2_vert_1_winner = nullptr;
 Mesh* obb2_vert_2_winner = nullptr;
@@ -1363,7 +1375,16 @@ Mesh* obb2_vert_4_winner = nullptr;
 Mesh* obb2_vert_5_winner = nullptr;
 Mesh* obb2_vert_6_winner = nullptr;
 Mesh* obb2_vert_7_winner = nullptr;
+Mesh* obb1_vert_0_winner = nullptr;
+Mesh* obb1_vert_1_winner = nullptr;
+Mesh* obb1_vert_2_winner = nullptr;
+Mesh* obb1_vert_3_winner = nullptr;
+Mesh* obb1_vert_4_winner = nullptr;
+Mesh* obb1_vert_5_winner = nullptr;
+Mesh* obb1_vert_6_winner = nullptr;
+Mesh* obb1_vert_7_winner = nullptr;
 Mesh* obb2_pt_obb1_face_winner = nullptr;
+Mesh* obb1_pt_obb2_face_winner = nullptr;
 void DeleteOBB2Winner()
 {
 	if (obb2_vert_0_winner != nullptr)
@@ -1408,6 +1429,84 @@ void DeleteOBB2Winner()
 	}
 }
 
+void DeleteOBB1Winner()
+{
+	if (obb1_vert_0_winner != nullptr)
+	{
+		delete obb1_vert_0_winner;
+		obb1_vert_0_winner = nullptr;
+	}
+	if (obb1_vert_1_winner != nullptr)
+	{
+		delete obb1_vert_1_winner;
+		obb1_vert_1_winner = nullptr;
+	}
+	if (obb1_vert_2_winner != nullptr)
+	{
+		delete obb1_vert_2_winner;
+		obb1_vert_2_winner = nullptr;
+	}
+	if (obb1_vert_3_winner != nullptr)
+	{
+		delete obb1_vert_3_winner;
+		obb1_vert_3_winner = nullptr;
+	}
+	if (obb1_vert_4_winner != nullptr)
+	{
+		delete obb1_vert_4_winner;
+		obb1_vert_4_winner = nullptr;
+	}
+	if (obb1_vert_5_winner != nullptr)
+	{
+		delete obb1_vert_5_winner;
+		obb1_vert_5_winner = nullptr;
+	}
+	if (obb1_vert_6_winner != nullptr)
+	{
+		delete obb1_vert_6_winner;
+		obb1_vert_6_winner = nullptr;
+	}
+	if (obb1_vert_7_winner != nullptr)
+	{
+		delete obb1_vert_7_winner;
+		obb1_vert_7_winner = nullptr;
+	}
+}
+
+void DeleteOBB1PtToOBB2Face()
+{
+	if (obb1_vert_to_obb2_face_0 != nullptr)
+	{
+		delete obb1_vert_to_obb2_face_0;
+		obb1_vert_to_obb2_face_0 = nullptr;
+	}
+	if (obb1_vert_to_obb2_face_1 != nullptr)
+	{
+		delete obb1_vert_to_obb2_face_1;
+		obb1_vert_to_obb2_face_1 = nullptr;
+	}
+	if (obb1_vert_to_obb2_face_2 != nullptr)
+	{
+		delete obb1_vert_to_obb2_face_2;
+		obb1_vert_to_obb2_face_2 = nullptr;
+	}
+	if (obb1_vert_to_obb2_face_3 != nullptr)
+	{
+		delete obb1_vert_to_obb2_face_3;
+		obb1_vert_to_obb2_face_3 = nullptr;
+	}
+	if (obb1_vert_to_obb2_face_4 != nullptr)
+	{
+		delete obb1_vert_to_obb2_face_4;
+		obb1_vert_to_obb2_face_4 = nullptr;
+	}
+	if (obb1_vert_to_obb2_face_5 != nullptr)
+	{
+		delete obb1_vert_to_obb2_face_5;
+		obb1_vert_to_obb2_face_5 = nullptr;
+	}
+}
+
 void DeleteOBB2PtToOBB1Face()
 {
 	if (obb2_vert_to_obb1_face_0 != nullptr)
@@ -1439,6 +1538,66 @@ void DeleteOBB2PtToOBB1Face()
 	{
 		delete obb2_vert_to_obb1_face_5;
 		obb2_vert_to_obb1_face_5 = nullptr;
+	}
+}
+
+void GenerateObb1PtToObb2FaceMesh(const OBB3Face& obb2_face, float ext)
+{
+	const Rgba& color = color_list[color_index];
+	color_index = (color_index + 1) % COLOR_LIST_SIZE;
+	if (obb2_face_idx == 0)
+	{
+		if (obb1_vert_to_obb2_face_0 != nullptr)
+		{
+			delete obb1_vert_to_obb2_face_0;
+			obb1_vert_to_obb2_face_0 = nullptr;
+		}
+		obb1_vert_to_obb2_face_0 = Mesh::CreateLineImmediate(VERT_PCU, obb2_face.m_center, obb2_face.m_center + obb2_face.m_normal * ext, color);
+	}
+	else if (obb2_face_idx == 1)
+	{
+		if (obb1_vert_to_obb2_face_1 != nullptr)
+		{
+			delete obb1_vert_to_obb2_face_1;
+			obb1_vert_to_obb2_face_1 = nullptr;
+		}
+		obb1_vert_to_obb2_face_1 = Mesh::CreateLineImmediate(VERT_PCU, obb2_face.m_center, obb2_face.m_center + obb2_face.m_normal * ext, color);
+	}
+	else if (obb2_face_idx == 2)
+	{
+		if (obb1_vert_to_obb2_face_2 != nullptr)
+		{
+			delete obb1_vert_to_obb2_face_2;
+			obb1_vert_to_obb2_face_2 = nullptr;
+		}
+		obb1_vert_to_obb2_face_2 = Mesh::CreateLineImmediate(VERT_PCU, obb2_face.m_center, obb2_face.m_center + obb2_face.m_normal * ext, color);
+	}
+	else if (obb2_face_idx == 3)
+	{
+		if (obb1_vert_to_obb2_face_3 != nullptr)
+		{
+			delete obb1_vert_to_obb2_face_3;
+			obb1_vert_to_obb2_face_3 = nullptr;
+		}
+		obb1_vert_to_obb2_face_3 = Mesh::CreateLineImmediate(VERT_PCU, obb2_face.m_center, obb2_face.m_center + obb2_face.m_normal * ext, color);
+	}
+	else if (obb2_face_idx == 4)
+	{
+		if (obb1_vert_to_obb2_face_4 != nullptr)
+		{
+			delete obb1_vert_to_obb2_face_4;
+			obb1_vert_to_obb2_face_4 = nullptr;
+		}
+		obb1_vert_to_obb2_face_4 = Mesh::CreateLineImmediate(VERT_PCU, obb2_face.m_center, obb2_face.m_center + obb2_face.m_normal * ext, color);
+	}
+	else if (obb2_face_idx == 5)
+	{
+		if (obb1_vert_to_obb2_face_5 != nullptr)
+		{
+			delete obb1_vert_to_obb2_face_5;
+			obb1_vert_to_obb2_face_5 = nullptr;
+		}
+		obb1_vert_to_obb2_face_5 = Mesh::CreateLineImmediate(VERT_PCU, obb2_face.m_center, obb2_face.m_center + obb2_face.m_normal * ext, color);
 	}
 }
 
@@ -1499,6 +1658,90 @@ void GenerateObb2PtToObb1FaceMesh(const OBB3Face& obb1_face, float ext)
 			obb2_vert_to_obb1_face_5 = nullptr;
 		}
 		obb2_vert_to_obb1_face_5 = Mesh::CreateLineImmediate(VERT_PCU, obb1_face.m_center, obb1_face.m_center + obb1_face.m_normal * ext, color);
+	}
+}
+
+void GenerateObb1PtToObb2FaceWinnerMesh(const OBB3Face& shallow_obb2_face, float shallow_ext)
+{
+	if (shallowest_pair_obb1_vert_idx == 0)
+	{
+		if (obb1_vert_0_winner != nullptr)
+		{
+			delete obb1_vert_0_winner;
+			obb1_vert_0_winner = nullptr;
+		}
+		obb1_vert_0_winner = Mesh::CreateLineImmediate(VERT_PCU, shallow_obb2_face.m_center,
+			shallow_obb2_face.m_center + shallow_obb2_face.m_normal * shallow_ext, Rgba::GOLD);
+	}
+	if (shallowest_pair_obb1_vert_idx == 1)
+	{
+		if (obb1_vert_1_winner != nullptr)
+		{
+			delete obb1_vert_1_winner;
+			obb1_vert_1_winner = nullptr;
+		}
+		obb1_vert_1_winner = Mesh::CreateLineImmediate(VERT_PCU, shallow_obb2_face.m_center,
+			shallow_obb2_face.m_center + shallow_obb2_face.m_normal * shallow_ext, Rgba::GOLD);
+	}
+	if (shallowest_pair_obb1_vert_idx == 2)
+	{
+		if (obb1_vert_2_winner != nullptr)
+		{
+			delete obb1_vert_2_winner;
+			obb1_vert_2_winner = nullptr;
+		}
+		obb1_vert_2_winner = Mesh::CreateLineImmediate(VERT_PCU, shallow_obb2_face.m_center,
+			shallow_obb2_face.m_center + shallow_obb2_face.m_normal * shallow_ext, Rgba::GOLD);
+	}
+	if (shallowest_pair_obb1_vert_idx == 3)
+	{
+		if (obb1_vert_3_winner != nullptr)
+		{
+			delete obb1_vert_3_winner;
+			obb1_vert_3_winner = nullptr;
+		}
+		obb1_vert_3_winner = Mesh::CreateLineImmediate(VERT_PCU, shallow_obb2_face.m_center,
+			shallow_obb2_face.m_center + shallow_obb2_face.m_normal * shallow_ext, Rgba::GOLD);
+	}
+	if (shallowest_pair_obb1_vert_idx == 4)
+	{
+		if (obb1_vert_4_winner != nullptr)
+		{
+			delete obb1_vert_4_winner;
+			obb1_vert_4_winner = nullptr;
+		}
+		obb1_vert_4_winner = Mesh::CreateLineImmediate(VERT_PCU, shallow_obb2_face.m_center,
+			shallow_obb2_face.m_center + shallow_obb2_face.m_normal * shallow_ext, Rgba::GOLD);
+	}
+	if (shallowest_pair_obb1_vert_idx == 5)
+	{
+		if (obb1_vert_5_winner != nullptr)
+		{
+			delete obb1_vert_5_winner;
+			obb1_vert_5_winner = nullptr;
+		}
+		obb1_vert_5_winner = Mesh::CreateLineImmediate(VERT_PCU, shallow_obb2_face.m_center,
+			shallow_obb2_face.m_center + shallow_obb2_face.m_normal * shallow_ext, Rgba::GOLD);
+	}
+	if (shallowest_pair_obb1_vert_idx == 6)
+	{
+		if (obb1_vert_6_winner != nullptr)
+		{
+			delete obb1_vert_6_winner;
+			obb1_vert_6_winner = nullptr;
+		}
+		obb1_vert_6_winner = Mesh::CreateLineImmediate(VERT_PCU, shallow_obb2_face.m_center,
+			shallow_obb2_face.m_center + shallow_obb2_face.m_normal * shallow_ext, Rgba::GOLD);
+	}
+	if (shallowest_pair_obb1_vert_idx == 7)
+	{
+		if (obb1_vert_7_winner != nullptr)
+		{
+			delete obb1_vert_7_winner;
+			obb1_vert_7_winner = nullptr;
+		}
+		obb1_vert_7_winner = Mesh::CreateLineImmediate(VERT_PCU, shallow_obb2_face.m_center,
+			shallow_obb2_face.m_center + shallow_obb2_face.m_normal * shallow_ext, Rgba::GOLD);
 	}
 }
 
@@ -1583,6 +1826,26 @@ void GenerateObb2PtToObb1FaceWinnerMesh(const OBB3Face& shallow_obb1_face, float
 		}
 		obb2_vert_7_winner = Mesh::CreateLineImmediate(VERT_PCU, shallow_obb1_face.m_center,
 			shallow_obb1_face.m_center + shallow_obb1_face.m_normal * shallow_ext, Rgba::GOLD);
+	}
+}
+
+void GenerateOBB1PtToOBB2FaceFinalWinner(const OBB3& obb1, const OBB3& obb2)
+{
+	if (deepest_pair_obb1_vert_idx != -1 && deepest_pair_obb2_face_idx != -1)
+	{
+		const OBB3Vert& deep_obb1_vert = obb1.m_verts[deepest_pair_obb1_vert_idx];
+		const OBB3Face& deep_obb2_face = obb2.m_faces[deepest_pair_obb2_face_idx];
+
+		Vector3 deep_toPt = deep_obb1_vert.m_vert - deep_obb2_face.m_center;
+		float deep_ext = DotProduct(deep_toPt, deep_obb2_face.m_normal);
+
+		if (obb1_pt_obb2_face_winner != nullptr)
+		{
+			delete obb1_pt_obb2_face_winner;
+			obb1_pt_obb2_face_winner = nullptr;
+		}
+		obb1_pt_obb2_face_winner = Mesh::CreateLineImmediate(VERT_PCU, deep_obb2_face.m_center,
+			deep_obb2_face.m_center + deep_obb2_face.m_normal * deep_ext, Rgba::GOLD);
 	}
 }
 
@@ -1703,6 +1966,88 @@ void CollisionDetector::OBB3VsOBB3CoreBreakdownPtVsFace(const OBB3& obb1, const 
 			}
 		}
 	}
+	else if (input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_0) && debug_stat == FIRST_OBB_VERTS)
+	{
+		const OBB3Vert& obb1_vert = obb1.m_verts[obb1_vert_idx];
+		const OBB3Face& obb2_face = obb2.m_faces[obb2_face_idx];
+
+		Vector3 toPt = obb1_vert.m_vert - obb2_face.m_center;
+		float ext = DotProduct(toPt, obb2_face.m_center);
+
+		if (ext > 0.f)
+		{
+			shallowest = -INFINITY;
+			obb2_face_idx = 0;
+			obb1_vert_idx++;
+			shallowest_pair_obb1_vert_idx = 0;
+			shallowest_pair_obb2_face_idx = 0;
+
+			if (obb1_vert_idx == 8)
+			{
+				GenerateOBB1PtToOBB2FaceFinalWinner(obb1, obb2);
+
+				DeleteOBB1Winner();
+
+				deepest = INFINITY;
+				deepest_pair_obb2_face_idx = -1;
+				deepest_pair_obb1_vert_idx = -1;
+				debug_stat = TWO_OBB_EDGES;
+			}
+
+			DeleteOBB1PtToOBB2Face();
+		}
+		else
+		{
+			if (ext > shallowest)
+			{
+				shallowest = ext;
+
+				shallowest_pair_obb1_vert_idx = obb1_vert_idx;
+				shallowest_pair_obb2_face_idx = obb2_face_idx;
+			}
+
+			GenerateObb1PtToObb2FaceMesh(obb2_face, ext);
+
+			obb2_face_idx = (obb2_face_idx + 1) % 6;
+
+			if (obb2_face_idx == 0)
+			{
+				const OBB3Vert& shallow_obb1_vert = obb1.m_verts[shallowest_pair_obb1_vert_idx];
+				const OBB3Face& shallow_obb2_face = obb2.m_faces[shallowest_pair_obb2_face_idx];
+				Vector3 shallow_toPt = shallow_obb1_vert.m_vert - shallow_obb2_face.m_center;
+				float shallow_ext = DotProduct(shallow_toPt, shallow_obb2_face.m_normal);
+
+				if (shallow_ext < deepest)
+				{
+					deepest = shallow_ext;
+
+					deepest_pair_obb1_vert_idx = shallowest_pair_obb1_vert_idx;
+					deepest_pair_obb2_face_idx = shallowest_pair_obb2_face_idx;
+				}
+
+				GenerateObb1PtToObb2FaceWinnerMesh(shallow_obb2_face, shallow_ext);
+
+				shallowest = -INFINITY;
+				obb1_vert_idx++;
+				shallowest_pair_obb1_vert_idx = 0;
+				shallowest_pair_obb2_face_idx = 0;
+
+				DeleteOBB1PtToOBB2Face();
+
+				if (obb1_vert_idx == 8)
+				{
+					GenerateOBB1PtToOBB2FaceFinalWinner(obb1, obb2);
+
+					DeleteOBB1Winner();
+
+					deepest = INFINITY;
+					deepest_pair_obb2_face_idx = -1;
+					deepest_pair_obb1_vert_idx = -1;
+					debug_stat = TWO_OBB_EDGES;
+				}
+			}
+		}
+	}
 
 	switch (debug_stat)
 	{
@@ -1723,10 +2068,249 @@ void CollisionDetector::OBB3VsOBB3CoreBreakdownPtVsFace(const OBB3& obb1, const 
 	}
 		break;
 	case FIRST_OBB_VERTS:
+	{
+		const OBB3Vert& obb1_vert = obb1.m_verts[obb1_vert_idx];
+		const OBB3Face& obb2_face = obb2.m_faces[obb2_face_idx];
+
+		Vector3 toPt = obb1_vert.m_vert - obb2_face.m_center;
+		float ext = DotProduct(toPt, obb2_face.m_normal);
+
+		DebugRenderLine(0.1f, obb2_face.m_center, 
+			obb2_face.m_center + obb2_face.m_normal * ext, 
+			3.f, Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+
+		pt = obb1_vert.m_vert;
+		face_center = obb2_face.m_center;
+	}
 		break;
 	default:
 		break;
 	}
+}
+
+void CollisionDetector::OBB3VsOBB3StepOne(const OBB3& obb1, const OBB3& obb2)
+{
+	std::map<Vector3, std::tuple<OBB3Face, float>> record2;
+	for (std::vector<OBB3Vert>::size_type idx = 0; idx < obb2.m_verts.size(); ++idx)
+	{
+		bool pt_overlap = true;
+		const Vector3& pt = obb2.m_verts[idx].m_vert;
+		float shallowest = -INFINITY;
+		OBB3Face shallowest_against;
+		std::tuple<OBB3Face, float> pt_face_distance;
+
+		for (std::vector<OBB3Face>::size_type idx_face = 0; idx_face < obb1.m_faces.size(); ++idx_face)
+		{
+			const OBB3Face& face = obb1.m_faces[idx_face];
+			Vector3 toPt = pt - face.m_center;
+			const Vector3& face_n = face.m_normal;
+			float ext = DotProduct(toPt, face_n);
+			if (ext > 0.f)
+			{
+				pt_overlap = false;
+				break;
+			}
+
+			if (ext > shallowest)
+			{
+				shallowest = ext;
+				shallowest_against = face;
+			}
+		}
+
+		if (pt_overlap)
+		{
+			std::get<0>(pt_face_distance) = shallowest_against;
+			std::get<1>(pt_face_distance) = abs(shallowest);
+
+			record2.emplace(std::make_pair(pt, pt_face_distance));
+		}
+	}
+
+	float record2_deepest = -INFINITY;
+	std::tuple<Vector3, Vector3, float> c_info2;
+	for (std::map<Vector3, std::tuple<OBB3Face, float>>::iterator it = record2.begin(); it != record2.end(); ++it)
+	{
+		const Vector3& pt = it->first;
+		const std::tuple<OBB3Face, float>& tup = it->second;
+		float dist = std::get<1>(tup);
+		Vector3 normal = std::get<0>(tup).m_normal;
+		if (dist > record2_deepest)
+		{
+			record2_deepest = dist;
+
+			std::get<0>(c_info2) = pt;
+			std::get<1>(c_info2) = normal;
+			std::get<2>(c_info2) = dist;
+		}
+	}
+
+	const Vector3& pt = std::get<0>(c_info2);
+	const Vector3& normal = std::get<1>(c_info2);
+	const float& dist = std::get<2>(c_info2);
+
+	DebugRenderLine(0.1f, pt, pt + normal * dist, 3.f, Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+}
+
+void CollisionDetector::OBB3VsOBB3StepTwo(const OBB3& obb1, const OBB3& obb2)
+{
+	std::map<Vector3, std::tuple<OBB3Face, float>> record1;
+	for (std::vector<OBB3Vert>::size_type idx = 0; idx < obb1.m_verts.size(); ++idx)
+	{
+		bool pt_overlap = true;
+		const Vector3& pt = obb1.m_verts[idx].m_vert;
+		float shallowest = -INFINITY;
+		OBB3Face shallowest_against;
+		std::tuple<OBB3Face, float> pt_face_distance;
+
+		for (std::vector<OBB3Face>::size_type idx_face = 0; idx_face < obb2.m_faces.size(); ++idx_face)
+		{
+			const OBB3Face& face = obb2.m_faces[idx_face];
+			Vector3 toPt = pt - face.m_center;
+			const Vector3& face_n = face.m_normal;
+			float ext = DotProduct(toPt, face_n);
+			if (ext > 0.f)
+			{
+				pt_overlap = false;
+				break;
+			}
+
+			if (ext > shallowest)
+			{
+				shallowest = ext;
+				shallowest_against = face;
+			}
+		}
+
+		if (pt_overlap)
+		{
+			std::get<0>(pt_face_distance) = shallowest_against;
+			std::get<1>(pt_face_distance) = abs(shallowest);
+
+			record1.emplace(std::make_pair(pt, pt_face_distance));
+		}
+	}
+	float record1_deepest = -INFINITY;
+	std::tuple<Vector3, Vector3, float> c_info1;
+	for (std::map<Vector3, std::tuple<OBB3Face, float>>::iterator it = record1.begin(); it != record1.end(); ++it)
+	{
+		Vector3 pt = it->first;
+		const std::tuple<OBB3Face, float>& tup = it->second;
+		float dist = std::get<1>(tup);
+		Vector3 normal = -std::get<0>(tup).m_normal;
+		if (dist > record1_deepest)
+		{
+			record1_deepest = dist;
+
+			pt = pt - normal * dist;
+			std::get<0>(c_info1) = pt;
+			std::get<1>(c_info1) = normal;
+			std::get<2>(c_info1) = dist;
+		}
+	}
+
+	const Vector3& pt = std::get<0>(c_info1);
+	const Vector3& normal = std::get<1>(c_info1);
+	const float& dist = std::get<2>(c_info1);
+
+	DebugRenderLine(0.1f, pt, pt + normal * dist, 3.f, Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+}
+
+void CollisionDetector::OBB3VsOBB3StepThree(const OBB3& obb1, const OBB3& obb2)
+{
+	//// now look at edge to edge contact
+	//std::map<OBB3Edge, std::tuple<OBB3Edge, Vector3, float, Vector3, Vector3>> edge_pen_record;
+	//for (std::vector<OBB3Edge>::size_type idx_edge1 = 0; idx_edge1 < obb1.m_edges.size(); ++idx_edge1)
+	//{
+	//	float shallowest = INFINITY;
+	//	std::tuple<OBB3Edge, Vector3, float, Vector3, Vector3> edge_edge_penetration;	// <edge, normal, dist>
+
+	//	const OBB3Edge& edge1 = obb1.m_edges[idx_edge1];
+	//	LineSegment3 line_seg1 = LineSegment3(edge1.m_end1.m_vert, edge1.m_end2.m_vert);
+
+	//	bool overlap = false;
+	//	for (std::vector<OBB3Edge>::size_type idx_edge2 = 0; idx_edge2 < obb2.m_edges.size(); ++idx_edge2)
+	//	{
+	//		const OBB3Edge& edge2 = obb2.m_edges[idx_edge2];
+	//		LineSegment3 line_seg2 = LineSegment3(edge2.m_end1.m_vert, edge2.m_end2.m_vert);
+
+	//		Vector3 close_pt1, close_pt2;
+	//		float t1, t2;
+	//		float closest_dist_sqr = LineSegment3::ClosestPointsSegments(line_seg1, line_seg2, t1, t2, close_pt1, close_pt2);
+	//		float closest_dist = sqrtf(closest_dist_sqr);
+	//		//Vector3 close_pt = (close_pt1 + close_pt2) / 2.f;
+
+	//		//DebugRenderLine(0.1f, close_pt1, close_pt2, 3.f, Rgba::MEGENTA, Rgba::MEGENTA, DEBUG_RENDER_USE_DEPTH);
+
+	//		// trick, if separating, close point on 1 to 2's center should be farther
+	//		float dist_1_to_2 = (obb2.GetCenter() - close_pt1).GetLengthSquared();
+	//		float dist_2_to_2 = (obb2.GetCenter() - close_pt2).GetLengthSquared();
+	//		if (dist_1_to_2 > dist_2_to_2)
+	//			continue;
+
+	//		if (closest_dist < shallowest)
+	//		{
+	//			overlap = true;
+
+	//			shallowest = closest_dist;
+
+	//			// need to make sure normal is pointing away from 1
+	//			const Vector3& edge1_vec = line_seg1.extent;
+	//			const Vector3& edge2_vec = line_seg2.extent;
+	//			Vector3 cross = edge1_vec.Cross(edge2_vec).GetNormalized();
+	//			Vector3 ref = edge1.m_end1.m_vert - obb1.GetCenter();
+	//			if (DotProduct(cross, ref) < 0.f)
+	//				cross *= -1.f;
+
+	//			std::get<0>(edge_edge_penetration) = edge2;
+	//			std::get<1>(edge_edge_penetration) = cross;
+	//			std::get<2>(edge_edge_penetration) = closest_dist;
+	//			std::get<3>(edge_edge_penetration) = close_pt1;
+	//			std::get<4>(edge_edge_penetration) = close_pt2;
+	//		}
+	//	}
+
+	//	if (overlap)
+	//		edge_pen_record.emplace(std::make_pair(edge1, edge_edge_penetration));
+	//}
+
+	//bool edge_edge_has_win = (!edge_pen_record.empty());
+
+	//// find the deepest among these: contact point, normal and distance
+	//float edge_pen_deepest = -INFINITY;
+	//std::tuple<Vector3, Vector3, float, Vector3, Vector3> edge_edge_winner;		// <pt, normal, dist>
+	//for (std::map<OBB3Edge, std::tuple<OBB3Edge, Vector3, float, Vector3, Vector3>>::iterator it = edge_pen_record.begin(); it != edge_pen_record.end(); ++it)
+	//{
+	//	const OBB3Edge& edge1 = it->first;
+	//	const std::tuple<OBB3Edge, Vector3, float, Vector3, Vector3>& tup = it->second;
+	//	const OBB3Edge& edge2 = std::get<0>(tup);
+	//	const Vector3& n = std::get<1>(tup);
+	//	const float& dist = std::get<2>(tup);
+	//	const Vector3& pt1 = std::get<3>(tup);
+	//	const Vector3& pt2 = std::get<4>(tup);
+
+	//	if (dist > edge_pen_deepest)
+	//	{
+	//		edge_pen_deepest = dist;
+
+	//		std::get<0>(edge_edge_winner) = (pt1 + pt2) / 2.f;;
+	//		std::get<1>(edge_edge_winner) = n;
+	//		std::get<2>(edge_edge_winner) = dist;
+	//		std::get<3>(edge_edge_winner) = pt1;
+	//		std::get<4>(edge_edge_winner) = pt2;
+	//	}
+
+	//	//DebugRenderLine(0.1f, pt1, pt2, 5.f, Rgba::MEGENTA, Rgba::MEGENTA, DEBUG_RENDER_USE_DEPTH);
+	//}
+
+	//const Vector3& pt = std::get<0>(edge_edge_winner);
+	//const Vector3& n = std::get<1>(edge_edge_winner);
+	//const float& dist = std::get<2>(edge_edge_winner);
+	//const Vector3& pt1 = std::get<3>(edge_edge_winner);
+	//const Vector3& pt2 = std::get<4>(edge_edge_winner);
+
+	////DebugRenderLine(0.1f, pt, pt + n * abs(dist * .5f), 3.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
+	//DebugRenderLine(0.1f, pt1, pt2, 5.f, Rgba::MEGENTA, Rgba::MEGENTA, DEBUG_RENDER_USE_DEPTH);
 }
 
 bool CollisionDetector::OBB3VsOBB3Core(const OBB3& obb1, const OBB3& obb2, Contact3& contact)
@@ -1818,7 +2402,7 @@ bool CollisionDetector::OBB3VsOBB3Core(const OBB3& obb1, const OBB3& obb2, Conta
 			std::get<0>(pt_face_distance) = shallowest_against;
 			std::get<1>(pt_face_distance) = shallowest;
 
-			record2.emplace(std::make_pair(pt, pt_face_distance));
+			record1.emplace(std::make_pair(pt, pt_face_distance));
 		}
 	}
 	float record1_deepest = INFINITY;
@@ -1927,7 +2511,8 @@ bool CollisionDetector::OBB3VsOBB3Core(const OBB3& obb1, const OBB3& obb2, Conta
 			LineSegment3 line_seg1 = LineSegment3(edge1_start, edge1_end);
 			LineSegment3 line_seg2 = LineSegment3(edge2_start, edge2_end);
 			Vector3 close_pt1, close_pt2;
-			float closest_dist = LineSegment3::ClosestPointsSegmentsConstrained(line_seg1, line_seg2, close_pt1, close_pt2);
+			float t1, t2;
+			float closest_dist_sqr = LineSegment3::ClosestPointsSegments(line_seg1, line_seg2, t1, t2, close_pt1, close_pt2);
 			Vector3 close_pt = (close_pt1 + close_pt2) / 2.f;
 			
 			std::get<0>(edge_edge_winner) = close_pt;
@@ -2001,6 +2586,7 @@ uint CollisionDetector::OBB3VsOBB3Coherent(const OBB3& obb1, const OBB3& obb2, C
 
 	return 1;
 }
+
 
 uint CollisionDetector::OBB3VsPoint(const OBB3& obb, const Vector3& p, Contact3& contact, bool reverse)
 {
