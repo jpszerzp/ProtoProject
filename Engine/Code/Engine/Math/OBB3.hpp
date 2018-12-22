@@ -26,6 +26,8 @@ struct OBB3Edge
 	OBB3Edge(const OBB3Vert& v1, const OBB3Vert& v2) : m_end1(v1), m_end2(v2) {}
 
 	const bool operator<(const OBB3Edge& compared) const;
+
+	Vector3 ToVec3() const;
 };
 
 struct OBB3Face

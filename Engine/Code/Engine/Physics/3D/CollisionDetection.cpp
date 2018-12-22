@@ -2218,6 +2218,130 @@ void CollisionDetector::OBB3VsOBB3StepTwo(const OBB3& obb1, const OBB3& obb2)
 
 void CollisionDetector::OBB3VsOBB3StepThree(const OBB3& obb1, const OBB3& obb2)
 {
+	//DebugRenderLine(0.1f, obb1.GetCenter(), obb1.GetCenter() + Vector3(0.005f), 5.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
+	//DebugRenderLine(0.1f, obb2.GetCenter(), obb2.GetCenter() + Vector3(0.005f), 5.f, Rgba::GREEN, Rgba::GREEN, DEBUG_RENDER_USE_DEPTH);
+
+	//const OBB3Edge& edge1 = obb1.m_edges[0];
+	//const OBB3Edge& edge2 = obb2.m_edges[0];
+	//const Vector3& edge1_v3 = edge1.ToVec3();
+	//const Vector3& edge2_v3 = edge2.ToVec3();
+
+	//DebugRenderLine(0.1f, edge1.m_end1.m_vert, edge1.m_end1.m_vert + edge1_v3, 10.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
+	//DebugRenderLine(0.1f, edge2.m_end1.m_vert, edge2.m_end1.m_vert + edge2_v3, 10.f, Rgba::GREEN, Rgba::GREEN, DEBUG_RENDER_USE_DEPTH);
+
+	//Vector3 cross = (edge1_v3.Cross(edge2_v3)).GetNormalized();
+	//Vector3 ref = edge1.m_end1.m_vert - obb1.GetCenter();
+	//if (DotProduct(cross, ref) < 0.f)
+	//	cross *= -1.f;
+
+	//DebugRenderLine(0.1f, edge1.m_end1.m_vert, edge1.m_end1.m_vert + cross, 10.f, Rgba::MEGENTA, Rgba::MEGENTA, DEBUG_RENDER_USE_DEPTH);
+
+	std::vector<std::tuple<OBB3Edge, OBB3Edge>> edge_pairs;
+	for (std::vector<OBB3Edge>::size_type idx_edge1 = 0; idx_edge1 < obb1.m_edges.size(); ++idx_edge1)
+	{
+		const OBB3Edge& edge1 = obb1.m_edges[idx_edge1];
+		const Vector3& edge1_v3 = edge1.ToVec3();
+
+		float shallowest = -INFINITY;
+		OBB3Edge shallowest_edge2;
+
+		for (std::vector<OBB3Edge>::size_type idx_edge2 = 0; idx_edge2 < obb2.m_edges.size(); ++idx_edge2)
+		{
+			bool overlap = false;
+
+			const OBB3Edge& edge2 = obb2.m_edges[idx_edge2];
+			const Vector3& edge2_v3 = edge2.ToVec3();
+
+			// normal
+			Vector3 cross = (edge1_v3.Cross(edge2_v3)).GetNormalized();
+			Vector3 ref = edge1.m_end1.m_vert - obb1.GetCenter();
+			if (DotProduct(cross, ref) < 0.f)
+				cross *= -1.f;
+
+			// offset
+			const Vector3& onPlane = edge1.m_end1.m_vert;
+			float offset = DotProduct(onPlane, cross);
+
+			// build a plane with this cross/normal
+			Plane pl = Plane(cross, offset);
+
+			// find support point 
+			float deepest = INFINITY;
+			OBB3Vert deepest_vert;
+			for each (const OBB3Vert& vert in obb2.m_verts)
+			{
+				Vector3 v = vert.m_vert;
+				Vector3 to_v = v - onPlane;
+				float ext = DotProduct(to_v, cross);
+
+				if (ext < deepest)
+				{
+					deepest = ext;
+					deepest_vert = vert;
+				}
+			}
+			// has support point
+			if (deepest < 0.f)
+			{
+				// if the sp is on the right edge
+				if (deepest_vert.m_vert == edge2.m_end1.m_vert || deepest_vert.m_vert == edge2.m_end2.m_vert)
+					overlap = true;
+			}
+
+			if (overlap)
+			{
+				if (deepest > shallowest)
+				{
+					shallowest = deepest;
+					shallowest_edge2 = edge2;
+				}
+			}
+
+			//// check the penetration status of edge from 2 onto this plane
+			//const Vector3& on_edge2 = edge2.m_end1.m_vert;
+			//Vector3 to_on_edge2 = on_edge2 - onPlane;
+			//float ext = DotProduct(to_on_edge2, cross);
+			//if (ext < 0.f)
+			//{
+			//	overlap = true;
+
+			//	if (ext > shallowest)
+			//	{
+			//		shallowest = ext;
+			//		shallowest_edge2 = edge2;
+			//	}
+			//}
+		}
+
+		if (shallowest != -INFINITY)
+		{
+			// has been altered
+			Vector3 close_pt1, close_pt2;
+			float t1, t2;
+			LineSegment3 s1 = LineSegment3(edge1.m_end1.m_vert, edge1.m_end2.m_vert);
+			LineSegment3 s2 = LineSegment3(shallowest_edge2.m_end1.m_vert, shallowest_edge2.m_end2.m_vert);
+			LineSegment3::ClosestPointsSegments(s1, s2, t1, t2, close_pt1, close_pt2);
+			DebugRenderLine(0.1f, close_pt1, close_pt2, 10.f, Rgba::MEGENTA, Rgba::MEGENTA, DEBUG_RENDER_USE_DEPTH);
+		}
+
+		//if (overlap)
+		//	edge_pairs.push_back(std::make_tuple(edge1, shallowest_edge2));
+	}
+
+	//for (std::vector<std::tuple<OBB3Edge, OBB3Edge>>::iterator it = edge_pairs.begin(); it != edge_pairs.end(); ++it)
+	//{
+	//	const std::tuple<OBB3Edge, OBB3Edge>& pair = *it;
+	//	const OBB3Edge& e1 = std::get<0>(pair);
+	//	const OBB3Edge& e2 = std::get<1>(pair);
+	//	LineSegment3 s1 = LineSegment3(e1.m_end1.m_vert, e1.m_end2.m_vert);
+	//	LineSegment3 s2 = LineSegment3(e2.m_end1.m_vert, e2.m_end2.m_vert);
+
+	//	Vector3 close_pt1, close_pt2;
+	//	float t1, t2;
+	//	float closest_dist_sqr = LineSegment3::ClosestPointsSegments(s1, s2, t1, t2, close_pt1, close_pt2);
+	//	DebugRenderLine(0.1f, close_pt1, close_pt2, 3.f, Rgba::MEGENTA, Rgba::MEGENTA, DEBUG_RENDER_USE_DEPTH);
+	//}
+
 	//// now look at edge to edge contact
 	//std::map<OBB3Edge, std::tuple<OBB3Edge, Vector3, float, Vector3, Vector3>> edge_pen_record;
 	//for (std::vector<OBB3Edge>::size_type idx_edge1 = 0; idx_edge1 < obb1.m_edges.size(); ++idx_edge1)

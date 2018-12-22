@@ -233,3 +233,11 @@ const bool OBB3Edge::operator<(const OBB3Edge& compared) const
 	Vector3 vec2 = compared.m_end1.m_vert - compared.m_end2.m_vert;
 	return vec1.GetLength() < vec2.GetLength();
 }
+
+Vector3 OBB3Edge::ToVec3() const
+{
+	const Vector3& end1_v3 = m_end1.m_vert;
+	const Vector3& end2_v3 = m_end2.m_vert;
+
+	return (end2_v3 - end1_v3);
+}

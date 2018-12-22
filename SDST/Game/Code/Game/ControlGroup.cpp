@@ -691,7 +691,7 @@ void ControlGroup::UpdateUI()
 
 		Vector3 close_1, close_2;
 		float t1, t2;
-		//float close_dist = LineSegment3::ClosestPointsSegmentsConstrained(seg_1, seg_2, close_1, close_2);
+		//float close_dist = LineSegment3::ClosestPointsSegmentsUnconstrained(seg_1, seg_2, close_1, close_2);
 		float close_dist_sqr = LineSegment3::ClosestPointsSegments(seg_1, seg_2, t1, t2, close_1, close_2);
 		DebugRenderLine(0.1f, close_1, close_2, 5.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
 

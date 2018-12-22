@@ -77,9 +77,9 @@ float LineSegment3::ClosestPointsSegments(const LineSegment3& seg1,
 
 /*
  * Need to consider special case where two segments are parallel
+ * The difference between this and above function is that closest points are not constraint to the segment 
  */
-/*
-float LineSegment3::ClosestPointsSegmentsConstrained(const LineSegment3& seg1, const LineSegment3& seg2, Vector3& v1, Vector3& v2)
+float LineSegment3::ClosestPointsSegmentsUnconstrained(const LineSegment3& seg1, const LineSegment3& seg2, Vector3& v1, Vector3& v2)
 {
 	// see p147 of RTC
 	Vector3 dir1 = seg1.extent.GetNormalized();
@@ -116,7 +116,6 @@ float LineSegment3::ClosestPointsSegmentsConstrained(const LineSegment3& seg1, c
 
 	return (v1 - v2).GetLength();
 }
-*/
 
 float LineSegment3::ClosestPointPtSegment(const Vector3& pt, const LineSegment3& seg, Vector3& projected)
 {
