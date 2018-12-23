@@ -129,7 +129,12 @@ ProtoState::ProtoState()
 	m_sceneGraph->AddRenderable(c_1);
 
 	// ignore tint, use material instead
-	Cube* c_2 = new Cube(Vector3(8.f, 0.f, 0.f), Vector3(45.f), Vector3(1.f, 1.f, 1.f), Rgba::GOLD, "cube_lit", "shader/material_lit", false);
+	Texture* diffuse = theRenderer->CreateOrGetTexture("Data/Images/container/diffuse_container.png");
+	Texture* specular = theRenderer->CreateOrGetTexture("Data/Images/container/specular_container.png");
+	Cube* c_2 = new Cube(Vector3(8.f, 0.f, 0.f), Vector3(45.f), 
+		Vector3(1.f, 1.f, 1.f), Rgba::GOLD, "cube_lit", "shader/material_lit", false);
+	c_2->m_renderable->m_diffuse_map = diffuse;
+	c_2->m_renderable->m_specular_map = specular;
 	m_gameObjects.push_back(c_2);
 	m_sceneGraph->AddRenderable(c_2);
 

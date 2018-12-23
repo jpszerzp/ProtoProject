@@ -15,6 +15,9 @@ public:
 	Transform		m_transform;
 	Vector4			m_tint;
 
+	Texture*		m_diffuse_map;
+	Texture*		m_specular_map;
+
 	bool			m_delete = false;
 
 public:

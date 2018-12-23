@@ -276,6 +276,7 @@ public:
 	// Shader/uniforms
 	void BindRenderState(const sRenderState& state, bool culling = true, bool depth_test = true);
 	void SetImmediateMesh(Mesh* mesh) { m_immediateMesh = mesh; }
+	void SetUniform(const char* name, int i);
 	void SetUniform(const char* name, float f);
 	void SetUniform(const char* name, Vector3 v3);
 	void SetUniform(const char* name, Vector4 v4);

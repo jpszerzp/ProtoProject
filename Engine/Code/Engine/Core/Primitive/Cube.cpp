@@ -52,7 +52,7 @@ Cube::Cube(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint,
 
 
 Cube::Cube(const Vector3& pos, const Vector3& rot, const Vector3& scale, const Rgba& tint, 
-	std::string fp, std::string sp, bool drawBorder /*= false*/)
+	std::string fp, std::string sp, bool drawBorder)
 {
 	Renderer* renderer = Renderer::GetInstance();
 

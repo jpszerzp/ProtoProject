@@ -18,6 +18,8 @@ public:
 	Shader*		m_shader;
 	Matrix44	m_model;
 	Vector4		m_tint;
+	Texture*	m_diff;
+	Texture*	m_spec;
 	// int m_passIdx;
 
 	// single light

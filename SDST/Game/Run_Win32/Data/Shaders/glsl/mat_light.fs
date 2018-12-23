@@ -2,9 +2,11 @@
 
 struct Material
 {
-	vec3 ambient;
-	vec3 diffuse;
-	vec3 specular;
+	//vec3 ambient;
+	//vec3 diffuse;
+	sampler2D diffuse;
+	//vec3 specular;
+	sampler2D specular;
 	float shininess;
 };
 uniform Material material;
@@ -54,23 +56,26 @@ void main()
 {
 	// light and color preparation
 	// time changing light can be disabled (only for demo purpose)
-	//vec3 light_v3 = vec3(lightColor.x, lightColor.y, lightColor.z);
-	vec3 light_v3 = vec3(lightColor.x * sin(game_time * 2.0), lightColor.y * sin(game_time * 0.7), lightColor.z * sin(game_time * 1.3));
+	vec3 light_v3 = vec3(lightColor.x, lightColor.y, lightColor.z);
+	//vec3 light_v3 = vec3(lightColor.x * sin(game_time * 2.0), lightColor.y * sin(game_time * 0.7), lightColor.z * sin(game_time * 1.3));
 	vec3 norm = normalize(passNormal);
 	vec3 lightDir = normalize(lightPos - passFragPos);
 
 	// ambient
-	vec3 ambient_result = (light_v3 * light_mat.ambient) * material.ambient;
+	//vec3 ambient_result = (light_v3 * light_mat.ambient) * material.ambient;
+	vec3 ambient_result = (light_v3 * light_mat.ambient) * vec3(texture(material.diffuse, passUV));
 
 	// diffuse
 	float diff = max(dot(norm, lightDir), 0.0);
-	vec3 diffuse_result = (light_v3 * light_mat.diffuse) * (diff * material.diffuse);
+	//vec3 diffuse_result = (light_v3 * light_mat.diffuse) * (diff * material.diffuse);
+	vec3 diffuse_result = (light_v3 * light_mat.diffuse) * (diff * vec3(texture(material.diffuse, passUV)));
 
 	// specular
 	vec3 viewDir = normalize(EYE_POSITION - passFragPos);
 	vec3 reflectDir = reflect(-lightDir, norm);
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0),material.shininess);
-	vec3 specular_result = (light_v3 * light_mat.spec) * (spec * material.specular);
+	//vec3 specular_result = (light_v3 * light_mat.spec) * (spec * material.specular);
+	vec3 specular_result = (light_v3 * light_mat.spec) * (spec * vec3(texture(material.specular, passUV)));
 
 	vec3 result = ambient_result + diffuse_result + specular_result;
 	outColor = vec4(result, 1.0);

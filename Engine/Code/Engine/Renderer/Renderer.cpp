@@ -1230,17 +1230,26 @@ void Renderer::Draw(const Drawcall& dc)
 	SetSingleLightUBO(programHandle);
 	GL_CHECK_ERROR();
 
-	const Vector3& matAmbient = ToGLMaterialAmbient(dc.m_tint);
-	const Vector3& matDiffuse = ToGLMaterialDiffuse(dc.m_tint);
 	const Vector3& matSpec = ToGLMaterialSpec(dc.m_tint);
 	float matShin = 256.f;
-	SetUniform("material.ambient", matAmbient);
-	SetUniform("material.diffuse", matDiffuse);
-	SetUniform("material.specular", matSpec);
+	Texture* diff = dc.m_diff;
+	if (diff != nullptr)
+	{
+		SetUniform("material.diffuse", 0);
+		SetTexture2D(0, diff);
+		SetSampler2D(0, diff->GetSampler());
+	}
+	Texture* spec = dc.m_spec;
+	if (spec!=nullptr)
+	{
+		SetUniform("material.specular", 1);
+		SetTexture2D(1, spec);
+		SetSampler2D(1, spec->GetSampler());
+	}
 	SetUniform("material.shininess", matShin);
 	GL_CHECK_ERROR();
 
-	SetUniform("light_mat.ambient", dc.m_light_mat_ambient);				// this is for object using material system, values are user-specified, distinct from the light_color above
+	SetUniform("light_mat.ambient", dc.m_light_mat_ambient);	// this is for object using material system, values are user-specified, distinct from the light_color above
 	SetUniform("light_mat.diffuse", dc.m_light_mat_diff);
 	SetUniform("light_mat.spec", dc.m_light_mat_spec);
 	GL_CHECK_ERROR();
@@ -1572,6 +1581,13 @@ void Renderer::SetUniform(const char* name, Matrix44 m44)
 	GL_CHECK_ERROR();
 }
 
+
+void Renderer::SetUniform(const char* name, int i)
+{
+	int bindIdx = glGetUniformLocation( m_currentShader->GetShaderProgram()->GetHandle(), name ); 
+	if (bindIdx >= 0)
+		glUniform1i( bindIdx, i );
+}
 
 void Renderer::SetCameraUBO(GLuint handle)
 {

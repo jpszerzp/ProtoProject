@@ -52,6 +52,9 @@ Drawcall* Renderable::ComposeDrawcall()
 	dc->m_shader = m_non_mat_shader;
 	dc->m_tint = m_tint;
 
+	dc->m_diff = m_diffuse_map;
+	dc->m_spec = m_specular_map;
+
 	return dc;
 }
 

@@ -84,6 +84,7 @@ PFNGLDRAWBUFFERPROC glDrawBuffer = nullptr;
 PFNGLSTENCILOPPROC glStencilOp = nullptr;
 PFNGLSTENCILMASKPROC glStencilMask = nullptr;
 PFNGLSTENCILFUNCPROC glStencilFunc = nullptr;
+PFNGLUNIFORM1IPROC glUniform1i = nullptr;
 
 PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB = nullptr;
 PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB = nullptr;
@@ -295,6 +296,7 @@ void BindGLFunctions()
 	GL_BIND_FUNCTION( glStencilOp				);
 	GL_BIND_FUNCTION( glStencilMask				);
 	GL_BIND_FUNCTION( glStencilFunc				);
+	GL_BIND_FUNCTION( glUniform1i				);
 	GL_BIND_FUNCTION( glGetActiveUniformBlockName	);
 	GL_BIND_FUNCTION( glDeleteTextures				);
 	GL_BIND_FUNCTION( glDisable						);
@@ -389,6 +391,7 @@ bool AreGLFuncitonsBound()
 		glStencilOp						==		nullptr	||
 		glStencilMask					==		nullptr	||
 		glStencilFunc					==		nullptr	||
+		glUniform1i						==		nullptr	||
 		wglGetExtensionsStringARB		==		nullptr ||
 		wglChoosePixelFormatARB			==		nullptr ||
 		wglCreateContextAttribsARB		==		nullptr 
