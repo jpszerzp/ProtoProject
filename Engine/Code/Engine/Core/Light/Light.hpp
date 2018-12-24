@@ -30,6 +30,9 @@ public:
 	Vector3 m_mat_spec;
 	
 private:
+	float m_cutoff;
+	float m_outerCutoff;
+
 	// atten
 	float m_atten_const;
 	float m_atten_linear;
@@ -49,8 +52,12 @@ public:
 	float GetAttenLinear() const { return m_atten_linear; }
 	float GetAttenQuadratic() const { return m_atten_quad; }
 	Vector3 GetDirection() const { return m_direction;}
+	float GetCutOff() const { return m_cutoff;}
+	float GetOuterCutoff() const { return m_outerCutoff;}
 
 	void SetAttenConst(float val) { m_atten_const = val;}
 	void SetAttenLinear(float val) { m_atten_linear = val; }
 	void SetAttenQuad(float val) { m_atten_quad=val;}
+	void SetCutoff(float val) { m_cutoff = val;}
+	void SetOuterCutoff(float val) { m_outerCutoff = val; }
 };

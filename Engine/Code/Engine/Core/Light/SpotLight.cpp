@@ -10,6 +10,12 @@ SpotLight::SpotLight(Vector3 pos, Vector3 rot, Vector3 scale, Rgba color, Vector
 }
 
 
+SpotLight::SpotLight(const Vector3& pos, const Vector3& rot, const Vector3& scale, const Rgba& color, const Vector3& direction)
+	:Light(pos, rot, scale, color, Vector3::ZERO, Vector3::ZERO, direction, 0.f, 0.f, 0.f)
+{
+	
+}
+
 SpotLight::~SpotLight()
 {
 
@@ -18,7 +24,7 @@ SpotLight::~SpotLight()
 
 void SpotLight::Update(float)
 {
-	//m_renderable->m_transform.UpdateLocalMatrix();
+
 }
 
 

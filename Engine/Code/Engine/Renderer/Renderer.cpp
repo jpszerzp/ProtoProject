@@ -1257,6 +1257,8 @@ void Renderer::Draw(const Drawcall& dc)
 	SetUniform("light_mat.constant", dc.m_light_atten_const);
 	SetUniform("light_mat.linear", dc.m_light_atten_linear);
 	SetUniform("light_mat.quadratic", dc.m_light_atten_quad);
+	SetUniform("light_mat.cutoff", dc.m_cutoff);
+	SetUniform("light_mat.outerCutoff", dc.m_outerCutoff);
 	GL_CHECK_ERROR();
 
 	SetGameTimeUBO(programHandle);

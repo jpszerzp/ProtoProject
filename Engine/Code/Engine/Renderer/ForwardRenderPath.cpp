@@ -66,6 +66,8 @@ void ForwardRenderPath::RenderSceneForCamera(Camera* camera, RenderSceneGraph* s
 		dc->m_light_atten_const = scene->m_single_light->GetAttenConst();
 		dc->m_light_atten_linear = scene->m_single_light->GetAttenLinear();
 		dc->m_light_atten_quad = scene->m_single_light->GetAttenQuadratic();
+		dc->m_cutoff = scene->m_single_light->GetCutOff();
+		dc->m_outerCutoff = scene->m_single_light->GetOuterCutoff();
 
 		dcs.push_back(dc);
 	}

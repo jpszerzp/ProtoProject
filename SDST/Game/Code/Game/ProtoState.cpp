@@ -191,19 +191,19 @@ ProtoState::ProtoState()
 	Vector3 lightScale;
 	Rgba lightColor;
 	Vector3 lightDir;
-	lightPos = Vector3(6.f, 5.f, -3.f);
-	lightRot = Vector3::ZERO;
-	lightScale = Vector3(0.05f, 0.05f, 0.05f);
-	lightColor = Rgba::WHITE;
-	PointLight* pl_0 = new PointLight(lightPos, lightRot, lightScale, lightColor);
-	pl_0->SetAttenConst(1.f);
-	pl_0->SetAttenLinear(0.09f);
-	pl_0->SetAttenQuad(0.032f);
-	m_gameObjects.push_back(pl_0);
-	m_sceneGraph->AddLight(pl_0);
-	m_sceneGraph->m_single_light = pl_0;			// to be THE light of the scene graph
-	theRenderer->m_singleLightData.lightPos = pl_0->GetWorldPosition();
-	theRenderer->m_singleLightData.lightColor = pl_0->GetColor().ToVec4();		// this is using the light color
+	//lightPos = Vector3(6.f, 5.f, -3.f);
+	//lightRot = Vector3::ZERO;
+	//lightScale = Vector3(0.05f, 0.05f, 0.05f);
+	//lightColor = Rgba::WHITE;
+	//PointLight* pl_0 = new PointLight(lightPos, lightRot, lightScale, lightColor);
+	//pl_0->SetAttenConst(1.f);
+	//pl_0->SetAttenLinear(0.09f);
+	//pl_0->SetAttenQuad(0.032f);
+	//m_gameObjects.push_back(pl_0);
+	//m_sceneGraph->AddLight(pl_0);
+	//m_sceneGraph->m_single_light = pl_0;			// to be THE light of the scene graph
+	//theRenderer->m_singleLightData.lightPos = pl_0->GetWorldPosition();
+	//theRenderer->m_singleLightData.lightColor = pl_0->GetColor().ToVec4();		// this is using the light color
 
 	//lightPos = Vector3(-15.f, 6.5f, 10.f);
 	//lightRot = Vector3::ZERO;
@@ -216,6 +216,23 @@ ProtoState::ProtoState()
 	//m_sceneGraph->m_single_light = dl_0;
 	//theRenderer->m_singleLightData.lightPos = dl_0->GetWorldPosition();
 	//theRenderer->m_singleLightData.lightColor = dl_0->GetColor().ToVec4();		
+
+	lightPos = Vector3(6.f, 5.f, -3.f);
+	lightRot = Vector3::ZERO;
+	lightScale = Vector3(0.05f);
+	lightColor = Rgba::WHITE;
+	lightDir = Vector3(0.f, 0.f, 1.f);
+	SpotLight* sl_0 = new SpotLight(lightPos, lightRot, lightScale, lightColor, lightDir);
+	sl_0->SetAttenConst(1.f);
+	sl_0->SetAttenLinear(0.09f);
+	sl_0->SetAttenQuad(0.032f);
+	sl_0->SetCutoff(CosDegrees(30.f));
+	sl_0->SetOuterCutoff(CosDegrees(40.f));
+	m_gameObjects.push_back(sl_0);
+	m_sceneGraph->AddLight(sl_0);
+	m_sceneGraph->m_single_light = sl_0;
+	theRenderer->m_singleLightData.lightPos = sl_0->GetWorldPosition();
+	theRenderer->m_singleLightData.lightColor = sl_0->GetColor().ToVec4();		// this is using the light color
 
 	//Cone* cone = new Cone(Vector3(-20.f, 0.f, 5.f), Vector3::ZERO, Vector3::ONE, Rgba::WHITE, "cone_pcu", "white", MOVE_STATIC, BODY_PARTICLE, false);
 	//m_gameObjects.push_back(cone);

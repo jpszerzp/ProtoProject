@@ -32,6 +32,8 @@ public:
 	float m_light_atten_const;
 	float m_light_atten_linear;
 	float m_light_atten_quad;
+	float m_cutoff;
+	float m_outerCutoff;
 
 	uint m_lightCount;
 	int m_lightIndices[MAX_LIGHTS];

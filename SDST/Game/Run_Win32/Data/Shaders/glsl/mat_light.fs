@@ -15,6 +15,8 @@ struct LightMaterial
 {
 	vec3 direction;
 	vec3 pos;
+	float cutoff;
+	float outerCutoff;
 
 	vec3 ambient;
 	vec3 diffuse;
@@ -119,9 +121,53 @@ void ComputeDirectionalLight()
 	outColor = vec4(result, 1.0);
 }
 
+void ComputeSpotLight()
+{
+	vec3 light_v3 = vec3(lightColor.x, lightColor.y, lightColor.z);
+	vec3 norm = normalize(passNormal);
+	vec3 lightDir = normalize(light_mat.pos - passFragPos);
+	float dist = length(light_mat.pos - passFragPos);
+	float attenuation = ComputeAttenuation(light_mat, dist);
+	float theta = dot(lightDir, normalize(-light_mat.direction));
+	float epsilon = light_mat.cutoff - light_mat.outerCutoff;
+	float intensity = clamp((theta - light_mat.outerCutoff) / epsilon, 0.0, 1.0);
+
+	if (theta > light_mat.outerCutoff)
+	{
+		// ambient
+		vec3 ambient_result = (light_v3 * light_mat.ambient) * vec3(texture(material.diffuse, passUV));
+		ambient_result *= attenuation;
+
+		// diffuse
+		float diff = max(dot(norm, lightDir), 0.0);
+		vec3 diffuse_result = (light_v3 * light_mat.diffuse) * (diff * vec3(texture(material.diffuse, passUV)));
+		diffuse_result *= attenuation;
+		diffuse_result *= intensity;
+
+		// spec
+		vec3 viewDir = normalize(EYE_POSITION - passFragPos);
+		vec3 reflectDir = reflect(-lightDir, norm);
+		float spec = pow(max(dot(viewDir, reflectDir), 0.0),material.shininess);
+		vec3 specular_result = (light_v3 * light_mat.spec) * (spec * vec3(texture(material.specular, passUV)));
+		specular_result *= attenuation;
+		specular_result *= intensity;
+
+		vec3 result = ambient_result + diffuse_result + specular_result;
+		outColor = vec4(result, 1.0);
+	}
+	else
+	{
+		vec3 ambient_result = (light_v3 * light_mat.ambient) * vec3(texture(material.diffuse, passUV));
+		ambient_result *= attenuation;
+		
+		outColor = vec4(ambient_result, 1.0);
+	}
+}
+
 // Entry Point
 void main()
 {
-	ComputePointLight();
+	//ComputePointLight();
 	//ComputeDirectionalLight();
+	ComputeSpotLight();
 }
