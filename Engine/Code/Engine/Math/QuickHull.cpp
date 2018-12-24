@@ -525,8 +525,79 @@ QuickHull::QuickHull(uint num, const Vector3& min, const Vector3& max, bool auto
 	}
 
 	m_auto_gen = auto_gen;
+}
 
-	//m_transform = Transform();
+QuickHull::QuickHull(std::set<Vector3>& points)
+{
+	for (std::set<Vector3>::iterator it = points.begin(); it != points.end(); ++it)
+	{
+		Vector3 pos = *it;
+		QHVert* vert = new QHVert(pos, Rgba::WHITE);
+		m_conflict_verts.push_back(vert);
+	}
+
+	GenerateInitialFace();
+	GenerateInitialHull();
+	
+	for (QHFace* face : m_faces)
+	{
+		face->VerifyHalfEdgeNext();
+		face->VerifyHalfEdgeParent();
+		face->VerifyHalfEdgeTwin();
+	}
+
+	m_auto_gen = false;
+	m_once_gen = true;
+
+	// CONFLICT
+	while(!m_conflict_finished)
+	{
+		QHVert* vert = GetVert(m_vertCount);
+		bool removed = AddConflictPointInitial(vert);
+
+		if (!removed)
+			m_vertCount++;
+
+		if (m_vertCount == GetVertNum())
+			m_conflict_finished = true;
+	}
+
+	bool repeat = ConstructQuickHullUnit();
+	while (repeat)
+		repeat = ConstructQuickHullUnit();
+
+	// PRE_COMPLETE
+	for (QHFace* face : m_faces)
+		face->FlushHEMesh();
+	// we can generate centroid here
+	if (m_go_ref != nullptr)
+	{
+		m_ref_pos = m_go_ref->m_renderable->m_transform.m_localTransform.m_position;
+		m_qh_rot = m_go_ref->m_renderable->m_transform.m_localTransform.m_euler;
+		m_qh_scale = m_go_ref->m_renderable->m_transform.m_localTransform.m_scale;
+	}
+	else
+	{
+		m_ref_pos = GetCentroid();
+		m_qh_rot = Vector3::ZERO;
+		m_qh_scale = Vector3::ONE;
+	}
+	m_ref_mesh = Mesh::CreatePointImmediate(VERT_PCU, m_ref_pos, Rgba::WHITE);
+
+	// force transform
+	Vector3 disp = m_ref_pos - Vector3::ZERO;
+	for (QHFace* face : m_faces)
+	{
+		std::vector<Vector3>& verts = face->verts;
+		assert(verts.size() == 3U);
+		std::vector<Vector3> unitVerts;
+
+		for (const Vector3& vert : verts)
+			unitVerts.push_back(vert - disp);
+
+		// create unit mesh with unit verts
+		face->unitMesh = Mesh::CreateTriangleImmediate(VERT_PCU, Rgba::WHITE, unitVerts[0], unitVerts[1], unitVerts[2]);
+	}
 }
 
 QuickHull::~QuickHull()
@@ -602,7 +673,7 @@ void QuickHull::UpdateHull()
 		break;
 		case HORIZON_START:
 		{
-			QHFace* conflict_face = std::get<0>(m_eyePair);
+			//QHFace* conflict_face = std::get<0>(m_eyePair);
 			QHVert* conflict_vert = std::get<1>(m_eyePair);
 
 			bool visible = PointOutBoundFace(conflict_vert->vert, *m_otherFace);
@@ -634,7 +705,7 @@ void QuickHull::UpdateHull()
 		break;
 		case HORIZON_PROCESS:
 		{
-			QHFace* conflict_face = std::get<0>(m_eyePair);
+			//QHFace* conflict_face = std::get<0>(m_eyePair);
 			QHVert* conflict_pt = std::get<1>(m_eyePair);
 
 			if (!ReachStartHalfEdge())
@@ -704,7 +775,7 @@ void QuickHull::UpdateHull()
 				RemoveVisitedFrontier();
 
 				std::vector<QHFace*>::iterator it = std::find(m_faces.begin(), m_faces.end(), visited_frontier);
-				bool inList = (it != m_faces.end());
+				//bool inList = (it != m_faces.end());
 				m_faces.erase(it);
 
 				for (QHVert* v : visited_frontier->conflicts)
@@ -762,7 +833,7 @@ void QuickHull::UpdateHull()
 				std::tuple<Vector3, Vector3, HalfEdge*> he_data = m_horizon_infos.front();
 				m_horizon_infos.pop_front();
 
-				const Vector3& eyePos = eye->vert;
+				//const Vector3& eyePos = eye->vert;
 				QHFace* new_face = new QHFace(he_restore, std::get<1>(he_data), eye->vert);
 				CreateFaceMesh(*new_face);
 				GenerateOutboundNorm(m_anchor, *new_face);
@@ -962,6 +1033,286 @@ void QuickHull::UpdateBasis()
 			m_rightBasisMesh = nullptr;
 		}
 		m_rightBasisMesh = Mesh::CreateLineImmediate(VERT_PCU, world, rightEnd, Rgba::RED);
+	}
+}
+
+/*
+ * Return whether this construct unit function will be repeated or not (back to eye generation)
+ */
+bool QuickHull::ConstructQuickHullUnit()
+{
+	bool eye_finished = false;
+	bool horizon_start_finished = false;
+	bool horizon_process_finished = false;
+	bool old_face_finished = false;
+	bool new_face_finished = false;
+	bool orphan_finished = false;
+	bool topo_error_finished = false;
+	bool reset_finished = false;
+
+	// EYE
+	while (!eye_finished)
+	{
+		m_eyePair = GetFarthestConflictPair();
+		QHFace* conflict_face = std::get<0>(m_eyePair);
+		QHVert* conflict_pt = std::get<1>(m_eyePair);
+
+		if (conflict_face != nullptr && conflict_pt != nullptr)
+		{
+			m_start_he = conflict_face->m_entry;
+			m_current_he = m_start_he;
+			m_otherFace = m_current_he->m_twin->m_parentFace;
+
+			m_visitedFaces.push_back(conflict_face);
+			m_exploredFaces.push_back(conflict_face);
+
+			// got a conflict, add it to hull vert list
+			m_vertices.push_back(conflict_pt->vert);
+
+			eye_finished = true;
+		}
+	}
+
+	// HORIZON START
+	while(!horizon_start_finished)
+	{
+		//QHFace* conflict_face = std::get<0>(m_eyePair);
+		QHVert* conflict_vert = std::get<1>(m_eyePair);
+
+		bool visible = PointOutBoundFace(conflict_vert->vert, *m_otherFace);
+		if (visible)
+		{
+			m_exploredFaces.push_back(m_otherFace);
+			m_visitedFaces.push_back(m_otherFace);
+
+			ChangeCurrentHalfEdgeNewFace();
+			ChangeOtherFace();
+		}
+		else
+		{
+			HalfEdge* horizon = m_current_he;
+			ChangeCurrentHalfEdgeOldFace();
+			horizon->VerifyHorizonTwin();
+			AddHorizonInfo(horizon);
+			ChangeOtherFace();
+		}
+
+		horizon_start_finished = true;
+	}
+
+	// HORIZON_PROCESS
+	while (!horizon_process_finished)
+	{
+		//QHFace* conflict_face = std::get<0>(m_eyePair);
+		QHVert* conflict_pt = std::get<1>(m_eyePair);
+
+		if (!ReachStartHalfEdge())
+		{
+			bool visible = PointOutBoundFace(conflict_pt->vert, *m_otherFace);
+			if (visible)
+			{
+				bool visited = HasVisitedFace(m_otherFace);
+				if (visited)
+				{
+					bool last_visited = IsLastVisitedFace(m_otherFace);
+					if (last_visited)
+					{
+						m_exploredFaces.pop_back();
+						ChangeCurrentHalfEdgeNewFace();
+						ChangeOtherFace();
+					}
+					else
+					{
+						ChangeCurrentHalfEdgeOldFace();
+						ChangeOtherFace();
+					}
+				}
+				else
+				{
+					m_exploredFaces.push_back(m_otherFace);
+					m_visitedFaces.push_back(m_otherFace);
+
+					ChangeCurrentHalfEdgeNewFace();
+					ChangeOtherFace();
+				}
+			}
+			else
+			{
+				HalfEdge* horizon = m_current_he;
+				ChangeCurrentHalfEdgeOldFace();
+				horizon->VerifyHorizonTwin();
+				AddHorizonInfo(horizon);
+				ChangeOtherFace();
+			}
+		}
+		else
+			horizon_process_finished = true;
+	}
+
+	// OLD_FACE
+	while (!old_face_finished)
+	{
+		if (!m_visitedFaces.empty())
+		{
+			QHVert* eye = std::get<1>(m_eyePair);
+
+			QHFace* visited_frontier = PeekVisitedFrontier();
+			RemoveVisitedFrontier();
+
+			std::vector<QHFace*>::iterator it = std::find(m_faces.begin(), m_faces.end(), visited_frontier);
+			//bool inList = (it != m_faces.end());
+			m_faces.erase(it);
+
+			for (QHVert* v : visited_frontier->conflicts)
+			{
+				if (v != eye)
+					m_orphans.push_back(v);
+			}
+
+			HalfEdge* it_he = visited_frontier->m_entry;
+			HalfEdge* prev = it_he->m_prev;
+			HalfEdge* next = it_he->m_next;
+			if (std::find(m_horizon.begin(), m_horizon.end(), it_he) == m_horizon.end())
+				// in other words, delete the entry if we cannot find it as part of horizon
+				delete it_he;
+			if (std::find(m_horizon.begin(), m_horizon.end(), prev) == m_horizon.end())
+				delete prev;
+			if (std::find(m_horizon.begin(), m_horizon.end(), next) == m_horizon.end())
+				delete next;
+
+			if (m_anchor == Vector3::INVALID)
+			{
+				Vector3 interior = visited_frontier->GetFaceCentroid();
+				m_anchor = interior;
+			}
+
+			delete visited_frontier;
+		}
+		else
+		{
+			// verification
+			for (QHFace* face : m_faces)
+			{
+				face->VerifyHalfEdgeNext();
+				face->VerifyHalfEdgeParent();
+				face->VerifyHalfEdgeTwin();
+			}
+
+			m_render_horizon = true;
+			std::get<0>(m_eyePair) = nullptr;
+			old_face_finished = true;
+		}
+	}
+
+	// NEW FACE
+	while (!new_face_finished)
+	{
+		if (!m_horizon.empty())
+		{
+			QHVert* eye = std::get<1>(m_eyePair);
+
+			HalfEdge* he_restore = PeekHorizonFrontier();
+			RemoveHorizonFrontier();
+
+			std::tuple<Vector3, Vector3, HalfEdge*> he_data = m_horizon_infos.front();
+			m_horizon_infos.pop_front();
+
+			//const Vector3& eyePos = eye->vert;
+			QHFace* new_face = new QHFace(he_restore, std::get<1>(he_data), eye->vert);
+			CreateFaceMesh(*new_face);
+			GenerateOutboundNorm(m_anchor, *new_face);
+			CreateFaceNormalMesh(*new_face);
+			new_face->SetParentHalfEdge();
+
+			new_face->VerifyHalfEdgeNext();
+			new_face->VerifyHalfEdgeParent();
+
+			AddFace(new_face);
+			AddNewFace(new_face);
+		}
+		else
+		{
+			// build twin relation
+			for (std::vector<QHFace*>::size_type i1 = 0; i1 < m_newFaces.size(); ++i1)
+			{
+				QHFace* subject = m_newFaces[i1];
+
+				for (std::vector<QHFace*>::size_type i2 = 0; i2 < m_newFaces.size(); ++i2)
+				{
+					QHFace* object = m_newFaces[i2];
+					if (subject != object)
+					{
+						// for each new face, there is a possibility that it shares an edge with another new face
+						// once we find that shared edge, the half edge corresponding to it in that other face is just the twin
+						// of the half edge corresponding to this shared edge in this current face we are inspecting
+						subject->UpdateSharedEdge(object);		// set twins along the way
+					}
+				}
+			}
+
+			// verifications
+			for (QHFace* face : m_faces)
+			{
+				face->VerifyHalfEdgeNext();
+				face->VerifyHalfEdgeParent();
+				face->VerifyHalfEdgeTwin();
+			}
+
+			new_face_finished = true;
+		}
+	}
+
+	// ORPHAN
+	while (!orphan_finished)
+	{
+		if (!m_orphans.empty())
+		{
+			QHVert* orphan = m_orphans.front();
+			m_orphans.pop_front();
+
+			AddConflictPointGeneral(orphan, m_newFaces);
+		}
+		else
+		{
+			m_newFaces.clear();
+			orphan_finished=true;
+		}
+	}
+
+	// TOPO ERROR
+	while (!topo_error_finished)
+		topo_error_finished = true;
+
+	// RESET
+	while (!reset_finished)
+	{
+		QHVert* eye = std::get<1>(m_eyePair);
+		RemovePointGlobal(eye->vert);
+
+		if (!m_exploredFaces.empty())
+			m_exploredFaces.clear();
+
+		m_start_he = nullptr;
+		m_current_he = nullptr;
+		m_otherFace = nullptr;
+
+		m_anchor = Vector3::INVALID;
+
+		m_render_horizon = false;
+
+		// verify again
+		for (QHFace* face : m_faces)
+		{
+			face->VerifyHalfEdgeNext();
+			face->VerifyHalfEdgeParent();
+			face->VerifyHalfEdgeTwin();
+		}
+
+		if (!m_conflict_verts.empty())
+			// conflict list should be adjusted correctly already; back to the step where we generate eye
+			return true;
+		else
+			return false;
 	}
 }
 
@@ -2035,7 +2386,7 @@ void QuickHull::RemoveHorizonFrontier()
 
 Vector3 QuickHull::GetCentroid() const
 {
-	int dimension = m_vertices.size();
+	size_t dimension = m_vertices.size();
 
 	Vector3 vert_sum = Vector3::ZERO;
 	for (int i = 0; i < m_vertices.size(); ++i)
@@ -2078,12 +2429,17 @@ void QuickHull::RenderHull(Renderer* renderer)
 {
 	if (!m_auto_gen)
 	{
-		RenderFacesAndNormals(renderer);
-		RenderVerts(renderer);
-		if (m_render_horizon)
-			RenderHorizon(renderer);
-		//RenderCurrentHalfEdge(renderer);
-		//RenderAnchor(renderer);
+		if (!m_once_gen)
+		{
+			RenderFacesAndNormals(renderer);
+			RenderVerts(renderer);
+			if (m_render_horizon)
+				RenderHorizon(renderer);
+			//RenderCurrentHalfEdge(renderer);
+			//RenderAnchor(renderer);
+		}
+		else
+			RenderUnitFaces(renderer);
 	}
 	else
 	{
@@ -2227,6 +2583,22 @@ void QuickHull::CreateFaceNormalMesh(QHFace& face)
 	face.CreateFaceNormalMesh(theColor);
 	++color_index;
 	color_index = color_index % COLOR_LIST_SIZE;
+}
+
+QuickHull* QuickHull::GenerateMinkowskiHull(QuickHull* hull0, QuickHull* hull1)
+{
+	const std::vector<Vector3>& hull_0_verts = hull0->GetVerts();
+	const std::vector<Vector3>& hull_1_verts = hull1->GetVerts();
+
+	// take minkowski difference of two sets and delete duplicates with the help of a set
+	std::set<Vector3> hull_0_verts_set = ConvertToSetFromVector(hull_0_verts);
+	std::set<Vector3> hull_1_verts_set = ConvertToSetFromVector(hull_1_verts);
+	std::set<Vector3> mksi_set = MinkowskiDifferenceHull(hull_0_verts_set, hull_1_verts_set);
+
+	// given the set of points, generate the mksi hull
+	QuickHull* res = new QuickHull(mksi_set);
+
+	return res;
 }
 
 QHEdge::QHEdge(const Vector3& vert1, const Vector3& vert2)

@@ -33,9 +33,10 @@ public:
 	ControlGroup(GameObject* go1, GameObject* go2, const eControlID& id, const Vector3& observation);
 	~ControlGroup(){}
 
-	void ProcessInput();
 	void RenderCore(Renderer* renderer);
 	void RenderUI();
+
+	void ProcessInput();
 	void Update(float deltaTime);
 	void UpdateDebugDraw();
 	void UpdateUI();

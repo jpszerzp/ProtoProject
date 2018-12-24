@@ -162,6 +162,7 @@ class QuickHull
 public:
 	QuickHull(){}
 	QuickHull(uint num, const Vector3& min, const Vector3& max, bool auto_gen = false);
+	QuickHull(std::set<Vector3>& points);
 	~QuickHull();
 
 	// global list of verts that have a chance to sit on surface of hull
@@ -200,6 +201,17 @@ public:
 	int m_vertCount = 0;
 	bool m_unit_gen = false;
 
+	bool m_once_gen = false;
+	bool m_conflict_finished = false;
+	//bool m_eye_finished = false;
+	//bool m_horizon_start_finished = false;
+	//bool m_horizon_process_finished = false;
+	//bool m_old_face_finished = false;
+	//bool m_new_face_finished = false;
+	//bool m_orphan_finished = false;
+	//bool m_topo_error_finished = false;
+	//bool m_reset_finished = false;
+
 	// centroid as reference point
 	//Transform m_transform;
 	Vector3 m_ref_pos;
@@ -215,6 +227,7 @@ public:
 	Mesh* m_rightBasisMesh = nullptr;
 
 public:
+	bool ConstructQuickHullUnit();
 	bool AddConflictPointInitial(QHVert* vert);
 	bool AddConflictPointGeneral(QHVert* vert, std::vector<QHFace*>& faces);
 	//void AddHorizonMesh(HalfEdge* horizon);
@@ -240,6 +253,7 @@ public:
 	const std::vector<QHFace*> FindFaceGivenSharedEdgeInitial(const QHEdge& edge, bool& found);
 	const std::vector<QHFace*> FindFaceGivenSharedEdgeGeneral(const QHEdge& edge, bool& found, const std::vector<QHFace*>& new_faces);
 	const std::vector<QHFace*> FindFaceGivenSharedVertInitial(const QHVert& vert, bool& found);
+	const std::vector<Vector3>& GetVerts() const { return m_vertices; }
 	QHVert* GetVert(int idx) { return m_conflict_verts[idx]; }
 	size_t GetVertNum() const { return m_conflict_verts.size(); }
 	std::tuple<QHFace*, QHVert*> GetFarthestConflictPair(float& dist) const;
@@ -277,4 +291,6 @@ public:
 	void FlushNormalMeshes();
 	void CreateFaceMesh(QHFace& face, Rgba color = Rgba::WHITE);
 	void CreateFaceNormalMesh(QHFace& face);
+
+	static QuickHull* GenerateMinkowskiHull(QuickHull* hull0, QuickHull* hull1);
 };

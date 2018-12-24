@@ -32,6 +32,7 @@ ControlGroup::ControlGroup(GameObject* go1, GameObject* go2, const eControlID& i
 	m_observation_pos = observation;
 }
 
+static QuickHull* fake_hull = nullptr;		// holder for mksi hull
 void ControlGroup::ProcessInput()
 {
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_C))
@@ -226,6 +227,24 @@ void ControlGroup::ProcessInput()
 		else 
 			rb1->SetAngularVelocity(Vector3::ZERO);
 	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_0))
+	{
+		// first generate the minkowski hull if the group is all about hull object
+		if (m_id == CONTROL_HULL_HULL)
+		{
+			if (fake_hull == nullptr)
+			{
+				HullObject* hull_0 = dynamic_cast<HullObject*>(g0);
+				HullObject* hull_1 = dynamic_cast<HullObject*>(g1);
+
+				QuickHull* qh_0 = hull_0->GetHullPrimitive();
+				QuickHull* qh_1 = hull_1->GetHullPrimitive();
+
+				fake_hull = QuickHull::GenerateMinkowskiHull(qh_0, qh_1);
+			}
+		}
+	}
 }
 
 static Mesh* obb3_obb3_pt_pos = nullptr;
@@ -238,122 +257,11 @@ void ControlGroup::RenderCore(Renderer* renderer)
 			m_gos[idx]->Render(renderer);
 	}
 
-	/*
-	////////////////////////////// FOR OBB3 COLLISION DEBUG ONLY /////////////////////////////////
-	Shader* shader = renderer->CreateOrGetShader("wireframe_color");
-	renderer->UseShader(shader);
-
-	Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
-	renderer->SetTexture2D(0, texture);
-	renderer->SetSampler2D(0, texture->GetSampler());
-	glPointSize(10.f);
-
-	renderer->m_objectData.model = Matrix44::IDENTITY;
-
-	if (obb3_obb3_pt_pos != nullptr)
-		renderer->DrawMesh(obb3_obb3_pt_pos);
-
-	if (obb3_obb3_face_center != nullptr)
-		renderer->DrawMesh(obb3_obb3_face_center);
-
-	if (obb2_vert_to_obb1_face_0 != nullptr)
-		renderer->DrawMesh(obb2_vert_to_obb1_face_0);
-
-	if (obb2_vert_to_obb1_face_1 != nullptr)
-		renderer->DrawMesh(obb2_vert_to_obb1_face_1);
-
-	if (obb2_vert_to_obb1_face_2 != nullptr)
-		renderer->DrawMesh(obb2_vert_to_obb1_face_2);
-
-	if (obb2_vert_to_obb1_face_3 != nullptr)
-		renderer->DrawMesh(obb2_vert_to_obb1_face_3);
-
-	if (obb2_vert_to_obb1_face_4 != nullptr)
-		renderer->DrawMesh(obb2_vert_to_obb1_face_4);
-
-	if (obb2_vert_to_obb1_face_5 != nullptr)
-		renderer->DrawMesh(obb2_vert_to_obb1_face_5);
-
-	if (obb1_vert_to_obb2_face_0 != nullptr)
-		renderer->DrawMesh(obb1_vert_to_obb2_face_0);
-
-	if (obb1_vert_to_obb2_face_1 != nullptr)
-		renderer->DrawMesh(obb1_vert_to_obb2_face_1);
-
-	if (obb1_vert_to_obb2_face_2 != nullptr)
-		renderer->DrawMesh(obb1_vert_to_obb2_face_2);
-
-	if (obb1_vert_to_obb2_face_3 != nullptr)
-		renderer->DrawMesh(obb1_vert_to_obb2_face_3);
-
-	if (obb1_vert_to_obb2_face_4 != nullptr)
-		renderer->DrawMesh(obb1_vert_to_obb2_face_4);
-
-	if (obb1_vert_to_obb2_face_5 != nullptr)
-		renderer->DrawMesh(obb1_vert_to_obb2_face_5);
-
-	if (obb2_vert_0_winner != nullptr)
-		renderer->DrawMesh(obb2_vert_0_winner);
-
-	if (obb2_vert_1_winner != nullptr)
-		renderer->DrawMesh(obb2_vert_1_winner);
-
-	if (obb2_vert_2_winner != nullptr)
-		renderer->DrawMesh(obb2_vert_2_winner);
-
-	if (obb2_vert_3_winner != nullptr)
-		renderer->DrawMesh(obb2_vert_3_winner);
-
-	if (obb2_vert_4_winner != nullptr)
-		renderer->DrawMesh(obb2_vert_4_winner);
-
-	if (obb2_vert_5_winner != nullptr)
-		renderer->DrawMesh(obb2_vert_5_winner);
-
-	if (obb2_vert_6_winner != nullptr)
-		renderer->DrawMesh(obb2_vert_6_winner);
-
-	if (obb2_vert_7_winner != nullptr)
-		renderer->DrawMesh(obb2_vert_7_winner);
-
-	if (obb1_vert_0_winner != nullptr)
-		renderer->DrawMesh(obb1_vert_0_winner);
-
-	if (obb1_vert_1_winner != nullptr)
-		renderer->DrawMesh(obb1_vert_1_winner);
-
-	if (obb1_vert_2_winner != nullptr)
-		renderer->DrawMesh(obb1_vert_2_winner);
-
-	if (obb1_vert_3_winner != nullptr)
-		renderer->DrawMesh(obb1_vert_3_winner);
-
-	if (obb1_vert_4_winner != nullptr)
-		renderer->DrawMesh(obb1_vert_4_winner);
-
-	if (obb1_vert_5_winner != nullptr)
-		renderer->DrawMesh(obb1_vert_5_winner);
-
-	if (obb1_vert_6_winner != nullptr)
-		renderer->DrawMesh(obb1_vert_6_winner);
-
-	if (obb1_vert_7_winner != nullptr)
-		renderer->DrawMesh(obb1_vert_7_winner);
-
-	if (obb2_pt_obb1_face_winner != nullptr)
+	if (m_id == CONTROL_HULL_HULL)
 	{
-		glLineWidth(5.f);
-		renderer->DrawMesh(obb2_pt_obb1_face_winner);
-		glLineWidth(2.f);
+		if (fake_hull != nullptr)
+			fake_hull->RenderHull(renderer);
 	}
-
-	if (obb1_pt_obb2_face_winner != nullptr)
-	{
-		glLineWidth(5.f);
-		renderer->DrawMesh(obb1_pt_obb2_face_winner);
-		glLineWidth(2.f);
-	}
-	*/
 }
 
 void ControlGroup::RenderUI()

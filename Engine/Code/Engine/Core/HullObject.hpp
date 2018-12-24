@@ -11,6 +11,8 @@ public:
 
 	void SetHullObject() { m_hull->m_go_ref = this; }
 
+	QuickHull* GetHullPrimitive() { return m_hull; }
+
 	HullObject(){}
 	HullObject(const Vector3& pos, const Vector3& ext, const Vector3& rot, const Vector3& scale, const Rgba& tint,
 		std::string matName, eMoveStatus moveStat, eBodyIdentity bid, int sampleCount, std::string fileName = "", bool multipass = false,
