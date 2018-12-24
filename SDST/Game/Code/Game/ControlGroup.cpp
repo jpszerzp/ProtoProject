@@ -33,6 +33,7 @@ ControlGroup::ControlGroup(GameObject* go1, GameObject* go2, const eControlID& i
 }
 
 static QuickHull* fake_hull = nullptr;		// holder for mksi hull
+static Vector3 net_disp;
 void ControlGroup::ProcessInput()
 {
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_C))
@@ -148,36 +149,42 @@ void ControlGroup::ProcessInput()
 				Vector3 pos = hull->m_renderable->m_transform.GetLocalPosition();
 				pos += Vector3(0.f, 0.f, 1.f);
 				hull->m_renderable->m_transform.SetLocalPosition(pos);
+				net_disp = Vector3(0.f, 0.f, 1.f);
 			}
 			if (g_input->IsKeyDown(InputSystem::KEYBOARD_DOWN_ARROW))
 			{
 				Vector3 pos = hull->m_renderable->m_transform.GetLocalPosition();
 				pos -= Vector3(0.f, 0.f, 1.f);
 				hull->m_renderable->m_transform.SetLocalPosition(pos);
+				net_disp = -Vector3(0.f, 0.f, 1.f);
 			}
 			if (g_input->IsKeyDown(InputSystem::KEYBOARD_LEFT_ARROW))
 			{
 				Vector3 pos = hull->m_renderable->m_transform.GetLocalPosition();
 				pos -= Vector3(1.f, 0.f, 0.f);
 				hull->m_renderable->m_transform.SetLocalPosition(pos);
+				net_disp = -Vector3(1.f, 0.f, 0.f);
 			}
 			if (g_input->IsKeyDown(InputSystem::KEYBOARD_RIGHT_ARROW))
 			{
 				Vector3 pos = hull->m_renderable->m_transform.GetLocalPosition();
 				pos += Vector3(1.f, 0.f, 0.f);
 				hull->m_renderable->m_transform.SetLocalPosition(pos);
+				net_disp = Vector3(1.f, 0.f, 0.f);
 			}
 			if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEUP))
 			{
 				Vector3 pos = hull->m_renderable->m_transform.GetLocalPosition();
 				pos += Vector3(0.f, 1.f, 0.f);
 				hull->m_renderable->m_transform.SetLocalPosition(pos);
+				net_disp = Vector3(0.f, 1.f, 0.f);
 			}
 			if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEDOWN))
 			{
 				Vector3 pos = hull->m_renderable->m_transform.GetLocalPosition();
 				pos -= Vector3(0.f, 1.f, 0.f);
 				hull->m_renderable->m_transform.SetLocalPosition(pos);
+				net_disp = -Vector3(0.f, 1.f, 0.f);
 			}
 			if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_1))
 			{
@@ -406,6 +413,13 @@ void ControlGroup::Update(float deltaTime)
 		break;
 	default:
 		break;
+	}
+
+	// fake hull
+	if (fake_hull != nullptr)
+	{
+		fake_hull->m_ref_pos += net_disp;
+		net_disp = Vector3::ZERO;
 	}
 
 	UpdateUI();

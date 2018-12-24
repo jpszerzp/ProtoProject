@@ -22,4 +22,5 @@ private:
 	std::vector<ControlGroup*> m_controlGrps;
 	ControlGroup* m_focusedGrp = nullptr;
 	int m_focusedIndex;
+	Mesh* m_origin_mesh =nullptr;
 };

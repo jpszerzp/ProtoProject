@@ -216,10 +216,10 @@ Collision3State::Collision3State()
 	scale = Vector3::ONE;
 	Vector3 hull_ext = Vector3(15.f, 15.f, 15.f);
 	TODO("material needs to be adjusted so that it respects data imported from assimp");
-	HullObject* h_1 = new HullObject(pos, hull_ext, rot, scale, tint, "white", stat, bid, 7, "", multipass, compare, cull, wind);
+	HullObject* h_1 = new HullObject(pos, hull_ext, rot, scale, tint, "white", stat, bid, 6, "", multipass, compare, cull, wind);
 	pos = Vector3(55.f, 0.f, 0.f);
 	rot = Vector3(45.f, 0.f, 0.f);
-	HullObject* h_2 = new HullObject(pos, hull_ext, rot, scale, tint, "white", stat, bid, 7, "", multipass, compare, cull, wind);
+	HullObject* h_2 = new HullObject(pos, hull_ext, rot, scale, tint, "white", stat, bid, 6, "", multipass, compare, cull, wind);
 	h_1->SetHullObject();
 	h_2->SetHullObject();
 	m_gameObjects.push_back(h_1);
@@ -231,6 +231,9 @@ Collision3State::Collision3State()
 	// set the focused grp and the initial index
 	m_focusedIndex = 0;
 	m_focusedGrp = m_controlGrps[m_focusedIndex];
+
+	// origin
+	m_origin_mesh = Mesh::CreatePointImmediate(VERT_PCU, Vector3::ZERO, Rgba::MEGENTA);
 
 	// debug
 	DebugRenderSet3DCamera(m_camera);
@@ -358,6 +361,8 @@ void Collision3State::Render(Renderer* renderer)
 	// draw group contents
 	renderer->SetCamera(m_camera);
 	m_focusedGrp->RenderCore(renderer);
+
+	DrawPoint(m_origin_mesh);
 
 	m_forwardPath->RenderScene(m_sceneGraph);
 }

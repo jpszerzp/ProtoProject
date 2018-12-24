@@ -33,3 +33,22 @@ void DrawTexts(const std::vector<Mesh*>& meshes)
 	for (Mesh* mesh : meshes)
 		DrawTextCut(mesh);
 }
+
+extern void DrawPoint(Mesh* point_mesh)
+{
+	Renderer* renderer = Renderer::GetInstance();
+	if (point_mesh != nullptr)
+	{
+		Shader* shader = renderer->CreateOrGetShader("wireframe_color");
+		renderer->UseShader(shader);
+
+		Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
+		renderer->SetTexture2D(0, texture);
+		renderer->SetSampler2D(0, texture->GetSampler());
+		glPointSize(10.f);
+
+		renderer->m_objectData.model = Matrix44::IDENTITY;
+
+		renderer->DrawMesh(point_mesh);
+	}
+}
