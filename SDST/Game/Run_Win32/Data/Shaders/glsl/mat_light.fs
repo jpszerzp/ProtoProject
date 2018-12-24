@@ -13,9 +13,16 @@ uniform Material material;
 
 struct LightMaterial
 {
+	vec3 direction;
+	vec3 pos;
+
 	vec3 ambient;
 	vec3 diffuse;
 	vec3 spec;
+
+	float constant;
+	float linear;
+	float quadratic;
 };
 uniform LightMaterial light_mat;
 
@@ -49,26 +56,33 @@ in vec3 passFragPos;
 
 out vec4 outColor;
 
-//uniform vec4 lightColor;
+float ComputeAttenuation(LightMaterial light, float dist)
+{
+	float attenuation = 1.0 / (light.constant + light.linear * dist + light.quadratic * (dist * dist));
+	return attenuation;
+}
 
-// Entry Point
-void main()
+void ComputePointLight()
 {
 	// light and color preparation
 	// time changing light can be disabled (only for demo purpose)
 	vec3 light_v3 = vec3(lightColor.x, lightColor.y, lightColor.z);
 	//vec3 light_v3 = vec3(lightColor.x * sin(game_time * 2.0), lightColor.y * sin(game_time * 0.7), lightColor.z * sin(game_time * 1.3));
 	vec3 norm = normalize(passNormal);
-	vec3 lightDir = normalize(lightPos - passFragPos);
+	vec3 lightDir = normalize(light_mat.pos - passFragPos);
+	float dist = length(light_mat.pos - passFragPos);
+	float attenuation = ComputeAttenuation(light_mat, dist);
 
 	// ambient
 	//vec3 ambient_result = (light_v3 * light_mat.ambient) * material.ambient;
 	vec3 ambient_result = (light_v3 * light_mat.ambient) * vec3(texture(material.diffuse, passUV));
+	ambient_result *= attenuation;
 
 	// diffuse
 	float diff = max(dot(norm, lightDir), 0.0);
 	//vec3 diffuse_result = (light_v3 * light_mat.diffuse) * (diff * material.diffuse);
 	vec3 diffuse_result = (light_v3 * light_mat.diffuse) * (diff * vec3(texture(material.diffuse, passUV)));
+	diffuse_result *= attenuation;
 
 	// specular
 	vec3 viewDir = normalize(EYE_POSITION - passFragPos);
@@ -76,7 +90,38 @@ void main()
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0),material.shininess);
 	//vec3 specular_result = (light_v3 * light_mat.spec) * (spec * material.specular);
 	vec3 specular_result = (light_v3 * light_mat.spec) * (spec * vec3(texture(material.specular, passUV)));
+	specular_result *= attenuation;
 
 	vec3 result = ambient_result + diffuse_result + specular_result;
 	outColor = vec4(result, 1.0);
+}
+
+void ComputeDirectionalLight()
+{
+	vec3 light_v3 = vec3(lightColor.x, lightColor.y, lightColor.z);
+	vec3 norm = normalize(passNormal);	
+	vec3 lightDir = normalize(-light_mat.direction);
+
+	// ambient
+	vec3 ambient_result = (light_v3 * light_mat.ambient) * vec3(texture(material.diffuse, passUV));
+
+	// diffuse
+	float diff = max(dot(norm, lightDir), 0.0);
+	vec3 diffuse_result = (light_v3 * light_mat.diffuse) * (diff * vec3(texture(material.diffuse, passUV)));
+
+	// specular
+	vec3 viewDir = normalize(EYE_POSITION - passFragPos);
+	vec3 reflectDir = reflect(-lightDir, norm);
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0),material.shininess);
+	vec3 specular_result = (light_v3 * light_mat.spec) * (spec * vec3(texture(material.specular, passUV)));
+
+	vec3 result = ambient_result + diffuse_result + specular_result;
+	outColor = vec4(result, 1.0);
+}
+
+// Entry Point
+void main()
+{
+	ComputePointLight();
+	//ComputeDirectionalLight();
 }

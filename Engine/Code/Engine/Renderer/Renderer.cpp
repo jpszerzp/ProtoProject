@@ -1230,7 +1230,7 @@ void Renderer::Draw(const Drawcall& dc)
 	SetSingleLightUBO(programHandle);
 	GL_CHECK_ERROR();
 
-	const Vector3& matSpec = ToGLMaterialSpec(dc.m_tint);
+	//const Vector3& matSpec = ToGLMaterialSpec(dc.m_tint);
 	float matShin = 256.f;
 	Texture* diff = dc.m_diff;
 	if (diff != nullptr)
@@ -1252,6 +1252,11 @@ void Renderer::Draw(const Drawcall& dc)
 	SetUniform("light_mat.ambient", dc.m_light_mat_ambient);	// this is for object using material system, values are user-specified, distinct from the light_color above
 	SetUniform("light_mat.diffuse", dc.m_light_mat_diff);
 	SetUniform("light_mat.spec", dc.m_light_mat_spec);
+	SetUniform("light_mat.pos", dc.m_light_pos);
+	SetUniform("light_mat.direction", dc.m_light_dir);
+	SetUniform("light_mat.constant", dc.m_light_atten_const);
+	SetUniform("light_mat.linear", dc.m_light_atten_linear);
+	SetUniform("light_mat.quadratic", dc.m_light_atten_quad);
 	GL_CHECK_ERROR();
 
 	SetGameTimeUBO(programHandle);
