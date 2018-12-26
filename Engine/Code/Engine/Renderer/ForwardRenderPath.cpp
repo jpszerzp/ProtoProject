@@ -68,6 +68,7 @@ void ForwardRenderPath::RenderSceneForCamera(Camera* camera, RenderSceneGraph* s
 		dc->m_light_atten_quad = scene->m_single_light->GetAttenQuadratic();
 		dc->m_cutoff = scene->m_single_light->GetCutOff();
 		dc->m_outerCutoff = scene->m_single_light->GetOuterCutoff();
+		dc->m_lights = scene->m_lights;			// first 4 point lights, last one directional light
 
 		dcs.push_back(dc);
 	}

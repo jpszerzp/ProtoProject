@@ -1,0 +1,6 @@
+<shader name="multi_lit">
+	<program>
+		<vertex file="Shaders/glsl/light.vs" />
+		<fragment file="Shaders/glsl/multi_light.fs" />
+	</program>
+</shader>

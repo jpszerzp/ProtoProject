@@ -1264,6 +1264,40 @@ void Renderer::Draw(const Drawcall& dc)
 	SetGameTimeUBO(programHandle);
 	GL_CHECK_ERROR();
 
+	// multi light
+	// pointlight
+	const std::vector<Light*>& lights = dc.m_lights;
+	for (int i = 0; i < 4; ++i)
+	{
+		Light* l = lights[i];
+		std::string name = Stringf("pointLights[%i].constant", i);
+		SetUniform(name.c_str(), l->GetAttenConst());
+		name = Stringf("pointLights[%i].linear", i);
+		SetUniform(name.c_str(), l->GetAttenLinear());
+		name = Stringf("pointLight[%i].quadratic", i);
+		SetUniform(name.c_str(), l->GetAttenQuadratic());
+
+		name = Stringf("pointLights[%i].ambient", i);
+		SetUniform(name.c_str(), l->m_mat_amb);
+		name = Stringf("pointLights[%i].diffuse", i);
+		SetUniform(name.c_str(), l->m_mat_diff);
+		name = Stringf("pointLights[%i].specular", i);
+		SetUniform(name.c_str(), l->m_mat_spec);
+
+		name = Stringf("pointLights[%i].position", i);
+		SetUniform(name.c_str(), l->GetWorldPosition());
+	}
+	// directional light
+	Light* l = lights[4];
+	std::string name = Stringf("dirLight.ambient");
+	SetUniform(name.c_str(), l->m_mat_amb);
+	name = Stringf("dirLight.diffuse");
+	SetUniform(name.c_str(), l->m_mat_diff);
+	name = Stringf("dirLight.specular");
+	SetUniform(name.c_str(), l->m_mat_spec);
+	name = Stringf("dirLight.direction");
+	SetUniform(name.c_str(), l->m_direction);
+
 	Mesh* mesh = dc.m_mesh;
 	BindRenderState(m_currentShader->m_state);
 	glBindBuffer(GL_ARRAY_BUFFER, mesh->m_vbo.GetHandle());

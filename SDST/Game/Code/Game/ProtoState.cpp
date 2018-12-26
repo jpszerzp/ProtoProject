@@ -132,35 +132,35 @@ ProtoState::ProtoState()
 	Texture* diffuse = theRenderer->CreateOrGetTexture("Data/Images/container/diffuse_container.png");
 	Texture* specular = theRenderer->CreateOrGetTexture("Data/Images/container/specular_container.png");
 	Cube* c_2 = new Cube(Vector3(8.f, 0.f, 0.f), Vector3(45.f), 
-		Vector3(1.f, 1.f, 1.f), Rgba::GOLD, "cube_lit", "shader/material_lit", false);
+		Vector3(1.f, 1.f, 1.f), Rgba::GOLD, "cube_lit", "shader/multi_lit", false);
 	c_2->m_renderable->m_diffuse_map = diffuse;
 	c_2->m_renderable->m_specular_map = specular;
 	m_gameObjects.push_back(c_2);
 	m_sceneGraph->AddRenderable(c_2);
 
 	Cube* c_3 = new Cube(Vector3(6.f, 3.f, 0.f), Vector3(96.f, -123.f, 12.f),
-		Vector3(1.f, 1.2f, 1.5f), Rgba::GOLD, "cube_lit", "shader/material_lit", false);
+		Vector3(1.f, 1.2f, 1.5f), Rgba::GOLD, "cube_lit", "shader/multi_lit", false);
 	c_3->m_renderable->m_diffuse_map = diffuse;
 	c_3->m_renderable->m_specular_map = specular;
 	m_gameObjects.push_back(c_3);
 	m_sceneGraph->AddRenderable(c_3);
 
 	Cube* c_4 = new Cube(Vector3(4.f, 5.f, -1.f), Vector3(16.f, -12.f, 70.f),
-		Vector3::ONE, Rgba::GOLD, "cube_lit", "shader/material_lit", false);
+		Vector3::ONE, Rgba::GOLD, "cube_lit", "shader/multi_lit", false);
 	c_4->m_renderable->m_diffuse_map = diffuse;
 	c_4->m_renderable->m_specular_map = specular;
 	m_gameObjects.push_back(c_4);
 	m_sceneGraph->AddRenderable(c_4);
 
 	Cube* c_5 = new Cube(Vector3(5.f, 8.f, 2.f), Vector3(132.f, -112.f, 170.f),
-		Vector3::ONE, Rgba::GOLD, "cube_lit", "shader/material_lit", false);
+		Vector3::ONE, Rgba::GOLD, "cube_lit", "shader/multi_lit", false);
 	c_5->m_renderable->m_diffuse_map = diffuse;
 	c_5->m_renderable->m_specular_map = specular;
 	m_gameObjects.push_back(c_5);
 	m_sceneGraph->AddRenderable(c_5);
 
 	Cube* c_6 = new Cube(Vector3(7.f, 5.f, -2.f), Vector3(84.f, 123.f, 93.f),
-		Vector3::ONE, Rgba::GOLD, "cube_lit", "shader/material_lit", false);
+		Vector3::ONE, Rgba::GOLD, "cube_lit", "shader/multi_lit", false);
 	c_6->m_renderable->m_diffuse_map = diffuse;
 	c_6->m_renderable->m_specular_map = specular;
 	m_gameObjects.push_back(c_6);
@@ -191,48 +191,81 @@ ProtoState::ProtoState()
 	Vector3 lightScale;
 	Rgba lightColor;
 	Vector3 lightDir;
-	//lightPos = Vector3(6.f, 5.f, -3.f);
-	//lightRot = Vector3::ZERO;
-	//lightScale = Vector3(0.05f, 0.05f, 0.05f);
-	//lightColor = Rgba::WHITE;
-	//PointLight* pl_0 = new PointLight(lightPos, lightRot, lightScale, lightColor);
-	//pl_0->SetAttenConst(1.f);
-	//pl_0->SetAttenLinear(0.09f);
-	//pl_0->SetAttenQuad(0.032f);
-	//m_gameObjects.push_back(pl_0);
-	//m_sceneGraph->AddLight(pl_0);
-	//m_sceneGraph->m_single_light = pl_0;			// to be THE light of the scene graph
-	//theRenderer->m_singleLightData.lightPos = pl_0->GetWorldPosition();
-	//theRenderer->m_singleLightData.lightColor = pl_0->GetColor().ToVec4();		// this is using the light color
+	lightPos = Vector3(6.f, 5.f, -3.f);
+	lightRot = Vector3::ZERO;
+	lightScale = Vector3(0.05f, 0.05f, 0.05f);
+	lightColor = Rgba::WHITE;
+	PointLight* pl_0 = new PointLight(lightPos, lightRot, lightScale, lightColor);
+	pl_0->SetAttenConst(1.f);
+	pl_0->SetAttenLinear(0.09f);
+	pl_0->SetAttenQuad(0.032f);
+	m_gameObjects.push_back(pl_0);
+	m_sceneGraph->AddLight(pl_0);
+	m_sceneGraph->m_single_light = pl_0;			// to be THE light of the scene graph
+	theRenderer->m_singleLightData.lightPos = pl_0->GetWorldPosition();
+	theRenderer->m_singleLightData.lightColor = pl_0->GetColor().ToVec4();		// this is using the light color
 
-	//lightPos = Vector3(-15.f, 6.5f, 10.f);
-	//lightRot = Vector3::ZERO;
-	//lightScale = Vector3(0.05f);
-	//lightColor = Rgba::WHITE;
-	//lightDir = Vector3(0.f, -1.f, 0.f);		
-	//DirectionalLight* dl_0 = new DirectionalLight(lightPos, lightRot, lightScale, lightColor, lightDir);
-	//m_gameObjects.push_back(dl_0);
-	//m_sceneGraph->AddLight(dl_0);
+	lightPos = Vector3(6.f, 5.f, 4.f);
+	lightRot = Vector3::ZERO;
+	lightScale = Vector3(0.05f, 0.05f, 0.05f);
+	lightColor = Rgba::WHITE;
+	PointLight* pl_1 = new PointLight(lightPos, lightRot, lightScale, lightColor);
+	pl_1->SetAttenConst(1.f);
+	pl_1->SetAttenLinear(0.09f);
+	pl_1->SetAttenQuad(0.032f);
+	m_gameObjects.push_back(pl_1);
+	m_sceneGraph->AddLight(pl_1);
+
+	lightPos = Vector3(3.f, 5.f, 0.f);
+	lightRot = Vector3::ZERO;
+	lightScale = Vector3(0.05f, 0.05f, 0.05f);
+	lightColor = Rgba::WHITE;
+	PointLight* pl_2 = new PointLight(lightPos, lightRot, lightScale, lightColor);
+	pl_2->SetAttenConst(1.f);
+	pl_2->SetAttenLinear(0.09f);
+	pl_2->SetAttenQuad(0.032f);
+	m_gameObjects.push_back(pl_2);
+	m_sceneGraph->AddLight(pl_2);
+
+	lightPos = Vector3(9.f, 5.f, 0.f);
+	lightRot = Vector3::ZERO;
+	lightScale = Vector3(0.05f, 0.05f, 0.05f);
+	lightColor = Rgba::WHITE;
+	PointLight* pl_3 = new PointLight(lightPos, lightRot, lightScale, lightColor);
+	pl_3->SetAttenConst(1.f);
+	pl_3->SetAttenLinear(0.09f);
+	pl_3->SetAttenQuad(0.032f);
+	m_gameObjects.push_back(pl_3);
+	m_sceneGraph->AddLight(pl_3);
+
+	lightPos = Vector3(-15.f, 6.5f, 10.f);
+	lightRot = Vector3::ZERO;
+	lightScale = Vector3(0.05f);
+	lightColor = Rgba::WHITE;
+	lightDir = Vector3(0.f, -1.f, 0.f);		
+	DirectionalLight* dl_0 = new DirectionalLight(lightPos, lightRot, lightScale, lightColor, lightDir);
+	m_gameObjects.push_back(dl_0);
+	m_sceneGraph->AddLight(dl_0);
 	//m_sceneGraph->m_single_light = dl_0;
 	//theRenderer->m_singleLightData.lightPos = dl_0->GetWorldPosition();
 	//theRenderer->m_singleLightData.lightColor = dl_0->GetColor().ToVec4();		
 
-	lightPos = Vector3(6.f, 5.f, -3.f);
-	lightRot = Vector3::ZERO;
-	lightScale = Vector3(0.05f);
-	lightColor = Rgba::WHITE;
-	lightDir = Vector3(0.f, 0.f, 1.f);
-	SpotLight* sl_0 = new SpotLight(lightPos, lightRot, lightScale, lightColor, lightDir);
-	sl_0->SetAttenConst(1.f);
-	sl_0->SetAttenLinear(0.09f);
-	sl_0->SetAttenQuad(0.032f);
-	sl_0->SetCutoff(CosDegrees(30.f));
-	sl_0->SetOuterCutoff(CosDegrees(40.f));
-	m_gameObjects.push_back(sl_0);
-	m_sceneGraph->AddLight(sl_0);
-	m_sceneGraph->m_single_light = sl_0;
-	theRenderer->m_singleLightData.lightPos = sl_0->GetWorldPosition();
-	theRenderer->m_singleLightData.lightColor = sl_0->GetColor().ToVec4();		// this is using the light color
+	//lightPos = Vector3(6.f, 5.f, -3.f);
+	//lightRot = Vector3::ZERO;
+	//lightScale = Vector3(0.05f);
+	//lightColor = Rgba::WHITE;
+	//lightDir = Vector3(0.f, 0.f, 1.f);
+	//SpotLight* sl_0 = new SpotLight(lightPos, lightRot, lightScale, lightColor, lightDir);
+	//sl_0->SetAttenConst(1.f);
+	//sl_0->SetAttenLinear(0.09f);
+	//sl_0->SetAttenQuad(0.032f);
+	//sl_0->SetCutoff(CosDegrees(30.f));
+	//sl_0->SetOuterCutoff(CosDegrees(40.f));
+	//m_gameObjects.push_back(sl_0);
+	//m_sceneGraph->AddLight(sl_0);
+	//m_sceneGraph->m_single_light = sl_0;
+	//theRenderer->m_singleLightData.lightPos = sl_0->GetWorldPosition();
+	//theRenderer->m_singleLightData.lightColor = sl_0->GetColor().ToVec4();		// this is using the light color
 
 	//Cone* cone = new Cone(Vector3(-20.f, 0.f, 5.f), Vector3::ZERO, Vector3::ONE, Rgba::WHITE, "cone_pcu", "white", MOVE_STATIC, BODY_PARTICLE, false);
 	//m_gameObjects.push_back(cone);

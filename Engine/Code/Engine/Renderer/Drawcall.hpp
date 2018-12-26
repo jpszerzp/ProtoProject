@@ -35,6 +35,8 @@ public:
 	float m_cutoff;
 	float m_outerCutoff;
 
+	std::vector<Light*> m_lights;
+
 	uint m_lightCount;
 	int m_lightIndices[MAX_LIGHTS];
 
