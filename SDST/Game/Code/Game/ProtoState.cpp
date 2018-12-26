@@ -121,7 +121,9 @@ ProtoState::ProtoState()
 
 	c_0 = new Cube(Vector3::ZERO, Vector3::ZERO, Vector3::ONE, Rgba::GREEN, "cube_pcu", "shader/default", false);
 	m_gameObjects.push_back(c_0);
-	//m_sceneGraph->AddRenderable(c_0);
+
+	q_0 = new Quad(Vector3(-5.f, 0.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::WHITE, "quad_pcu", "shader/default", false, false);
+	m_gameObjects.push_back(q_0);
 
 	// do not use material, will use the object color and tint
 	c_1 = new Cube(Vector3(5.f, 0.f, 0.f), Vector3(45.f), Vector3(1.f, 1.5f, 1.f), Rgba::WHITE, "cube_lit", "shader/lit", false);
@@ -166,6 +168,12 @@ ProtoState::ProtoState()
 	m_gameObjects.push_back(c_6);
 	m_sceneGraph->AddRenderable(c_6);
 
+	Quad* q_1 = new Quad(Vector3(6.f, 2.f, -8.f), Vector3(-90.f, 0.f, 0.f), Vector3(4.f), Rgba::WHITE, "quad_lit", "shader/blinn_phong_mat_lit", false, false);
+	q_1->m_renderable->m_diffuse_map = diffuse;
+	q_1->m_renderable->m_specular_map = specular;
+	m_gameObjects.push_back(q_1);
+	m_sceneGraph->AddRenderable(q_1);
+
 	//s_0 = new Sphere(Vector3(10.f, 0.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::WHITE, "sphere_pcu", "default", MOVE_STATIC, BODY_PARTICLE);
 	//m_gameObjects.push_back(s_0);
 
@@ -191,7 +199,7 @@ ProtoState::ProtoState()
 	Vector3 lightScale;
 	Rgba lightColor;
 	Vector3 lightDir;
-	lightPos = Vector3(6.f, 5.f, -3.f);
+	lightPos = Vector3(6.f, 5.f, -8.f);
 	lightRot = Vector3::ZERO;
 	lightScale = Vector3(0.05f, 0.05f, 0.05f);
 	lightColor = Rgba::WHITE;

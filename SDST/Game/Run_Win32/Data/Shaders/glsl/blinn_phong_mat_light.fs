@@ -88,9 +88,8 @@ void ComputePointLight()
 
 	// specular
 	vec3 viewDir = normalize(EYE_POSITION - passFragPos);
-	vec3 reflectDir = reflect(-lightDir, norm);
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0),material.shininess);
-	//vec3 specular_result = (light_v3 * light_mat.spec) * (spec * material.specular);
+	vec3 halfwayDir = normalize(lightDir + viewDir);			// use half way instead of reflection
+	float spec = pow(max(dot(norm, halfwayDir), 0.0), 16.0);	// 16 intensity for blinn model, hardcoded
 	vec3 specular_result = (light_v3 * light_mat.spec) * (spec * vec3(texture(material.specular, passUV)));
 	specular_result *= attenuation;
 

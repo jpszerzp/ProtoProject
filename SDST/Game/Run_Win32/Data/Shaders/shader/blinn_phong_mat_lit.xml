@@ -1,0 +1,6 @@
+<shader name="blinn_phong_mat_lit">
+	<program>
+		<vertex file="Shaders/glsl/light.vs" />
+		<fragment file="Shaders/glsl/blinn_phong_mat_light.fs" />
+	</program>
+</shader>

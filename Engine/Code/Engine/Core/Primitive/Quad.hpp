@@ -4,6 +4,8 @@
 
 class Quad : public GameObject
 {
+	bool m_dep = true;
+
 public:
 	void Render(Renderer* renderer) override;
 	void Update(float deltaTime) override;
@@ -27,5 +29,7 @@ public:
 		eCullMode cull = CULLMODE_BACK,
 		eWindOrder order = WIND_COUNTER_CLOCKWISE,
 		eDynamicScheme scheme = DISCRETE);
+	Quad(const Vector3& pos, const Vector3& rot, const Vector3& scale, const Rgba& tint,
+		std::string fp, std::string sp, bool dp, bool dep);
 	~Quad();
 };
