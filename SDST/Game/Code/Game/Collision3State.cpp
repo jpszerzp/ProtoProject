@@ -216,10 +216,10 @@ Collision3State::Collision3State()
 	scale = Vector3::ONE;
 	Vector3 hull_ext = Vector3(15.f, 15.f, 15.f);
 	TODO("material needs to be adjusted so that it respects data imported from assimp");
-	HullObject* h_1 = new HullObject(pos, hull_ext, rot, scale, tint, "white", stat, bid, 6, "", multipass, compare, cull, wind);
+	HullObject* h_1 = new HullObject(pos, hull_ext, rot, scale, tint, "white", stat, bid, 5, "", multipass, compare, cull, wind);
 	pos = Vector3(55.f, 0.f, 0.f);
 	rot = Vector3(45.f, 0.f, 0.f);
-	HullObject* h_2 = new HullObject(pos, hull_ext, rot, scale, tint, "white", stat, bid, 6, "", multipass, compare, cull, wind);
+	HullObject* h_2 = new HullObject(pos, hull_ext, rot, scale, tint, "white", stat, bid, 5, "", multipass, compare, cull, wind);
 	h_1->SetHullObject();
 	h_2->SetHullObject();
 	m_gameObjects.push_back(h_1);

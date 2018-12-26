@@ -267,6 +267,7 @@ public:
 	HalfEdge* PeekHorizonFrontier();
 	void RemoveHorizonFrontier();
 	Vector3 GetCentroid() const;
+	Vector3 GetRandomPt() const;
 
 	void ChangeCurrentHalfEdgeOldFace();
 	void ChangeCurrentHalfEdgeNewFace();

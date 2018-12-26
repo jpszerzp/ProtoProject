@@ -1,8 +1,40 @@
 #pragma once
 
 #include "Engine/Math/Vector3.hpp"
+#include "Engine/Math/QuickHull.hpp"
+#include "Engine/Math/Line3.hpp"
 
 #include <set>
+
+enum eGJKStatus
+{
+	GJK_FIND_SUPP_INITIAL,
+	GJK_FIND_DIRECTION_INITIAL,
+	GJK_FIND_SUPP,
+	GJK_UPDATE_MIN_NORMAL,
+	GJK_FIND_DIRECTION,
+	GJK_COMPLETE
+};
+
+enum eGJKSimplex
+{
+	GJK_SIMPLEX_NONE,
+	GJK_SIMPLEX_PT,
+	GJK_SIMPLEX_LINE,
+	GJK_SIMPLEX_TRIANGLE,
+	GJK_SIMPLEX_TETRA
+};
+
+eGJKSimplex GJK_UpdateSimplex(std::set<Vector3>& simplex);
+Vector3 GJK_FindSupp(QuickHull* hull, const Line3& dir);
+Mesh* GJK_CreateSimplexMesh(const std::set<Vector3>& gjk_simplex, const eGJKSimplex& stat);
+void GJK_DrawSimplex(Mesh* gjk_simplex_mesh, const eGJKSimplex& stat);
+Vector3 GJK_FindMinNormalBase(std::set<Vector3>& gjk_simplex, eGJKSimplex& stat, float& dist);
+Vector3 GJK_SimplexReduction_PointToLine(std::set<Vector3>& gjk_simplex, const Vector3& pt, const Line3& line, float& dist);
+Vector3 GJK_SimplexReduction_PointToTriangle(std::set<Vector3>& gjk_simplex, const Vector3& pt, const Vector3& a, const Vector3& b, const Vector3& c, float& dist);
+Vector3 GJK_SimplexReduction_PointToTetrahedron(std::set<Vector3>& gjk_simplex, const Vector3& point, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3, const Vector3& vert4, float& dist);
+
+//////////////////////////////////////////////////////////////////////////
 
 // We use GetPointSet from QH to generate hull point sets initially
 // given point sets of two convex hull A and B, generate the set that represents the minkowski difference of them

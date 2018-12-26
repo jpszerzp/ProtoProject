@@ -785,7 +785,29 @@ bool ProjectPlaneToSphere(Vector2 pos, float r, Vector3& out_pos)
 	return inCircle;
 }
 
-Vector3 ProjectPointToLine(const Vector3& point, const Line3& line, float& ext)
+Vector3 ProjectPointToLine(const Vector3& point, const Line3& line, float& dist)
+{
+	// extension is based 'one_end' of the line
+	const Vector3& one_end = line.one;
+	const Vector3& the_other_end = line.the_other;
+
+	Vector3 one_end_to_point = point - one_end;
+	Vector3 dir = (the_other_end - one_end).GetNormalized();
+
+	float ext = DotProduct(one_end_to_point, dir);
+
+	Vector3 projection = one_end + dir * ext;
+
+	// point - projection = vert_disp 
+	dist = (point - projection).GetLength();
+
+	return projection;
+}
+
+/*
+ * Instead of recording the vertical dist, record the horizontal extension
+ */
+Vector3 ProjectPointToLineExt(const Vector3& point, const Line3& line, float& ext)
 {
 	// extension is based 'one_end' of the line
 	const Vector3& one_end = line.one;
@@ -799,6 +821,185 @@ Vector3 ProjectPointToLine(const Vector3& point, const Line3& line, float& ext)
 	Vector3 projection = one_end + dir * ext;
 
 	return projection;
+}
+
+/*
+ * Projection is constraint to feature
+ */ 
+Vector3 ProjectPointToLineFeature(const Vector3& point, const Line3& line, float& dist)
+{
+	const Vector3& one_end = line.one;
+	const Vector3& the_other_end = line.the_other;
+
+	Vector3 one_end_to_point = point - one_end;
+	Vector3 dir = (the_other_end - one_end).GetNormalized();
+
+	float ext = DotProduct(one_end_to_point, dir);
+
+	if (ext < 0.f)
+	{
+		dist = (point - one_end).GetLength();
+		return one_end;
+	}
+
+	Vector3 projection = one_end + dir * ext;
+	Vector3 to_other_end = projection - the_other_end;
+	
+	ext = DotProduct(to_other_end, dir);
+
+	if (ext < 0.f)
+	{
+		dist = (point-projection).GetLength();
+		return projection;
+	}
+
+	dist = (point-the_other_end).GetLength();
+	return the_other_end;
+}
+
+Vector3 ProjectPointToPlane(const Vector3& point, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3, float& dist)
+{
+	Vector3 norm_numerator = (vert2 - vert1).Cross(vert3 - vert1);
+	float norm_denom = norm_numerator.GetLength();
+	Vector3 unit_norm = norm_numerator / norm_denom;
+
+	Vector3 disp = point - vert1;
+	float signed_dist = DotProduct(unit_norm, disp);
+	dist = abs(signed_dist);			// unsigned distance
+	Vector3 vertical = unit_norm * signed_dist;
+	Vector3 horizontal = disp - vertical;
+
+	// projection - vert1 = horizontal
+	Vector3 projection = horizontal + vert1;
+
+	return projection;
+}
+
+Vector3 ProjectPointToPlaneFeature(const Vector3& pt, const Vector3& a, const Vector3& b, const Vector3& c, float& dist)
+{
+	// see p139 of real time collision detection
+	// in my case, I want the distance and feature info
+	Vector3 ab = b - a;
+	Vector3 ac = c - a;
+	Vector3 bc = c - b;
+
+	// Voronoi related to ab
+	float snom = DotProduct(pt - a, ab);
+	float sdenom = DotProduct(pt - b, a - b);
+
+	// Voronoi related to ac
+	float tnom = DotProduct(pt - a, ac);
+	float tdenom = DotProduct(pt - c, a - c);
+
+	if (snom <= 0.f && tnom <= 0.f)
+	{
+		dist = (pt - a).GetLength();
+		return a;
+	}
+
+	// Voronoi related to bc
+	float unom = DotProduct(pt - b, bc);
+	float udenom = DotProduct(pt - c, b - c);
+
+	if (sdenom <= 0.f && unom <= 0.f)
+	{
+		dist = (pt - b).GetLength();
+		return b;
+	}
+
+	if (tdenom <= 0.f && udenom <= 0.f)
+	{
+		dist = (pt - c).GetLength();
+		return c;
+	}
+
+	// investigate edge features with barycentric methods
+	// ab
+	Vector3 n = ab.Cross(ac);
+	Vector3 toA = a - pt;
+	Vector3 toB = b - pt;
+	float vc = DotProduct(n, toA.Cross(toB));
+	if (vc <= 0.f && snom >= 0.f && sdenom >= 0.f)
+	{
+		// closest feature is edge ab
+		Vector3 dev = ab * (snom / (snom + sdenom));
+		Vector3 closest = a + dev;
+		dist = (-toA - dev).GetLength();
+
+		return closest;
+	}
+
+	// bc
+	Vector3 toC = c - pt;
+	float va = DotProduct(n, toB.Cross(toC));
+	if (va <= 0.f && unom >= 0.f && udenom >= 0.f)
+	{
+		// closest feature is edge bc
+		Vector3 dev = bc * (unom / (unom + udenom));
+		Vector3 closest = b + dev;
+		dist = (-toB - dev).GetLength();
+
+		return closest;
+	}
+
+	// ac
+	float vb = DotProduct(n, toC.Cross(toA));
+	if (vb <= 0.f && tnom >= 0.f && tdenom >= 0.f)
+	{
+		// closest feature is edge ac
+		Vector3 dev = ac * (tnom / (tnom + tdenom));
+		Vector3 closest = a + dev;
+		dist = (-toA - dev).GetLength();
+
+		return closest;
+	}
+
+	// in this case pt project within the triangle 
+	float u = va / (va + vb + vc);
+	float v = vb / (va + vb + vc);
+	float w = 1.f - u - v;
+	Vector3 closest = a * u + b * v + c * w;
+	dist = (pt - closest).GetLength();
+
+	return closest;
+}
+
+Vector3 ProjectPointToTetraFeature(const Vector3& point, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3, const Vector3& vert4, float& dist)
+{
+	float min_dist = INFINITY;
+	Vector3 closest;
+
+	// closest dist regarding all triangles
+	Vector3 close = ProjectPointToPlaneFeature(point, vert1, vert2, vert3, dist);
+	if (dist < min_dist)
+	{
+		min_dist = dist;
+		closest = close;
+	}
+
+	close = ProjectPointToPlaneFeature(point, vert2, vert3, vert4, dist);
+	if (dist < min_dist)
+	{
+		min_dist = dist;
+		closest = close;
+	}
+
+	close = ProjectPointToPlaneFeature(point, vert1, vert2, vert4, dist);
+	if (dist < min_dist)
+	{
+		min_dist = dist;
+		closest = close;
+	}
+
+	close =ProjectPointToPlaneFeature(point, vert1, vert3, vert4, dist);
+	if (dist < min_dist)
+	{
+		min_dist = dist;
+		closest = close;
+	}
+
+	dist = min_dist;
+	return closest;
 }
 
 bool Quadratic(Vector2& out, float a, float b, float c)
@@ -1262,7 +1463,7 @@ DirectionalInterval GetIntervalOfBoxAcrossAxis(const OBB3& obb, const Line3& lin
 		const Vector3& candidate = obb_vertices[i];
 
 		// project this point onto the line
-		const Vector3& projection = ProjectPointToLine(candidate, line, ext);
+		const Vector3& projection = ProjectPointToLineExt(candidate, line, ext);
 
 		// at the first round, the first we consider will take over both winner place
 		if (i == 0)

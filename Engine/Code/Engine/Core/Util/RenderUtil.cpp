@@ -34,7 +34,7 @@ void DrawTexts(const std::vector<Mesh*>& meshes)
 		DrawTextCut(mesh);
 }
 
-extern void DrawPoint(Mesh* point_mesh)
+extern void DrawPoint(Mesh* point_mesh, uint size)
 {
 	Renderer* renderer = Renderer::GetInstance();
 	if (point_mesh != nullptr)
@@ -45,10 +45,67 @@ extern void DrawPoint(Mesh* point_mesh)
 		Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
 		renderer->SetTexture2D(0, texture);
 		renderer->SetSampler2D(0, texture->GetSampler());
-		glPointSize(10.f);
+		glPointSize(size);
 
 		renderer->m_objectData.model = Matrix44::IDENTITY;
 
 		renderer->DrawMesh(point_mesh);
+	}
+}
+
+extern void DrawLine(Mesh* line_mesh)
+{
+	Renderer* renderer = Renderer::GetInstance();
+	if (line_mesh!= nullptr)
+	{
+		Shader* shader = renderer->CreateOrGetShader("wireframe_color");
+		renderer->UseShader(shader);
+
+		Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
+		renderer->SetTexture2D(0, texture);
+		renderer->SetSampler2D(0, texture->GetSampler());
+		glLineWidth(5.f);
+
+		renderer->m_objectData.model = Matrix44::IDENTITY;
+
+		renderer->DrawMesh(line_mesh);
+	}
+}
+
+extern void DrawTriangle(Mesh* triangle_mesh)
+{
+	Renderer* renderer = Renderer::GetInstance();
+	if (triangle_mesh!= nullptr)
+	{
+		Shader* shader = renderer->CreateOrGetShader("wireframe_color");
+		renderer->UseShader(shader);
+
+		Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
+		renderer->SetTexture2D(0, texture);
+		renderer->SetSampler2D(0, texture->GetSampler());
+		glLineWidth(5.f);
+
+		renderer->m_objectData.model = Matrix44::IDENTITY;
+
+		renderer->DrawMesh(triangle_mesh, false);
+	}
+}
+
+extern void DrawTetrahedron(Mesh* tetra_mesh)
+{
+	Renderer* renderer = Renderer::GetInstance();
+	if (tetra_mesh!= nullptr)
+	{
+		Shader* shader = renderer->CreateOrGetShader("wireframe_color");
+		renderer->UseShader(shader);
+
+		Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
+		renderer->SetTexture2D(0, texture);
+		renderer->SetSampler2D(0, texture->GetSampler());
+		glLineWidth(5.f);
+
+		renderer->m_objectData.model = Matrix44::IDENTITY;
+
+		renderer->DrawMesh(tetra_mesh, false);
 	}
 }

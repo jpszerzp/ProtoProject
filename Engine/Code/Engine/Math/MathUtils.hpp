@@ -116,7 +116,12 @@ void MakeOrthonormalBasis(const Vector3& x, Vector3& y, Vector3& z);
 void MakeOrthonormalBasisOpt(const Vector3& x, Vector3& y, Vector3& z);
 //void MakeOrthonormalBasisStable(const Vector3& x);
 bool ProjectPlaneToSphere(Vector2 pos, float r, Vector3& out_pos);	// a spherical coord operation
-Vector3 ProjectPointToLine(const Vector3& point, const Line3& line, float& ext);
+Vector3 ProjectPointToLine(const Vector3& point, const Line3& line, float& dist);
+Vector3 ProjectPointToLineExt(const Vector3& point, const Line3& line, float& ext);
+Vector3 ProjectPointToLineFeature(const Vector3& point, const Line3& line, float& dist);
+Vector3 ProjectPointToPlane(const Vector3& point, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3, float& dist);
+Vector3 ProjectPointToPlaneFeature(const Vector3& point, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3, float& dist);
+Vector3 ProjectPointToTetraFeature(const Vector3& point, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3, const Vector3& vert4, float& dist);
 
 bool  Quadratic(Vector2& out, float a, float b, float c);
 int   ComputeManhattanDistanceInt(IntVector2 v1, IntVector2 v2);

@@ -12,6 +12,7 @@
 #include "Engine/Physics/3D/SphereRB3.hpp"
 #include "Engine/Physics/3D/QuadRb3.hpp"
 #include "Engine/Physics/3D/BoxRB3.hpp"
+#include "Engine/Physics/3D/GJK3.hpp"
 #include "Engine/Renderer/DebugRenderer.hpp"
 #include "Engine/Renderer/Window.hpp"
 #include "Engine/Renderer/Renderable.hpp"
@@ -34,6 +35,29 @@ ControlGroup::ControlGroup(GameObject* go1, GameObject* go2, const eControlID& i
 
 static QuickHull* fake_hull = nullptr;		// holder for mksi hull
 static Vector3 net_disp;
+
+// stat control of gjk algorithm
+static eGJKStatus gjk_stat = GJK_FIND_SUPP_INITIAL;
+static float gjk_closest_dist;
+
+// support point
+static Vector3 gjk_supp;
+static Mesh* gjk_supp_mesh;
+
+// support direction
+static Line3 gjk_supp_dir;
+static Mesh* gjk_supp_dir_mesh;
+
+// gjk simplex
+static std::set<Vector3> gjk_simplex;
+static eGJKSimplex gjk_simplex_stat= GJK_SIMPLEX_NONE;
+static Mesh* gjk_simplex_mesh =nullptr;
+
+// gjk normal base
+static Mesh* gjk_normal_base_mesh = nullptr;
+static Vector3 gjk_normal_base;
+static Vector3 gjk_last_normal_base;
+
 void ControlGroup::ProcessInput()
 {
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_C))
@@ -249,6 +273,137 @@ void ControlGroup::ProcessInput()
 				QuickHull* qh_1 = hull_1->GetHullPrimitive();
 
 				fake_hull = QuickHull::GenerateMinkowskiHull(qh_0, qh_1);
+				//std::vector<Vector3>& verts = fake_hull->m_vertices;
+				//for each (const Vector3& vert in verts)
+				//	DebugRenderPoint(1000.f, 20.f, vert, Rgba::GREEN, Rgba::GREEN, DEBUG_RENDER_USE_DEPTH);
+			}
+		}
+	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_3))
+	{
+		if (fake_hull != nullptr)
+		{
+			switch (gjk_stat)
+			{
+			case GJK_FIND_SUPP_INITIAL:
+			{
+				gjk_supp = fake_hull->GetRandomPt();
+				if (gjk_supp_mesh != nullptr)
+				{
+					delete gjk_supp_mesh;
+					gjk_supp_mesh= nullptr;
+				}
+				gjk_supp_mesh = Mesh::CreatePointImmediate(VERT_PCU, gjk_supp, Rgba::RED);
+
+				// update simplex
+				gjk_simplex.insert(gjk_supp);
+				gjk_simplex_stat = GJK_UpdateSimplex(gjk_simplex);
+				if (gjk_simplex_mesh != nullptr)
+				{
+					delete gjk_simplex_mesh;
+					gjk_simplex_mesh = nullptr;
+				}
+				gjk_simplex_mesh = GJK_CreateSimplexMesh(gjk_simplex, gjk_simplex_stat);
+
+				gjk_stat = GJK_FIND_DIRECTION_INITIAL;
+			}
+				break;
+			case GJK_FIND_DIRECTION_INITIAL:
+			{
+				// given the supp point, find the direction to start with iterations
+				gjk_supp_dir = Line3(gjk_supp, Vector3::ZERO);
+				if (gjk_supp_dir_mesh != nullptr)
+				{
+					delete gjk_supp_dir_mesh;
+					gjk_supp_dir_mesh = nullptr;
+				}
+				gjk_supp_dir_mesh = Mesh::CreateLineImmediate(VERT_PCU, gjk_supp,Vector3::ZERO, Rgba::CYAN);
+				
+				gjk_stat = GJK_FIND_SUPP;
+			}
+				break;
+			case GJK_FIND_SUPP:
+			{
+				gjk_supp = GJK_FindSupp(fake_hull, gjk_supp_dir);
+				if (gjk_supp_mesh != nullptr)
+				{
+					delete gjk_supp_mesh;
+					gjk_supp_mesh = nullptr;
+				}
+				gjk_supp_mesh = Mesh::CreatePointImmediate(VERT_PCU, gjk_supp, Rgba::RED);
+
+				// update simplex
+				std::vector<Vector3> gjk_simplex_snapshot = ConvertToVectorFromSet(gjk_simplex);
+				gjk_simplex.insert(gjk_supp);
+				gjk_simplex_stat = GJK_UpdateSimplex(gjk_simplex);
+				if (gjk_simplex_mesh != nullptr)
+				{
+					delete gjk_simplex_mesh;
+					gjk_simplex_mesh = nullptr;
+				}
+				gjk_simplex_mesh = GJK_CreateSimplexMesh(gjk_simplex, gjk_simplex_stat);
+
+				// TODO: when the simplex is a tetrahedron, we check if the origin is in it; if yes we abort and the two hulls intersect
+				// there may be a better early out check on this using an IsPointContainedHull(Vector3::ZERO)
+
+				gjk_stat = GJK_UPDATE_MIN_NORMAL;
+			}
+				break;
+			case GJK_UPDATE_MIN_NORMAL:
+			{
+				// find the min normal of current simplex
+				float dist;
+				gjk_normal_base= GJK_FindMinNormalBase(gjk_simplex, gjk_simplex_stat, dist);
+
+				// there is a chance where finding the normal base would reduce the simplex
+				if (gjk_simplex_mesh != nullptr)
+				{
+					delete gjk_simplex_mesh;
+					gjk_simplex_mesh = nullptr;
+				}
+				gjk_simplex_mesh = GJK_CreateSimplexMesh(gjk_simplex, gjk_simplex_stat);
+
+				if (gjk_normal_base_mesh != nullptr)
+				{
+					delete gjk_normal_base_mesh;
+					gjk_normal_base_mesh = nullptr;
+				}
+				gjk_normal_base_mesh = Mesh::CreatePointImmediate(VERT_PCU, gjk_normal_base, Rgba::YELLOW);
+
+				// if the normal base remains the same, gjk ends
+				if (gjk_normal_base == gjk_last_normal_base)
+				{
+					gjk_closest_dist = dist;
+					gjk_stat = GJK_COMPLETE;
+				}
+				else
+				{
+					gjk_last_normal_base = gjk_normal_base;
+					gjk_stat = GJK_FIND_DIRECTION;
+				}
+			}
+				break;
+			case GJK_FIND_DIRECTION:
+			{
+				gjk_supp_dir = Line3(gjk_normal_base, Vector3::ZERO);
+				if (gjk_supp_dir_mesh != nullptr)
+				{
+					delete gjk_supp_dir_mesh;
+					gjk_supp_dir_mesh= nullptr;
+				}
+				gjk_supp_dir_mesh = Mesh::CreateLineImmediate(VERT_PCU, gjk_normal_base,Vector3::ZERO, Rgba::CYAN);
+
+				gjk_stat = GJK_FIND_SUPP;
+			}
+				break;
+			case GJK_COMPLETE:
+			{
+
+			}
+				break;
+			default:
+				break;
 			}
 		}
 	}
@@ -268,6 +423,18 @@ void ControlGroup::RenderCore(Renderer* renderer)
 	{
 		if (fake_hull != nullptr)
 			fake_hull->RenderHull(renderer);
+
+		if (gjk_supp_mesh != nullptr)
+			DrawPoint(gjk_supp_mesh);
+
+		if (gjk_supp_dir_mesh != nullptr)
+			DrawLine(gjk_supp_dir_mesh);
+
+		if (gjk_simplex_mesh != nullptr)
+			GJK_DrawSimplex(gjk_simplex_mesh, gjk_simplex_stat);
+
+		if (gjk_normal_base_mesh != nullptr)
+			DrawPoint(gjk_normal_base_mesh, 20.f);
 	}
 }
 
@@ -418,7 +585,13 @@ void ControlGroup::Update(float deltaTime)
 	// fake hull
 	if (fake_hull != nullptr)
 	{
+		// we need to update transform here for the fake_hull because it does not have a gameobject container
 		fake_hull->m_ref_pos += net_disp;
+
+		// update vertices
+		for (std::vector<Vector3>::size_type idx = 0; idx < fake_hull->m_vertices.size(); ++idx)
+			fake_hull->m_vertices[idx] += net_disp;
+		
 		net_disp = Vector3::ZERO;
 	}
 
@@ -649,6 +822,15 @@ void ControlGroup::UpdateUI()
 		Mesh* mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, cp_title, VERT_PCU);
 		m_view.push_back(mesh);
 		min -= Vector2(0.f, m_textHeight);
+
+		// get closest distance and show it if gjk is complete
+		if (gjk_stat == GJK_COMPLETE)
+		{
+			std::string dist_str = std::to_string(gjk_closest_dist);
+			Mesh* mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, dist_str, VERT_PCU);
+			m_view.push_back(mesh);
+			min -= Vector2(0.f, m_textHeight);
+		}
 	}
 		break;
 	default:

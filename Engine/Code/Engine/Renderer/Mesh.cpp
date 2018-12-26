@@ -693,6 +693,68 @@ Mesh* Mesh::CreateTriangleImmediate(eVertexType type, const Rgba& color,
 	return mesh;
 }
 
+Mesh* Mesh::CreateTetrahedronImmediate(eVertexType type, const Rgba& color, const Vector3& v1, const Vector3& v2, const Vector3& v3, const Vector3& v4)
+{
+	MeshBuilder mb;
+
+	mb.Begin(DRAW_TRIANGLE, true);
+	mb.SetColor(color);
+
+	// f1
+	mb.SetUV(Vector2::ZERO);
+	uint idx = mb.PushVertex(v1);
+
+	mb.SetUV(Vector2(1.f, 0.f));
+	mb.PushVertex(v2);
+
+	mb.SetUV(Vector2(0.f, 1.f));
+	mb.PushVertex(v3);
+
+	mb.AddTriangle(idx, idx + 1, idx + 2);
+
+	// f2
+	mb.SetUV(Vector2::ZERO);
+	idx = mb.PushVertex(v2);
+
+	mb.SetUV(Vector2(1.f, 0.f));
+	mb.PushVertex(v3);
+
+	mb.SetUV(Vector2(0.f, 1.f));
+	mb.PushVertex(v4);
+
+	mb.AddTriangle(idx, idx + 1, idx + 2);
+
+	// f3
+	mb.SetUV(Vector2::ZERO);
+	idx = mb.PushVertex(v3);
+
+	mb.SetUV(Vector2(1.f, 0.f));
+	mb.PushVertex(v4);
+
+	mb.SetUV(Vector2(0.f, 1.f));
+	mb.PushVertex(v1);
+
+	mb.AddTriangle(idx, idx + 1, idx + 2);
+
+	// f4
+	mb.SetUV(Vector2::ZERO);
+	idx = mb.PushVertex(v2);
+
+	mb.SetUV(Vector2(1.f, 0.f));
+	mb.PushVertex(v4);
+
+	mb.SetUV(Vector2(0.f, 1.f));
+	mb.PushVertex(v1);
+
+	mb.AddTriangle(idx, idx + 1, idx + 2);
+
+	mb.End();
+
+	Mesh* mesh = mb.CreateMesh(type, DRAW_TRIANGLE);
+	mesh->m_immediate = true;
+	return mesh;
+}
+
 Mesh* Mesh::CreateCone(eVertexType type, int base_side)
 {
 	// apex

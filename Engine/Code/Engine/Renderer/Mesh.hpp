@@ -39,6 +39,8 @@ public:
 	static Mesh* CreateTerrainImmediateFromChunk(MapChunk* chunk, eVertexType type);
 	static Mesh* CreateTriangleImmediate(eVertexType type, const Rgba& color,
 		const Vector3& v1, const Vector3& v2, const Vector3& v3);
+	static Mesh* CreateTetrahedronImmediate(eVertexType type, const Rgba& color,
+		const Vector3& v1, const Vector3& v2, const Vector3& v3, const Vector3& v4);
 	static Mesh* CreateCone(eVertexType type, int base_side);
 
 	// 2D

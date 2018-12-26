@@ -2397,6 +2397,12 @@ Vector3 QuickHull::GetCentroid() const
 	return centroid;
 }
 
+Vector3 QuickHull::GetRandomPt() const
+{
+	int idx = GetRandomIntInRange(0, m_vertices.size() - 1);
+	return m_vertices[idx];
+}
+
 void QuickHull::ChangeCurrentHalfEdgeOldFace()
 {
 	m_current_he = m_current_he->m_next;
