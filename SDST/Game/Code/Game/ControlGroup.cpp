@@ -14,6 +14,7 @@
 #include "Engine/Physics/3D/BoxRB3.hpp"
 #include "Engine/Physics/3D/GJK3.hpp"
 #include "Engine/Physics/3D/GJK3Simplex.hpp"
+#include "Engine/Physics/3D/EPA3.hpp"
 #include "Engine/Renderer/DebugRenderer.hpp"
 #include "Engine/Renderer/Window.hpp"
 #include "Engine/Renderer/Renderable.hpp"
@@ -410,6 +411,23 @@ void ControlGroup::ProcessInput()
 			}
 				break;
 			case GJK_COMPLETE:
+			{
+
+			}
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_3))
+	{
+		if (fake_hull != nullptr && gjk_stat == GJK_COMPLETE)
+		{
+			switch (epa_stat)
+			{
+			case EPA_FIND_FACE:
 			{
 
 			}
