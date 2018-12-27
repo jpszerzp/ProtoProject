@@ -69,6 +69,11 @@ layout(binding=3, std140) uniform uboSingleLight
 	vec4 lightColor;
 };
 
+layout(binding=6, std140) uniform uboDebugMode 
+{
+   vec4 MODE; 
+};
+
 layout(binding=9, std140) uniform uboTime
 {
 	float game_time;
@@ -232,6 +237,15 @@ void ComputeSpotLight()
 	}
 }
 
+float near = 1.0;
+float far = 1000.0;
+float GetLinearDepth(float depth)
+{
+	float z = depth * 2.0 - 1.0;
+	float linear_depth = (2.0 * near * far) / (far + near - z * (far - near));
+	return linear_depth;
+}
+
 // Entry Point
 void main()
 {
@@ -245,4 +259,16 @@ void main()
 		result += ComputePointLight(pointLights[i], norm, passFragPos, viewDir);
 
 	outColor = vec4(result, 1.0);
+
+	switch(int(MODE.w))
+	{
+		case 0: break;
+		case 13:
+		{
+			float depth = GetLinearDepth(gl_FragCoord.z)/ far;
+			outColor = vec4(vec3(depth), 1.0);
+		}
+		break;
+		default: break;
+	}
 }

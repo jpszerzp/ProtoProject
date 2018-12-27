@@ -360,6 +360,7 @@
     <ClCompile Include="Physics\2D\Entity.cpp" />
     <ClCompile Include="Physics\2D\Manifold.cpp" />
     <ClCompile Include="Physics\3D\Entity3.cpp" />
+    <ClCompile Include="Physics\3D\EPA3.cpp" />
     <ClCompile Include="Physics\3D\ForceGenerator.cpp" />
     <ClCompile Include="Physics\3D\ForceRegistry.cpp" />
     <ClCompile Include="Physics\3D\GJK3.cpp" />
@@ -530,6 +531,7 @@
     <ClInclude Include="Physics\2D\Entity.hpp" />
     <ClInclude Include="Physics\2D\Manifold.hpp" />
     <ClInclude Include="Physics\3D\Entity3.hpp" />
+    <ClInclude Include="Physics\3D\EPA3.hpp" />
     <ClInclude Include="Physics\3D\ForceGenerator.hpp" />
     <ClInclude Include="Physics\3D\ForceRegistry.hpp" />
     <ClInclude Include="Physics\3D\GJK3.hpp" />

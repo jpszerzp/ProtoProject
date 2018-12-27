@@ -1298,6 +1298,8 @@ void Renderer::Draw(const Drawcall& dc)
 	name = Stringf("dirLight.direction");
 	SetUniform(name.c_str(), l->m_direction);
 
+	SetDebugModeUBO(programHandle);
+
 	Mesh* mesh = dc.m_mesh;
 	BindRenderState(m_currentShader->m_state);
 	glBindBuffer(GL_ARRAY_BUFFER, mesh->m_vbo.GetHandle());

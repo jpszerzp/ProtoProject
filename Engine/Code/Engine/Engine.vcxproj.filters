@@ -541,6 +541,9 @@
     <ClCompile Include="Physics\3D\GJK3Simplex.cpp">
       <Filter>General</Filter>
     </ClCompile>
+    <ClCompile Include="Physics\3D\EPA3.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -935,5 +938,6 @@
       <Filter>Core\GameObject</Filter>
     </ClInclude>
     <ClInclude Include="Physics\3D\GJK3Simplex.hpp" />
+    <ClInclude Include="Physics\3D\EPA3.hpp" />
   </ItemGroup>
 </Project>
