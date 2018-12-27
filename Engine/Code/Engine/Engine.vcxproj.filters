@@ -538,6 +538,9 @@
     <ClCompile Include="Core\HullObject.cpp">
       <Filter>Core\GameObject</Filter>
     </ClCompile>
+    <ClCompile Include="Physics\3D\GJK3Simplex.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -931,5 +934,6 @@
     <ClInclude Include="Core\HullObject.hpp">
       <Filter>Core\GameObject</Filter>
     </ClInclude>
+    <ClInclude Include="Physics\3D\GJK3Simplex.hpp" />
   </ItemGroup>
 </Project>

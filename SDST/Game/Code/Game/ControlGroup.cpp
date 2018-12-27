@@ -13,6 +13,7 @@
 #include "Engine/Physics/3D/QuadRb3.hpp"
 #include "Engine/Physics/3D/BoxRB3.hpp"
 #include "Engine/Physics/3D/GJK3.hpp"
+#include "Engine/Physics/3D/GJK3Simplex.hpp"
 #include "Engine/Renderer/DebugRenderer.hpp"
 #include "Engine/Renderer/Window.hpp"
 #include "Engine/Renderer/Renderable.hpp"
@@ -346,8 +347,19 @@ void ControlGroup::ProcessInput()
 
 				// TODO: when the simplex is a tetrahedron, we check if the origin is in it; if yes we abort and the two hulls intersect
 				// there may be a better early out check on this using an IsPointContainedHull(Vector3::ZERO)
-
-				gjk_stat = GJK_UPDATE_MIN_NORMAL;
+				if (gjk_simplex.size() == 4)
+				{
+					GJK3SimplexTetra tetra = GJK3SimplexTetra(gjk_simplex);
+					if (tetra.IsPointInTetra(Vector3::ZERO))
+					{
+						gjk_closest_dist = -INFINITY;
+						gjk_stat = GJK_COMPLETE;
+					}
+					else
+						gjk_stat = GJK_UPDATE_MIN_NORMAL;
+				}
+				else
+					gjk_stat = GJK_UPDATE_MIN_NORMAL;
 			}
 				break;
 			case GJK_UPDATE_MIN_NORMAL:

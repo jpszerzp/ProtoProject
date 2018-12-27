@@ -363,6 +363,7 @@
     <ClCompile Include="Physics\3D\ForceGenerator.cpp" />
     <ClCompile Include="Physics\3D\ForceRegistry.cpp" />
     <ClCompile Include="Physics\3D\GJK3.cpp" />
+    <ClCompile Include="Physics\3D\GJK3Simplex.cpp" />
     <ClCompile Include="Physics\3D\PointEntity3.cpp" />
     <ClCompile Include="Physics\3D\PointRB3.cpp" />
     <ClCompile Include="Physics\3D\QuadEntity3.cpp" />
@@ -532,6 +533,7 @@
     <ClInclude Include="Physics\3D\ForceGenerator.hpp" />
     <ClInclude Include="Physics\3D\ForceRegistry.hpp" />
     <ClInclude Include="Physics\3D\GJK3.hpp" />
+    <ClInclude Include="Physics\3D\GJK3Simplex.hpp" />
     <ClInclude Include="Physics\3D\PointEntity3.hpp" />
     <ClInclude Include="Physics\3D\PointRB3.hpp" />
     <ClInclude Include="Physics\3D\QuadEntity3.hpp" />
