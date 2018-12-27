@@ -60,6 +60,20 @@ static Mesh* gjk_normal_base_mesh = nullptr;
 static Vector3 gjk_normal_base;
 static Vector3 gjk_last_normal_base;
 
+// epa stat
+static eEPAStat epa_stat = EPA_DELETE_GJK_REF;
+
+// epa helper
+static Mesh* epa_face_centroid;
+
+// epa simplex
+static sEPASimplex* epa_simplex;
+
+// epa support data
+static Mesh* epa_support_anchor;
+static Mesh* epa_support_line;
+static Mesh* epa_support_pt;
+
 void ControlGroup::ProcessInput()
 {
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_C))
@@ -421,16 +435,87 @@ void ControlGroup::ProcessInput()
 		}
 	}
 
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_3))
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_6))
 	{
 		if (fake_hull != nullptr && gjk_stat == GJK_COMPLETE)
 		{
 			switch (epa_stat)
 			{
+			case EPA_DELETE_GJK_REF:
+			{
+				if (gjk_supp_mesh != nullptr)
+				{
+					delete gjk_supp_mesh;
+					gjk_supp_mesh = nullptr;
+				}
+				if (gjk_supp_dir_mesh != nullptr)
+				{
+					delete gjk_supp_dir_mesh;
+					gjk_supp_dir_mesh = nullptr;
+				}
+				if (gjk_simplex_mesh != nullptr)
+				{
+					delete gjk_simplex_mesh;
+					gjk_simplex_mesh = nullptr;
+				}
+				if (gjk_normal_base_mesh != nullptr)
+				{
+					delete gjk_normal_base_mesh;
+					gjk_normal_base_mesh = nullptr;
+				}
+
+				epa_stat = EPA_CREATE_SIMPLEX;
+			}
+				break;
+			case EPA_CREATE_SIMPLEX:
+			{
+				epa_simplex = new sEPASimplex(gjk_simplex);
+				epa_stat = EPA_FIND_FACE;
+			}
+				break;
 			case EPA_FIND_FACE:
 			{
+				sEPAFace* close_face = epa_simplex->SelectClosestFaceToOrigin();
+				float to_face;
+				Vector3 origin_projection = ProjectPointToPlane(Vector3::ZERO, close_face->m_verts[0], close_face->m_verts[1], close_face->m_verts[2], to_face);
 
+				Vector3 centroid = (close_face->m_verts[0] + close_face->m_verts[1] + close_face->m_verts[2]) / 3.f;
+				if (epa_face_centroid != nullptr)
+				{
+					delete epa_face_centroid;
+					epa_face_centroid = nullptr;
+				}
+				epa_face_centroid = Mesh::CreatePointImmediate(VERT_PCU, centroid, Rgba::GREEN);
+
+				if (epa_support_anchor != nullptr)
+				{
+					delete epa_support_anchor;
+					epa_support_anchor = nullptr;
+				}
+				epa_support_anchor = Mesh::CreatePointImmediate(VERT_PCU, origin_projection, Rgba::BLUE);
+
+				if (epa_support_line != nullptr)
+				{
+					delete epa_support_line;
+					epa_support_line = nullptr;
+				}
+				epa_support_line = Mesh::CreateLineImmediate(VERT_PCU, Vector3::ZERO, origin_projection, Rgba::CYAN);
+				
+				// finally, the support point should be on the hull
+				Line3 epa_support_dir = Line3(Vector3::ZERO, origin_projection);
+				Vector3 hull_support_pt = EPA_FindSupp(fake_hull, epa_support_dir);
+
+				if (epa_support_pt != nullptr)
+				{
+					delete epa_support_pt;
+					epa_support_pt = nullptr;
+				}
+				epa_support_pt = Mesh::CreatePointImmediate(VERT_PCU, hull_support_pt, Rgba::RED);
+
+				epa_stat = EPA_DELETE_VISIBLE;
 			}
+				break;
+			case EPA_DELETE_VISIBLE:
 				break;
 			default:
 				break;
@@ -454,6 +539,7 @@ void ControlGroup::RenderCore(Renderer* renderer)
 		if (fake_hull != nullptr)
 			fake_hull->RenderHull(renderer);
 
+		// gjk
 		if (gjk_supp_mesh != nullptr)
 			DrawPoint(gjk_supp_mesh);
 
@@ -465,6 +551,22 @@ void ControlGroup::RenderCore(Renderer* renderer)
 
 		if (gjk_normal_base_mesh != nullptr)
 			DrawPoint(gjk_normal_base_mesh, 20.f);
+
+		// epa
+		if (epa_simplex != nullptr)
+			epa_simplex->Draw(renderer);
+
+		if (epa_support_anchor != nullptr)
+			DrawPoint(epa_support_anchor);
+
+		if (epa_support_line != nullptr)
+			DrawLine(epa_support_line);
+
+		if (epa_support_pt != nullptr)
+			DrawPoint(epa_support_pt);
+
+		if (epa_face_centroid != nullptr)
+			DrawPoint(epa_face_centroid);
 	}
 }
 
