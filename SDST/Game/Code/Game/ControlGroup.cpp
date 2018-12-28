@@ -65,14 +65,20 @@ static eEPAStat epa_stat = EPA_DELETE_GJK_REF;
 
 // epa helper
 static Mesh* epa_face_centroid;
+static float epa_threshold = 1.f;	// hardcoded threshold, could be adjusted
+static float epa_close_dist;
 
 // epa simplex
 static sEPASimplex* epa_simplex;
+static sEPAFace* epa_close_face;
 
 // epa support data
 static Mesh* epa_support_anchor;
 static Mesh* epa_support_line;
 static Mesh* epa_support_pt;
+static Vector3 epa_support_pt_pos;
+static Vector3 epa_last_support_pt_pos = Vector3::ZERO;		// might be wrong in the corner case where the origin lies ON one of the verts of hull
+static Vector3 epa_support_anchor_pos;
 
 void ControlGroup::ProcessInput()
 {
@@ -364,6 +370,8 @@ void ControlGroup::ProcessInput()
 				// there may be a better early out check on this using an IsPointContainedHull(Vector3::ZERO)
 				if (gjk_simplex.size() == 4)
 				{
+					// Note: this also means that when gjk ends the simplex is mostly a tetrahedron? (not a triangle or line)
+					// when it is triangle it is most when the origin is outside the mksi_hull
 					GJK3SimplexTetra tetra = GJK3SimplexTetra(gjk_simplex);
 					if (tetra.IsPointInTetra(Vector3::ZERO))
 					{
@@ -470,16 +478,21 @@ void ControlGroup::ProcessInput()
 			case EPA_CREATE_SIMPLEX:
 			{
 				epa_simplex = new sEPASimplex(gjk_simplex);
+
 				epa_stat = EPA_FIND_FACE;
 			}
 				break;
 			case EPA_FIND_FACE:
 			{
-				sEPAFace* close_face = epa_simplex->SelectClosestFaceToOrigin();
-				float to_face;
-				Vector3 origin_projection = ProjectPointToPlane(Vector3::ZERO, close_face->m_verts[0], close_face->m_verts[1], close_face->m_verts[2], to_face);
+				//sEPAFace* close_face = epa_simplex->SelectClosestFaceToOrigin();
+				epa_close_face = epa_simplex->SelectClosestFaceToOrigin();
+				//float to_face;
+				//epa_support_anchor_pos = ProjectPointToPlane(Vector3::ZERO, close_face->m_verts[0], close_face->m_verts[1], close_face->m_verts[2], to_face);
+				epa_support_anchor_pos = ProjectPointToPlane(Vector3::ZERO, epa_close_face->m_verts[0], epa_close_face->m_verts[1], epa_close_face->m_verts[2], epa_close_dist);
+				//if (epa_threshold == 0.f)
+				//	epa_threshold = to_face;		// lower bound of the epa algorithm, could be adjusted later
 
-				Vector3 centroid = (close_face->m_verts[0] + close_face->m_verts[1] + close_face->m_verts[2]) / 3.f;
+				Vector3 centroid = (epa_close_face->m_verts[0] + epa_close_face->m_verts[1] + epa_close_face->m_verts[2]) / 3.f;
 				if (epa_face_centroid != nullptr)
 				{
 					delete epa_face_centroid;
@@ -492,30 +505,124 @@ void ControlGroup::ProcessInput()
 					delete epa_support_anchor;
 					epa_support_anchor = nullptr;
 				}
-				epa_support_anchor = Mesh::CreatePointImmediate(VERT_PCU, origin_projection, Rgba::BLUE);
+				epa_support_anchor = Mesh::CreatePointImmediate(VERT_PCU, epa_support_anchor_pos, Rgba::BLUE);
 
 				if (epa_support_line != nullptr)
 				{
 					delete epa_support_line;
 					epa_support_line = nullptr;
 				}
-				epa_support_line = Mesh::CreateLineImmediate(VERT_PCU, Vector3::ZERO, origin_projection, Rgba::CYAN);
+				epa_support_line = Mesh::CreateLineImmediate(VERT_PCU, Vector3::ZERO, epa_support_anchor_pos, Rgba::CYAN);
 				
 				// finally, the support point should be on the hull
-				Line3 epa_support_dir = Line3(Vector3::ZERO, origin_projection);
-				Vector3 hull_support_pt = EPA_FindSupp(fake_hull, epa_support_dir);
+				Line3 epa_support_dir = Line3(Vector3::ZERO, epa_support_anchor_pos);
+				epa_support_pt_pos = EPA_FindSupp(fake_hull, epa_support_dir);
+
+				// if the support point remains the same, we've reached end
+				if (epa_support_pt_pos != epa_last_support_pt_pos)
+					epa_last_support_pt_pos = epa_support_pt_pos;
+				else
+					epa_stat = EPA_COMPLETE;
+
+				if (epa_stat != EPA_COMPLETE)
+				{
+					// IMPORTANT: got the newest support point, will abort if dist from this point to origin
+					// MINUS the threshold is smaller than the distance from closest face to origin
+					if (((epa_support_pt_pos - Vector3::ZERO).GetLength() - epa_threshold) < epa_close_dist)
+						epa_stat = EPA_COMPLETE;
+					else 
+					{
+						if (epa_support_pt != nullptr)
+						{
+							delete epa_support_pt;
+							epa_support_pt = nullptr;
+						}
+						epa_support_pt = Mesh::CreatePointImmediate(VERT_PCU, epa_support_pt_pos, Rgba::RED);
+
+						epa_stat = EPA_DELETE_VISIBLE;
+					}
+				}
+			}
+				break;
+			case EPA_DELETE_VISIBLE:
+			{
+				bool deleted = epa_simplex->DeleteVisibleFacesForPt(epa_support_pt_pos);
+
+				// delete old debug draws
+				if (epa_support_anchor != nullptr)
+				{
+					delete epa_support_anchor;
+					epa_support_anchor = nullptr;
+				}
+				if (epa_support_line != nullptr)
+				{
+					delete epa_support_line;
+					epa_support_line = nullptr;
+				}
+				if (epa_face_centroid != nullptr)
+				{
+					delete epa_face_centroid;
+					epa_face_centroid = nullptr;
+				}
+				
+				epa_stat = EPA_FORM_NEW_FACE;
+			}
+				break;
+			case EPA_FORM_NEW_FACE:
+			{
+				// generate new faces between the supp point and edges with 1 ref count
+				std::vector<sEPAEdgeRef*> new_edges;
+				for (sEPAEdgeRef* edge : epa_simplex->m_edge_refs)
+				{
+					if (edge->ref_count == 1)
+						epa_simplex->FormNewFace(epa_support_pt_pos, edge, epa_support_anchor_pos, new_edges);
+				}
+				epa_simplex->AppendNewEdges(new_edges);
+				new_edges.clear();
+
+				//std::vector<sEPAEdgeRef*> new_edges_non_dup;
+				//for (std::vector<sEPAEdgeRef*>::size_type idx = 0; idx < new_edges.size(); ++idx)
+				//{
+
+				//}
+
+				epa_stat = EPA_FIND_FACE;
+			}
+				break;
+			case EPA_COMPLETE:
+			{
+				// in the step of completion, release all unnecessary heap memory
+				if (epa_face_centroid != nullptr)
+				{
+					delete epa_face_centroid;
+					epa_face_centroid = nullptr;
+				}
+
+				if (epa_support_anchor != nullptr)
+				{
+					delete epa_support_anchor;
+					epa_support_anchor = nullptr;
+				}
+
+				if (epa_support_line != nullptr)
+				{
+					delete epa_support_line;
+					epa_support_line = nullptr;
+				}
 
 				if (epa_support_pt != nullptr)
 				{
 					delete epa_support_pt;
 					epa_support_pt = nullptr;
 				}
-				epa_support_pt = Mesh::CreatePointImmediate(VERT_PCU, hull_support_pt, Rgba::RED);
 
-				epa_stat = EPA_DELETE_VISIBLE;
+				epa_stat = EPA_POST_COMPLETE;
 			}
 				break;
-			case EPA_DELETE_VISIBLE:
+			case EPA_POST_COMPLETE:
+			{
+
+			}
 				break;
 			default:
 				break;
@@ -959,7 +1066,38 @@ void ControlGroup::UpdateUI()
 		if (gjk_stat == GJK_COMPLETE)
 		{
 			std::string dist_str = std::to_string(gjk_closest_dist);
-			Mesh* mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, dist_str, VERT_PCU);
+			mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, dist_str, VERT_PCU);
+			m_view.push_back(mesh);
+			min -= Vector2(0.f, m_textHeight);
+		}
+
+		// epa debug
+		if (epa_stat >= EPA_DELETE_VISIBLE)
+		{
+			std::string face_str = std::to_string(epa_simplex->m_unordered_faces.size());
+			face_str += " - number of face of EPA simplex";
+			mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, face_str, VERT_PCU);
+			m_view.push_back(mesh);
+			min -= Vector2(0.f, m_textHeight);
+		}
+
+		if (epa_stat == EPA_POST_COMPLETE)
+		{
+			std::string complete_str = "EPA Complete!";
+			mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, complete_str, VERT_PCU);
+			m_view.push_back(mesh);
+			min -= Vector2(0.f, m_textHeight);
+
+			// normal is the negativity of triangle normal here, think about the inducing hull
+			Vector3 n = epa_close_face->m_normal;
+			n.Normalize();
+			std::string normal_str = Stringf("The normal is: (%f, %f, %f)", n.x, n.y, n.z);
+			mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, normal_str, VERT_PCU);
+			m_view.push_back(mesh);
+			min -= Vector2(0.f, m_textHeight);
+
+			std::string pen_str = Stringf("The penetration depth is: %f", epa_close_dist);
+			mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, pen_str, VERT_PCU);
 			m_view.push_back(mesh);
 			min -= Vector2(0.f, m_textHeight);
 		}
