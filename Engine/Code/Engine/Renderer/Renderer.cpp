@@ -1457,7 +1457,7 @@ void Renderer::Draw(const Drawcall& dc)
 	*/
 }
 
-void Renderer::Draw(Mesh* mesh)
+void Renderer::Draw(Mesh* mesh, bool cull, bool depth, bool stencil)
 {
 	GLuint programHandle = m_currentShader->GetShaderProgram()->GetHandle();
 	glUseProgram(programHandle);
@@ -1466,7 +1466,7 @@ void Renderer::Draw(Mesh* mesh)
 	SetCameraUBO(programHandle);
 	SetColorUBO(programHandle);
 
-	BindRenderState(m_currentShader->m_state);
+	BindRenderState(m_currentShader->m_state, cull, depth, stencil);
 	glBindBuffer(GL_ARRAY_BUFFER, mesh->m_vbo.GetHandle());
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->m_ibo.GetHandle());
 	BindLayoutToProgram( programHandle, mesh->GetLayout() ); 
@@ -1482,6 +1482,16 @@ void Renderer::Draw(Mesh* mesh)
 		glDrawArrays( ToGLPrimitiveType(mesh->GetDrawInstruction().primitive_type),
 			0, mesh->GetVertexCount() );
 	}
+}
+
+void Renderer::SetStencilFunc(GLenum func)
+{
+	glStencilFunc(func, 1, 0xFF);
+}
+
+void Renderer::SetStencilMask(GLuint mask)
+{
+	glStencilMask(mask);
 }
 
 // Not using forward path or material - for example, see the use of SetObjectColorUBO
@@ -1552,16 +1562,14 @@ void Renderer::DrawMeshImmediate()
 }
 
 
-void Renderer::BindRenderState(const sRenderState& state, bool culling, bool depth_test)
+void Renderer::BindRenderState(const sRenderState& state, bool culling, bool depth_test, bool)
 {
 	// blend mode
 	glEnable( GL_BLEND ); 
 	glBlendEquation(ToGLBlendOp(state.m_colorBlendOp));
-	glBlendFunc( ToGLBlendFactor(state.m_colorSrcFactor),
-		ToGLBlendFactor(state.m_colorDstFactor) ); 
+	glBlendFunc( ToGLBlendFactor(state.m_colorSrcFactor),ToGLBlendFactor(state.m_colorDstFactor) ); 
 	glBlendEquation(ToGLBlendOp(state.m_alphaBlendOp));
-	glBlendFunc( ToGLBlendFactor(state.m_alphaSrcFactor),
-		ToGLBlendFactor(state.m_alphaDstFactor) );
+	glBlendFunc( ToGLBlendFactor(state.m_alphaSrcFactor),ToGLBlendFactor(state.m_alphaDstFactor) );
 
 	// Depth mode ones
 	if (depth_test)
@@ -2027,6 +2035,11 @@ void Renderer::EnableDepth(eDepthCompare compare, bool overwrite)
 }
 
 
+void Renderer::EnableDepth()
+{
+	glEnable(GL_DEPTH_TEST);
+}
+
 void Renderer::DisableDepth()
 {
 	EnableDepth(COMPARE_ALWAYS, false);
@@ -2054,13 +2067,25 @@ void Renderer::ClearColor(Rgba color)
 
 void Renderer::ClearStencil()
 {
-	//glEnable(GL_STENCIL_TEST);
-	//glDisable(GL_STENCIL_TEST);
-	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+	glStencilMask(0x00);			// close writing to stencil buffer by default
 	glClear(GL_STENCIL_BUFFER_BIT);
-	glStencilMask(GL_FALSE);			// close writing to stencil buffer by default
 
 	GL_CHECK_ERROR();
+}
+
+void Renderer::EnableStencil()
+{
+	glEnable(GL_STENCIL_TEST);
+}
+
+void Renderer::DisableStencil()
+{
+	glDisable(GL_STENCIL_TEST);
+}
+
+void Renderer::SetStencilOP(GLenum sfail, GLenum dpfail, GLenum dppass)
+{
+	glStencilOp(sfail, dpfail, dppass);
 }
 
 void Renderer::ApplyEffects(ShaderProgram*)

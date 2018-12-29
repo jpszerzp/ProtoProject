@@ -119,6 +119,9 @@ ProtoState::ProtoState()
 	//m_gameObjects.push_back(q_11);
 	//m_sceneGraph->AddRenderable(q_11);
 
+	Cube* border_cube = new Cube(Vector3(-10.f, 0.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::WHITE, "cube_pcu", "shader/default", true);
+	m_gameObjects.push_back(border_cube);
+
 	c_0 = new Cube(Vector3::ZERO, Vector3::ZERO, Vector3::ONE, Rgba::GREEN, "cube_pcu", "shader/default", false);
 	m_gameObjects.push_back(c_0);
 

@@ -47,7 +47,7 @@ Cube::Cube(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint,
 	m_physEntity->SetEntityForPrimitive();
 
 	// later for stencil test
-	m_drawBorder = drawBorder;
+	//m_drawBorder = drawBorder;
 }
 
 
