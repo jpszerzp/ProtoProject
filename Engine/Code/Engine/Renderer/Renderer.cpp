@@ -119,7 +119,7 @@ Vector3 ToGLMaterialAmbient(const Vector4& v)
 	// see http://devernay.free.fr/cours/opengl/materials.html
 
 	if (rgba == Rgba::GOLD)
-		return Vector3(0.24725, 0.1995, 0.0745);
+		return Vector3(0.24725f, 0.1995f, 0.0745f);
 }
 
 Vector3 ToGLMaterialDiffuse(const Vector4& v)
@@ -130,7 +130,7 @@ Vector3 ToGLMaterialDiffuse(const Vector4& v)
 	// see http://devernay.free.fr/cours/opengl/materials.html
 
 	if (rgba == Rgba::GOLD)
-		return Vector3(0.75164,	0.60648, 0.22648);
+		return Vector3(0.75164f, 0.60648f, 0.22648f);
 }
 
 Vector3 ToGLMaterialSpec(const Vector4& v)
@@ -141,7 +141,7 @@ Vector3 ToGLMaterialSpec(const Vector4& v)
 	// see http://devernay.free.fr/cours/opengl/materials.html
 
 	if (rgba == Rgba::GOLD)
-		return Vector3(0.628281,0.555802,0.366065);
+		return Vector3(0.628281f,0.555802f,0.366065f);
 }
 
 GLenum ToGLBlendOp(eBlendOp op)
@@ -1457,7 +1457,7 @@ void Renderer::Draw(const Drawcall& dc)
 	*/
 }
 
-void Renderer::Draw(Mesh* mesh, bool cull, bool depth, bool stencil)
+void Renderer::Draw(Mesh* mesh, bool cull, bool depth, bool stencil, bool alpha)
 {
 	GLuint programHandle = m_currentShader->GetShaderProgram()->GetHandle();
 	glUseProgram(programHandle);
@@ -1466,7 +1466,7 @@ void Renderer::Draw(Mesh* mesh, bool cull, bool depth, bool stencil)
 	SetCameraUBO(programHandle);
 	SetColorUBO(programHandle);
 
-	BindRenderState(m_currentShader->m_state, cull, depth, stencil);
+	BindRenderState(m_currentShader->m_state, cull, depth, stencil, alpha);
 	glBindBuffer(GL_ARRAY_BUFFER, mesh->m_vbo.GetHandle());
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->m_ibo.GetHandle());
 	BindLayoutToProgram( programHandle, mesh->GetLayout() ); 
@@ -1562,14 +1562,17 @@ void Renderer::DrawMeshImmediate()
 }
 
 
-void Renderer::BindRenderState(const sRenderState& state, bool culling, bool depth_test, bool)
+void Renderer::BindRenderState(const sRenderState& state, bool culling, bool depth_test, bool, bool alpha)
 {
 	// blend mode
 	glEnable( GL_BLEND ); 
-	glBlendEquation(ToGLBlendOp(state.m_colorBlendOp));
-	glBlendFunc( ToGLBlendFactor(state.m_colorSrcFactor),ToGLBlendFactor(state.m_colorDstFactor) ); 
-	glBlendEquation(ToGLBlendOp(state.m_alphaBlendOp));
-	glBlendFunc( ToGLBlendFactor(state.m_alphaSrcFactor),ToGLBlendFactor(state.m_alphaDstFactor) );
+	//glBlendEquation(ToGLBlendOp(state.m_colorBlendOp));
+	//glBlendFunc( ToGLBlendFactor(state.m_colorSrcFactor),ToGLBlendFactor(state.m_colorDstFactor) ); 
+	//glBlendEquation(ToGLBlendOp(state.m_alphaBlendOp));
+	if (!alpha)
+		glBlendFunc( ToGLBlendFactor(state.m_alphaSrcFactor),ToGLBlendFactor(state.m_alphaDstFactor) );
+	else 
+		glBlendFunc(ToGLBlendFactor(BLEND_SRC_ALPHA), ToGLBlendFactor(BLEND_ONE_MINUS_SRC_ALPHA));
 
 	// Depth mode ones
 	if (depth_test)

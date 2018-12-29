@@ -546,7 +546,7 @@ void ControlGroup::ProcessInput()
 				break;
 			case EPA_DELETE_VISIBLE:
 			{
-				bool deleted = epa_simplex->DeleteVisibleFacesForPt(epa_support_pt_pos);
+				//bool deleted = epa_simplex->DeleteVisibleFacesForPt(epa_support_pt_pos);
 
 				// delete old debug draws
 				if (epa_support_anchor != nullptr)
@@ -657,7 +657,7 @@ void ControlGroup::RenderCore(Renderer* renderer)
 			GJK_DrawSimplex(gjk_simplex_mesh, gjk_simplex_stat);
 
 		if (gjk_normal_base_mesh != nullptr)
-			DrawPoint(gjk_normal_base_mesh, 20.f);
+			DrawPoint(gjk_normal_base_mesh, (uint)20.f);
 
 		// epa
 		if (epa_simplex != nullptr)
@@ -1024,8 +1024,8 @@ void ControlGroup::UpdateUI()
 		LineSegment3 seg_2 = LineSegment3(start_2, end_2);
 
 		Vector3 close_1, close_2;
-		float t1, t2;
-		float close_dist_sqr = LineSegment3::ClosestPointsSegments(seg_1, seg_2, t1, t2, close_1, close_2);
+		//float t1, t2;
+		//float close_dist_sqr = LineSegment3::ClosestPointsSegments(seg_1, seg_2, t1, t2, close_1, close_2);
 		DebugRenderLine(0.1f, close_1, close_2, 5.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
 
 		Vector3 normal = close_1 - close_2;

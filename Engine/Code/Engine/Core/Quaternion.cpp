@@ -263,10 +263,10 @@ Quaternion Quaternion::FromMatrix(const Matrix33& rot)
 	float m32 = rot.Jz;
 	float m33 = rot.Kz;
 
-	float w = 0.f;
+	//float w = 0.f;
 	float x = 0.f;
-	float y = 0.f;
-	float z = 0.f;
+	//float y = 0.f;
+	//float z = 0.f;
 
 	float w_sqrf = m11 + m22 + m33;
 	float x_sqrf = m11 - m22 - m33;

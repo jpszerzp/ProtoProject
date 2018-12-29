@@ -30,6 +30,6 @@ public:
 		eWindOrder order = WIND_COUNTER_CLOCKWISE,
 		eDynamicScheme scheme = DISCRETE);
 	Quad(const Vector3& pos, const Vector3& rot, const Vector3& scale, const Rgba& tint,
-		std::string fp, std::string sp, bool dp, bool dep);
+		std::string fp, std::string sp, bool dp, bool dep, std::string tp, bool alpha);
 	~Quad();
 };

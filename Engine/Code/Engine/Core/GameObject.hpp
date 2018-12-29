@@ -12,6 +12,7 @@ public:
 	bool		m_physDriven = false;
 	bool		m_dead = false;
 
+	bool		m_transparent = false;
 	bool		m_drawBorder = false;
 	bool		m_drawBasis = false;
 	bool		m_debugOn = false;
@@ -28,6 +29,7 @@ public:
 
 	// Renderable
 	Renderable* m_renderable = nullptr;
+	Texture* m_direct_tex;
 
 	Entity3* m_physEntity = nullptr;
 

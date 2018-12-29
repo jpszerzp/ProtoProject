@@ -85,7 +85,7 @@ Quad::Quad(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint, std::string meshN
 }
 
 
-Quad::Quad(const Vector3& pos, const Vector3& rot, const Vector3& scale, const Rgba& tint, std::string fp, std::string sp, bool dp, bool dep)
+Quad::Quad(const Vector3& pos, const Vector3& rot, const Vector3& scale, const Rgba& tint, std::string fp, std::string sp, bool dp, bool deprecated, std::string tp, bool alpha)
 {
 	Renderer* renderer = Renderer::GetInstance();
 
@@ -96,9 +96,11 @@ Quad::Quad(const Vector3& pos, const Vector3& rot, const Vector3& scale, const R
 	tint.GetAsFloats(tintVec4.x, tintVec4.y, tintVec4.z, tintVec4.w);
 
 	m_renderable = new Renderable(shader, mesh, transform, tintVec4);
+	m_direct_tex = renderer->CreateOrGetTexture("Data/Images/" + tp);
+	m_transparent = alpha;
 
 	m_drawBorder = dp;
-	m_dep = dep;
+	m_dep = deprecated;
 }
 
 Quad::~Quad()
@@ -229,9 +231,8 @@ void Quad::Render(Renderer* renderer)
 			renderer->UseShader(shader);
 
 			// texture
-			Texture* tex = renderer->CreateOrGetTexture("Data/Images/couch/couch_diffuse.png");
-			renderer->SetTexture2D(0, tex);
-			renderer->SetSampler2D(0, tex->GetSampler());
+			renderer->SetTexture2D(0, m_direct_tex);
+			renderer->SetSampler2D(0, m_direct_tex->GetSampler());
 
 			// color
 			renderer->m_colorData.rgba = m_renderable->GetTint();
@@ -240,8 +241,10 @@ void Quad::Render(Renderer* renderer)
 			renderer->m_objectData.model = transform.GetWorldMatrix();
 
 			// camera data is set thru draw
-
-			renderer->Draw(mesh);
+			if (m_transparent)
+				renderer->Draw(mesh, true, true, false, true);
+			else 
+				renderer->Draw(mesh);
 		}
 	}
 }

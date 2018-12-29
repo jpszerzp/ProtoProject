@@ -11,7 +11,7 @@ AssimpLoader::AssimpLoader()
 AssimpLoader::AssimpLoader(const char* path)
 {
 	if (!LoadModel(path))
-		ASSERT_RECOVERABLE(false, "Failed to import model %s with assimp", path);
+		ASSERT_RECOVERABLE(false, "Failed to import model with assimp");
 }
 
 AssimpLoader::~AssimpLoader()

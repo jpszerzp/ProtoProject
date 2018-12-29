@@ -105,7 +105,7 @@ void GJK_DrawSimplex(Mesh* gjk_simplex_mesh, const eGJKSimplex& stat)
 	case GJK_SIMPLEX_NONE:
 		break;
 	case GJK_SIMPLEX_PT:
-		DrawPoint(gjk_simplex_mesh, 5.f);
+		DrawPoint(gjk_simplex_mesh, (uint)5.f);
 		break;
 	case GJK_SIMPLEX_LINE:
 		DrawLine(gjk_simplex_mesh);

@@ -280,7 +280,7 @@ public:
 	void BindProperties(const Drawcall& dc);
 
 	// Shader/uniforms
-	void BindRenderState(const sRenderState& state, bool culling = true, bool depth_test = true, bool stencil = false);
+	void BindRenderState(const sRenderState& state, bool culling = true, bool depth_test = true, bool stencil = false, bool alpha=false);
 	void SetImmediateMesh(Mesh* mesh) { m_immediateMesh = mesh; }
 	void SetUniform(const char* name, int i);
 	void SetUniform(const char* name, float f);
@@ -318,7 +318,7 @@ public:
 
 	// REFACTOR
 	Shader*			MakeShader(std::string shaderName);
-	void Draw(Mesh* mesh, bool cull = true, bool depth = true, bool stencil = false);
+	void Draw(Mesh* mesh, bool cull = true, bool depth = true, bool stencil = false, bool alpha = false);
 
 	void SetStencilFunc(GLenum func);
 	void SetStencilMask(GLuint mask);

@@ -120,13 +120,19 @@ ProtoState::ProtoState()
 	//m_sceneGraph->AddRenderable(q_11);
 
 	Cube* border_cube = new Cube(Vector3(-10.f, 0.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::WHITE, "cube_pcu", "shader/default", true);
-	m_gameObjects.push_back(border_cube);
+	AddOpague(border_cube);
 
 	c_0 = new Cube(Vector3::ZERO, Vector3::ZERO, Vector3::ONE, Rgba::GREEN, "cube_pcu", "shader/default", false);
-	m_gameObjects.push_back(c_0);
+	AddOpague(c_0);
 
-	q_0 = new Quad(Vector3(-5.f, 0.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::WHITE, "quad_pcu", "shader/default", false, false);
-	m_gameObjects.push_back(q_0);
+	q_0 = new Quad(Vector3(-5.f, 0.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::WHITE, "quad_pcu", "shader/default", false, false, "couch/couch_diffuse.png", false);
+	AddOpague(q_0);
+
+	Quad* transparent_quad_0 = new Quad(Vector3(-5.f, 0.f, -0.5f), Vector3::ZERO, Vector3::ONE, Rgba::WHITE, "quad_pcu", "shader/default", false, false, "window/window.png", true);
+	AddTransparent(transparent_quad_0);
+
+	Quad* transparent_quad_1 = new Quad(Vector3(-4.5f, 0.f, -0.3f), Vector3::ZERO, Vector3::ONE, Rgba::WHITE, "quad_pcu", "shader/default", false, false, "window/window.png", true);
+	AddTransparent(transparent_quad_1);
 
 	// do not use material, will use the object color and tint
 	c_1 = new Cube(Vector3(5.f, 0.f, 0.f), Vector3(45.f), Vector3(1.f, 1.5f, 1.f), Rgba::WHITE, "cube_lit", "shader/lit", false);
@@ -171,7 +177,7 @@ ProtoState::ProtoState()
 	m_gameObjects.push_back(c_6);
 	m_sceneGraph->AddRenderable(c_6);
 
-	Quad* q_1 = new Quad(Vector3(6.f, 2.f, -8.f), Vector3(-90.f, 0.f, 0.f), Vector3(4.f), Rgba::WHITE, "quad_lit", "shader/blinn_phong_mat_lit", false, false);
+	Quad* q_1 = new Quad(Vector3(6.f, 2.f, -8.f), Vector3(-90.f, 0.f, 0.f), Vector3(4.f), Rgba::WHITE, "quad_lit", "shader/blinn_phong_mat_lit", false, false, "couch/couch_diffuse.png", false);
 	q_1->m_renderable->m_diffuse_map = diffuse;
 	q_1->m_renderable->m_specular_map = specular;
 	m_gameObjects.push_back(q_1);
@@ -705,14 +711,47 @@ void ProtoState::Render(Renderer* renderer)
 	renderer->SetCamera(m_camera);
 	renderer->ClearScreen(Rgba::BLACK);
 
-	for each (GameObject* gameobject in m_gameObjects)
-	{
-		if (!gameobject->m_isInForwardPath)
-			gameobject->Render(renderer);
+	//for each (GameObject* gameobject in m_gameObjects)
+	//{
+	//	if (!gameobject->m_isInForwardPath)
+	//		gameobject->Render(renderer);
 
-		//gameobject->RenderBasis(renderer);
-	}
+	//	//gameobject->RenderBasis(renderer);
+	//}
+
+	// render opague first
+	for each (GameObject* opague in m_opagues)
+		opague->Render(renderer);
+
+	// render transparent in order
+	//for(std::map<float,GameObject*>::reverse_iterator it = m_sorted_alphas.rbegin(); it != m_sorted_alphas.rend(); ++it) 
+	//{
+	//	GameObject* transparent = it->second;
+	//	transparent->Render(renderer);
+	//}  
+
+	for(std::map<float,GameObject*>::iterator it = m_sorted_alphas.begin(); it != m_sorted_alphas.end(); ++it) 
+	{
+		GameObject* transparent = it->second;
+		transparent->Render(renderer);
+	}  
 
 	// fp
 	m_forwardPath->RenderScene(m_sceneGraph);
+}
+
+void ProtoState::AddOpague(GameObject* go)
+{
+	m_gameObjects.push_back(go);
+	m_opagues.push_back(go);
+}
+
+void ProtoState::AddTransparent(GameObject* go)
+{
+	m_gameObjects.push_back(go);
+	m_alphas.push_back(go);
+	
+	const Vector3& cam_pos = m_camera->GetWorldPosition();
+	float distance = (cam_pos - go->GetWorldPosition()).GetLengthSquared();
+	m_sorted_alphas[distance] = go;
 }

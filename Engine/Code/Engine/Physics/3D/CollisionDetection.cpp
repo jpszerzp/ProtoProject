@@ -1345,7 +1345,7 @@ static int obb2_vert_idx = 0;
 static int obb1_face_idx = 0;
 static int obb1_vert_idx = 0;
 static int obb2_face_idx = 0;
-static float shallowest = -INFINITY;
+static float shallowest_global = -INFINITY;
 static float deepest = INFINITY;
 static int shallowest_pair_obb2_vert_idx;
 static int shallowest_pair_obb1_face_idx;
@@ -1884,7 +1884,7 @@ void CollisionDetector::OBB3VsOBB3CoreBreakdownPtVsFace(const OBB3& obb1, const 
 		// by abort we want to visit next vert of obb2; this current one is meaningless to investigate
 		if (ext > 0.f)
 		{
-			shallowest = -INFINITY;
+			shallowest_global = -INFINITY;
 			obb1_face_idx = 0;
 			obb2_vert_idx++;
 			shallowest_pair_obb2_vert_idx = 0;
@@ -1909,9 +1909,9 @@ void CollisionDetector::OBB3VsOBB3CoreBreakdownPtVsFace(const OBB3& obb1, const 
 		{
 			// otherwise the point (from obb2) is inside obb1, we need to record the shallowest pen
 			// also, we can render the debug line from face to the point
-			if (ext > shallowest)
+			if (ext > shallowest_global)
 			{
-				shallowest = ext;
+				shallowest_global = ext;
 
 				shallowest_pair_obb2_vert_idx = obb2_vert_idx;
 				shallowest_pair_obb1_face_idx = obb1_face_idx;
@@ -1942,7 +1942,7 @@ void CollisionDetector::OBB3VsOBB3CoreBreakdownPtVsFace(const OBB3& obb1, const 
 
 				GenerateObb2PtToObb1FaceWinnerMesh(shallow_obb1_face, shallow_ext);
 
-				shallowest = -INFINITY;
+				shallowest_global = -INFINITY;
 				obb2_vert_idx++;
 				shallowest_pair_obb2_vert_idx = 0;
 				shallowest_pair_obb1_face_idx = 0;
@@ -1976,7 +1976,7 @@ void CollisionDetector::OBB3VsOBB3CoreBreakdownPtVsFace(const OBB3& obb1, const 
 
 		if (ext > 0.f)
 		{
-			shallowest = -INFINITY;
+			shallowest_global = -INFINITY;
 			obb2_face_idx = 0;
 			obb1_vert_idx++;
 			shallowest_pair_obb1_vert_idx = 0;
@@ -1998,9 +1998,9 @@ void CollisionDetector::OBB3VsOBB3CoreBreakdownPtVsFace(const OBB3& obb1, const 
 		}
 		else
 		{
-			if (ext > shallowest)
+			if (ext > shallowest_global)
 			{
-				shallowest = ext;
+				shallowest_global = ext;
 
 				shallowest_pair_obb1_vert_idx = obb1_vert_idx;
 				shallowest_pair_obb2_face_idx = obb2_face_idx;
@@ -2027,7 +2027,7 @@ void CollisionDetector::OBB3VsOBB3CoreBreakdownPtVsFace(const OBB3& obb1, const 
 
 				GenerateObb1PtToObb2FaceWinnerMesh(shallow_obb2_face, shallow_ext);
 
-				shallowest = -INFINITY;
+				shallowest_global = -INFINITY;
 				obb1_vert_idx++;
 				shallowest_pair_obb1_vert_idx = 0;
 				shallowest_pair_obb2_face_idx = 0;
@@ -2278,11 +2278,11 @@ void CollisionDetector::OBB3VsOBB3StepThree(const OBB3& obb1, const OBB3& obb2)
 	// debug draw overlap for each edge1 (if there is any)
 	for (std::map<OBB3Edge, std::tuple<OBB3Edge, Vector3, float, Vector3, Vector3>>::iterator it = edge_pen_record.begin(); it != edge_pen_record.end(); ++it)
 	{
-		const OBB3Edge& edge1 = it->first;
+		//const OBB3Edge& edge1 = it->first;
 		const std::tuple<OBB3Edge, Vector3, float, Vector3, Vector3>& tup = it->second;
-		const OBB3Edge& edge2 = std::get<0>(tup);
-		const Vector3& n = std::get<1>(tup);
-		const float& dist = std::get<2>(tup);
+		//const OBB3Edge& edge2 = std::get<0>(tup);
+		//const Vector3& n = std::get<1>(tup);
+		//const float& dist = std::get<2>(tup);
 		const Vector3& pt1 = std::get<3>(tup);
 		const Vector3& pt2 = std::get<4>(tup);
 
@@ -2488,8 +2488,8 @@ bool CollisionDetector::OBB3VsOBB3Core(const OBB3& obb1, const OBB3& obb2, Conta
 			LineSegment3 line_seg1 = LineSegment3(edge1_start, edge1_end);
 			LineSegment3 line_seg2 = LineSegment3(edge2_start, edge2_end);
 			Vector3 close_pt1, close_pt2;
-			float t1, t2;
-			float closest_dist_sqr = LineSegment3::ClosestPointsSegments(line_seg1, line_seg2, t1, t2, close_pt1, close_pt2);
+			//float t1, t2;
+			//float closest_dist_sqr = LineSegment3::ClosestPointsSegments(line_seg1, line_seg2, t1, t2, close_pt1, close_pt2);
 			Vector3 close_pt = (close_pt1 + close_pt2) / 2.f;
 			
 			std::get<0>(edge_edge_winner) = close_pt;

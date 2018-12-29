@@ -859,14 +859,14 @@ Vector3 Matrix44::GetTranslation() const
 }
 
 
-const float* Matrix44::GetValues() const
-{
-	const float m[16] = {
-		Ix, Iy, Iz, Iw, Jx, Jy, Jz, Jw, Kx, Ky, Kz, Kw, Tx, Ty, Tz, Tw
-	};
-
-	return m;
-}
+//const float* Matrix44::GetValues() const
+//{
+//	const float m[16] = {
+//		Ix, Iy, Iz, Iw, Jx, Jy, Jz, Jw, Kx, Ky, Kz, Kw, Tx, Ty, Tz, Tw
+//	};
+//
+//	return m;
+//}
 
 Matrix33 Matrix44::ExtractMat3() const
 {

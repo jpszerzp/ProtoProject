@@ -77,7 +77,7 @@ public:
 	Vector3 GetRight() const;
 	Vector3 GetTranslation() const;
 
-	const float* GetValues() const;
+	//const float* GetValues() const;
 
 	Matrix33 ExtractMat3() const;
 

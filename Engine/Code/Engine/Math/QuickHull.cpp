@@ -2399,7 +2399,7 @@ Vector3 QuickHull::GetCentroid() const
 
 Vector3 QuickHull::GetRandomPt() const
 {
-	int idx = GetRandomIntInRange(0, m_vertices.size() - 1);
+	int idx = GetRandomIntInRange(0, (int)(m_vertices.size() - 1));
 	return m_vertices[idx];
 }
 

@@ -22,6 +22,9 @@ public:
 
 	void Render(Renderer* renderer) override;
 
+	void AddOpague(GameObject* go);
+	void AddTransparent(GameObject* go);
+
 public:
 	Cube* c_0 = nullptr;
 	Cube* c_1 = nullptr;
@@ -30,4 +33,8 @@ public:
 	Point* p_0 = nullptr;
 	Line* l_0 = nullptr;
 	Ship* ship_0 = nullptr;
+
+	std::vector<GameObject*> m_opagues;
+	std::vector<GameObject*> m_alphas;
+	std::map<float, GameObject*> m_sorted_alphas;
 };

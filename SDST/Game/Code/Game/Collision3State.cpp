@@ -289,7 +289,7 @@ void Collision3State::UpdateKeyboard(float deltaTime)
 	{
 		// switch focused control group
 		++m_focusedIndex;
-		int groupCount = m_controlGrps.size();
+		int groupCount = (int)m_controlGrps.size();
 		m_focusedIndex = m_focusedIndex % groupCount;
 		m_focusedGrp = m_controlGrps[m_focusedIndex];
 

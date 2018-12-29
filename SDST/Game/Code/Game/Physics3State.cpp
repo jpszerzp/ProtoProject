@@ -716,7 +716,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 			break;
 		case HULL_GEN_FORM_HORIZON_START:
 		{
-			QHFace* conflict_face = std::get<0>(g_hull->m_eyePair);
+			//QHFace* conflict_face = std::get<0>(g_hull->m_eyePair);
 			QHVert* conflict_pt = std::get<1>(g_hull->m_eyePair);
 
 			// to start with, we can assume the we have never visited any other faces
@@ -760,7 +760,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 			break;
 		case HULL_GEN_FORM_HORIZON_PROECSS:
 		{
-			QHFace* conflict_face = std::get<0>(g_hull->m_eyePair);
+			//QHFace* conflict_face = std::get<0>(g_hull->m_eyePair);
 			QHVert* conflict_pt = std::get<1>(g_hull->m_eyePair);
 
 			if (!g_hull->ReachStartHalfEdge())
@@ -791,7 +791,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 						else
 						{
 							// this is not the face we came from, it is just a normal face we previously visited; skip it
-							HalfEdge* expiring = g_hull->m_current_he;
+							//HalfEdge* expiring = g_hull->m_current_he;
 
 							g_hull->ChangeCurrentHalfEdgeOldFace();
 							g_hull->ChangeCurrentHalfEdgeMesh();			// verifies if the new HE has twin
@@ -855,7 +855,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 
 				// remove from list of all faces
 				std::vector<QHFace*>::iterator it = std::find(g_hull->m_faces.begin(), g_hull->m_faces.end(), visited_frontier);
-				bool inList = (it != g_hull->m_faces.end());
+				//bool inList = (it != g_hull->m_faces.end());
 				g_hull->m_faces.erase(it);
 
 				// delete this face
@@ -928,7 +928,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 				g_hull->m_horizon_infos.pop_front();
 
 				// build new face and verify it 
-				const Vector3& eyePos = eye->vert;
+				//const Vector3& eyePos = eye->vert;
 				QHFace* new_face = new QHFace(he_restore, std::get<1>(he_data), eye->vert);
 				g_hull->CreateFaceMesh(*new_face);			// face mesh
 				g_hull->GenerateOutboundNorm(g_hull->m_anchor, *new_face);		// normal
@@ -1056,7 +1056,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 			m_camera->GetTransform().SetLocalPosition(pos);
 			m_camera->GetTransform().SetLocalRotation(Vector3::ZERO);
 
-			int size = m_inspection.size();
+			int size = (int)m_inspection.size();
 			++m_insepction_count;
 			m_insepction_count = (m_insepction_count % size);
 		}

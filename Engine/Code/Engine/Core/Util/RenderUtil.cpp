@@ -45,7 +45,7 @@ extern void DrawPoint(Mesh* point_mesh, uint size)
 		Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
 		renderer->SetTexture2D(0, texture);
 		renderer->SetSampler2D(0, texture->GetSampler());
-		glPointSize(size);
+		glPointSize((GLfloat)size);
 
 		renderer->m_objectData.model = Matrix44::IDENTITY;
 
