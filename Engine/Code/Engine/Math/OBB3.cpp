@@ -1,25 +1,26 @@
 #include "Engine/Math/OBB3.hpp"
+#include "Engine/Math/MathUtils.hpp"
 
 OBB3::OBB3(Vector3 center, Vector3 forward, Vector3 up, Vector3 right, Vector3 halfExt)
 	: m_center(center), m_forward(forward), m_up(up), m_right(right), m_halfExt(halfExt) 
 {
 	Vector3 front_center = center + m_forward * halfExt.z;
-	OBB3Face front_face = OBB3Face(m_forward, front_center);
+	OBB3Face front_face = OBB3Face(m_forward, front_center, F1);
 
 	Vector3 back_center = center + (-forward) * halfExt.z;
-	OBB3Face back_face = OBB3Face(-m_forward, back_center);
+	OBB3Face back_face = OBB3Face(-m_forward, back_center, F2);
 
 	Vector3 right_center = center + m_right * halfExt.x;
-	OBB3Face right_face = OBB3Face(m_right, right_center);
+	OBB3Face right_face = OBB3Face(m_right, right_center, F3);
 
 	Vector3 left_center = center + (-right) * halfExt.x;
-	OBB3Face left_face = OBB3Face(-m_right, left_center);
+	OBB3Face left_face = OBB3Face(-m_right, left_center, F4);
 
 	Vector3 up_center = center + m_up * halfExt.y;
-	OBB3Face up_face = OBB3Face(m_up, up_center);
+	OBB3Face up_face = OBB3Face(m_up, up_center, F5);
 	
 	Vector3 down_center = center + (-up) * halfExt.y;
-	OBB3Face down_face = OBB3Face(-m_up, down_center);
+	OBB3Face down_face = OBB3Face(-m_up, down_center, F6);
 
 	m_faces.push_back(front_face);
 	m_faces.push_back(back_face);
@@ -36,14 +37,14 @@ OBB3::OBB3(Vector3 center, Vector3 forward, Vector3 up, Vector3 right, Vector3 h
 	Vector3 fbl = m_center - m_right * halfExt.x - m_up * halfExt.y + m_forward * halfExt.z;
 	Vector3 fbr = m_center + m_right * halfExt.x - m_up * halfExt.y + m_forward * halfExt.z;
 	Vector3 ftr = m_center + m_right * halfExt.x + m_up * halfExt.y + m_forward * halfExt.z;
-	OBB3Vert vert_ftl = OBB3Vert(ftl);
-	OBB3Vert vert_fbl = OBB3Vert(fbl);
-	OBB3Vert vert_fbr = OBB3Vert(fbr);
-	OBB3Vert vert_ftr = OBB3Vert(ftr);
-	OBB3Vert vert_btl = OBB3Vert(btl);
-	OBB3Vert vert_bbl = OBB3Vert(bbl);
-	OBB3Vert vert_bbr = OBB3Vert(bbr);
-	OBB3Vert vert_btr = OBB3Vert(btr);
+	OBB3Vert vert_ftl = OBB3Vert(ftl, V1);
+	OBB3Vert vert_fbl = OBB3Vert(fbl, V2);
+	OBB3Vert vert_fbr = OBB3Vert(fbr, V3);
+	OBB3Vert vert_ftr = OBB3Vert(ftr, V4);
+	OBB3Vert vert_btl = OBB3Vert(btl, V5);
+	OBB3Vert vert_bbl = OBB3Vert(bbl, V6);
+	OBB3Vert vert_bbr = OBB3Vert(bbr, V7);
+	OBB3Vert vert_btr = OBB3Vert(btr, V8);
 	m_verts.push_back(vert_ftl);
 	m_verts.push_back(vert_fbl);
 	m_verts.push_back(vert_fbr);
@@ -53,18 +54,18 @@ OBB3::OBB3(Vector3 center, Vector3 forward, Vector3 up, Vector3 right, Vector3 h
 	m_verts.push_back(vert_bbr);
 	m_verts.push_back(vert_btr);
 
-	OBB3Edge e1 = OBB3Edge(vert_ftl, vert_fbl);
-	OBB3Edge e2 = OBB3Edge(vert_fbl, vert_fbr);
-	OBB3Edge e3 = OBB3Edge(vert_fbr, vert_ftr);
-	OBB3Edge e4 = OBB3Edge(vert_ftr, vert_ftl);
-	OBB3Edge e5 = OBB3Edge(vert_btl, vert_bbl);
-	OBB3Edge e6 = OBB3Edge(vert_bbl, vert_bbr);
-	OBB3Edge e7 = OBB3Edge(vert_bbr, vert_btr);
-	OBB3Edge e8 = OBB3Edge(vert_btr, vert_btl);
-	OBB3Edge e9 = OBB3Edge(vert_fbl, vert_bbl);
-	OBB3Edge e10 = OBB3Edge(vert_fbr, vert_bbr);
-	OBB3Edge e11 = OBB3Edge(vert_ftr, vert_btr);
-	OBB3Edge e12 = OBB3Edge(vert_ftl, vert_btl);
+	OBB3Edge e1 = OBB3Edge(vert_ftl, vert_fbl, E1);
+	OBB3Edge e2 = OBB3Edge(vert_fbl, vert_fbr, E2);
+	OBB3Edge e3 = OBB3Edge(vert_fbr, vert_ftr, E3);
+	OBB3Edge e4 = OBB3Edge(vert_ftr, vert_ftl, E4);
+	OBB3Edge e5 = OBB3Edge(vert_btl, vert_bbl, E5);
+	OBB3Edge e6 = OBB3Edge(vert_bbl, vert_bbr, E6);
+	OBB3Edge e7 = OBB3Edge(vert_bbr, vert_btr, E7);
+	OBB3Edge e8 = OBB3Edge(vert_btr, vert_btl, E8);
+	OBB3Edge e9 = OBB3Edge(vert_fbl, vert_bbl, E9);
+	OBB3Edge e10 = OBB3Edge(vert_fbr, vert_bbr, E10);
+	OBB3Edge e11 = OBB3Edge(vert_ftr, vert_btr, E11);
+	OBB3Edge e12 = OBB3Edge(vert_ftl, vert_btl, E12);
 	m_edges.push_back(e1);
 	m_edges.push_back(e2);
 	m_edges.push_back(e3);
@@ -79,45 +80,85 @@ OBB3::OBB3(Vector3 center, Vector3 forward, Vector3 up, Vector3 right, Vector3 h
 	m_edges.push_back(e12);
 }
 
-
-Vector3 OBB3::GetFTL() const
+Vector3 OBB3::GetFTLExt() const
 {
-	return GetCenter() - GetHalfExtX() + GetHalfExtY() - GetHalfExtZ();
+	return GetFTL() - GetCenter();
 }
 
-Vector3 OBB3::GetFBL() const
+Vector3 OBB3::GetFBLExt() const
 {
-	return GetCenter() - GetHalfExtX() - GetHalfExtY() - GetHalfExtZ();
+	return GetFBL() - GetCenter();
 }
 
-Vector3 OBB3::GetFBR() const
+Vector3 OBB3::GetFBRExt() const
 {
-	return GetCenter() + GetHalfExtX() - GetHalfExtY() - GetHalfExtZ();
+	return GetFBR() - GetCenter();
 }
 
-Vector3 OBB3::GetFTR() const
+Vector3 OBB3::GetFTRExt() const
 {
-	return GetCenter() + GetHalfExtX() + GetHalfExtY() - GetHalfExtZ();
+	return GetFTR() - GetCenter();
 }
 
-Vector3 OBB3::GetBTL() const
+Vector3 OBB3::GetBTLExt() const
 {
-	return GetCenter() - GetHalfExtX() + GetHalfExtY() + GetHalfExtZ();
+	return GetBTL() - GetCenter();
 }
 
-Vector3 OBB3::GetBBL() const
+Vector3 OBB3::GetBBLExt() const
 {
-	return GetCenter() - GetHalfExtX() - GetHalfExtY() + GetHalfExtZ();
+	return GetBBL() - GetCenter();
 }
 
-Vector3 OBB3::GetBBR() const
+Vector3 OBB3::GetBBRExt() const
 {
-	return GetCenter() + GetHalfExtX() - GetHalfExtY() + GetHalfExtZ();
+	return GetBBR() - GetCenter();
 }
 
-Vector3 OBB3::GetBTR() const
+Vector3 OBB3::GetBTRExt() const
 {
-	return GetCenter() + GetHalfExtX() + GetHalfExtY() + GetHalfExtZ();
+	return GetBTR() - GetCenter();
+}
+
+// along is normalized
+float OBB3::GetFTLExtAlong(const Vector3& along) const
+{
+	return (DotProduct(GetFTLExt(), along));
+}
+
+float OBB3::GetFBLExtAlong(const Vector3& along) const
+{
+	return (DotProduct(GetFBLExt(), along));
+}
+
+float OBB3::GetFBRExtAlong(const Vector3& along) const
+{
+	return (DotProduct(GetFBRExt(), along));
+}
+
+float OBB3::GetFTRExtAlong(const Vector3& along) const
+{
+	return (DotProduct(GetFTRExt(), along));
+}
+
+float OBB3::GetBTLExtAlong(const Vector3& along) const
+{
+	return (DotProduct(GetBTLExt(), along));
+}
+
+float OBB3::GetBBLExtAlong(const Vector3& along) const
+{
+	return(DotProduct(GetBBLExt(), along));
+}
+
+float OBB3::GetBBRExtAlong(const Vector3& along) const
+{
+	return (DotProduct(GetBBRExt(), along));
+}
+
+float OBB3::GetBTRExtAlong(const Vector3& along) const
+{
+	return (DotProduct(GetBTRExt(), along));
 }
 
 std::vector<Vector3> OBB3::GetVertices() const

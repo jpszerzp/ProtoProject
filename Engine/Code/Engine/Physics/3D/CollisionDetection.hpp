@@ -12,14 +12,6 @@
 //TODO("This threshold should have negative value");
 #define COHERENT_THRESHOLD 0.01f
 
-enum eContactFeature
-{
-	V1, V2, V3, V4, V5, V6, V7, V8,
-	F1, F2, F3, F4, F5, F6,
-	E1, E2, E3, E4, E5, E6, E7, E8, E9, E10, E11, E12,
-	UNKNOWN
-};
-
 enum eContactType
 {
 	POINT_FACE,
@@ -34,8 +26,8 @@ class Contact3
 {
 public:
 	eContactType m_type = NO_CARE;
-	eContactFeature m_f1;	// feature from e1
-	eContactFeature m_f2;	// feature from e2
+	eContactFeature m_f1 = FEATURE_NO_CARE;	// feature from e1
+	eContactFeature m_f2 = FEATURE_NO_CARE;	// feature from e2
 
 	Entity3* m_e1;
 	Entity3* m_e2;
@@ -75,9 +67,7 @@ public:
 	Vector3 ComputeWorldImpulseFriction();
 
 	// pos change
-	void SolveNonlinearProjection(
-		float angularInertia[2], float linearInertia[2],
-		float angularMove[2], float linearMove[2]);
+	void SolveNonlinearProjection( float angularInertia[2], float linearInertia[2], float angularMove[2], float linearMove[2]);
 
 	void ApplyImpulse();
 	void ResolveVelocityCoherent(Vector3 linearChange[2], Vector3 angularChange[2]);
@@ -94,6 +84,8 @@ public:
 
 	// contact may wake entities up
 	void WakeUp();
+	
+	bool DoesFeatureMatter() const { return m_type != NO_CARE; }
 };
 
 /**
@@ -112,8 +104,8 @@ struct CollisionData3
 	void ClearCoherent();
 
 	bool HasAndUpdateContact(const Contact3& contact);
-	bool FeatureMatchAndUpdate(const Contact3& comparer, Contact3& comparee);
-	bool EntityMatchAndUpdate(const Contact3& comparer, Contact3& comparee);
+	//bool FeatureMatchAndUpdate(const Contact3& comparer, Contact3& comparee);
+	//bool EntityMatchAndUpdate(const Contact3& comparer, Contact3& comparee);
 
 	std::vector<Contact3>& GetContacts() { return m_contacts; }
 };
@@ -153,9 +145,9 @@ public:
 	static bool OBB3VsOBB3Core(const OBB3& obb_0, const OBB3& obb_1, Contact3& contact);
 	static uint OBB3VsOBB3Single(const OBB3& obb1, const OBB3& obb2, CollisionData3* data);
 	static uint OBB3VsOBB3Coherent(const OBB3& obb1, const OBB3& obb2, CollisionData3* data);
-	static void OBB3VsOBB3StepOne(const OBB3& obb1, const OBB3& obb2);
-	static void OBB3VsOBB3StepTwo(const OBB3& obb1, const OBB3& obb2);
-	static void OBB3VsOBB3StepThree(const OBB3& obb1, const OBB3& obb2);
+	static bool OBB3VsOBB3StepOne(const OBB3& obb1, const OBB3& obb2, std::tuple<Vector3, Vector3, float>& c_info2, OBB3Face& obb1_face, OBB3Vert& obb2_vert);
+	static bool OBB3VsOBB3StepTwo(const OBB3& obb1, const OBB3& obb2, std::tuple<Vector3, Vector3, float>& c_info1, OBB3Face& obb2_face, OBB3Vert& obb1_vert);
+	static bool OBB3VsOBB3StepThree(const OBB3& obb1, const OBB3& obb2, std::tuple<OBB3Edge, Vector3, float, Vector3, Vector3>& c_info, OBB3Edge& obb1_edge, OBB3Edge& obb2_edge);
 
 	// obb3 vs point
 	static uint OBB3VsPoint(const OBB3& obb, const Vector3& p, Contact3& contact, bool reverse);

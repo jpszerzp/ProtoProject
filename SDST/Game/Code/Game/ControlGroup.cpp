@@ -283,7 +283,7 @@ void ControlGroup::ProcessInput()
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_0))
 	{
-		// first generate the minkowski hull if the group is all about hull object
+		// first generate the minkowski hull if the group is all about hull objects
 		if (m_id == CONTROL_HULL_HULL)
 		{
 			if (fake_hull == nullptr)
@@ -780,31 +780,25 @@ void ControlGroup::Update(float deltaTime)
 		const OBB3& obb_0 = rbb_0->m_primitive;
 		const OBB3& obb_1 = rbb_1->m_primitive;
 
-		//TODO("contact point is not correct - it is set to center of an entity, see Core for detail");
-		//bool intersected = CollisionDetector::OBB3VsOBB3Core(obb_0, obb_1, contact);
-		//if (intersected)
-		//	m_contacts.push_back(contact);
+		bool intersected = CollisionDetector::OBB3VsOBB3Core(obb_0, obb_1, contact);
+		if (intersected)
+			m_contacts.push_back(contact);
 
-		//// debug
-		//Vector3 vert_pos;
-		//Vector3 face_center;
-		//CollisionDetector::OBB3VsOBB3CoreBreakdownPtVsFace(obb_0, obb_1, vert_pos, face_center);
-		//if (obb3_obb3_pt_pos != nullptr)
-		//{
-		//	delete obb3_obb3_pt_pos;
-		//	obb3_obb3_pt_pos = nullptr;
-		//}
-		//obb3_obb3_pt_pos = Mesh::CreatePointImmediate(VERT_PCU, vert_pos, Rgba::MEGENTA);
-		//if (obb3_obb3_face_center != nullptr)
-		//{
-		//	delete obb3_obb3_face_center;
-		//	obb3_obb3_face_center = nullptr;
-		//}
-		//obb3_obb3_face_center = Mesh::CreatePointImmediate(VERT_PCU, face_center, Rgba::BLUE);
+		//std::tuple<Vector3, Vector3, float> c_info2;
+		//std::tuple<Vector3, Vector3, float> c_info1;
+		//std::tuple<OBB3Edge, Vector3, float, Vector3, Vector3> c_info;
 
-		CollisionDetector::OBB3VsOBB3StepOne(obb_0, obb_1);
-		CollisionDetector::OBB3VsOBB3StepTwo(obb_0, obb_1);
-		CollisionDetector::OBB3VsOBB3StepThree(obb_0, obb_1);
+		//OBB3Face obb1_face;
+		//OBB3Vert obb2_vert;
+		//bool obb2_vert_to_obb1_face = CollisionDetector::OBB3VsOBB3StepOne(obb_0, obb_1, c_info2, obb1_face, obb2_vert);
+
+		//OBB3Vert obb1_vert;
+		//OBB3Face obb2_face;
+		//bool obb1_vert_to_obb2_face = CollisionDetector::OBB3VsOBB3StepTwo(obb_0, obb_1, c_info1, obb2_face, obb1_vert);
+
+		//OBB3Edge obb1_edge;
+		//OBB3Edge obb2_edge;
+		//bool obb1_edge_to_obb2_edge = CollisionDetector::OBB3VsOBB3StepThree(obb_0, obb_1, c_info, obb1_edge, obb2_edge);
 	}
 		break;
 	case CONTROL_LINE_LINE:
