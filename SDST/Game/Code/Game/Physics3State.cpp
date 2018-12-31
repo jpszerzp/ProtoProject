@@ -100,7 +100,7 @@ Physics3State::Physics3State()
 	//m_gravity = new GravityRigidForceGenerator(Vector3::GRAVITY / 8.f);
 	//m_gravity = new GravityRigidForceGenerator(Vector3::GRAVITY / 16.f);
 	
-	m_iterResolver = new ContactResolver(2);
+	//m_iterResolver = new ContactResolver(2);
 	m_allResolver = new ContactResolver();
 	m_coherentResolver = new ContactResolver(RESOLVE_COHERENT);
 
@@ -530,44 +530,6 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		Vector3 gridTR = Vector3(100.f, 0.f, 100.f);
 		DebugRenderPlaneGrid(lifetime, gridBL, gridTL, gridTR, gridBR, 10.f, 10.f, 2.5f, mode);
 	}
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_0) && DebugRenderOn())
-	{
-		g_renderer->m_debugModeData.mode.w = DEBUG_NONE;
-	}
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_1) && DebugRenderOn())
-	{
-		g_renderer->m_debugModeData.mode.w = DEBUG_COLOR;
-	}
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_2) && DebugRenderOn())
-	{
-		g_renderer->m_debugModeData.mode.w = DEBUG_UV;
-	}
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_3) && DebugRenderOn())
-	{
-		g_renderer->m_debugModeData.mode.w = DEBUG_SURFACE_NORMAL;
-	}
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_4) && DebugRenderOn())
-	{
-		g_renderer->m_debugModeData.mode.w = DEBUG_WORLD_NORMAL;
-	}
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_8) && DebugRenderOn())
-	{
-		g_renderer->m_debugModeData.mode.w = DEBUG_DIFFUSE;
-	}
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_9) && DebugRenderOn())
-	{
-		g_renderer->m_debugModeData.mode.w = DEBUG_SPECULAR;
-	}
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_5))
-	{
-		// toggle debug draw of entity bounding sphere
-		// call ToggleBoundSphereDebugDraw();
-	}
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_6))
-	{
-		// toggle debug draw of entity bounding box
-		// call ToggleBoundBoxDebugDraw();
-	}
 
 	// BVH
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_T) && !DevConsoleIsOpen())
@@ -620,28 +582,10 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_F2))
 		g_broadphase = !g_broadphase;
 
-	// delete objects in dynamic/general wraparound
-	TODO("Find a way to delete objects in a wraparound");
+	// clear entities in a wraparound
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_F3))
 	{
-		for (std::vector<GameObject*>::size_type idx = 0; idx < m_wraparound_general->m_gos.size(); ++idx)
-		{
-			GameObject* go = m_wraparound_general->m_gos[idx];
 
-			// first erase it from this structure
-			std::vector<GameObject*>::iterator it_wrap = m_wraparound_general->m_gos.begin() + idx;
-			m_wraparound_general->m_gos.erase(it_wrap);
-
-			// then erase from gameobject structure
-			
-			// then erase from sphere/box structure
-
-			// then erase from rigid structure 
-
-			delete go;
-
-			idx--;
-		}
 	}
 
 	// fireworks cleanup - it is the only case where a GO's lifetime would expire
@@ -1063,21 +1007,22 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	}
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_SPACE))
+		WrapAroundTestGeneral(true);
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_1))
+		WrapAroundTestBox(true);
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_2))
+		WrapAroundTestSphere(true);
+
+	if (g_input->IsKeyDown(InputSystem::KEYBOARD_0))
 	{
-		WrapAroundTestGeneral();
+		// slow down gameobjects in the specified wraparound
+		for (GameObject* go : m_wraparound_general->m_gos)
+			go->m_physEntity->m_slowed = 0.1f;
 	}
-
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_F1))
+	else
 	{
-		GravityRigidForceGenerator* gravity = new GravityRigidForceGenerator(Vector3::GRAVITY);
-
-		Vector3 pos = Vector3(0.f, 290.f, 0.f);
-		Sphere* s = InitializePhysSphere(pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID, true);
-		Rigidbody3* rigid_s = static_cast<Rigidbody3*>(s->GetEntity());
-		m_rigidRegistry->Register(rigid_s, gravity);
-		rigid_s->SetAwake(true);
-		rigid_s->SetCanSleep(true);
-		m_wraparound_general->m_gos.push_back(s);
+		for (GameObject* go : m_wraparound_general->m_gos)
+			go->m_physEntity->m_slowed = 1.f; 
 	}
 
 	// camera update from input
@@ -1278,7 +1223,7 @@ void Physics3State::UpdateContactGeneration()
 	if (!m_broadPhase)
 	{
 		///////////////////////////////////////////// Clear Resolver ////////////////////////////////////////////
-		m_iterResolver->ClearRecords();
+		//m_iterResolver->ClearRecords();
 		m_allResolver->ClearRecords();
 		m_coherentResolver->ClearRecords();
 
@@ -1382,7 +1327,30 @@ void Physics3State::UpdateCore()
 			Sphere* sphere = m_spheres[idx1];
 			Quad* quad = m_quads[idx2];
 
-			if (sphere->m_physEntity->GetEntityBodyID() == BODY_RIGID)
+			if (sphere->m_physEntity->GetEntityBodyID() == BODY_PARTICLE)
+			{
+				if (quad->m_physEntity->GetEntityBodyID() == BODY_PARTICLE)
+				{
+					SphereEntity3* se = dynamic_cast<SphereEntity3*>(sphere->m_physEntity);
+					QuadEntity3* qe = dynamic_cast<QuadEntity3*>(quad->m_physEntity);
+
+					Sphere3 sph = se->GetSpherePrimitive();
+					Plane pl = qe->GetPlanePrimitive();
+
+					CollisionDetector::Sphere3VsPlane3Single(sph, pl, m_allResolver->GetCollisionData());
+				}
+				else 
+				{
+					SphereEntity3* se = dynamic_cast<SphereEntity3*>(sphere->m_physEntity);
+					QuadRB3* qrb = dynamic_cast<QuadRB3*>(quad->m_physEntity);
+
+					Sphere3 sph = se->GetSpherePrimitive();
+					Plane pl = qrb->GetPlanePrimitive();
+
+					CollisionDetector::Sphere3VsPlane3Single(sph, pl, m_allResolver->GetCollisionData());
+				}
+			}
+			else 
 			{
 				if (quad->m_physEntity->GetEntityBodyID() == BODY_PARTICLE)
 				{
@@ -1403,29 +1371,6 @@ void Physics3State::UpdateCore()
 					Plane pl = qrb->GetPlanePrimitive();
 
 					CollisionDetector::Sphere3VsPlane3Coherent(sph, pl, m_coherentResolver->GetCollisionData());
-				}
-			}
-			else 
-			{
-				if (quad->m_physEntity->GetEntityBodyID() == BODY_PARTICLE)
-				{
-					SphereEntity3* se = dynamic_cast<SphereEntity3*>(sphere->m_physEntity);
-					QuadEntity3* qe = dynamic_cast<QuadEntity3*>(quad->m_physEntity);
-
-					Sphere3 sph = se->GetSpherePrimitive();
-					Plane pl = qe->GetPlanePrimitive();
-
-					CollisionDetector::Sphere3VsPlane3Single(sph, pl, m_allResolver->GetCollisionData());
-				}
-				else 
-				{
-					SphereEntity3* se = dynamic_cast<SphereEntity3*>(sphere->m_physEntity);
-					QuadRB3* qrb = dynamic_cast<QuadRB3*>(quad->m_physEntity);
-
-					Sphere3 sph = se->GetSpherePrimitive();
-					Plane pl = qrb->GetPlanePrimitive();
-
-					CollisionDetector::Sphere3VsPlane3Single(sph, pl, m_allResolver->GetCollisionData());
 				}
 			}
 		}
@@ -1611,7 +1556,7 @@ void Physics3State::UpdateCore()
 
 void Physics3State::UpdateContactResolution(float deltaTime)
 {
-	m_iterResolver->ResolveContacts(deltaTime);
+	//m_iterResolver->ResolveContacts(deltaTime);
 	m_allResolver->ResolveContacts(deltaTime);
 	m_coherentResolver->ResolveContacts(deltaTime);
 }
@@ -1707,7 +1652,16 @@ void Physics3State::RenderModelSamples(Renderer* renderer)
 	}
 }
 
-void Physics3State::WrapAroundTestGeneral()
+void Physics3State::WrapAroundTestGeneral(bool give_ang_vel)
+{
+	if ((m_wrap_pos_it_general % 2) == 0)
+		WrapAroundTestSphere(give_ang_vel);
+	else
+		WrapAroundTestBox(give_ang_vel);
+}
+
+
+void Physics3State::WrapAroundTestSphere(bool give_ang_vel)
 {
 	Vector3 positions[8] = {Vector3(-5.f, 295.f, -5.f), Vector3(5.f, 295.f, -5.f),
 		Vector3(-5.f, 295.f, 5.f), Vector3(5.f, 295.f, 5.f),
@@ -1715,34 +1669,53 @@ void Physics3State::WrapAroundTestGeneral()
 		Vector3(-5.f, 305.f, 5.f), Vector3(5.f, 305.f, 5.f)};
 	Vector3 pos = positions[m_wrap_pos_it_general];
 
-	// spawn sphere
-	if ((m_wrap_pos_it_general % 2) == 0)
+	// even, spawn ball
+	Sphere* s = InitializePhysSphere(pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID, true);
+	Rigidbody3* rigid_s = static_cast<Rigidbody3*>(s->GetEntity());
+	m_rigidRegistry->Register(rigid_s, m_gravity);
+	rigid_s->SetLinearVelocity(GetRandomVector3() * 5.f);
+	if (give_ang_vel)
 	{
-		// even, spawn ball
-		Sphere* s = InitializePhysSphere(pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID, true);
-		Rigidbody3* rigid_s = static_cast<Rigidbody3*>(s->GetEntity());
-		m_rigidRegistry->Register(rigid_s, m_gravity);
-		rigid_s->SetLinearVelocity(GetRandomVector3() * 5.f);
-		rigid_s->SetAwake(true);
-		rigid_s->SetCanSleep(true);
-		m_wraparound_general->m_gos.push_back(s);
+		float ang_v_x = GetRandomFloatInRange(-5.f, 5.f);
+		float ang_v_y = GetRandomFloatInRange(-5.f, 5.f);
+		float ang_v_z = GetRandomFloatInRange(-5.f, 5.f);
+		rigid_s->SetAngularVelocity(Vector3(ang_v_x, ang_v_y, ang_v_z));
 	}
-	else
-	{
-		// spawn box
-		Box* b = InitializePhysBox(pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID, true);
-		Rigidbody3* rigid_b = static_cast<Rigidbody3*>(b->GetEntity());
-		m_rigidRegistry->Register(rigid_b, m_gravity);
-		rigid_b->SetLinearVelocity(GetRandomVector3() * 5.f);
-		rigid_b->SetAwake(true);
-		rigid_b->SetCanSleep(true);
-		m_wraparound_general->m_gos.push_back(b);
-	}
+	rigid_s->SetAwake(true);
+	rigid_s->SetCanSleep(true);
+	m_wraparound_general->m_gos.push_back(s);
 
 	m_wrap_pos_it_general += 1;
 	m_wrap_pos_it_general %= 8;
 }
 
+void Physics3State::WrapAroundTestBox(bool give_ang_vel)
+{
+	Vector3 positions[8] = {Vector3(-5.f, 295.f, -5.f), Vector3(5.f, 295.f, -5.f),
+		Vector3(-5.f, 295.f, 5.f), Vector3(5.f, 295.f, 5.f),
+		Vector3(-5.f, 305.f, -5.f), Vector3(5.f, 305.f, -5.f),
+		Vector3(-5.f, 305.f, 5.f), Vector3(5.f, 305.f, 5.f)};
+	Vector3 pos = positions[m_wrap_pos_it_general];
+
+	// spawn box
+	Box* b = InitializePhysBox(pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID, true);
+	Rigidbody3* rigid_b = static_cast<Rigidbody3*>(b->GetEntity());
+	m_rigidRegistry->Register(rigid_b, m_gravity);
+	rigid_b->SetLinearVelocity(GetRandomVector3() * 5.f);
+	if (give_ang_vel)
+	{
+		float ang_v_x = GetRandomFloatInRange(-5.f, 5.f);
+		float ang_v_y = GetRandomFloatInRange(-5.f, 5.f);
+		float ang_v_z = GetRandomFloatInRange(-5.f, 5.f);
+		rigid_b->SetAngularVelocity(Vector3(ang_v_x, ang_v_y, ang_v_z));
+	}
+	rigid_b->SetAwake(true);
+	rigid_b->SetCanSleep(true);
+	m_wraparound_general->m_gos.push_back(b);
+
+	m_wrap_pos_it_general += 1;
+	m_wrap_pos_it_general %= 8;
+}
 
 void Physics3State::SwapHullStatusMesh(const std::string& str)
 {

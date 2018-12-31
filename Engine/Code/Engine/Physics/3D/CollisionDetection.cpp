@@ -841,8 +841,8 @@ bool CollisionDetector::Sphere3VsSphere3Core(const Sphere3& s1, const Sphere3& s
 
 	// allow pessimistic collision detection
 	TODO("Need to test this more with ALL cases, i.e. resting");
-	float pessimistic = 0.f;
-	if (length <= 0.f || length >= (s1Rad + s2Rad + pessimistic))
+	//float pessimistic = 0.f;
+	if (length <= 0.f || length >= (s1Rad + s2Rad))
 	{
 		// if mid line length is invalid
 		// or, larger than radius threshold, return directly
@@ -1247,6 +1247,28 @@ bool CollisionDetector::OBB3VsPlane3Core(const OBB3& obb, const Plane& pl, Conta
 
 		return true;
 	}
+
+	/*
+	float r = obb.m_halfExt.x * abs(DotProduct(pl.m_normal, obb.m_right)) +
+	obb.m_halfExt.y * abs(DotProduct(pl.m_normal, obb.m_up)) +
+	obb.m_halfExt.z * abs(DotProduct(pl.m_normal, obb.m_forward));
+	float s = DotProduct(pl.m_normal, obb.m_center) - pl.m_offset;
+
+	if (abs(s) > r)
+	return false;
+
+	float penetration = r - abs(s);		// > 0
+	Vector3 usedNormal;
+	if (s > 0)
+	usedNormal = pl.GetNormal();
+	else
+	usedNormal = -pl.GetNormal();
+	Vector3 contactPoint = obb.GetCenter() + (-usedNormal) * s;
+	Contact3 theContact = Contact3(obb.GetEntity(), pl.GetEntity(), usedNormal, contactPoint, penetration, 0.9f);
+	contact = theContact;
+
+	return true;
+	*/
 }
 
 

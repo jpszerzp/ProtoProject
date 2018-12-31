@@ -711,24 +711,9 @@ void ProtoState::Render(Renderer* renderer)
 	renderer->SetCamera(m_camera);
 	renderer->ClearScreen(Rgba::BLACK);
 
-	//for each (GameObject* gameobject in m_gameObjects)
-	//{
-	//	if (!gameobject->m_isInForwardPath)
-	//		gameobject->Render(renderer);
-
-	//	//gameobject->RenderBasis(renderer);
-	//}
-
 	// render opague first
 	for each (GameObject* opague in m_opagues)
 		opague->Render(renderer);
-
-	// render transparent in order
-	//for(std::map<float,GameObject*>::reverse_iterator it = m_sorted_alphas.rbegin(); it != m_sorted_alphas.rend(); ++it) 
-	//{
-	//	GameObject* transparent = it->second;
-	//	transparent->Render(renderer);
-	//}  
 
 	for(std::map<float,GameObject*>::iterator it = m_sorted_alphas.begin(); it != m_sorted_alphas.end(); ++it) 
 	{

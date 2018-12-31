@@ -264,7 +264,7 @@ Quaternion Quaternion::FromMatrix(const Matrix33& rot)
 	float m33 = rot.Kz;
 
 	//float w = 0.f;
-	float x = 0.f;
+	//float x = 0.f;
 	//float y = 0.f;
 	//float z = 0.f;
 
@@ -275,7 +275,7 @@ Quaternion Quaternion::FromMatrix(const Matrix33& rot)
 
 	int idx = 0;
 	float biggest = w_sqrf;
-	if (x > biggest)
+	if (x_sqrf > biggest)
 	{
 		biggest = x_sqrf;
 		idx = 1;

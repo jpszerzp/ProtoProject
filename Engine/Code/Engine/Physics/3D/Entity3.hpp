@@ -64,7 +64,8 @@ public:
 	// p'': force and acc
 	Vector3 m_linearAcceleration = Vector3::ZERO;
 	Vector3 m_netforce = Vector3::ZERO;
-	bool m_forcePersistent = false;			// by default force is NOT persistent
+	bool m_forcePersistent = false;			
+	// by default force is NOT persistent
 
 	// mass and phys mat
 	MassData3 m_massData;
@@ -100,6 +101,7 @@ public:
 	eBodyIdentity m_bodyID = BODY_PARTICLE;		// this entity can be statically casted to specified type
 	eBodyShape m_body_shape = SHAPE_DEFAULT;
 
+	float m_slowed = 1.f;
 	bool m_frozen = false;
 	bool m_constrained = false;
 

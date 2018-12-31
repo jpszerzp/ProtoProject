@@ -76,7 +76,6 @@ void ContactResolver::ResolveContactsAll(float deltaTime)
 
 void ContactResolver::ResolveContactsCoherent(float deltaTime)
 {
-	PROFILE_LOG_SCOPED_FUNCTION();
 	if (m_collision->m_contacts.empty())
 		return;
 

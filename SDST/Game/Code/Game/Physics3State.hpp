@@ -83,7 +83,9 @@ public:
 	void RenderModelSamples(Renderer* renderer);
 
 	// scene tests
-	void WrapAroundTestGeneral();
+	void WrapAroundTestGeneral(bool give_ang_vel);
+	void WrapAroundTestSphere(bool give_ang_vel);
+	void WrapAroundTestBox(bool give_ang_vel);
 
 	void SwapHullStatusMesh(const std::string& str);
 
@@ -92,7 +94,7 @@ public:
 
 	Spring* m_spring;
 	AnchorSpring* m_anchorSpring;
-	Rod* m_rod;
+	//Rod* m_rod;
 	GeneralRigidAnchorSpring* m_rigidAnchorSpring;
 
 	ParticleForceRegistry* m_particleRegistry = nullptr;
@@ -118,7 +120,7 @@ public:
 	std::vector<Quad*> m_ccd_planes;
 
 	ContactResolver* m_allResolver;		
-	ContactResolver* m_iterResolver;
+	//ContactResolver* m_iterResolver;
 	ContactResolver* m_coherentResolver;
 	
 	// BVH
@@ -139,8 +141,8 @@ public:
 	Vector2 m_statusMin = Vector2::ZERO;
 	
 	WrapAround* m_wraparound_continuous;
-	WrapAround* m_wraparound_general;
 	WrapAround* m_wraparound_verlet;
+	WrapAround* m_wraparound_general;
 	int m_wrap_pos_it_general = 0;
 
 	// assimp test

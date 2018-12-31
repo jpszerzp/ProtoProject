@@ -116,13 +116,15 @@ void SphereRB3::UpdateInput(float)
 
 void SphereRB3::Integrate(float deltaTime)
 {
+	float usedTime = deltaTime * m_slowed;
+
 	if (!m_awake) return;
 
-	UpdateInput(deltaTime);
+	UpdateInput(usedTime);
 
-	float usedTime = deltaTime;
-	if (m_scheme == CONTINUOUS && m_motionClamp)
-		usedTime = m_motionClampTime;
+	//float usedTime = deltaTime;
+	//if (m_scheme == CONTINUOUS && m_motionClamp)
+	//	usedTime = m_motionClampTime;
 
 	if (!m_frozen)
 	{
@@ -159,15 +161,15 @@ void SphereRB3::Integrate(float deltaTime)
 
 	ClearAccs();
 
-	if (m_scheme == CONTINUOUS && m_motionClamp)
-		m_motionClamp = false;
+	//if (m_scheme == CONTINUOUS && m_motionClamp)
+	//	m_motionClamp = false;
 
 	// updating sleep system
 	if (m_canSleep)
 	{
 		float currentMotion = DotProduct(m_linearVelocity, m_linearVelocity) + DotProduct(m_angularVelocity, m_angularVelocity);
 
-		float bias = powf(.5f, deltaTime);
+		float bias = powf(.5f, usedTime);
 		m_motion = bias * m_motion + (1.f - bias) * currentMotion;
 
 		if (m_motion < m_sleepThreshold) 

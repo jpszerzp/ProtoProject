@@ -2,6 +2,7 @@
 
 #include "Engine/Math/AABB3.hpp"
 #include "Engine/Core/GameObject.hpp"
+#include "Engine/Physics/3D/Rigidbody3.hpp"
 
 #include <vector>
 

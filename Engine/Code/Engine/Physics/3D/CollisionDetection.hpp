@@ -9,7 +9,6 @@
 #include "Engine/Core/ErrorWarningAssert.hpp"
 
 #define MAX_CONTACTS 2000
-//TODO("This threshold should have negative value");
 #define COHERENT_THRESHOLD 0.01f
 
 enum eContactType
