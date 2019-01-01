@@ -4,7 +4,7 @@
 #include "Engine/Physics/3D/CollisionDetection.hpp"
 #include "Engine/Physics/3D/ContactResolver.hpp"
 #include "Engine/Physics/3D/Rigidbody3.hpp"
-#include "Engine/Physics/3D/BVH3.hpp"
+//#include "Engine/Physics/3D/BVH3.hpp"
 #include "Engine/Physics/3D/SphereRB3.hpp"
 #include "Engine/Physics/3D/CCDResolver.hpp"
 #include "Engine/Core/Primitive/Sphere.hpp"
@@ -67,20 +67,28 @@ public:
 	void UpdateInput(float deltaTime);
 	void UpdateGameobjects(float deltaTime);
 	void UpdateDebugDraw(float deltaTime);
+	void UpdateHulls(float deltaTime);
+	void UpdateWrapArounds();
 	void RespawnFireworks();
 
 	// update of GO
 	void UpdateForceRegistry(float deltaTime);
 	void UpdateGameobjectsCore(float deltaTime);
+	void UpdateGameobjectsDelete(float deltaTime);
 	void UpdateContactGeneration();
 	void UpdateCore();
 	void UpdateContactResolution(float deltaTime);
-	void UpdateBVH();
+	void UpdateResolverEnd();
+	//void UpdateBVH();
 
 	void Render(Renderer* renderer) override;
 	void RenderGameobjects(Renderer* renderer);
-	void RenderBVH(Renderer* renderer);
 	void RenderModelSamples(Renderer* renderer);
+	void RenderHulls(Renderer* renderer);
+	void RenderWrapArounds(Renderer* renderer);
+	void RenderForwardPath(Renderer* renderer);
+	void RenderAssimpModels(Renderer* renderer);
+	//void RenderBVH(Renderer* renderer);
 
 	// scene tests
 	void WrapAroundTestGeneral(bool give_ang_vel, bool register_g);
@@ -89,14 +97,14 @@ public:
 	void WrapAroundTestBox(bool give_ang_vel, bool register_g);
 	void WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool register_g);
 
-	void SwapHullStatusMesh(const std::string& str);
+	//void SwapHullStatusMesh(const std::string& str);
 
 public:
 	GravityRigidForceGenerator* m_gravity;
 
+	//Rod* m_rod;
 	Spring* m_spring;
 	AnchorSpring* m_anchorSpring;
-	//Rod* m_rod;
 	GeneralRigidAnchorSpring* m_rigidAnchorSpring;
 
 	ParticleForceRegistry* m_particleRegistry = nullptr;
@@ -109,7 +117,7 @@ public:
 	std::vector<Point*>  m_points;
 	std::vector<Fireworks*>  m_fw_points;
 	std::vector<Box*>	 m_boxes;
-	std::vector<GameObject*> m_rigid_bvh_gos;		// for convenience of BVH
+	//std::vector<GameObject*> m_rigid_bvh_gos;		// for convenience of BVH
 
 	// continuous convenience
 	Sphere* m_ball_ccd_test_discrete = nullptr;
@@ -122,25 +130,12 @@ public:
 	std::vector<Quad*> m_ccd_planes;
 
 	ContactResolver* m_allResolver;		
-	//ContactResolver* m_iterResolver;
 	ContactResolver* m_coherentResolver;
-	
-	// BVH
-	bool m_broadPhase = false;
-	std::vector<BVHContact> m_bvhContacts;
-	BVHNode<BoundingSphere>* m_bvh_node;
-	int m_nodeCount = 0;			// temp: later will flush all GO into tree at once
-	Mesh* m_bp_title = nullptr;
-	Mesh* m_bp_status = nullptr;
+	//ContactResolver* m_iterResolver;
 
 	// QH
 	QuickHull* m_qh = nullptr;
 	eHullGenerationStep m_genStep = HULL_GEN_FORM_CONFLICTS;
-	Mesh* m_hull_title = nullptr;
-	Mesh* m_hull_status = nullptr;
-	float m_textHeight = 0.f;
-	Vector2 m_titleMin = Vector2::ZERO;
-	Vector2 m_statusMin = Vector2::ZERO;
 	
 	WrapAround* m_wraparound_continuous;
 	WrapAround* m_wraparound_verlet;

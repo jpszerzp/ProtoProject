@@ -58,37 +58,15 @@ Physics3State::Physics3State()
 		m_UICamera->SetProjectionOrtho(window->GetWindowWidth(), window->GetWindowHeight(), 0.f, 100.f);
 	}
 
-	// hull title
-	m_textHeight = height / 50.f;
-	m_titleMin = Vector2(-width / 2.f, height / 2.f - m_textHeight);
-	Rgba titleColor = Rgba::WHITE;
-	BitmapFont* font = theRenderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
-	std::string title = "Hull Gen Status: ";
-	m_hull_title = Mesh::CreateTextImmediate(titleColor, m_titleMin, font, m_textHeight, .5f, title, VERT_PCU);
-
-	// hull status
-	float textWidth = title.size() * (m_textHeight * 0.5f);
-	Rgba statusColor = titleColor;
-	m_statusMin = m_titleMin + Vector2(textWidth, 0.f);
-	std::string status = "Filling conflict lists";
-	m_hull_status = Mesh::CreateTextImmediate(statusColor, m_statusMin, font, m_textHeight, .5f, status, VERT_PCU);
-
 	// quick hull
 	Vector3 qhMin = Vector3(-150.f, 0.f, 0.f);
 	Vector3 qhMax = Vector3(-50.f, 100.f, 100.f);
-	//m_qh = new QuickHull(20, qhMin, qhMax);
-	//g_hull = m_qh;
 	g_hull = new QuickHull(20, qhMin, qhMax);
 
 	// auto-gen qh 
 	qhMin = Vector3(-300.f, 0.f, 0.f);
 	qhMax = Vector3(-200, 100.f, 100.f);
 	m_qh = new QuickHull(20, qhMin, qhMax, true);
-
-	// bvh title
-	std::string bp_title = "Broadphase status: ";
-	Vector2 bp_title_min = m_titleMin - Vector2(0, m_textHeight);
-	m_bp_title = Mesh::CreateTextImmediate(Rgba::WHITE, bp_title_min, font, m_textHeight, .5f, bp_title, VERT_PCU);
 
 	// force registry 
 	m_particleRegistry = new ParticleForceRegistry();
@@ -262,6 +240,12 @@ Physics3State::~Physics3State()
 
 	delete m_wraparound_continuous;
 	m_wraparound_continuous = nullptr;
+
+	delete m_wraparound_box_only;
+	m_wraparound_box_only = nullptr;
+
+	delete m_wraparound_sphere_only;
+	m_wraparound_sphere_only = nullptr;
 }
 
 
@@ -278,9 +262,6 @@ Sphere* Physics3State::InitializePhysSphere(Vector3 pos, Vector3 rot, Vector3 sc
 
 	if (scheme == CONTINUOUS)
 		m_ccd_spheres.push_back(s);
-
-	if (bid == BODY_RIGID && bp)
-		m_rigid_bvh_gos.push_back(s);
 
 	return s;
 }
@@ -312,9 +293,6 @@ Quad* Physics3State::InitializePhysQuad(Vector3 pos, Vector3 rot, Vector3 scale,
 
 	if (scheme == CONTINUOUS)
 		m_ccd_planes.push_back(q);
-	
-	if (bid == BODY_RIGID && bp)
-		m_rigid_bvh_gos.push_back(q);
 
 	return q;
 }
@@ -329,9 +307,6 @@ Box* Physics3State::InitializePhysBox(Vector3 pos, Vector3 rot, Vector3 scale,
 
 	b->m_physEntity->SetGameobject(b);
 	b->m_physEntity->m_body_shape = SHAPE_BOX;
-
-	if (bid == BODY_RIGID && bp)
-		m_rigid_bvh_gos.push_back(b);
 
 	return b;
 }
@@ -439,7 +414,6 @@ Rod* Physics3State::SetupRod(float length, Point* p1, Point* p2)
 
 void Physics3State::Update(float deltaTime)
 {
-	m_broadPhase = g_broadphase;		// hacky...
 	RespawnFireworks();
 	UpdateInput(deltaTime);				// update input
 	UpdateGameobjects(deltaTime);		// update gameobjects
@@ -545,56 +519,56 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		DebugRenderPlaneGrid(lifetime, gridBL, gridTL, gridTR, gridBR, 10.f, 10.f, 2.5f, mode);
 	}
 
-	// BVH
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_T) && !DevConsoleIsOpen())
-	{
-		if (m_broadPhase)
-		{
-			// get rigid body expect to insert
-			//Entity3* ent = m_gameObjects[m_nodeCount]->GetEntity();
-			Entity3* ent = m_rigid_bvh_gos[m_nodeCount]->GetEntity();
+	//// BVH
+	//if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_T) && !DevConsoleIsOpen())
+	//{
+	//	if (m_broadPhase)
+	//	{
+	//		// get rigid body expect to insert
+	//		//Entity3* ent = m_gameObjects[m_nodeCount]->GetEntity();
+	//		Entity3* ent = m_rigid_bvh_gos[m_nodeCount]->GetEntity();
 
-			// add gameobject to BVH
-			if (m_bvh_node == nullptr)
-				m_bvh_node = new BVHNode<BoundingSphere>(nullptr, ent->GetBoundingSphere(), ent);
-			else
-				m_bvh_node->Insert(ent, ent->GetBoundingSphere());
+	//		// add gameobject to BVH
+	//		if (m_bvh_node == nullptr)
+	//			m_bvh_node = new BVHNode<BoundingSphere>(nullptr, ent->GetBoundingSphere(), ent);
+	//		else
+	//			m_bvh_node->Insert(ent, ent->GetBoundingSphere());
 
-			m_nodeCount++;
-		}
-	}
-	// test removing from leaf of BVH
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_R) && !DevConsoleIsOpen())
-	{
-		if (m_bvh_node != nullptr && m_broadPhase)
-		{
-			BVHNode<BoundingSphere>* leaf = m_bvh_node->GetRightLeaf();
+	//		m_nodeCount++;
+	//	}
+	//}
+	//// test removing from leaf of BVH
+	//if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_R) && !DevConsoleIsOpen())
+	//{
+	//	if (m_bvh_node != nullptr && m_broadPhase)
+	//	{
+	//		BVHNode<BoundingSphere>* leaf = m_bvh_node->GetRightLeaf();
 
-			if (leaf != nullptr)
-			{
-				if (leaf->m_parent == nullptr)
-					m_bvh_node = nullptr;
+	//		if (leaf != nullptr)
+	//		{
+	//			if (leaf->m_parent == nullptr)
+	//				m_bvh_node = nullptr;
 
-				delete leaf;
-				m_nodeCount--;
-			}
-		}
-	}
-	// test removing branch of BVH
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_Y) && !DevConsoleIsOpen())
-	{
-		if (m_broadPhase)
-		{
-			BVHNode<BoundingSphere>* branch = m_bvh_node->m_children[1];
+	//			delete leaf;
+	//			m_nodeCount--;
+	//		}
+	//	}
+	//}
+	//// test removing branch of BVH
+	//if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_Y) && !DevConsoleIsOpen())
+	//{
+	//	if (m_broadPhase)
+	//	{
+	//		BVHNode<BoundingSphere>* branch = m_bvh_node->m_children[1];
 
-			if (branch != nullptr)
-				delete branch;
+	//		if (branch != nullptr)
+	//			delete branch;
 
-			m_nodeCount = 1;
-		}
-	}
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_F2))
-		g_broadphase = !g_broadphase;
+	//		m_nodeCount = 1;
+	//	}
+	//}
+	//if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_F2))
+	//	g_broadphase = !g_broadphase;
 
 	// clear entities in a wraparound
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_F3))
@@ -639,7 +613,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 			// we are done with adding conflict points, so we should not come to this spot anymore
 			if (vert_count == g_hull->GetVertNum())
 			{
-				SwapHullStatusMesh("Forming eye");
+				//SwapHullStatusMesh("Forming eye");
 				m_genStep = HULL_GEN_FORM_EYE;
 			}
 		}
@@ -667,7 +641,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 
 				g_hull->ChangeCurrentHalfEdgeMesh();
 
-				SwapHullStatusMesh("Horizon start and process");
+				//SwapHullStatusMesh("Horizon start and process");
 				m_genStep = HULL_GEN_FORM_HORIZON_START;
 			}
 		}
@@ -796,7 +770,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 			{
 				// go to next state
 				// in this case we always know where current HE is (cyan or megenta)
-				SwapHullStatusMesh("Delete old faces");
+				//SwapHullStatusMesh("Delete old faces");
 				m_genStep = HULL_GEN_DELETE_OLD_FACES;
 			}
 		}
@@ -868,7 +842,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 				// conflict face is already deleted
 				std::get<0>(g_hull->m_eyePair) = nullptr;	
 
-				SwapHullStatusMesh("Form new faces");
+				//SwapHullStatusMesh("Form new faces");
 				m_genStep = HULL_GEN_FORM_NEW_FACES;
 			}
 		}
@@ -927,7 +901,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 					face->VerifyHalfEdgeTwin();
 				}
 
-				SwapHullStatusMesh("Assign orphans");
+				//SwapHullStatusMesh("Assign orphans");
 				m_genStep = HULL_GEN_ASSIGN_ORPHANS;
 			}
 		}
@@ -945,7 +919,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 			{
 				g_hull->m_newFaces.clear();
 
-				SwapHullStatusMesh("Correct Topo errors");
+				//SwapHullStatusMesh("Correct Topo errors");
 				m_genStep = HULL_GEN_TOPO_ERRORS;
 			}
 		}
@@ -953,7 +927,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		case HULL_GEN_TOPO_ERRORS:
 		{
 			// verify and adjust for topological errors
-			SwapHullStatusMesh("Finish up and reset");
+			//SwapHullStatusMesh("Finish up and reset");
 			m_genStep = HULL_GEN_FINISH_RESET;
 		}
 			break;
@@ -984,12 +958,12 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 			if (!g_hull->m_conflict_verts.empty())
 			{
 				// conflict list should be adjusted correctly already; back to the step where we generate eye
-				SwapHullStatusMesh("Forming eye");
+				//SwapHullStatusMesh("Forming eye");
 				m_genStep = HULL_GEN_FORM_EYE;
 			}
 			else
 			{
-				SwapHullStatusMesh("Hull complete");
+				//SwapHullStatusMesh("Hull complete");
 				m_genStep = HULL_GEN_COMPLETE;
 			}
 		}
@@ -1067,10 +1041,9 @@ void Physics3State::UpdateInput(float deltaTime)
 
 void Physics3State::UpdateGameobjects(float deltaTime)
 {
-	m_qh->UpdateHull();
+	UpdateHulls(deltaTime);
 	UpdateForceRegistry(deltaTime);			// update force registry
 	UpdateGameobjectsCore(deltaTime);		// update GO core
-	UpdateBVH();							// update BVH 
 	UpdateContactGeneration();				// update contact generation
 	UpdateContactResolution(deltaTime);		// contact resolution
 }
@@ -1121,6 +1094,22 @@ void Physics3State::UpdateDebugDraw(float deltaTime)
 			DebugRenderLine(.1f, start, end, 10.f, Rgba::MEGENTA, Rgba::MEGENTA, DEBUG_RENDER_USE_DEPTH);
 		}
 	}
+}
+
+void Physics3State::UpdateHulls(float)
+{
+	// update any relevant hulls
+	m_qh->UpdateHull();
+}
+
+void Physics3State::UpdateWrapArounds()
+{
+	// WRAPAROUND UPDATE
+	m_wraparound_general->Update();
+	m_wraparound_sphere_only->Update();
+	m_wraparound_box_only->Update();
+	m_wraparound_verlet->Update();
+	m_wraparound_continuous->Update();
 }
 
 void Physics3State::RespawnFireworks()
@@ -1212,6 +1201,13 @@ void Physics3State::UpdateGameobjectsCore(float deltaTime)
 
 	// DISCRETE INTEGRATION
 
+	UpdateGameobjectsDelete(deltaTime);
+
+	UpdateWrapArounds();
+}
+
+void Physics3State::UpdateGameobjectsDelete(float deltaTime)
+{
 	// core of update
 	for (std::vector<GameObject*>::size_type idx = 0; idx < m_gameObjects.size(); ++idx)
 	{
@@ -1229,57 +1225,14 @@ void Physics3State::UpdateGameobjectsCore(float deltaTime)
 			to_be_deleted = nullptr;
 		}
 	}
-
-	// WRAPAROUND UPDATE
-	m_wraparound_general->Update();
-	m_wraparound_sphere_only->Update();
-	m_wraparound_box_only->Update();
-	m_wraparound_verlet->Update();
-	m_wraparound_continuous->Update();
 }
 
 void Physics3State::UpdateContactGeneration()
 {
-	if (!m_broadPhase)
-	{
-		///////////////////////////////////////////// Clear Resolver ////////////////////////////////////////////
-		//m_iterResolver->ClearRecords();
-		m_allResolver->ClearRecords();
-		m_coherentResolver->ClearRecords();
+	UpdateResolverEnd();
 
-		///////////////////////////////////////////// Fill Resolver ////////////////////////////////////////////
-		// hard constraints use iterative solver
-		//m_rod->FillContact(m_iterResolver->GetCollisionData()->m_contacts);
-
-		// this is NOT using BVH to generate contacts
-		UpdateCore();
-	}
-	else
-	{
-		TODO("BVH considers other resolvers");
-		TODO("BVH undetermined behavior when number of entities in the tree exceeds some threshold, does not seem to generate bvh contact candidates correctly");
-		m_coherentResolver->ClearRecords();
-		m_bvhContacts.clear();
-
-		// broad phase, use BVH to generate contacts
-		if (m_bvh_node != nullptr)
-		{
-			m_bvh_node->GetContacts(m_bvhContacts, 1000);
-
-			// process rigid bodies
-			for (const BVHContact& bvhc : m_bvhContacts)
-			{
-				Entity3* e1 = bvhc.m_rb1;
-				Entity3* e2 = bvhc.m_rb2;
-
-				Rigidbody3* rb1 = static_cast<Rigidbody3*>(e1);
-				Rigidbody3* rb2 = static_cast<Rigidbody3*>(e2);
-
-				//CollisionDetector::Entity3VsEntity3(e1, e2, m_allResolver->GetCollisionData());
-				CollisionDetector::Rigid3VsRigid3(rb1, rb2, m_coherentResolver->GetCollisionData());
-			}
-		}
-	}
+	// this is NOT using BVH to generate contacts
+	UpdateCore();
 }
 
 void Physics3State::UpdateCore()
@@ -1581,58 +1534,50 @@ void Physics3State::UpdateContactResolution(float deltaTime)
 	m_coherentResolver->ResolveContacts(deltaTime);
 }
 
-void Physics3State::UpdateBVH()
+void Physics3State::UpdateResolverEnd()
 {
-	// update BVH bottom up
-	if (m_bvh_node != nullptr && m_broadPhase)
-		m_bvh_node->UpdateNode();
-
-	// update UI
-	if (m_bp_status != nullptr)
-	{
-		delete m_bp_status;
-		m_bp_status = nullptr;
-	}
-	Renderer* theRenderer = Renderer::GetInstance();
-	BitmapFont* font = theRenderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
-	std::string bp_status = m_broadPhase ? "On" : "Off";
-	std::string bp_title = "Broadphase status: ";
-	float bp_title_width = bp_title.size() * (.5f * m_textHeight);
-	Vector2 bp_title_min = m_titleMin - Vector2(0.f, m_textHeight);
-	Vector2 bp_status_min = bp_title_min + Vector2(bp_title_width, 0.f);
-	m_bp_status = Mesh::CreateTextImmediate(Rgba::WHITE, bp_status_min, font, m_textHeight, .5f, bp_status, VERT_PCU);
+	m_allResolver->ClearRecords();
+	m_coherentResolver->ClearRecords();
 }
+
+//void Physics3State::UpdateBVH()
+//{
+//	// update BVH bottom up
+//	if (m_bvh_node != nullptr && m_broadPhase)
+//		m_bvh_node->UpdateNode();
+//
+//	// update UI
+//	if (m_bp_status != nullptr)
+//	{
+//		delete m_bp_status;
+//		m_bp_status = nullptr;
+//	}
+//	Renderer* theRenderer = Renderer::GetInstance();
+//	BitmapFont* font = theRenderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
+//	std::string bp_status = m_broadPhase ? "On" : "Off";
+//	std::string bp_title = "Broadphase status: ";
+//	float bp_title_width = bp_title.size() * (.5f * m_textHeight);
+//	Vector2 bp_title_min = m_titleMin - Vector2(0.f, m_textHeight);
+//	Vector2 bp_status_min = bp_title_min + Vector2(bp_title_width, 0.f);
+//	m_bp_status = Mesh::CreateTextImmediate(Rgba::WHITE, bp_status_min, font, m_textHeight, .5f, bp_status, VERT_PCU);
+//}
 
 void Physics3State::Render(Renderer* renderer)
 {
 	renderer->SetCamera(m_UICamera);
 	renderer->ClearScreen(Rgba::BLACK);
-	DrawTextCut(m_hull_title);
-	DrawTextCut(m_hull_status);
-	DrawTextCut(m_bp_title);
-	DrawTextCut(m_bp_status);
 
 	renderer->SetCamera(m_camera);
 
-	// qh
-	g_hull->RenderHull(renderer);
-	m_qh->RenderHull(renderer);
+	RenderHulls(renderer);
 
-	// make sure the model is not drifted
-	renderer->m_objectData.model = Matrix44::IDENTITY;
-	renderer->DrawModel(m_assimp_0);
-	RenderModelSamples(renderer);				// sample points for model
+	RenderAssimpModels(renderer);
 
 	RenderGameobjects(renderer);
-	m_forwardPath->RenderScene(m_sceneGraph);
+	
+	RenderForwardPath(renderer);
 
-	RenderBVH(renderer);
-
-	m_wraparound_general->Render(renderer);
-	m_wraparound_sphere_only->Render(renderer);
-	m_wraparound_box_only->Render(renderer);
-	m_wraparound_verlet->Render(renderer);
-	m_wraparound_continuous->Render(renderer);
+	RenderWrapArounds(renderer);
 }
 
 void Physics3State::RenderGameobjects(Renderer* renderer)
@@ -1644,12 +1589,12 @@ void Physics3State::RenderGameobjects(Renderer* renderer)
 	}
 }
 
-void Physics3State::RenderBVH(Renderer* renderer)
-{
-	// traverse the BVH
-	if (m_bvh_node != nullptr && m_broadPhase)
-		m_bvh_node->DrawNode(renderer);
-}
+//void Physics3State::RenderBVH(Renderer* renderer)
+//{
+//	// traverse the BVH
+//	if (m_bvh_node != nullptr && m_broadPhase)
+//		m_bvh_node->DrawNode(renderer);
+//}
 
 void Physics3State::RenderModelSamples(Renderer* renderer)
 {
@@ -1672,6 +1617,36 @@ void Physics3State::RenderModelSamples(Renderer* renderer)
 		Mesh* mesh = m_modelPointMeshes[i];
 		renderer->DrawMesh(mesh);
 	}
+}
+
+void Physics3State::RenderHulls(Renderer* renderer)
+{
+	// render all qhs
+	g_hull->RenderHull(renderer);
+	m_qh->RenderHull(renderer);
+}
+
+void Physics3State::RenderWrapArounds(Renderer* renderer)
+{
+	m_wraparound_general->Render(renderer);
+	m_wraparound_sphere_only->Render(renderer);
+	m_wraparound_box_only->Render(renderer);
+	m_wraparound_verlet->Render(renderer);
+	m_wraparound_continuous->Render(renderer);
+}
+
+void Physics3State::RenderForwardPath(Renderer* renderer)
+{
+	m_forwardPath->RenderScene(m_sceneGraph);
+}
+
+void Physics3State::RenderAssimpModels(Renderer* renderer)
+{
+	// render all assimp-imported models
+	// make sure the model is not drifted
+	renderer->m_objectData.model = Matrix44::IDENTITY;
+	renderer->DrawModel(m_assimp_0);
+	RenderModelSamples(renderer);				// sample points for model
 }
 
 static int wraparound_toggle = 0;
@@ -1786,15 +1761,15 @@ void Physics3State::WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool r
 	wpa->m_pos_idx %= 8;
 }
 
-void Physics3State::SwapHullStatusMesh(const std::string& str)
-{
-	if (m_hull_status != nullptr)
-	{
-		delete m_hull_status;
-		m_hull_status = nullptr;
-	}
-
-	Renderer* theRenderer = Renderer::GetInstance();
-	BitmapFont* font = theRenderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
-	m_hull_status = Mesh::CreateTextImmediate(Rgba::WHITE, m_statusMin, font, m_textHeight, .5f, str, VERT_PCU);
-}
+//void Physics3State::SwapHullStatusMesh(const std::string& str)
+//{
+//	if (m_hull_status != nullptr)
+//	{
+//		delete m_hull_status;
+//		m_hull_status = nullptr;
+//	}
+//
+//	Renderer* theRenderer = Renderer::GetInstance();
+//	BitmapFont* font = theRenderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
+//	m_hull_status = Mesh::CreateTextImmediate(Rgba::WHITE, m_statusMin, font, m_textHeight, .5f, str, VERT_PCU);
+//}
