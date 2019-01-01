@@ -414,9 +414,10 @@ Rod* Physics3State::SetupRod(float length, Point* p1, Point* p2)
 
 void Physics3State::Update(float deltaTime)
 {
-	RespawnFireworks();
 	UpdateInput(deltaTime);				// update input
+	UpdateForceRegistry(deltaTime);		// update force registry
 	UpdateGameobjects(deltaTime);		// update gameobjects
+	UpdateContacts(deltaTime);
 	UpdateDebugDraw(deltaTime);			// update debug draw
 }
 
@@ -581,6 +582,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	{
 		m_fw_points.clear();
 		
+		// we clear expired fw now
 		for (std::vector<Point*>::size_type idx = 0; idx < m_points.size(); ++idx)
 		{
 			if (m_points[idx] == nullptr)
@@ -1041,11 +1043,11 @@ void Physics3State::UpdateInput(float deltaTime)
 
 void Physics3State::UpdateGameobjects(float deltaTime)
 {
+	UpdateFireworksStatus();
+
 	UpdateHulls(deltaTime);
-	UpdateForceRegistry(deltaTime);			// update force registry
+
 	UpdateGameobjectsCore(deltaTime);		// update GO core
-	UpdateContactGeneration();				// update contact generation
-	UpdateContactResolution(deltaTime);		// contact resolution
 }
 
 void Physics3State::UpdateDebugDraw(float deltaTime)
@@ -1112,8 +1114,9 @@ void Physics3State::UpdateWrapArounds()
 	m_wraparound_continuous->Update();
 }
 
-void Physics3State::RespawnFireworks()
+void Physics3State::UpdateFireworksStatus()
 {
+	// start a new fw seed whenever the structure is empty
 	if (m_fw_points.empty())
 		SetupFireworks(5.f, Vector3(25.f, 230.f, -5.f), Vector3::ZERO, Vector3(0.f, 4.f, 0.f), Vector3(0.f, 4.f, 0.f), false);
 }
@@ -1227,15 +1230,21 @@ void Physics3State::UpdateGameobjectsDelete(float deltaTime)
 	}
 }
 
+void Physics3State::UpdateContacts(float deltaTime)
+{
+	UpdateContactGeneration();				// update contact generation
+
+	UpdateContactResolution(deltaTime);		// contact resolution
+}
+
 void Physics3State::UpdateContactGeneration()
 {
 	UpdateResolverEnd();
 
-	// this is NOT using BVH to generate contacts
-	UpdateCore();
+	UpdateContactGenerationCore();
 }
 
-void Physics3State::UpdateCore()
+void Physics3State::UpdateContactGenerationCore()
 {
 	// sphere
 	for (uint idx1 = 0; idx1 < m_spheres.size(); ++idx1)

@@ -53,6 +53,7 @@ public:
 	Box* InitializePhysBox(Vector3 pos, Vector3 rot, Vector3 scale,
 		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid, bool bp, eDynamicScheme scheme = DISCRETE);
 
+	// below are all based on particles, NOT on rigidbodies
 	Fireworks* SetupFireworks(float age, Vector3 pos, Vector3 inheritVel, Vector3 maxVel, Vector3 minVel, bool lastRound = false);
 	Ballistics* SetupBallistics(eBallisticsType type, Vector3 pos, bool frozen, Rgba color);
 	Spring* SetupSpring(Point* end1, Point* end2, float coef, float rl);
@@ -69,14 +70,15 @@ public:
 	void UpdateDebugDraw(float deltaTime);
 	void UpdateHulls(float deltaTime);
 	void UpdateWrapArounds();
-	void RespawnFireworks();
+	void UpdateFireworksStatus();
 
 	// update of GO
 	void UpdateForceRegistry(float deltaTime);
 	void UpdateGameobjectsCore(float deltaTime);
 	void UpdateGameobjectsDelete(float deltaTime);
+	void UpdateContacts(float deltaTime);
 	void UpdateContactGeneration();
-	void UpdateCore();
+	void UpdateContactGenerationCore();
 	void UpdateContactResolution(float deltaTime);
 	void UpdateResolverEnd();
 	//void UpdateBVH();

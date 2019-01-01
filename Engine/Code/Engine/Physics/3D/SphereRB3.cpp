@@ -108,9 +108,11 @@ void SphereRB3::UpdateInput(float)
 {
 	InputSystem* input = InputSystem::GetInstance();
 
-	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_P) && !DevConsoleIsOpen() && !m_constrained)
+	// if this is not a constrained sphere - not involved in any constraints, hit P will freeze/unfreeze it
+	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_P) && !m_constrained)
 		m_frozen = !m_frozen;
 
+	// if this is a constrained sphere - involved in some constraint, hit NUMPAD_3 will freeze/unfreeze it
 	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_3) && m_constrained)
 		m_frozen = !m_frozen;
 }

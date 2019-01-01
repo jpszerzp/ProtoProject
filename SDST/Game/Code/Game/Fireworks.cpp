@@ -51,6 +51,7 @@ void Fireworks::Update(float deltaTime)
 
 void Fireworks::Render(Renderer* renderer)
 {
+	// we do not DRAW the fw if it is dead - it is still in the data structure
 	if (m_age > 0.f)
 	{
 		Mesh* mesh = m_renderable->m_mesh;
