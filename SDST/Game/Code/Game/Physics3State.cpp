@@ -134,9 +134,23 @@ Physics3State::Physics3State()
 	m_inspection.push_back(Vector3(1100.f, 1100.f, 900.f));		
 
 	// wraparounds
-	m_wraparound_general = new WrapAround(Vector3(-10.f, 280.f, -10.f), Vector3(10.f, 380.f, 10.f));
+	m_wraparound_general = new WrapAround(Vector3(-10.f, 280.f, -10.f), Vector3(10.f, 380.f, 10.f),
+		Vector3(-5.f, 295.f, -5.f), Vector3(5.f, 295.f, -5.f),
+		Vector3(-5.f, 295.f, 5.f), Vector3(5.f, 295.f, 5.f),
+		Vector3(-5.f, 305.f, -5.f), Vector3(5.f, 305.f, -5.f),
+		Vector3(-5.f, 305.f, 5.f), Vector3(5.f, 305.f, 5.f));
 	m_wraparound_verlet = new WrapAround(Vector3(-10.f, 200.f, -10.f), Vector3(0.f, 250.f, 0.f));
 	m_wraparound_continuous = new WrapAround(Vector3(1000.f, 1000.f, 1000.f), Vector3(1200.f, 1200.f, 1200.f));
+	m_wraparound_sphere_only = new WrapAround(Vector3(20.f, 300.f, -10.f), Vector3(40.f, 320.f, 10.f),
+		Vector3(25.f, 205.f, -5.f), Vector3(35.f, 205.f, -5.f),
+		Vector3(25.f, 205.f, 5.f), Vector3(35.f, 205.f, 5.f),
+		Vector3(25.f, 315.f, -5.f), Vector3(35.f, 315.f, -5.f),
+		Vector3(25.f, 315.f, 5.f), Vector3(35.f, 315.f, 5.f));
+	m_wraparound_box_only = new WrapAround(Vector3(50.f, 300.f, -10.f), Vector3(70.f, 320.f, 10.f),
+		Vector3(55.f, 205.f, -5.f), Vector3(65.f, 205.f, -5.f),
+		Vector3(55.f, 205.f, 5.f), Vector3(65.f, 205.f, 5.f),
+		Vector3(55.f, 315.f, -5.f), Vector3(65.f, 315.f, -5.f),
+		Vector3(55.f, 315.f, 5.f), Vector3(65.f, 315.f, 5.f));
 
 	// verlet comparison
 	Ballistics* free_ballistics = SetupBallistics(FREEFALL, Vector3(-7.f, 240.f, -5.f), true, Rgba::CYAN);
@@ -1007,11 +1021,15 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	}
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_SPACE))
-		WrapAroundTestGeneral(true);
+		WrapAroundTestGeneral(true, true);
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_1))
-		WrapAroundTestBox(true);
+		WrapAroundTestBox(true, true);			// to general wpa
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_2))
-		WrapAroundTestSphere(true);
+		WrapAroundTestSphere(true, true);		// to general wpa
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_3))
+		WrapAroundTestSphere(m_wraparound_sphere_only, false, false);
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_4))
+		WrapAroundTestBox(m_wraparound_box_only, false, false);
 
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_0))
 	{
@@ -1214,6 +1232,8 @@ void Physics3State::UpdateGameobjectsCore(float deltaTime)
 
 	// WRAPAROUND UPDATE
 	m_wraparound_general->Update();
+	m_wraparound_sphere_only->Update();
+	m_wraparound_box_only->Update();
 	m_wraparound_verlet->Update();
 	m_wraparound_continuous->Update();
 }
@@ -1609,6 +1629,8 @@ void Physics3State::Render(Renderer* renderer)
 	RenderBVH(renderer);
 
 	m_wraparound_general->Render(renderer);
+	m_wraparound_sphere_only->Render(renderer);
+	m_wraparound_box_only->Render(renderer);
 	m_wraparound_verlet->Render(renderer);
 	m_wraparound_continuous->Render(renderer);
 }
@@ -1652,27 +1674,27 @@ void Physics3State::RenderModelSamples(Renderer* renderer)
 	}
 }
 
-void Physics3State::WrapAroundTestGeneral(bool give_ang_vel)
+static int wraparound_toggle = 0;
+void Physics3State::WrapAroundTestGeneral(bool give_ang_vel, bool register_g)
 {
-	if ((m_wrap_pos_it_general % 2) == 0)
-		WrapAroundTestSphere(give_ang_vel);
+	if ((wraparound_toggle % 2) == 0)
+		WrapAroundTestSphere(give_ang_vel, register_g);
 	else
-		WrapAroundTestBox(give_ang_vel);
+		WrapAroundTestBox(give_ang_vel, register_g);
+
+	wraparound_toggle++;
 }
 
 
-void Physics3State::WrapAroundTestSphere(bool give_ang_vel)
+void Physics3State::WrapAroundTestSphere(bool give_ang_vel, bool register_g)
 {
-	Vector3 positions[8] = {Vector3(-5.f, 295.f, -5.f), Vector3(5.f, 295.f, -5.f),
-		Vector3(-5.f, 295.f, 5.f), Vector3(5.f, 295.f, 5.f),
-		Vector3(-5.f, 305.f, -5.f), Vector3(5.f, 305.f, -5.f),
-		Vector3(-5.f, 305.f, 5.f), Vector3(5.f, 305.f, 5.f)};
-	Vector3 pos = positions[m_wrap_pos_it_general];
+	Vector3 pos = m_wraparound_general->m_positions[m_wraparound_general->m_pos_idx];
 
 	// even, spawn ball
 	Sphere* s = InitializePhysSphere(pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID, true);
 	Rigidbody3* rigid_s = static_cast<Rigidbody3*>(s->GetEntity());
-	m_rigidRegistry->Register(rigid_s, m_gravity);
+	if (register_g)
+		m_rigidRegistry->Register(rigid_s, m_gravity);
 	rigid_s->SetLinearVelocity(GetRandomVector3() * 5.f);
 	if (give_ang_vel)
 	{
@@ -1685,22 +1707,44 @@ void Physics3State::WrapAroundTestSphere(bool give_ang_vel)
 	rigid_s->SetCanSleep(true);
 	m_wraparound_general->m_gos.push_back(s);
 
-	m_wrap_pos_it_general += 1;
-	m_wrap_pos_it_general %= 8;
+	m_wraparound_general->m_pos_idx += 1;
+	m_wraparound_general->m_pos_idx %= 8;
 }
 
-void Physics3State::WrapAroundTestBox(bool give_ang_vel)
+void Physics3State::WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, bool register_g)
 {
-	Vector3 positions[8] = {Vector3(-5.f, 295.f, -5.f), Vector3(5.f, 295.f, -5.f),
-		Vector3(-5.f, 295.f, 5.f), Vector3(5.f, 295.f, 5.f),
-		Vector3(-5.f, 305.f, -5.f), Vector3(5.f, 305.f, -5.f),
-		Vector3(-5.f, 305.f, 5.f), Vector3(5.f, 305.f, 5.f)};
-	Vector3 pos = positions[m_wrap_pos_it_general];
+	Vector3 pos = wpa->m_positions[wpa->m_pos_idx];
+
+	// even, spawn ball
+	Sphere* s = InitializePhysSphere(pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID, true);
+	Rigidbody3* rigid_s = static_cast<Rigidbody3*>(s->GetEntity());
+	if (register_g)
+		m_rigidRegistry->Register(rigid_s, m_gravity);
+	rigid_s->SetLinearVelocity(GetRandomVector3() * 5.f);
+	if (give_ang_vel)
+	{
+		float ang_v_x = GetRandomFloatInRange(-5.f, 5.f);
+		float ang_v_y = GetRandomFloatInRange(-5.f, 5.f);
+		float ang_v_z = GetRandomFloatInRange(-5.f, 5.f);
+		rigid_s->SetAngularVelocity(Vector3(ang_v_x, ang_v_y, ang_v_z));
+	}
+	rigid_s->SetAwake(true);
+	rigid_s->SetCanSleep(true);
+	wpa->m_gos.push_back(s);
+
+	wpa->m_pos_idx += 1;
+	wpa->m_pos_idx %= 8;
+}
+
+void Physics3State::WrapAroundTestBox(bool give_ang_vel, bool register_g)
+{
+	Vector3 pos = m_wraparound_general->m_positions[m_wraparound_general->m_pos_idx];
 
 	// spawn box
 	Box* b = InitializePhysBox(pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID, true);
 	Rigidbody3* rigid_b = static_cast<Rigidbody3*>(b->GetEntity());
-	m_rigidRegistry->Register(rigid_b, m_gravity);
+	if (register_g)
+		m_rigidRegistry->Register(rigid_b, m_gravity);
 	rigid_b->SetLinearVelocity(GetRandomVector3() * 5.f);
 	if (give_ang_vel)
 	{
@@ -1713,8 +1757,33 @@ void Physics3State::WrapAroundTestBox(bool give_ang_vel)
 	rigid_b->SetCanSleep(true);
 	m_wraparound_general->m_gos.push_back(b);
 
-	m_wrap_pos_it_general += 1;
-	m_wrap_pos_it_general %= 8;
+	m_wraparound_general->m_pos_idx += 1;
+	m_wraparound_general->m_pos_idx %= 8;
+}
+
+void Physics3State::WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool register_g)
+{
+	Vector3 pos = wpa->m_positions[wpa->m_pos_idx];
+
+	// spawn box
+	Box* b = InitializePhysBox(pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID, true);
+	Rigidbody3* rigid_b = static_cast<Rigidbody3*>(b->GetEntity());
+	if (register_g)
+		m_rigidRegistry->Register(rigid_b, m_gravity);
+	rigid_b->SetLinearVelocity(GetRandomVector3() * 5.f);
+	if (give_ang_vel)
+	{
+		float ang_v_x = GetRandomFloatInRange(-5.f, 5.f);
+		float ang_v_y = GetRandomFloatInRange(-5.f, 5.f);
+		float ang_v_z = GetRandomFloatInRange(-5.f, 5.f);
+		rigid_b->SetAngularVelocity(Vector3(ang_v_x, ang_v_y, ang_v_z));
+	}
+	rigid_b->SetAwake(true);
+	rigid_b->SetCanSleep(true);
+	wpa->m_gos.push_back(b);
+
+	wpa->m_pos_idx += 1;
+	wpa->m_pos_idx %= 8;
 }
 
 void Physics3State::SwapHullStatusMesh(const std::string& str)

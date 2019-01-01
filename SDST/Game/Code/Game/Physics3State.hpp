@@ -83,9 +83,11 @@ public:
 	void RenderModelSamples(Renderer* renderer);
 
 	// scene tests
-	void WrapAroundTestGeneral(bool give_ang_vel);
-	void WrapAroundTestSphere(bool give_ang_vel);
-	void WrapAroundTestBox(bool give_ang_vel);
+	void WrapAroundTestGeneral(bool give_ang_vel, bool register_g);
+	void WrapAroundTestSphere(bool give_ang_vel, bool register_g);
+	void WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, bool register_g);
+	void WrapAroundTestBox(bool give_ang_vel, bool register_g);
+	void WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool register_g);
 
 	void SwapHullStatusMesh(const std::string& str);
 
@@ -143,7 +145,9 @@ public:
 	WrapAround* m_wraparound_continuous;
 	WrapAround* m_wraparound_verlet;
 	WrapAround* m_wraparound_general;
-	int m_wrap_pos_it_general = 0;
+	WrapAround* m_wraparound_sphere_only;
+	WrapAround* m_wraparound_box_only;
+	//int m_wrap_pos_it_general = 0;
 
 	// assimp test
 	AssimpLoader* m_assimp_0 = nullptr;

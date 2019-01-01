@@ -1,7 +1,11 @@
 #include "Game/WrapAround3.hpp"
 #include "Engine/Renderer/Renderable.hpp"
 
-WrapAround::WrapAround(Vector3 min, Vector3 max)
+WrapAround::WrapAround(const Vector3& min, const Vector3& max,
+	const Vector3& p1, const Vector3& p2, 
+	const Vector3& p3, const Vector3& p4,
+	const Vector3& p5, const Vector3& p6,
+	const Vector3& p7, const Vector3& p8)
 {
 	m_bounds = AABB3(min, max);
 	float bound_width = m_bounds.GetDimensions().x;
@@ -14,6 +18,19 @@ WrapAround::WrapAround(Vector3 min, Vector3 max)
 	Vector3 rot = Vector3::ZERO;
 	Vector3 scale = Vector3(bound_width, bound_height, bound_thickness);
 	m_transform = Transform(pos, rot, scale);
+
+	float quater_width = bound_width * .25f;
+	float quater_height = bound_height * .25f;
+	float quater_thickness = bound_thickness * .25f;
+
+	m_positions[0] = p1;
+	m_positions[1] = p2;
+	m_positions[2] = p3;
+	m_positions[3] = p4;
+	m_positions[4] = p5;
+	m_positions[5] = p6;
+	m_positions[6] = p7;
+	m_positions[7] = p8;
 }
 
 WrapAround::~WrapAround()
