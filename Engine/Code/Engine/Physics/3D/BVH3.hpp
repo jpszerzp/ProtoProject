@@ -4,8 +4,8 @@
 
 struct BVHContact
 {
-	Entity3* m_rb1;
-	Entity3* m_rb2;
+	Entity3* m_e1;
+	Entity3* m_e2;
 };
 
 template<class T>
@@ -53,8 +53,7 @@ BVHNode<T>* BVHNode<T>::GetRightLeaf()
 template<class T>
 void BVHNode<T>::UpdateBV()
 {
-	TODO("If later scale of BV or other information for rigid changes, need to update here too");
-
+	//TODO("If later scale of BV or other information for rigid changes, need to update here too");
 	if (IsLeaf())
 	{
 		m_volume.m_center = m_body->GetBoundingSphere().GetCenter();
@@ -122,6 +121,11 @@ BVHNode<T>::~BVHNode()
 		sibling->m_body = nullptr;
 		sibling->m_children[0] = nullptr;
 		sibling->m_children[1] = nullptr;
+
+		// mark this gameobject as no long in the bvh
+		GameObject* go = m_body->GetGameobject();
+		go->m_isInBVH = false;
+
 		delete sibling;
 
 		m_parent->RecalculateBV();
@@ -216,8 +220,8 @@ uint BVHNode<T>::GetContactsAgainst(const BVHNode<T>* other, std::vector<BVHCont
 	BVHContact pContact = BVHContact();
 	if (IsLeaf() && other->IsLeaf())
 	{
-		pContact.m_rb1 = m_body;
-		pContact.m_rb2 = other->m_body;
+		pContact.m_e1 = m_body;
+		pContact.m_e2 = other->m_body;
 		contacts.push_back(pContact);
 		return 1;
 	}

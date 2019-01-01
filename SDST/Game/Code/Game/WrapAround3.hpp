@@ -3,8 +3,13 @@
 #include "Engine/Math/AABB3.hpp"
 #include "Engine/Core/GameObject.hpp"
 #include "Engine/Physics/3D/Rigidbody3.hpp"
+#include "Engine/Physics/3D/BVH3.hpp"
 
 #include <vector>
+
+#define BVH_CONTACT_LIMIT 1000
+
+class Physics3State;
 
 class WrapAround
 {
@@ -15,6 +20,14 @@ public:
 	Transform m_transform;
 	Vector3 m_positions[8];
 	int m_pos_idx = 0;
+
+	//bvh
+	int m_bvh_node_count = 0;
+	bool m_bvh_based = false;
+	BVHNode<BoundingSphere>* m_bvh = nullptr;
+	std::vector<BVHContact> m_bvh_contacts;
+
+	Physics3State* m_physState = nullptr;
 	
 public:
 	WrapAround(const Vector3& min, const Vector3& max, 
@@ -25,6 +38,14 @@ public:
 	~WrapAround();
 
 	void Update();
+	void UpdateInput();
+	void UpdateBVH();
+	void UpdateBVHContactGeneration();			// used in phyics state
+	void UpdateWraparound();
 
 	void Render(Renderer* renderer);
+	void RenderBVH(Renderer* renderer);
+	void RenderWraparounds(Renderer* renderer);
+
+	void ClearBVHRecords();
 };

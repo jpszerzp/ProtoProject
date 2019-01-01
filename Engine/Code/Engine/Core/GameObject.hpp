@@ -17,6 +17,7 @@ public:
 	bool		m_drawBasis = false;
 	bool		m_debugOn = false;
 	bool		m_isInForwardPath = false;
+	bool		m_isInBVH = false;
 	bool		m_renderableDelayedDelete = false;
 	eDepthCompare	m_desiredCompare;
 	eCullMode	m_desiredCull;

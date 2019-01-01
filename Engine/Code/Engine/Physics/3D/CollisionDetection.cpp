@@ -2721,150 +2721,150 @@ uint CollisionDetector::OBB3VsPoint(const OBB3& obb, const Vector3& p, Contact3&
 	return 1;
 }
 
-uint CollisionDetector::Entity3VsEntity3(Entity3* e1, Entity3* e2, CollisionData3* data)
-{
-	uint res = 0;
-
-	// 1
-	SphereEntity3* s1 = dynamic_cast<SphereEntity3*>(e1);
-	SphereRB3* srb1 = dynamic_cast<SphereRB3*>(e1);
-
-	CubeEntity3* c1 = dynamic_cast<CubeEntity3*>(e1);
-
-	QuadEntity3* q1 = dynamic_cast<QuadEntity3*>(e1);
-
-	// 2
-	SphereEntity3* s2 = dynamic_cast<SphereEntity3*>(e2);
-	SphereRB3* srb2 = dynamic_cast<SphereRB3*>(e2);
-
-	CubeEntity3* c2 = dynamic_cast<CubeEntity3*>(e2);
-
-	QuadEntity3* q2 = dynamic_cast<QuadEntity3*>(e2);
-
-	if (s1 != nullptr)
-	{
-		if (s2 != nullptr)
-		{
-			Sphere3 sph1 = s1->GetSpherePrimitive();
-			Sphere3 sph2 = s2->GetSpherePrimitive();
-
-			res = Sphere3VsSphere3Single(sph1, sph2, data);
-		}
-		else if (srb2 != nullptr)
-		{
-			Sphere3 sph1 = s1->GetSpherePrimitive();
-			Sphere3 sph2 = srb2->GetSpherePrimitive();
-
-			res = Sphere3VsSphere3Single(sph1, sph2, data);
-		}
-		else if (c2 != nullptr)
-		{
-			Sphere3 sph = s1->GetSpherePrimitive();
-			AABB3 aabb3 = c2->GetCubePrimitive();
-
-			res = Sphere3VsAABB3(sph, aabb3, data);
-		}
-		else if (q2 != nullptr)
-		{
-			Sphere3 sph = s1->GetSpherePrimitive();
-			Plane pl = q2->GetPlanePrimitive();
-
-			res = Sphere3VsPlane3Single(sph, pl, data);
-		}
-	}
-	else if (srb1 != nullptr)
-	{
-		if (s2 != nullptr)
-		{
-			Sphere3 sph1 = srb1->GetSpherePrimitive();
-			Sphere3 sph2 = s2->GetSpherePrimitive();
-
-			res = Sphere3VsSphere3Single(sph1, sph2, data);
-		}
-		else if (srb2 != nullptr)
-		{
-			Sphere3 sph1 = srb1->GetSpherePrimitive();
-			Sphere3 sph2 = srb2->GetSpherePrimitive();
-
-			res = Sphere3VsSphere3Single(sph1, sph2, data);
-		}
-		else if (c2 != nullptr)
-		{
-			Sphere3 sph = srb1->GetSpherePrimitive();
-			AABB3 aabb3 = c2->GetCubePrimitive();
-
-			res = Sphere3VsAABB3(sph, aabb3, data);
-		}
-		else if (q2 != nullptr)
-		{
-			Sphere3 sph = srb1->GetSpherePrimitive();
-			Plane pl = q2->GetPlanePrimitive();
-
-			res = Sphere3VsPlane3Single(sph, pl, data);
-		}
-	}
-	else if (c1 != nullptr)
-	{
-		if (s2 != nullptr)
-		{
-			AABB3 aabb3 = c1->GetCubePrimitive();
-			Sphere3 sph = s2->GetSpherePrimitive();
-
-			res = Sphere3VsAABB3(sph, aabb3, data);
-		}
-		else if (srb2 != nullptr)
-		{
-			AABB3 aabb3 = c1->GetCubePrimitive();
-			Sphere3 sph = srb2->GetSpherePrimitive();
-
-			res = Sphere3VsAABB3(sph, aabb3, data);
-		}
-		else if (c2 != nullptr)
-		{
-			AABB3 aabb3_1 = c1->GetCubePrimitive();
-			AABB3 aabb3_2 = c2->GetCubePrimitive();
-
-			res = AABB3VsAABB3Single(aabb3_1, aabb3_2, data);
-		}
-		else if (q2 != nullptr)
-		{
-			AABB3 aabb3 = c1->GetCubePrimitive();
-			Plane pl = q2->GetPlanePrimitive();
-
-			res = AABB3VsPlane3Single(aabb3, pl, data);
-		}
-	}
-	else if (q1 != nullptr)
-	{
-		if (s2 != nullptr)
-		{
-			Plane pl = q1->GetPlanePrimitive();
-			Sphere3 sph = s2->GetSpherePrimitive();
-
-			res = Sphere3VsPlane3Single(sph, pl, data);
-		}
-		else if (srb2 != nullptr)
-		{
-			Plane pl = q1->GetPlanePrimitive();
-			Sphere3 sph = srb2->GetSpherePrimitive();
-
-			res = Sphere3VsPlane3Single(sph, pl, data);
-		}
-		else if (c2 != nullptr)
-		{
-			Plane pl = q1->GetPlanePrimitive();
-			AABB3 aabb = c2->GetCubePrimitive();
-
-			res = AABB3VsPlane3Single(aabb, pl, data);
-		}
-		else if (q2 != nullptr)
-		{
-			TODO("Later deal with quad vs quad");
-		}
-	}
-
-	return res;
-}
+//uint CollisionDetector::Entity3VsEntity3(Entity3* e1, Entity3* e2, CollisionData3* data)
+//{
+//	uint res = 0;
+//
+//	// 1
+//	SphereEntity3* s1 = dynamic_cast<SphereEntity3*>(e1);
+//	SphereRB3* srb1 = dynamic_cast<SphereRB3*>(e1);
+//
+//	CubeEntity3* c1 = dynamic_cast<CubeEntity3*>(e1);
+//
+//	QuadEntity3* q1 = dynamic_cast<QuadEntity3*>(e1);
+//
+//	// 2
+//	SphereEntity3* s2 = dynamic_cast<SphereEntity3*>(e2);
+//	SphereRB3* srb2 = dynamic_cast<SphereRB3*>(e2);
+//
+//	CubeEntity3* c2 = dynamic_cast<CubeEntity3*>(e2);
+//
+//	QuadEntity3* q2 = dynamic_cast<QuadEntity3*>(e2);
+//
+//	if (s1 != nullptr)
+//	{
+//		if (s2 != nullptr)
+//		{
+//			Sphere3 sph1 = s1->GetSpherePrimitive();
+//			Sphere3 sph2 = s2->GetSpherePrimitive();
+//
+//			res = Sphere3VsSphere3Single(sph1, sph2, data);
+//		}
+//		else if (srb2 != nullptr)
+//		{
+//			Sphere3 sph1 = s1->GetSpherePrimitive();
+//			Sphere3 sph2 = srb2->GetSpherePrimitive();
+//
+//			res = Sphere3VsSphere3Single(sph1, sph2, data);
+//		}
+//		else if (c2 != nullptr)
+//		{
+//			Sphere3 sph = s1->GetSpherePrimitive();
+//			AABB3 aabb3 = c2->GetCubePrimitive();
+//
+//			res = Sphere3VsAABB3(sph, aabb3, data);
+//		}
+//		else if (q2 != nullptr)
+//		{
+//			Sphere3 sph = s1->GetSpherePrimitive();
+//			Plane pl = q2->GetPlanePrimitive();
+//
+//			res = Sphere3VsPlane3Single(sph, pl, data);
+//		}
+//	}
+//	else if (srb1 != nullptr)
+//	{
+//		if (s2 != nullptr)
+//		{
+//			Sphere3 sph1 = srb1->GetSpherePrimitive();
+//			Sphere3 sph2 = s2->GetSpherePrimitive();
+//
+//			res = Sphere3VsSphere3Single(sph1, sph2, data);
+//		}
+//		else if (srb2 != nullptr)
+//		{
+//			Sphere3 sph1 = srb1->GetSpherePrimitive();
+//			Sphere3 sph2 = srb2->GetSpherePrimitive();
+//
+//			res = Sphere3VsSphere3Single(sph1, sph2, data);
+//		}
+//		else if (c2 != nullptr)
+//		{
+//			Sphere3 sph = srb1->GetSpherePrimitive();
+//			AABB3 aabb3 = c2->GetCubePrimitive();
+//
+//			res = Sphere3VsAABB3(sph, aabb3, data);
+//		}
+//		else if (q2 != nullptr)
+//		{
+//			Sphere3 sph = srb1->GetSpherePrimitive();
+//			Plane pl = q2->GetPlanePrimitive();
+//
+//			res = Sphere3VsPlane3Single(sph, pl, data);
+//		}
+//	}
+//	else if (c1 != nullptr)
+//	{
+//		if (s2 != nullptr)
+//		{
+//			AABB3 aabb3 = c1->GetCubePrimitive();
+//			Sphere3 sph = s2->GetSpherePrimitive();
+//
+//			res = Sphere3VsAABB3(sph, aabb3, data);
+//		}
+//		else if (srb2 != nullptr)
+//		{
+//			AABB3 aabb3 = c1->GetCubePrimitive();
+//			Sphere3 sph = srb2->GetSpherePrimitive();
+//
+//			res = Sphere3VsAABB3(sph, aabb3, data);
+//		}
+//		else if (c2 != nullptr)
+//		{
+//			AABB3 aabb3_1 = c1->GetCubePrimitive();
+//			AABB3 aabb3_2 = c2->GetCubePrimitive();
+//
+//			res = AABB3VsAABB3Single(aabb3_1, aabb3_2, data);
+//		}
+//		else if (q2 != nullptr)
+//		{
+//			AABB3 aabb3 = c1->GetCubePrimitive();
+//			Plane pl = q2->GetPlanePrimitive();
+//
+//			res = AABB3VsPlane3Single(aabb3, pl, data);
+//		}
+//	}
+//	else if (q1 != nullptr)
+//	{
+//		if (s2 != nullptr)
+//		{
+//			Plane pl = q1->GetPlanePrimitive();
+//			Sphere3 sph = s2->GetSpherePrimitive();
+//
+//			res = Sphere3VsPlane3Single(sph, pl, data);
+//		}
+//		else if (srb2 != nullptr)
+//		{
+//			Plane pl = q1->GetPlanePrimitive();
+//			Sphere3 sph = srb2->GetSpherePrimitive();
+//
+//			res = Sphere3VsPlane3Single(sph, pl, data);
+//		}
+//		else if (c2 != nullptr)
+//		{
+//			Plane pl = q1->GetPlanePrimitive();
+//			AABB3 aabb = c2->GetCubePrimitive();
+//
+//			res = AABB3VsPlane3Single(aabb, pl, data);
+//		}
+//		else if (q2 != nullptr)
+//		{
+//			TODO("Later deal with quad vs quad");
+//		}
+//	}
+//
+//	return res;
+//}
 
 uint CollisionDetector::Rigid3VsRigid3(Rigidbody3* rb1, Rigidbody3* rb2, CollisionData3* data)
 {
@@ -2878,8 +2878,8 @@ uint CollisionDetector::Rigid3VsRigid3(Rigidbody3* rb1, Rigidbody3* rb2, Collisi
 		SphereRB3* srb1 = static_cast<SphereRB3*>(rb1);
 		SphereRB3* srb2 = static_cast<SphereRB3*>(rb2);
 
-		Sphere3 sph1 = srb1->GetSpherePrimitive();
-		Sphere3 sph2 = srb2->GetSpherePrimitive();
+		const Sphere3& sph1 = srb1->GetSpherePrimitive();
+		const Sphere3& sph2 = srb2->GetSpherePrimitive();
 
 		res = CollisionDetector::Sphere3VsSphere3Coherent(sph1, sph2, data);
 	}
@@ -2888,8 +2888,8 @@ uint CollisionDetector::Rigid3VsRigid3(Rigidbody3* rb1, Rigidbody3* rb2, Collisi
 		SphereRB3* srb = static_cast<SphereRB3*>(rb1);
 		QuadRB3* qrb = static_cast<QuadRB3*>(rb2);
 
-		Sphere3 sph = srb->GetSpherePrimitive();
-		Plane pl = qrb->GetPlanePrimitive();
+		const Sphere3& sph = srb->GetSpherePrimitive();
+		const Plane& pl = qrb->GetPlanePrimitive();
 
 		res = CollisionDetector::Sphere3VsPlane3Coherent(sph, pl, data);
 	}
@@ -2908,8 +2908,8 @@ uint CollisionDetector::Rigid3VsRigid3(Rigidbody3* rb1, Rigidbody3* rb2, Collisi
 		QuadRB3* qrb = static_cast<QuadRB3*>(rb1);
 		SphereRB3* srb = static_cast<SphereRB3*>(rb2);
 
-		Plane pl = qrb->GetPlanePrimitive();
-		Sphere3 sph = srb->GetSpherePrimitive();
+		const Plane& pl = qrb->GetPlanePrimitive();
+		const Sphere3& sph = srb->GetSpherePrimitive();
 
 		res = CollisionDetector::Sphere3VsPlane3Coherent(sph, pl, data);
 	}

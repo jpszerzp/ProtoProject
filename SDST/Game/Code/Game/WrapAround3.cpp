@@ -1,5 +1,9 @@
 #include "Game/WrapAround3.hpp"
+#include "Game/GameCommon.hpp"
+#include "Game/Physics3State.hpp"
 #include "Engine/Renderer/Renderable.hpp"
+#include "Engine/Input/InputSystem.hpp"
+#include "Engine/Physics/3D/CollisionDetection.hpp"
 
 WrapAround::WrapAround(const Vector3& min, const Vector3& max,
 	const Vector3& p1, const Vector3& p2, 
@@ -39,6 +43,79 @@ WrapAround::~WrapAround()
 }
 
 void WrapAround::Update()
+{
+	UpdateInput();
+
+	UpdateWraparound();
+
+	UpdateBVH();
+}
+
+void WrapAround::UpdateInput()
+{
+	// the bvh starts with no node (bvh == nullptr), so we need another way to tell if to add that first node
+	if (m_bvh_based)
+	{
+		// insert
+		if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_T))
+		{
+			if (m_bvh_node_count < m_gos.size())
+			{
+				GameObject* go = m_gos[m_bvh_node_count];
+				Entity3* ent = go->GetEntity();
+				go->m_isInBVH = true;
+
+				if (m_bvh == nullptr)
+					m_bvh = new BVHNode<BoundingSphere>(nullptr, ent->GetBoundingSphere(), ent);
+				else
+					m_bvh->Insert(ent, ent->GetBoundingSphere());
+
+				m_bvh_node_count++;
+			}
+		}
+
+		// remove all
+		if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_R))
+		{
+			if (m_bvh != nullptr)
+			{
+				delete m_bvh;
+				m_bvh = nullptr;
+
+				m_bvh_node_count = 0;
+			}
+		}
+	}
+}
+
+void WrapAround::UpdateBVH()
+{
+	if (m_bvh != nullptr)
+		m_bvh->UpdateNode();
+}
+
+
+void WrapAround::UpdateBVHContactGeneration()
+{
+	if (m_bvh != nullptr)
+	{
+		m_bvh->GetContacts(m_bvh_contacts, BVH_CONTACT_LIMIT);
+
+		for (const BVHContact& bvhc : m_bvh_contacts)
+		{
+			Entity3* e1 = bvhc.m_e1;
+			Entity3* e2 = bvhc.m_e2;
+
+			Rigidbody3* rb1 = static_cast<Rigidbody3*>(e1);
+			Rigidbody3* rb2 = static_cast<Rigidbody3*>(e2);
+
+			ASSERT_OR_DIE(m_physState != nullptr, "The wrap aronnd does not know about the physics state it is in.");
+			CollisionDetector::Rigid3VsRigid3(rb1, rb2, m_physState->m_coherentResolver->GetCollisionData());
+		}
+	}
+}
+
+void WrapAround::UpdateWraparound()
 {
 	// goes thru every gameobject in this wraparound group and update ONLY when they teleport
 	for (GameObject* go : m_gos)
@@ -110,7 +187,14 @@ void WrapAround::Update()
 	}
 }
 
-void WrapAround::Render(Renderer* renderer)
+void WrapAround::RenderBVH(Renderer* renderer)
+{
+	// traverse the BVH
+	if (m_bvh != nullptr)
+		m_bvh->DrawNode(renderer);
+}
+
+void WrapAround::RenderWraparounds(Renderer* renderer)
 {
 	Shader* shader = renderer->CreateOrGetShader("wireframe_color");
 	renderer->UseShader(shader);
@@ -124,4 +208,16 @@ void WrapAround::Render(Renderer* renderer)
 
 	if (m_mesh != nullptr)
 		renderer->DrawMesh(m_mesh, false);
+}
+
+void WrapAround::ClearBVHRecords()
+{
+	m_bvh_contacts.clear();
+}
+
+void WrapAround::Render(Renderer* renderer)
+{
+	RenderWraparounds(renderer);
+
+	RenderBVH(renderer);
 }

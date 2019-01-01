@@ -4,7 +4,6 @@
 #include "Engine/Physics/3D/CollisionDetection.hpp"
 #include "Engine/Physics/3D/ContactResolver.hpp"
 #include "Engine/Physics/3D/Rigidbody3.hpp"
-//#include "Engine/Physics/3D/BVH3.hpp"
 #include "Engine/Physics/3D/SphereRB3.hpp"
 #include "Engine/Physics/3D/CCDResolver.hpp"
 #include "Engine/Core/Primitive/Sphere.hpp"
@@ -41,17 +40,18 @@ class Physics3State : public GameState
 public:
 	Physics3State();
 	~Physics3State();
+	void PostConstruct();
 
 	Sphere* InitializePhysSphere(Vector3 pos, Vector3 rot, Vector3 scale,
-		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid, bool bp, eDynamicScheme scheme = DISCRETE);
+		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme scheme = DISCRETE);
 	Cube* InitializePhysCube(Vector3 pos, Vector3 rot, Vector3 scale,
 		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid);
 	Point* InitializePhysPoint(Vector3 pos, Vector3 rot, float size, 
 		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid);
 	Quad* InitializePhysQuad(Vector3 pos, Vector3 rot, Vector3 scale,
-		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid, bool bp, eDynamicScheme scheme = DISCRETE);
+		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme scheme = DISCRETE);
 	Box* InitializePhysBox(Vector3 pos, Vector3 rot, Vector3 scale,
-		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid, bool bp, eDynamicScheme scheme = DISCRETE);
+		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme scheme = DISCRETE);
 
 	// below are all based on particles, NOT on rigidbodies
 	Fireworks* SetupFireworks(float age, Vector3 pos, Vector3 inheritVel, Vector3 maxVel, Vector3 minVel, bool lastRound = false);
@@ -71,6 +71,7 @@ public:
 	void UpdateHulls(float deltaTime);
 	void UpdateWrapArounds();
 	void UpdateFireworksStatus();
+	void UpdateUI();
 
 	// update of GO
 	void UpdateForceRegistry(float deltaTime);
@@ -79,9 +80,10 @@ public:
 	void UpdateContacts(float deltaTime);
 	void UpdateContactGeneration();
 	void UpdateContactGenerationCore();
+	void UpdateContactGenerationOrdinary();
+	void UpdateContactGenerationBVH();
 	void UpdateContactResolution(float deltaTime);
 	void UpdateResolverEnd();
-	//void UpdateBVH();
 
 	void Render(Renderer* renderer) override;
 	void RenderGameobjects(Renderer* renderer);
@@ -90,7 +92,7 @@ public:
 	void RenderWrapArounds(Renderer* renderer);
 	void RenderForwardPath(Renderer* renderer);
 	void RenderAssimpModels(Renderer* renderer);
-	//void RenderBVH(Renderer* renderer);
+	void RenderUI(Renderer* renderer);
 
 	// scene tests
 	void WrapAroundTestGeneral(bool give_ang_vel, bool register_g);
@@ -98,8 +100,6 @@ public:
 	void WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, bool register_g);
 	void WrapAroundTestBox(bool give_ang_vel, bool register_g);
 	void WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool register_g);
-
-	//void SwapHullStatusMesh(const std::string& str);
 
 public:
 	GravityRigidForceGenerator* m_gravity;
@@ -119,7 +119,6 @@ public:
 	std::vector<Point*>  m_points;
 	std::vector<Fireworks*>  m_fw_points;
 	std::vector<Box*>	 m_boxes;
-	//std::vector<GameObject*> m_rigid_bvh_gos;		// for convenience of BVH
 
 	// continuous convenience
 	Sphere* m_ball_ccd_test_discrete = nullptr;
@@ -133,7 +132,6 @@ public:
 
 	ContactResolver* m_allResolver;		
 	ContactResolver* m_coherentResolver;
-	//ContactResolver* m_iterResolver;
 
 	// QH
 	QuickHull* m_qh = nullptr;
@@ -144,10 +142,14 @@ public:
 	WrapAround* m_wraparound_general;
 	WrapAround* m_wraparound_sphere_only;
 	WrapAround* m_wraparound_box_only;
-	//int m_wrap_pos_it_general = 0;
+	WrapAround* m_wraparound_bvh;
 
 	// assimp test
 	AssimpLoader* m_assimp_0 = nullptr;
 	std::set<Vector3> m_modelPoints;
 	std::vector<Mesh*> m_modelPointMeshes;
+
+	// bp
+	Mesh* m_bp_title = nullptr;
+	Mesh* m_bp_stat = nullptr;
 };

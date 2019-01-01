@@ -255,6 +255,7 @@ void TheApp::StateStartup()
 	Collision3State* collision = new Collision3State();
 	ProtoState* proto = new ProtoState();
 	StateMachine* states = new StateMachine();
+	phys3->PostConstruct();
 	states->AppendState(proto);
 	states->AppendState(phys3);
 	states->AppendState(collision);

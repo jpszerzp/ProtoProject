@@ -9,7 +9,7 @@
 #include "Engine/Core/ErrorWarningAssert.hpp"
 
 #define MAX_CONTACTS 2000
-#define COHERENT_THRESHOLD 0.01f
+#define COHERENT_THRESHOLD 0.005f
 
 enum eContactType
 {
@@ -152,7 +152,7 @@ public:
 	static uint OBB3VsPoint(const OBB3& obb, const Vector3& p, Contact3& contact, bool reverse);
 	
 	// general entity detection
-	static uint Entity3VsEntity3(Entity3* e1, Entity3* e2, CollisionData3* data);
+	//static uint Entity3VsEntity3(Entity3* e1, Entity3* e2, CollisionData3* data);
 	static uint Rigid3VsRigid3(Rigidbody3* rb1, Rigidbody3* rb2, CollisionData3* data);
 
 	// AABB deprecated
