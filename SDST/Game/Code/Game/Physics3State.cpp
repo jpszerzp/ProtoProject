@@ -1001,9 +1001,9 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_5))
 		WrapAroundTestSphere(m_wraparound_bvh, false, false);
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_6))
-		WrapAroundTestSphere(m_wraparound_sphere_only, false, false, true, Vector3(31.8f, 315.f, 0.f), Vector3::ZERO, Vector3::ONE);
+		WrapAroundTestSphere(m_wraparound_sphere_only, false, false, true, Vector3(31.5f, 315.f, 0.f), Vector3::ZERO, Vector3::ONE);
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_8))
-		WrapAroundTestBox(m_wraparound_box_only, false, false, true, Vector3(60.8f, 315.f, 0.f), Vector3(-20.f, 0.f, -20.f), Vector3::ONE); // pos - (60.8f, 315.f, 0.f), rot - (-20.f, 0.f, -20.f) gives visual appealing result
+		WrapAroundTestBox(m_wraparound_box_only, false, false, true, Vector3(60.6f, 315.f, 0.f), Vector3(50.f, 50.f, 50.f), Vector3::ONE); // pos - (60.8f, 315.f, 0.f), rot - (-20.f, 0.f, -20.f) gives visual appealing result
 
 	// slow
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_0))
