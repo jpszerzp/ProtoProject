@@ -196,14 +196,17 @@ Physics3State::Physics3State()
 	SetupFireworks(5.f, Vector3(25.f, 230.f, -5.f), Vector3::ZERO, Vector3(0.f, 4.f, 0.f), Vector3(0.f, 4.f, 0.f), false);
 
 	// continuity
+	// ccd plane
 	m_quad_ccd_test = InitializePhysQuad(Vector3(1150.f, 1100.f, 1100.f), Vector3(0.f, 90.f, 0.f), Vector3(200.f, 200.f, 1.f), Rgba::WHITE, MOVE_STATIC, BODY_RIGID, CONTINUOUS);
+	// discrete ball for ccd comparison test
 	m_ball_ccd_test_discrete = InitializePhysSphere(Vector3(1050.f, 1100.f, 1100.f), Vector3::ZERO, Vector3(0.5f, 0.5f, 0.5f), Rgba::CYAN, MOVE_DYNAMIC, BODY_RIGID);			// this is for comparison without ccd
-	Rigidbody3* rigid_ccd_s_dis = static_cast<Rigidbody3*>(m_ball_ccd_test_discrete->GetEntity());
-	rigid_ccd_s_dis->SetLinearVelocity(Vector3(500.f, 0.f, 0.f));	
-	rigid_ccd_s_dis->SetAwake(true);
-	rigid_ccd_s_dis->SetCanSleep(false);
-	rigid_ccd_s_dis->SetFrozen(true);			// freeze at the start
+	Rigidbody3* rigid_ccd_s_discrete = static_cast<Rigidbody3*>(m_ball_ccd_test_discrete->GetEntity());
+	rigid_ccd_s_discrete->SetLinearVelocity(Vector3(500.f, 0.f, 0.f));	
+	rigid_ccd_s_discrete->SetAwake(true);
+	rigid_ccd_s_discrete->SetCanSleep(false);
+	rigid_ccd_s_discrete->SetFrozen(true);			// freeze at the start
 	m_wraparound_continuous->m_gos.push_back(m_ball_ccd_test_discrete);
+	// continuous ball for ccd comparison test
 	m_ball_ccd_test_continuous = InitializePhysSphere(Vector3(1050.f, 1050.f, 1050.f), Vector3::ZERO, Vector3(0.5f, 0.5f, 0.5f), Rgba::CYAN, MOVE_DYNAMIC, BODY_RIGID, CONTINUOUS);
 	Rigidbody3* rigid_ccd_s_cnt = static_cast<Rigidbody3*>(m_ball_ccd_test_continuous->GetEntity());
 	rigid_ccd_s_cnt->SetLinearVelocity(Vector3(500.f, -1.f, 0.f));	
@@ -1139,89 +1142,127 @@ void Physics3State::UpdateForceRegistry(float deltaTime)
 
 void Physics3State::UpdateGameobjectsCore(float deltaTime)
 {
-	// CONTINUOUS INTEGRATION FIRST
+	// continuous clamp time preparation (if there is some collision among continuous objects)
 	UpdateGameobjectContinuous(deltaTime);
 
-	// plane pairs (excluding spheres since that sort of pair has been processed)
-	// ...
-
-	// DISCRETE INTEGRATION
-
-	UpdateGameobjectsDiscrete(deltaTime);
+	UpdateGameobjectsDynamics(deltaTime);
 
 	UpdateWrapArounds();
 }
 
 void Physics3State::UpdateGameobjectContinuous(float deltaTime)
 {
-	// at the start of the frame, take a snapshot of all continuous pairs
-	// and record essential info for ccd test (see comments below)
-	// we start with sphere and plane pairs
+	//// at the start of the frame, take a snapshot of all continuous pairs
+	//// and record essential info for ccd test (see comments below)
+	//// we start with sphere and plane pairs
+	//for (std::vector<Sphere*>::size_type idx_sph = 0; idx_sph < m_ccd_spheres.size(); ++idx_sph)
+	//{
+	//	// we get the first sphere
+	//	Sphere* sph = m_ccd_spheres[idx_sph];
+	//	SphereRB3* sph_rb = static_cast<SphereRB3*>(sph->m_physEntity);
+	//	const float& radius = sph->GetRadius();
+	//	const Vector3& this_center = sph->GetPhysicsCenter();
+
+	//	if (sph_rb->IsFrozen())
+	//		break;
+
+	//	// vs (STATIC) plane
+	//	for (std::vector<Quad*>::size_type idx_quad = 0; idx_quad < m_ccd_planes.size(); ++idx_quad)
+	//	{
+	//		TODO("Extend to entity3 as well");
+	//		Quad* quad = m_ccd_planes[idx_quad];
+	//		QuadRB3* quad_rb = static_cast<QuadRB3*>(quad->m_physEntity);
+	//		const Plane& plane = quad_rb->GetPlanePrimitive();
+
+	//		// we need to calculate a sc, which represents a signed distance to from sphere to plane before integration
+	//		const float& sc = DistPointToPlaneSigned(this_center, plane);
+
+	//		Vector3 next_center;
+	//		Quaternion next_orient;
+	//		sph_rb->Simulate(deltaTime, next_center, next_orient);
+
+	//		// with the simulated new center, get the signed dist again
+	//		const float& se = DistPointToPlaneSigned(next_center, plane); 
+
+	//		// now we need to adjust simulation time for continuous objects if they are about to tunnel
+	//		// remember the radius check, it is by nature based on minkowski method
+	//		// the check is sc*se > 0, |sc > r| and |se > r|
+	//		if (!(se * sc > 0 && abs(se) > radius && abs(sc) > radius))
+	//		{
+	//			// in this case we need motion clamp
+	//			float t = (sc - radius) / (sc - se);
+	//			float simulated_time = deltaTime * t;
+
+	//			// now that we get this t, we want to iterate on it to make sure there would be a intersection using this t
+	//			Vector3 predicted_center;
+	//			Quaternion predicted_orient;
+	//			sph_rb->Simulate(simulated_time, predicted_center, predicted_orient);
+
+	//			float predicted_se = DistPointToPlaneSigned(predicted_center, plane);
+
+	//			while (abs(predicted_se) >= radius)
+	//			{
+	//				t += 0.01f;
+	//				simulated_time = deltaTime * t;
+	//				sph_rb->Simulate(simulated_time, predicted_center, predicted_orient);
+	//				predicted_se = DistPointToPlaneSigned(predicted_center, plane);
+	//			}
+
+	//			// at this time t is reusable since we know it clamps the motion to an extend that there will still be an intersection
+	//			sph_rb->m_motionClampTime = t;
+	//			sph_rb->m_motionClamp = true;
+	//		}
+	//	}
+
+	//	// vs sphere
+	//	// ...
+	//}
+
 	for (std::vector<Sphere*>::size_type idx_sph = 0; idx_sph < m_ccd_spheres.size(); ++idx_sph)
 	{
-		// we get the first sphere
 		Sphere* sph = m_ccd_spheres[idx_sph];
 		SphereRB3* sph_rb = static_cast<SphereRB3*>(sph->m_physEntity);
-		const float& radius = sph->GetRadius();
-		const Vector3& this_center = sph->GetPhysicsCenter();
+		const Sphere3& sph_primitive = sph_rb->GetSpherePrimitive();
 
-		if (sph_rb->IsFrozen())
-			break;
-
-		// vs (STATIC) plane
 		for (std::vector<Quad*>::size_type idx_quad = 0; idx_quad < m_ccd_planes.size(); ++idx_quad)
 		{
-			TODO("Extend to entity3 as well");
 			Quad* quad = m_ccd_planes[idx_quad];
 			QuadRB3* quad_rb = static_cast<QuadRB3*>(quad->m_physEntity);
-			const Plane& plane = quad_rb->GetPlanePrimitive();
+			const Plane& pl_primitive = quad_rb->GetPlanePrimitive();
 
-			// we need to calculate a sc, which represents a signed distance to from sphere to plane before integration
-			const float& sc = DistPointToPlaneSigned(this_center, plane);
+			float t;
+			Vector3 hit;
+			Vector3 rel_v = sph_rb->GetLinearVelocity() - quad_rb->GetLinearVelocity();
+			uint res = CollisionDetector::Sphere3VsPlane3Continuous(sph_primitive, pl_primitive, rel_v, t, hit);
 
-			Vector3 next_center;
-			Quaternion next_orient;
-			sph_rb->Simulate(deltaTime, next_center, next_orient);
-
-			// with the simulated new center, get the signed dist again
-			const float& se = DistPointToPlaneSigned(next_center, plane); 
-
-			// now we need to adjust simulation time for continuous objects if they are about to tunnel
-			// remember the radius check, it is by nature based on minkowski method
-			// the check is sc*se > 0, |sc > r| and |se > r|
-			if (!(se * sc > 0 && abs(se) > radius && abs(sc) > radius))
+			if (res != 0)
 			{
-				// in this case we need motion clamp
-				float t = (sc - radius) / (sc - se);
-				float simulated_time = deltaTime * t;
-
-				// now that we get this t, we want to iterate on it to make sure there would be a intersection using this t
-				Vector3 predicted_center;
-				Quaternion predicted_orient;
-				sph_rb->Simulate(simulated_time, predicted_center, predicted_orient);
-
-				float predicted_se = DistPointToPlaneSigned(predicted_center, plane);
-
-				while (abs(predicted_se) >= radius)
+				// could be overlapping
+				// t cannot < 0
+				if (t == 0.f)
 				{
-					t += 0.01f;
-					simulated_time = deltaTime * t;
-					sph_rb->Simulate(simulated_time, predicted_center, predicted_orient);
-					predicted_se = DistPointToPlaneSigned(predicted_center, plane);
+					// sphere already overlapping the plane, stop it
+					sph_rb->m_frozen = true;
+					quad_rb->m_frozen = true;
 				}
-
-				// at this time t is reusable since we know it clamps the motion to an extend that there will still be an intersection
-				sph_rb->m_motionClampTime = t;
-				sph_rb->m_motionClamp = true;
+				else if (t > 0.f && t < deltaTime)
+				{
+					// sphere will overlap this frame, set position to hit and stop it
+					sph->UpdateWithSetPos(hit);
+					sph_rb->m_frozen = true;
+					quad_rb->m_frozen = true;
+				}
+				else
+				{
+					// sphere will overlap next frame, deal with it later
+				}
 			}
+			// otherwise they do not have a chance to overlap
 		}
-
-		// vs sphere
-		// ...
 	}
 }
 
-void Physics3State::UpdateGameobjectsDiscrete(float deltaTime)
+void Physics3State::UpdateGameobjectsDynamics(float deltaTime)
 {
 	// core of update
 	for (std::vector<GameObject*>::size_type idx = 0; idx < m_gameObjects.size(); ++idx)
@@ -1372,17 +1413,11 @@ void Physics3State::UpdateContactGenerationOrdinary()
 					const Sphere3& sph = srb->GetSpherePrimitive();
 					const Plane& pl = qrb->GetPlanePrimitive();
 
-					uint generated = CollisionDetector::Sphere3VsPlane3Coherent(sph, pl, m_coherentResolver->GetCollisionData());
+					// if for any reason objects are frozen, we do not bother to generate contacts to resolve with
+					if (srb->m_frozen && qrb->m_frozen)
+						continue;		// to the next plane
 
-					if (generated != 0)
-					{
-						// hack, to elimite continuous objects from pipeline
-						if (srb->m_scheme == CONTINUOUS && qrb->m_scheme == CONTINUOUS)
-						{
-							srb->m_frozen = true;
-							qrb->m_frozen = true;
-						}
-					}
+					CollisionDetector::Sphere3VsPlane3Coherent(sph, pl, m_coherentResolver->GetCollisionData());
 				}
 			}
 		}

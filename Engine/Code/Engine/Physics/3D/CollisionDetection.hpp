@@ -127,6 +127,7 @@ public:
 	static bool Sphere3VsPlane3Core(const Sphere3& sph, const Plane& pl, Contact3& contact);
 	static uint Sphere3VsPlane3Single(const Sphere3& sph, const Plane& pl, CollisionData3* data);
 	static uint Sphere3VsPlane3Coherent(const Sphere3& sph, const Plane& pl, CollisionData3* data);
+	static uint Sphere3VsPlane3Continuous(const Sphere3& sph, const Plane& pl, const Vector3& v, float& t, Vector3& hit);
 
 	// obb3 vs plane
 	static bool OBB3VsPlane3Core(const OBB3& obb, const Plane& pl, Contact3& contact);

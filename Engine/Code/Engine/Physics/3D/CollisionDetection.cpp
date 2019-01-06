@@ -926,6 +926,38 @@ uint CollisionDetector::Sphere3VsPlane3Coherent(const Sphere3& sph, const Plane&
 	return 1;
 }
 
+uint CollisionDetector::Sphere3VsPlane3Continuous(const Sphere3& sph, const Plane& pl, const Vector3& v, float& t, Vector3& hit)
+{
+	// sph to plane distance
+	float dist = DotProduct(pl.m_normal, sph.m_center);
+	dist -= pl.m_offset;
+
+	if (abs(dist) <= sph.m_radius)
+	{
+		// sphere is already overlapping plane.
+		// set TOI to 0 and impact point to sphere center
+		t = 0.f;
+		hit = sph.m_center;
+		return 1;
+	}
+	else
+	{
+		float denom = DotProduct(pl.m_normal, v);
+		if (denom * dist >= 0.f)
+			// sphere moving parallel to or away from the plane
+			return 0;
+		else
+		{
+			// sphere moving towards the plane
+			// use +r if sphere in front of plane, -r otherwise
+			float r = dist > 0.f ? sph.m_radius : -sph.m_radius;
+			t = (r - dist) / denom;
+			hit = sph.m_center + v * t - pl.m_normal * r;
+			return 1;
+		}
+	}
+}
+
 uint CollisionDetector::Sphere3VsAABB3(const Sphere3& sph, const AABB3& aabb3, CollisionData3* data)
 {
 	if (data->m_contacts.size() >= data->m_maxContacts)

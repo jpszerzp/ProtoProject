@@ -7,6 +7,7 @@ class Sphere : public GameObject
 public:
 	void Render(Renderer* renderer) override;
 	void Update(float deltaTime) override;
+	void UpdateWithSetPos(const Vector3& pos) override;
 
 	Sphere();
 	Sphere(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint,

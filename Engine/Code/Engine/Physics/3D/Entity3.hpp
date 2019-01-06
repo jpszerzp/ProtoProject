@@ -106,8 +106,8 @@ public:
 	bool m_constrained = false;
 
 	eDynamicScheme m_scheme;
-	float m_motionClampTime;
-	bool m_motionClamp = false;
+	//float m_motionClampTime;
+	//bool m_motionClamp = false;
 
 public:
 	virtual ~Entity3(){}

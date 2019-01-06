@@ -77,7 +77,7 @@ public:
 	void UpdateForceRegistry(float deltaTime);
 	void UpdateGameobjectsCore(float deltaTime);
 	void UpdateGameobjectContinuous(float deltaTime);
-	void UpdateGameobjectsDiscrete(float deltaTime);
+	void UpdateGameobjectsDynamics(float deltaTime);
 	void UpdateContacts(float deltaTime);
 	void UpdateContactGeneration();
 	void UpdateContactGenerationCore();

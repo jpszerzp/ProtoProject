@@ -121,32 +121,13 @@ void SphereRB3::Integrate(float deltaTime)
 {
 	float usedTime = deltaTime;
 
-	if (m_scheme == CONTINUOUS)
-	{
-		if (m_motionClamp)
-			usedTime = m_motionClampTime;
+	usedTime *= m_slowed;
 
-		if (!m_awake) return;
+	if (!m_awake) return;
 
-		UpdateInput(usedTime);
+	UpdateInput(usedTime);
 
-		UpdateDynamicsCore(usedTime);
+	UpdateDynamicsCore(usedTime);
 
-		if (m_scheme == CONTINUOUS && m_motionClamp)
-			m_motionClamp = false;
-
-		UpdateSleepSystem(usedTime);
-	}
-	else
-	{
-		usedTime *= m_slowed;
-
-		if (!m_awake) return;
-
-		UpdateInput(usedTime);
-
-		UpdateDynamicsCore(usedTime);
-
-		UpdateSleepSystem(usedTime);
-	}
+	UpdateSleepSystem(usedTime);
 }

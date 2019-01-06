@@ -89,6 +89,15 @@ void Sphere::Update(float deltaTime)
 	UpdateBasis();
 }
 
+void Sphere::UpdateWithSetPos(const Vector3& pos)
+{
+	m_physEntity->SetEntityCenter(pos);
+	m_physEntity->UpdateTransforms();
+	m_physEntity->UpdatePrimitives();
+	m_renderable->m_transform = m_physEntity->GetEntityTransform();
+	UpdateBasis();
+}
+
 void Sphere::Render(Renderer* renderer)
 {
 	Mesh* mesh = m_renderable->m_mesh;

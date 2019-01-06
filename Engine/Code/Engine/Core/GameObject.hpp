@@ -36,6 +36,7 @@ public:
 
 public:
 	virtual void Update(float){}
+	virtual void UpdateWithSetPos(const Vector3& pos){}
 	virtual void UpdateInput(float){}
 	virtual void UpdateBasis();
 
