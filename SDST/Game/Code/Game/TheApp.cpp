@@ -253,10 +253,10 @@ void TheApp::StateStartup()
 {
 	Physics3State* phys3 = new Physics3State();
 	Collision3State* collision = new Collision3State();
-	ProtoState* proto = new ProtoState();
+	//ProtoState* proto = new ProtoState();
 	StateMachine* states = new StateMachine();
 	phys3->PostConstruct();
-	states->AppendState(proto);
+	//states->AppendState(proto);
 	states->AppendState(phys3);
 	states->AppendState(collision);
 	g_theGame = new TheGame();

@@ -50,8 +50,8 @@ public:
 		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid);
 	Quad* InitializePhysQuad(Vector3 pos, Vector3 rot, Vector3 scale,
 		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme scheme = DISCRETE);
-	Box* InitializePhysBox(Vector3 pos, Vector3 rot, Vector3 scale,
-		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme scheme = DISCRETE);
+	Box* InitializePhysBox(const Vector3& pos, const Vector3& rot, const Vector3& scale,
+		const Rgba& tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme scheme = DISCRETE);
 
 	// below are all based on particles, NOT on rigidbodies
 	Fireworks* SetupFireworks(float age, Vector3 pos, Vector3 inheritVel, Vector3 maxVel, Vector3 minVel, bool lastRound = false);
@@ -99,9 +99,10 @@ public:
 	void WrapAroundTestGeneral(bool give_ang_vel, bool register_g);
 	void WrapAroundTestSphere(bool give_ang_vel, bool register_g);
 	void WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, bool register_g);
-	void WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position);
+	void WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, const Vector3& rot, const Vector3& scale);
 	void WrapAroundTestBox(bool give_ang_vel, bool register_g);
 	void WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool register_g);
+	void WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, const Vector3& rot, const Vector3& scale);
 
 public:
 	GravityRigidForceGenerator* m_gravity;

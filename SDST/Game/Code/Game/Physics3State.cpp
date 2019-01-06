@@ -126,14 +126,16 @@ Physics3State::Physics3State()
 		Vector3(25.f, 305.f, 5.f), Vector3(35.f, 305.f, 5.f),
 		Vector3(25.f, 315.f, -5.f), Vector3(35.f, 315.f, -5.f),
 		Vector3(25.f, 315.f, 5.f), Vector3(35.f, 315.f, 5.f));
-	Sphere* sph_11 = InitializePhysSphere(100000.f, Vector3(30.f, 310.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::GREEN, MOVE_DYNAMIC, BODY_RIGID);
+	Sphere* sph_11 = InitializePhysSphere(1.f, Vector3(30.f, 310.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::GREEN, MOVE_DYNAMIC, BODY_RIGID);
 	m_wraparound_sphere_only->m_gos.push_back(sph_11);
 	
 	m_wraparound_box_only = new WrapAround(Vector3(50.f, 300.f, -10.f), Vector3(70.f, 320.f, 10.f),
-		Vector3(55.f, 295.f, -5.f), Vector3(65.f, 295.f, -5.f),
-		Vector3(55.f, 295.f, 5.f), Vector3(65.f, 295.f, 5.f),
+		Vector3(55.f, 305.f, -5.f), Vector3(65.f, 305.f, -5.f),
+		Vector3(55.f, 305.f, 5.f), Vector3(65.f, 305.f, 5.f),
 		Vector3(55.f, 315.f, -5.f), Vector3(65.f, 315.f, -5.f),
 		Vector3(55.f, 315.f, 5.f), Vector3(65.f, 315.f, 5.f));
+	Box* box_11 = InitializePhysBox(Vector3(60.f, 310.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::GREEN, MOVE_DYNAMIC, BODY_RIGID);
+	m_wraparound_box_only->m_gos.push_back(box_11);
 
 	m_wraparound_bvh = new WrapAround(Vector3(55.f, 200.f, -10.f), Vector3(75.f, 220.f, 10.f),
 		Vector3(60.f, 205.f, -5.f), Vector3(70.f, 205.f, -5.f),
@@ -334,8 +336,8 @@ Quad* Physics3State::InitializePhysQuad(Vector3 pos, Vector3 rot, Vector3 scale,
 	return q;
 }
 
-Box* Physics3State::InitializePhysBox(Vector3 pos, Vector3 rot, Vector3 scale,
-	Rgba tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme scheme)
+Box* Physics3State::InitializePhysBox(const Vector3& pos, const Vector3& rot, const Vector3& scale,
+	const Rgba& tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme scheme)
 {
 	Box* b = new Box(pos, rot, scale, tint, "cube_pcu", "default", moveStat, bid);
 	b->m_physDriven = true;
@@ -999,7 +1001,9 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_5))
 		WrapAroundTestSphere(m_wraparound_bvh, false, false);
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_6))
-		WrapAroundTestSphere(m_wraparound_sphere_only, false, false, true, Vector3(30.5f, 315.f, 0.f));
+		WrapAroundTestSphere(m_wraparound_sphere_only, false, false, true, Vector3(31.8f, 315.f, 0.f), Vector3::ZERO, Vector3::ONE);
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_8))
+		WrapAroundTestBox(m_wraparound_box_only, false, false, true, Vector3(60.8f, 315.f, 0.f), Vector3(-20.f, 0.f, -20.f), Vector3::ONE); // pos - (60.8f, 315.f, 0.f), rot - (-20.f, 0.f, -20.f) gives visual appealing result
 
 	// slow
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_0))
@@ -1010,6 +1014,9 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 
 		for (GameObject* go : m_wraparound_sphere_only->m_gos)
 			go->m_physEntity->m_slowed = 0.1f;
+
+		for (GameObject* go : m_wraparound_box_only->m_gos)
+			go->m_physEntity->m_slowed = 0.1f;
 	}
 	else
 	{
@@ -1017,6 +1024,9 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 			go->m_physEntity->m_slowed = 1.f; 
 
 		for (GameObject* go : m_wraparound_sphere_only->m_gos)
+			go->m_physEntity->m_slowed = 1.f;
+
+		for (GameObject* go : m_wraparound_box_only->m_gos)
 			go->m_physEntity->m_slowed = 1.f;
 	}
 
@@ -1792,9 +1802,9 @@ void Physics3State::WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, boo
 	wpa->m_pos_idx %= 8;
 }
 
-void Physics3State::WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position)
+void Physics3State::WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, const Vector3& rot, const Vector3& scale)
 {
-	Sphere* s = InitializePhysSphere(1.f, position, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID);
+	Sphere* s = InitializePhysSphere(1.f, position, rot, scale, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID);
 	Rigidbody3* rigid_s = static_cast<Rigidbody3*>(s->GetEntity());
 
 	if(register_g)
@@ -1864,4 +1874,28 @@ void Physics3State::WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool r
 
 	wpa->m_pos_idx += 1;
 	wpa->m_pos_idx %= 8;
+}
+
+void Physics3State::WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, const Vector3& rot, const Vector3& scale)
+{
+	Box* b = InitializePhysBox(position, rot, scale, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID);
+	Rigidbody3* rigid_b = static_cast<Rigidbody3*>(b->GetEntity());
+
+	if(register_g)
+		m_rigidRegistry->Register(rigid_b, m_gravity);
+
+	if (give_lin_vel)
+		rigid_b->SetLinearVelocity(GetRandomVector3() * 5.f);
+
+	if (give_ang_vel)
+	{
+		float ang_v_x = GetRandomFloatInRange(-5.f, 5.f);
+		float ang_v_y = GetRandomFloatInRange(-5.f, 5.f);
+		float ang_v_z = GetRandomFloatInRange(-5.f, 5.f);
+		rigid_b->SetAngularVelocity(Vector3(ang_v_x, ang_v_y, ang_v_z));
+	}
+
+	rigid_b->SetAwake(true);
+	rigid_b->SetCanSleep(true);
+	wpa->m_gos.push_back(b);
 }

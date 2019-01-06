@@ -40,7 +40,7 @@ Box::Box(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint, std::string meshNam
 	Vector3 right = transform.GetWorldRight().GetNormalized();
 	OBB3 obb3 = OBB3(pos, forward, up, right, scale / 2.f);
 	if (bid == BODY_RIGID)
-		m_physEntity = new BoxRB3(5.f, obb3, rot, moveStat);
+		m_physEntity = new BoxRB3(1.f, obb3, rot, moveStat);
 	else if (bid == BODY_PARTICLE)
 		m_physEntity = new BoxEntity3(obb3, rot, moveStat);
 	m_physEntity->SetEntityForPrimitive();
