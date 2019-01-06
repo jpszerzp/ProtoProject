@@ -1140,7 +1140,20 @@ void Physics3State::UpdateForceRegistry(float deltaTime)
 void Physics3State::UpdateGameobjectsCore(float deltaTime)
 {
 	// CONTINUOUS INTEGRATION FIRST
+	UpdateGameobjectContinuous(deltaTime);
 
+	// plane pairs (excluding spheres since that sort of pair has been processed)
+	// ...
+
+	// DISCRETE INTEGRATION
+
+	UpdateGameobjectsDiscrete(deltaTime);
+
+	UpdateWrapArounds();
+}
+
+void Physics3State::UpdateGameobjectContinuous(float deltaTime)
+{
 	// at the start of the frame, take a snapshot of all continuous pairs
 	// and record essential info for ccd test (see comments below)
 	// we start with sphere and plane pairs
@@ -1181,7 +1194,7 @@ void Physics3State::UpdateGameobjectsCore(float deltaTime)
 				// in this case we need motion clamp
 				float t = (sc - radius) / (sc - se);
 				float simulated_time = deltaTime * t;
-				
+
 				// now that we get this t, we want to iterate on it to make sure there would be a intersection using this t
 				Vector3 predicted_center;
 				Quaternion predicted_orient;
@@ -1206,18 +1219,9 @@ void Physics3State::UpdateGameobjectsCore(float deltaTime)
 		// vs sphere
 		// ...
 	}
-
-	// plane pairs (excluding spheres since that sort of pair has been processed)
-	// ...
-
-	// DISCRETE INTEGRATION
-
-	UpdateGameobjectsDelete(deltaTime);
-
-	UpdateWrapArounds();
 }
 
-void Physics3State::UpdateGameobjectsDelete(float deltaTime)
+void Physics3State::UpdateGameobjectsDiscrete(float deltaTime)
 {
 	// core of update
 	for (std::vector<GameObject*>::size_type idx = 0; idx < m_gameObjects.size(); ++idx)
@@ -1368,7 +1372,17 @@ void Physics3State::UpdateContactGenerationOrdinary()
 					const Sphere3& sph = srb->GetSpherePrimitive();
 					const Plane& pl = qrb->GetPlanePrimitive();
 
-					CollisionDetector::Sphere3VsPlane3Coherent(sph, pl, m_coherentResolver->GetCollisionData());
+					uint generated = CollisionDetector::Sphere3VsPlane3Coherent(sph, pl, m_coherentResolver->GetCollisionData());
+
+					if (generated != 0)
+					{
+						// hack, to elimite continuous objects from pipeline
+						if (srb->m_scheme == CONTINUOUS && qrb->m_scheme == CONTINUOUS)
+						{
+							srb->m_frozen = true;
+							qrb->m_frozen = true;
+						}
+					}
 				}
 			}
 		}

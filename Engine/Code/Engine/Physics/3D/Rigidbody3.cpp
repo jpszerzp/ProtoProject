@@ -1,4 +1,5 @@
 #include "Engine/Physics/3D/Rigidbody3.hpp"
+#include "Engine/Math/MathUtils.hpp"
 
 Rigidbody3::Rigidbody3()
 {
@@ -248,5 +249,60 @@ void Rigidbody3::Simulate(float deltaTime, Vector3& simulate_pos, Quaternion& si
 		simulate_orient = m_orientation;
 		simulate_orient.AddScaledVector(ang_vel, deltaTime);
 		simulate_orient.AddScaledVector(ang_acc, deltaTime * deltaTime * .5f);
+	}
+}
+
+void Rigidbody3::UpdateDynamicsCore(float usedTime)
+{
+	if (!m_frozen)
+	{
+		// acc
+		m_lastFrameLinearAcc = m_linearAcceleration;
+		m_linearAcceleration = m_netforce * m_massData.m_invMass;
+		Vector3 angularAcc = m_inverseInertiaTensorWorld * m_torqueAcc;
+
+		// vel
+		m_linearVelocity += m_linearAcceleration * usedTime;
+		m_angularVelocity += angularAcc * usedTime;
+
+		// damp on vel
+		m_linearVelocity *= powf(m_linearDamp, usedTime);	// damp: 1 means no damp	
+		m_angularVelocity *= powf(m_angularDamp, usedTime);
+
+		// first-order Newton
+		if (m_linearAcceleration.GetLength() < ACC_LIMIT && angularAcc.GetLength() < ACC_LIMIT)
+		{
+			m_center += m_linearVelocity * usedTime;							// pos
+			m_orientation.AddScaledVector(m_angularVelocity, usedTime);		// rot
+		}
+		// second-order Newton
+		// used when either linear or angular acc goes too large - in this case use second-order is safer yet costly
+		else
+		{
+			m_center += (m_linearVelocity * usedTime + m_linearAcceleration * usedTime * usedTime * .5f);
+			m_orientation.AddScaledVector(m_angularVelocity, usedTime);
+			m_orientation.AddScaledVector(angularAcc, usedTime * usedTime * .5f);
+		}
+
+		CacheData();
+	}
+
+	ClearAccs();
+}
+
+void Rigidbody3::UpdateSleepSystem(float usedTime)
+{
+	// updating sleep system
+	if (m_canSleep)
+	{
+		float currentMotion = DotProduct(m_linearVelocity, m_linearVelocity) + DotProduct(m_angularVelocity, m_angularVelocity);
+
+		float bias = powf(.5f, usedTime);
+		m_motion = bias * m_motion + (1.f - bias) * currentMotion;
+
+		if (m_motion < m_sleepThreshold) 
+			SetAwake(false);
+		else if (m_motion > 10.f * m_sleepThreshold) 
+			m_motion = 10.f * m_sleepThreshold;		// clamp up to 10 times of threshold
 	}
 }

@@ -769,53 +769,6 @@ bool CollisionData3::HasAndUpdateContact(const Contact3& contact)
 	}
 }
 
-//bool CollisionData3::FeatureMatchAndUpdate(const Contact3& comparer, Contact3& comparee)
-//{
-//	bool found = false;
-//
-//	if (comparer.m_type == POINT_FACE)
-//	{
-//		if (comparer.m_f1 == FEATURE_NO_CARE)
-//		{
-//			found = (comparer.m_f2 == comparee.m_f2);
-//			if (found)
-//				comparee = comparer;
-//		}
-//		else 
-//		{
-//			found = (comparer.m_f1 == comparee.m_f1);
-//			if (found)
-//				comparee = comparer;
-//		}
-//	}
-//	else if (comparer.m_type == EDGE_EDGE)
-//	{
-//		found = (comparer.m_f1 == comparee.m_f1) && (comparer.m_f2 == comparee.m_f2);
-//		if (found)
-//			comparee = comparer;
-//	}
-//	else
-//	{
-//		// we do not care if contact has other types
-//		// we will not use this function in those cases either
-//	}
-//
-//	return found;
-//}
-//
-//bool CollisionData3::EntityMatchAndUpdate(const Contact3& comparer, Contact3& comparee)
-//{
-//	bool found = false;
-//
-//	bool ent1Match = (comparer.m_e1 == comparee.m_e1);
-//	bool ent2Match = (comparer.m_e2 == comparee.m_e2);
-//	found = (ent1Match && ent2Match);
-//
-//	if (found)
-//		comparee = comparer;
-//
-//	return found;
-//}
 
 const Vector3 CollisionDetector::ISA = Vector3(-INFINITY);
 

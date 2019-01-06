@@ -49,6 +49,7 @@ void Entity3::UpdateTransforms()
 	m_boxBoundTransform.SetLocalPosition(m_center);
 }
 
+
 void Entity3::VerletIntegrate(float deltaTime)
 {
 	// basic position verlet

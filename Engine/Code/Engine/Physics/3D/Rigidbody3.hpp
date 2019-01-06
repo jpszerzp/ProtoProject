@@ -58,6 +58,8 @@ public:
 	virtual void Render(Renderer* renderer) override;
 	virtual void Integrate(float deltaTime) override;
 	virtual void Simulate(float deltaTime, Vector3& simulate_pos, Quaternion& simulate_orient);
+	virtual void UpdateDynamicsCore(float deltaTime) override;
+	virtual void UpdateSleepSystem(float deltaTime) override;
 
 	Vector3 GetAngularVelocity() const { return m_angularVelocity; }
 	Quaternion GetQuaternion() const { return m_orientation; }

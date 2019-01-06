@@ -88,51 +88,35 @@ void QuadRB3::UpdateTransforms()
 
 void QuadRB3::Integrate(float deltaTime)
 {
-	if (!m_awake) return;
-
 	float usedTime = deltaTime;
-	if (m_scheme == CONTINUOUS && m_motionClamp)
-		usedTime = m_motionClampTime;
 
-	if (!m_frozen)
+	if (m_scheme == CONTINUOUS)
 	{
-		// acc
-		m_lastFrameLinearAcc = m_linearAcceleration;
-		m_linearAcceleration = m_netforce * m_massData.m_invMass;
-		Vector3 angularAcc = m_inverseInertiaTensorWorld * m_torqueAcc;
+		if (m_motionClamp)
+			usedTime = m_motionClampTime;
 
-		// vel
-		m_linearVelocity += m_linearAcceleration * deltaTime;
-		m_angularVelocity += angularAcc * deltaTime;
+		if (!m_awake) return;
 
-		// damp on vel
-		m_linearVelocity *= powf(m_linearDamp, deltaTime);	// damp 1 means no damp	
-		m_angularVelocity *= powf(m_angularDamp, deltaTime);
+		UpdateInput(usedTime);
 
-		// pos
-		m_center += m_linearVelocity * deltaTime;
-		m_orientation.AddScaledVector(m_angularVelocity, deltaTime);
+		UpdateDynamicsCore(usedTime);
 
-		CacheData();
+		if (m_scheme == CONTINUOUS && m_motionClamp)
+			m_motionClamp = false;
+
+		UpdateSleepSystem(usedTime);
 	}
-
-	ClearAccs();
-
-	if (m_scheme == CONTINUOUS && m_motionClamp)
-		m_motionClamp = false;
-
-	// updating sleep system
-	if (m_canSleep)
+	else
 	{
-		float currentMotion = DotProduct(m_linearVelocity, m_linearVelocity) + DotProduct(m_angularVelocity, m_angularVelocity);
+		usedTime *= m_slowed;
 
-		float bias = powf(.5f, deltaTime);
-		m_motion = bias * m_motion + (1.f - bias) * currentMotion;
+		if (!m_awake) return;
 
-		if (m_motion < m_sleepThreshold) 
-			SetAwake(false);
-		else if (m_motion > 10.f * m_sleepThreshold) 
-			m_motion = 10.f * m_sleepThreshold;		// clamp up to 10 times of threshold
+		UpdateInput(usedTime);
+
+		UpdateDynamicsCore(usedTime);
+
+		UpdateSleepSystem(usedTime);
 	}
 }
 

@@ -160,6 +160,8 @@ public:
 	virtual void UpdateTransforms();		// all transforms
 	virtual void Update(float){}
 	virtual void UpdateInput(float){}
+	virtual void UpdateDynamicsCore(float){}
+	virtual void UpdateSleepSystem(float){}
 	virtual void Render(Renderer*){}
 	virtual void Translate(Vector3){}
 
