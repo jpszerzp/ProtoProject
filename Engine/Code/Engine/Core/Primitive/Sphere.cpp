@@ -9,8 +9,8 @@ Sphere::Sphere()
 
 }
 
-Sphere::Sphere(Vector3 pos, Vector3 rot, Vector3 scale, 
-	Rgba tint, std::string meshName, std::string materialName,
+Sphere::Sphere(const float& mass, const Vector3& pos, const Vector3& rot, const Vector3& scale, 
+	const Rgba& tint, std::string meshName, std::string materialName,
 	eMoveStatus moveStat, eBodyIdentity bid, bool multipass,
 	eDepthCompare compare, eCullMode cull, eWindOrder order, eDynamicScheme scheme)
 {
@@ -39,7 +39,7 @@ Sphere::Sphere(Vector3 pos, Vector3 rot, Vector3 scale,
 	if (bid == BODY_PARTICLE)
 		m_physEntity = new SphereEntity3(sphere3, rot, moveStat);
 	else
-		m_physEntity = new SphereRB3(1.f, sphere3, rot, moveStat);
+		m_physEntity = new SphereRB3(mass, sphere3, rot, moveStat);
 	m_physEntity->m_scheme = scheme;			// discrete or continuous
 	m_physEntity->SetEntityForPrimitive();
 }

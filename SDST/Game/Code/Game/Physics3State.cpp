@@ -116,18 +116,25 @@ Physics3State::Physics3State()
 		Vector3(-5.f, 305.f, 5.f), Vector3(5.f, 305.f, 5.f));
 	// for dynamics demo
 	InitializePhysQuad(Vector3(0.f, 280.f, 0.f), Vector3(90.f, 0.f, 0.f), Vector3(20.f, 20.f, 1.f), Rgba::GREEN, MOVE_STATIC, BODY_RIGID);
+
 	m_wraparound_verlet = new WrapAround(Vector3(-10.f, 200.f, -10.f), Vector3(0.f, 250.f, 0.f));
+
 	m_wraparound_continuous = new WrapAround(Vector3(1000.f, 1000.f, 1000.f), Vector3(1200.f, 1200.f, 1200.f));
+
 	m_wraparound_sphere_only = new WrapAround(Vector3(20.f, 300.f, -10.f), Vector3(40.f, 320.f, 10.f),
-		Vector3(25.f, 295.f, -5.f), Vector3(35.f, 295.f, -5.f),
-		Vector3(25.f, 295.f, 5.f), Vector3(35.f, 295.f, 5.f),
+		Vector3(25.f, 305.f, -5.f), Vector3(35.f, 305.f, -5.f),
+		Vector3(25.f, 305.f, 5.f), Vector3(35.f, 305.f, 5.f),
 		Vector3(25.f, 315.f, -5.f), Vector3(35.f, 315.f, -5.f),
 		Vector3(25.f, 315.f, 5.f), Vector3(35.f, 315.f, 5.f));
+	Sphere* sph_11 = InitializePhysSphere(100000.f, Vector3(30.f, 310.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::GREEN, MOVE_DYNAMIC, BODY_RIGID);
+	m_wraparound_sphere_only->m_gos.push_back(sph_11);
+	
 	m_wraparound_box_only = new WrapAround(Vector3(50.f, 300.f, -10.f), Vector3(70.f, 320.f, 10.f),
 		Vector3(55.f, 295.f, -5.f), Vector3(65.f, 295.f, -5.f),
 		Vector3(55.f, 295.f, 5.f), Vector3(65.f, 295.f, 5.f),
 		Vector3(55.f, 315.f, -5.f), Vector3(65.f, 315.f, -5.f),
 		Vector3(55.f, 315.f, 5.f), Vector3(65.f, 315.f, 5.f));
+
 	m_wraparound_bvh = new WrapAround(Vector3(55.f, 200.f, -10.f), Vector3(75.f, 220.f, 10.f),
 		Vector3(60.f, 205.f, -5.f), Vector3(70.f, 205.f, -5.f),
 		Vector3(60.f, 205.f, 5.f), Vector3(70.f, 205.f, 5.f),
@@ -171,7 +178,7 @@ Physics3State::Physics3State()
 
 	// rigid spring
 	// the rigid ball
-	Sphere* spring_sphere = InitializePhysSphere(Vector3(45.f, 220.f, -5.f), Vector3::ZERO, Vector3::ONE, Rgba::MEGENTA, MOVE_DYNAMIC, BODY_RIGID, DISCRETE);
+	Sphere* spring_sphere = InitializePhysSphere(1.f, Vector3(45.f, 220.f, -5.f), Vector3::ZERO, Vector3::ONE, Rgba::MEGENTA, MOVE_DYNAMIC, BODY_RIGID, DISCRETE);
 	spring_sphere->m_physEntity->SetFrozen(true);
 	// anchor
 	Point* rigid_anchor = InitializePhysPoint(Vector3(45.f, 235.f, -5.f), Vector3::ZERO, 10.f, Rgba::MEGENTA, MOVE_STATIC, BODY_PARTICLE);
@@ -199,7 +206,7 @@ Physics3State::Physics3State()
 	// ccd plane
 	m_quad_ccd_test = InitializePhysQuad(Vector3(1150.f, 1100.f, 1100.f), Vector3(0.f, 90.f, 0.f), Vector3(200.f, 200.f, 1.f), Rgba::WHITE, MOVE_STATIC, BODY_RIGID, CONTINUOUS);
 	// discrete ball for ccd comparison test
-	m_ball_ccd_test_discrete = InitializePhysSphere(Vector3(1050.f, 1100.f, 1100.f), Vector3::ZERO, Vector3(0.5f, 0.5f, 0.5f), Rgba::CYAN, MOVE_DYNAMIC, BODY_RIGID);			// this is for comparison without ccd
+	m_ball_ccd_test_discrete = InitializePhysSphere(1.f, Vector3(1050.f, 1100.f, 1100.f), Vector3::ZERO, Vector3(0.5f, 0.5f, 0.5f), Rgba::CYAN, MOVE_DYNAMIC, BODY_RIGID);			// this is for comparison without ccd
 	Rigidbody3* rigid_ccd_s_discrete = static_cast<Rigidbody3*>(m_ball_ccd_test_discrete->GetEntity());
 	rigid_ccd_s_discrete->SetLinearVelocity(Vector3(500.f, 0.f, 0.f));	
 	rigid_ccd_s_discrete->SetAwake(true);
@@ -207,7 +214,7 @@ Physics3State::Physics3State()
 	rigid_ccd_s_discrete->SetFrozen(true);			// freeze at the start
 	m_wraparound_continuous->m_gos.push_back(m_ball_ccd_test_discrete);
 	// continuous ball for ccd comparison test
-	m_ball_ccd_test_continuous = InitializePhysSphere(Vector3(1050.f, 1050.f, 1050.f), Vector3::ZERO, Vector3(0.5f, 0.5f, 0.5f), Rgba::CYAN, MOVE_DYNAMIC, BODY_RIGID, CONTINUOUS);
+	m_ball_ccd_test_continuous = InitializePhysSphere(1.f, Vector3(1050.f, 1050.f, 1050.f), Vector3::ZERO, Vector3(0.5f, 0.5f, 0.5f), Rgba::CYAN, MOVE_DYNAMIC, BODY_RIGID, CONTINUOUS);
 	Rigidbody3* rigid_ccd_s_cnt = static_cast<Rigidbody3*>(m_ball_ccd_test_continuous->GetEntity());
 	rigid_ccd_s_cnt->SetLinearVelocity(Vector3(500.f, -1.f, 0.f));	
 	rigid_ccd_s_cnt->SetAwake(true);
@@ -279,10 +286,10 @@ void Physics3State::PostConstruct()
 	m_wraparound_bvh->m_physState = this;
 }
 
-Sphere* Physics3State::InitializePhysSphere(Vector3 pos, Vector3 rot, Vector3 scale,
-	Rgba tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme scheme)
+Sphere* Physics3State::InitializePhysSphere(const float& mass, const Vector3& pos, const Vector3& rot, const Vector3& scale,
+	const Rgba& tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme scheme)
 {
-	Sphere* s = new Sphere(pos, rot, scale, tint, "sphere_pcu", "default", moveStat, bid, false, COMPARE_LESS, CULLMODE_BACK, WIND_COUNTER_CLOCKWISE, scheme);
+	Sphere* s = new Sphere(mass, pos, rot, scale, tint, "sphere_pcu", "default", moveStat, bid, false, COMPARE_LESS, CULLMODE_BACK, WIND_COUNTER_CLOCKWISE, scheme);
 	s->m_physDriven = true;
 	m_gameObjects.push_back(s);
 	m_spheres.push_back(s);
@@ -991,6 +998,8 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	// bvh wraparound
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_5))
 		WrapAroundTestSphere(m_wraparound_bvh, false, false);
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_6))
+		WrapAroundTestSphere(m_wraparound_sphere_only, false, false, true, Vector3(30.5f, 315.f, 0.f));
 
 	// slow
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_0))
@@ -998,11 +1007,17 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		// slow down gameobjects in the specified wraparound
 		for (GameObject* go : m_wraparound_general->m_gos)
 			go->m_physEntity->m_slowed = 0.1f;
+
+		for (GameObject* go : m_wraparound_sphere_only->m_gos)
+			go->m_physEntity->m_slowed = 0.1f;
 	}
 	else
 	{
 		for (GameObject* go : m_wraparound_general->m_gos)
 			go->m_physEntity->m_slowed = 1.f; 
+
+		for (GameObject* go : m_wraparound_sphere_only->m_gos)
+			go->m_physEntity->m_slowed = 1.f;
 	}
 
 	// camera update from input
@@ -1732,7 +1747,7 @@ void Physics3State::WrapAroundTestSphere(bool give_ang_vel, bool register_g)
 	Vector3 pos = m_wraparound_general->m_positions[m_wraparound_general->m_pos_idx];
 
 	// even, spawn ball
-	Sphere* s = InitializePhysSphere(pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID);
+	Sphere* s = InitializePhysSphere(1.f, pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID);
 	Rigidbody3* rigid_s = static_cast<Rigidbody3*>(s->GetEntity());
 	if (register_g)
 		m_rigidRegistry->Register(rigid_s, m_gravity);
@@ -1757,7 +1772,7 @@ void Physics3State::WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, boo
 	Vector3 pos = wpa->m_positions[wpa->m_pos_idx];
 
 	// even, spawn ball
-	Sphere* s = InitializePhysSphere(pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID);
+	Sphere* s = InitializePhysSphere(1.f, pos, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID);
 	Rigidbody3* rigid_s = static_cast<Rigidbody3*>(s->GetEntity());
 	if (register_g)
 		m_rigidRegistry->Register(rigid_s, m_gravity);
@@ -1775,6 +1790,30 @@ void Physics3State::WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, boo
 
 	wpa->m_pos_idx += 1;
 	wpa->m_pos_idx %= 8;
+}
+
+void Physics3State::WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position)
+{
+	Sphere* s = InitializePhysSphere(1.f, position, Vector3::ZERO, Vector3::ONE, Rgba::RED, MOVE_DYNAMIC, BODY_RIGID);
+	Rigidbody3* rigid_s = static_cast<Rigidbody3*>(s->GetEntity());
+
+	if(register_g)
+		m_rigidRegistry->Register(rigid_s, m_gravity);
+	
+	if (give_lin_vel)
+		rigid_s->SetLinearVelocity(GetRandomVector3() * 5.f);
+
+	if (give_ang_vel)
+	{
+		float ang_v_x = GetRandomFloatInRange(-5.f, 5.f);
+		float ang_v_y = GetRandomFloatInRange(-5.f, 5.f);
+		float ang_v_z = GetRandomFloatInRange(-5.f, 5.f);
+		rigid_s->SetAngularVelocity(Vector3(ang_v_x, ang_v_y, ang_v_z));
+	}
+
+	rigid_s->SetAwake(true);
+	rigid_s->SetCanSleep(true);
+	wpa->m_gos.push_back(s);
 }
 
 void Physics3State::WrapAroundTestBox(bool give_ang_vel, bool register_g)

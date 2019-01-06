@@ -65,7 +65,7 @@ Collision3State::Collision3State()
 	eCullMode cull = CULLMODE_BACK;
 	eWindOrder wind = WIND_COUNTER_CLOCKWISE;
 	eDynamicScheme scheme = DISCRETE;
-	Sphere* sph = new Sphere(pos, rot, scale, tint, meshName, matName, stat, bid, multipass, compare, cull, wind, scheme);
+	Sphere* sph = new Sphere(1.f, pos, rot, scale, tint, meshName, matName, stat, bid, multipass, compare, cull, wind, scheme);
 	Rigidbody3* rigid = static_cast<Rigidbody3*>(sph->GetEntity());
 	sph->m_physDriven = true;
 	rigid->SetGameobject(sph);
@@ -75,7 +75,7 @@ Collision3State::Collision3State()
 
 	pos = Vector3(-108.5f, 0.f, 0.f);
 	scale = Vector3(2.f, 2.f, 2.f);
-	Sphere* sph_0 = new Sphere(pos, rot, scale, tint, meshName, matName, stat, bid, multipass, compare, cull, wind, scheme);
+	Sphere* sph_0 = new Sphere(1.f, pos, rot, scale, tint, meshName, matName, stat, bid, multipass, compare, cull, wind, scheme);
 	rigid = static_cast<Rigidbody3*>(sph_0->GetEntity());
 	sph_0->m_physDriven = true;
 	rigid->SetGameobject(sph_0);
@@ -89,7 +89,7 @@ Collision3State::Collision3State()
 	// cp 2
 	pos = Vector3(100.f, -105.f, 0.f);
 	scale = Vector3::ONE;
-	Sphere* sph_1 = new Sphere(pos, rot, scale, tint, meshName, matName, stat, bid, multipass, compare, cull, wind, scheme);
+	Sphere* sph_1 = new Sphere(1.f, pos, rot, scale, tint, meshName, matName, stat, bid, multipass, compare, cull, wind, scheme);
 	rigid = static_cast<Rigidbody3*>(sph_1->GetEntity());
 	sph_1->m_physDriven = true;
 	rigid->SetGameobject(sph_1);
@@ -158,7 +158,7 @@ Collision3State::Collision3State()
 
 	pos = Vector3(112.f, 0.f, 0.f);
 	rot = Vector3::ZERO;
-	Sphere* sph_2 = new Sphere(pos, rot, scale, tint, meshName, matName, stat, bid, multipass, compare, cull, wind);
+	Sphere* sph_2 = new Sphere(1.f, pos, rot, scale, tint, meshName, matName, stat, bid, multipass, compare, cull, wind);
 	rigid = static_cast<Rigidbody3*>(sph_2->GetEntity());
 	sph_2->m_physDriven = true;
 	rigid->SetGameobject(sph_2);

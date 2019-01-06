@@ -42,8 +42,8 @@ public:
 	~Physics3State();
 	void PostConstruct();
 
-	Sphere* InitializePhysSphere(Vector3 pos, Vector3 rot, Vector3 scale,
-		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme scheme = DISCRETE);
+	Sphere* InitializePhysSphere(const float& mass, const Vector3& pos, const Vector3& rot, const Vector3& scale,
+		const Rgba& tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme scheme = DISCRETE);
 	Cube* InitializePhysCube(Vector3 pos, Vector3 rot, Vector3 scale,
 		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid);
 	Point* InitializePhysPoint(Vector3 pos, Vector3 rot, float size, 
@@ -99,6 +99,7 @@ public:
 	void WrapAroundTestGeneral(bool give_ang_vel, bool register_g);
 	void WrapAroundTestSphere(bool give_ang_vel, bool register_g);
 	void WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, bool register_g);
+	void WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position);
 	void WrapAroundTestBox(bool give_ang_vel, bool register_g);
 	void WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool register_g);
 
