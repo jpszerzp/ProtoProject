@@ -24,6 +24,9 @@ public:
 	const float operator[](const int idx) const;
 
 	float GetDeterminant() const;
+	Vector3 GetI() const { return Vector3(Ix, Iy, Iz); }
+	Vector3 GetJ() const { return Vector3(Jx, Jy, Jz); }
+	Vector3 GetK() const { return Vector3(Kx, Ky, Kz); }
 
 	void SetRight(Vector3 right);
 	void SetUp(Vector3 up);

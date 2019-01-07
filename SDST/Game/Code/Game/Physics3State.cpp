@@ -127,6 +127,11 @@ Physics3State::Physics3State()
 		Vector3(25.f, 315.f, -5.f), Vector3(35.f, 315.f, -5.f),
 		Vector3(25.f, 315.f, 5.f), Vector3(35.f, 315.f, 5.f));
 	Sphere* sph_11 = InitializePhysSphere(1.f, Vector3(30.f, 310.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::GREEN, MOVE_DYNAMIC, BODY_RIGID);
+	SphereRB3* sph_rb_11 = static_cast<SphereRB3*>(sph_11->m_physEntity);
+	sph_rb_11->SetAngularVelocity(Vector3(0.f, 0.f, 0.f));
+	sph_rb_11->SetAwake(true);
+	sph_rb_11->SetCanSleep(true);
+
 	m_wraparound_sphere_only->m_gos.push_back(sph_11);
 	
 	m_wraparound_box_only = new WrapAround(Vector3(50.f, 300.f, -10.f), Vector3(70.f, 320.f, 10.f),
