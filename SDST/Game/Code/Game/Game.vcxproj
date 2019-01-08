@@ -102,34 +102,46 @@
     <OutDir>$(SolutionDir)Temporary\$(ProjectName)_$(PlatformName)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Temporary\$(ProjectName)_$(PlatformName)_$(Configuration)\</IntDir>
     <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
+    <IncludePath>C:\PhysX-4.0\physx\include;C:\PhysX-4.0\pxshared\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\PhysX-4.0\physx\bin\win.x86_64.vc141.mt\checked;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugInline|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)Temporary\$(ProjectName)_$(PlatformName)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Temporary\$(ProjectName)_$(PlatformName)_$(Configuration)\</IntDir>
     <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
+    <IncludePath>C:\PhysX-4.0\physx\include;C:\PhysX-4.0\pxshared\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\PhysX-4.0\physx\bin\win.x86_64.vc141.mt\checked;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)Temporary\$(ProjectName)_$(PlatformName)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Temporary\$(ProjectName)_$(PlatformName)_$(Configuration)\</IntDir>
     <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
+    <IncludePath>C:\PhysX-4.0\physx\include;C:\PhysX-4.0\pxshared\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\PhysX-4.0\physx\bin\win.x86_64.vc141.mt\checked;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugInline|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)Temporary\$(ProjectName)_$(PlatformName)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Temporary\$(ProjectName)_$(PlatformName)_$(Configuration)\</IntDir>
     <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
+    <IncludePath>C:\PhysX-4.0\physx\include;C:\PhysX-4.0\pxshared\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\PhysX-4.0\physx\bin\win.x86_64.vc141.mt\checked;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)Temporary\$(ProjectName)_$(PlatformName)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Temporary\$(ProjectName)_$(PlatformName)_$(Configuration)\</IntDir>
+    <IncludePath>C:\PhysX-4.0\physx\include;C:\PhysX-4.0\pxshared\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\PhysX-4.0\physx\bin\win.x86_64.vc141.mt\checked;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)Temporary\$(ProjectName)_$(PlatformName)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Temporary\$(ProjectName)_$(PlatformName)_$(Configuration)\</IntDir>
+    <IncludePath>C:\PhysX-4.0\physx\include;C:\PhysX-4.0\pxshared\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\PhysX-4.0\physx\bin\win.x86_64.vc141.mt\checked;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

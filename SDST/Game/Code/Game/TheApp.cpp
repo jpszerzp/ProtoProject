@@ -16,6 +16,8 @@
 #include "Engine/Net/Net.hpp"
 #include "Engine/Net/NetAddress.hpp"
 
+#include "PxPhysicsAPI.h"
+
 TheApp::TheApp()
 {
 	TimeStartup();
