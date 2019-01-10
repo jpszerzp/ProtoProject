@@ -8,6 +8,7 @@
 #include "Engine/Math/AABB3.hpp"
 #include "Engine/Math/Primitive3.hpp"
 #include "Engine/Core/Quaternion.hpp"
+#include "Engine/Core/ErrorWarningAssert.hpp"
 
 enum eVerletScheme
 {
@@ -135,6 +136,7 @@ public:
 	void SetFrozen(bool value) { m_frozen = value; }
 	void SetTransform(const Transform& t) { m_entityTransform = t; }
 	virtual void SetEntityForPrimitive(){}
+	virtual void SetQuaternion(const Quaternion& orientation) { ASSERT_OR_DIE(false, "This virtual function should NOT be called from Entity."); }
 
 	bool HasInfiniteMass() const;
 	bool IsConst() const { return (m_moveStatus == MOVE_STATIC); }
@@ -155,6 +157,9 @@ public:
 	bool IsFrozen() const { return m_frozen; }
 	eBodyIdentity GetEntityBodyID() const { return m_bodyID; }
 	BoundingSphere GetBoundingSphere() const { return m_boundSphere; }
+	virtual Vector3 GetAngularVelocity() const { ASSERT_OR_DIE(false, "This virtual function should NOT be called."); return Vector3::ZERO; }
+	virtual Matrix33 GetIITWorld() const { ASSERT_OR_DIE(false, "This virtual function should NOT be called."); return Matrix33(); }
+	virtual Quaternion GetQuaternion() const { ASSERT_OR_DIE(false, "This virtual function should NOT be called."); return Quaternion(); }
 
 	virtual void UpdatePrimitives(){}	// do not know which primitive this entity has, hence virtual
 	virtual void UpdateTransforms();		// all transforms

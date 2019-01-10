@@ -47,6 +47,8 @@ public:
 	void ResolvePositionsCoherent(float deltaTime);
 	void ResolveVelocityCoherent(float deltaTime);
 
+	void RF_ResolvePositionsCoherent(float deltaTime);
+
 	void ClearRecords();
 
 	CollisionData3* GetCollisionData() { return m_collision; }

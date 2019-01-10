@@ -40,7 +40,7 @@ public:
 	float m_friction;
 
 	// transformation convenience properties
-	Matrix33 m_toWorld;
+	Matrix33 m_toWorld;		// matrix transform basis from contact coord to world coord, with local basis of contact coord as components
 	Vector3 m_closingVel;
 	float m_desiredVelDelta;
 	Vector3 m_relativePosWorld[2];
@@ -55,7 +55,7 @@ public:
 	void ResolveContact(float deltaTime);
 	void ResolveVelocity(float deltaTime);
 	void ResolvePenetration(float deltaTime);
-	void MakeToWorld(Matrix33& contactToWorldRot);
+	void MakeToWorld();
 
 	// vel change
 	float GetVelPerImpulseContact();
@@ -65,12 +65,16 @@ public:
 	Vector3 ComputeWorldImpulse();
 	Vector3 ComputeWorldImpulseFriction();
 
+	// iit short for inverse inertia tensor
+	Vector3 RF_ComputeFrictionlessImpulse();
+
 	// pos change
 	void SolveNonlinearProjection( float angularInertia[2], float linearInertia[2], float angularMove[2], float linearMove[2]);
 
 	void ApplyImpulse();
 	void ResolveVelocityCoherent(Vector3 linearChange[2], Vector3 angularChange[2]);
 	void ResolvePositionCoherent(Vector3 linearChange[2], Vector3 angularChange[2]);
+	void RF_ResolvePositionCoherent(Vector3 linearChange[2], Vector3 angularChange[2]);
 
 	// coherent
 	void PrepareInternal(float deltaTime);
@@ -106,7 +110,7 @@ struct CollisionData3
 	//bool FeatureMatchAndUpdate(const Contact3& comparer, Contact3& comparee);
 	//bool EntityMatchAndUpdate(const Contact3& comparer, Contact3& comparee);
 
-	std::vector<Contact3>& GetContacts() { return m_contacts; }
+	//std::vector<Contact3>& GetContacts() { return m_contacts; }
 };
 
 class CollisionDetector

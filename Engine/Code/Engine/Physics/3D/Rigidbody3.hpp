@@ -29,9 +29,9 @@ public:
 
 	void InitializeRigid();
 
+	virtual void SetQuaternion(const Quaternion& orientation) override;
 	void SetQuaternionIdentity();
-	void SetQuaternion(const Quaternion& orientation);
-	void SetQuaternion(const float r, const float x, const float y, const float z);
+	//void SetQuaternion(const float r, const float x, const float y, const float z);
 	void SetAwake(bool awake);
 	void SetCanSleep(bool value);
 	void SetAngularVelocity(const Vector3& angular) { m_angularVelocity = angular; }
@@ -61,8 +61,9 @@ public:
 	virtual void UpdateDynamicsCore(float deltaTime) override;
 	virtual void UpdateSleepSystem(float deltaTime) override;
 
-	Vector3 GetAngularVelocity() const { return m_angularVelocity; }
-	Quaternion GetQuaternion() const { return m_orientation; }
+	virtual Matrix33 GetIITWorld() const override { return m_inverseInertiaTensorWorld; }
+	virtual Vector3 GetAngularVelocity() const override { return m_angularVelocity; }
+	virtual Quaternion GetQuaternion() const override { return m_orientation; }
 	bool CanSleep() const { return m_canSleep; }
 	bool IsAwake() const { return m_awake; }
 };

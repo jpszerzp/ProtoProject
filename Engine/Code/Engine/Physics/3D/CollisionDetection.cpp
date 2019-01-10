@@ -58,7 +58,7 @@ void Contact3::ResolveContact(float deltaTime)
 	ResolvePenetration(deltaTime);
 }
 
-void Contact3::MakeToWorld(Matrix33& contactToWorldRot)
+void Contact3::MakeToWorld()
 {
 	Vector3 tangent[2];		// tangent[0] is y and the other z
 
@@ -87,7 +87,7 @@ void Contact3::MakeToWorld(Matrix33& contactToWorldRot)
 		tangent[1].z = m_normal.x * tangent[0].y;
 	}
 
-	contactToWorldRot.SetBasis(m_normal, tangent[0], tangent[1]);
+	m_toWorld.SetBasis(m_normal, tangent[0], tangent[1]);
 }
 
 float Contact3::GetVelPerImpulseContact()
@@ -146,8 +146,9 @@ float Contact3::GetDeltaVel()
 		vel += rigid2->GetLinearVelocity();
 	}
 
+	ASSERT_OR_DIE(false, "GetDeltaVel is deprecated, ignore this function");
 	Matrix33 contactToWorld;
-	MakeToWorld(contactToWorld);
+	//MakeToWorld(contactToWorld);
 	Matrix33 worldToContact = contactToWorld.Transpose();
 	Vector3 contactVel = worldToContact * vel;
 
@@ -254,6 +255,40 @@ Vector3 Contact3::ComputeWorldImpulseFriction()
 	Vector3 worldImpulse = m_toWorld * ComputeContactImpulseFriction();
 	DebugRenderLine(0.2f, m_point, m_point + worldImpulse, 5.f, Rgba::CYAN, Rgba::CYAN, DEBUG_RENDER_USE_DEPTH);
 	return worldImpulse;
+}
+
+// the goal is to transform from world space to contact space
+Vector3 Contact3::RF_ComputeFrictionlessImpulse()
+{
+	Vector3 impulseContact;
+
+	// assumes the normal is normalized
+	Vector3 deltaVelWorld = m_relativePosWorld[0].Cross(m_normal);
+	deltaVelWorld = m_e1->GetIITWorld() * deltaVelWorld;
+	deltaVelWorld = deltaVelWorld.Cross(m_relativePosWorld[0]);
+
+	float deltaVelocity = DotProduct(deltaVelWorld, m_normal);
+
+	deltaVelocity += m_e1->m_massData.m_invMass;
+
+	if (m_e2 != nullptr)
+	{
+		deltaVelWorld = m_relativePosWorld[1].Cross(m_normal);
+		deltaVelWorld = m_e2->GetIITWorld() * deltaVelWorld;
+		deltaVelWorld = deltaVelWorld.Cross(m_relativePosWorld[1]);
+
+		// to contact coord (for angular)
+		deltaVelocity += DotProduct(deltaVelWorld, m_normal);
+
+		// for linear
+		deltaVelocity += m_e2->m_massData.m_invMass;
+	}
+
+	// in frictionless case, we only care about the normal direction, which is x of impulse
+	impulseContact.x = m_desiredVelDelta / deltaVelocity;
+	impulseContact.y = 0.f;
+	impulseContact.z = 0.f;
+	return impulseContact;
 }
 
 void Contact3::ApplyImpulse()
@@ -393,14 +428,146 @@ void Contact3::ResolvePositionCoherent(Vector3 linearChange[2], Vector3 angularC
 	}
 }
 
+void Contact3::RF_ResolvePositionCoherent(Vector3 linearChange[2], Vector3 angularChange[2])
+{
+	const float angularLimit = 0.2f;
+	float angularMove[2];
+	float linearMove[2];
+
+	float totalInertia = 0;
+	float linearInertia[2];
+	float angularInertia[2]; 
+
+	// i == 0
+	Matrix33 iit = m_e1->GetIITWorld();
+
+	Vector3 angularInertiaWorld = m_relativePosWorld[0].Cross(m_normal);
+	angularInertiaWorld = iit * angularInertiaWorld;
+	angularInertiaWorld = angularInertiaWorld.Cross(m_relativePosWorld[0]);
+
+	angularInertia[0] = DotProduct(angularInertiaWorld, m_normal);
+	linearInertia[0] = m_e1->m_massData.m_invMass;
+	totalInertia += linearInertia[0] + angularInertia[0];
+
+	// i == 1
+	iit = m_e2->GetIITWorld();
+
+	angularInertiaWorld = m_relativePosWorld[1].Cross(m_normal);
+	angularInertiaWorld = iit * angularInertiaWorld;
+	angularInertiaWorld = angularInertiaWorld.Cross(m_relativePosWorld[1]);
+
+	angularInertia[1] = DotProduct(angularInertiaWorld, m_normal);
+	linearInertia[1] = m_e2->m_massData.m_invMass;
+	totalInertia += linearInertia[1] + angularInertia[1];
+
+	// i == 0
+	float sign = 1.f;
+	angularMove[0] = sign * m_penetration * (angularInertia[0] / totalInertia);
+	linearMove[0] = sign * m_penetration * (linearInertia[0] / totalInertia);
+
+	Vector3 projection = m_relativePosWorld[0];
+	projection += (m_normal * -DotProduct(m_relativePosWorld[0], m_normal));
+
+	float maxMagnitude = angularLimit * projection.GetLength();
+
+	if (angularMove[0] < -maxMagnitude)
+	{
+		float totalMove = angularMove[0] + linearMove[0];
+		angularMove[0] = -maxMagnitude;
+		linearMove[0] = totalMove - angularMove[0];
+	}
+	else if (angularMove[0] > maxMagnitude)
+	{
+		float totalMove = angularMove[0] + linearMove[0];
+		angularMove[0] = maxMagnitude;
+		linearMove[0] = totalMove - angularMove[0];
+	}
+
+	if (angularMove[0] == 0)
+		angularChange[0].ToDefault();
+	else 
+	{
+		Vector3 targetAngularDirection = m_relativePosWorld[0].Cross(m_normal);
+
+		Matrix33 iit;
+		iit = m_e1->GetIITWorld();
+
+		angularChange[0] = iit * targetAngularDirection * (angularMove[0] / angularInertia[0]);
+	}
+
+	linearChange[0] = m_normal * linearMove[0];
+
+	Vector3 pos;
+	pos = m_e1->GetEntityCenter();
+	pos += (m_normal * linearMove[0]);
+	m_e1->SetEntityCenter(pos);
+
+	Quaternion q;
+	q = m_e1->GetQuaternion();
+	q.AddScaledVector(angularChange[0], 1.f);
+	m_e1->SetQuaternion(q);
+
+	// awake system
+
+	// i == 1
+	sign = -1.f;
+	angularMove[1] = sign * m_penetration * (angularInertia[1] / totalInertia);
+	linearMove[1] = sign * m_penetration * (linearInertia[1] / totalInertia);
+
+	projection = m_relativePosWorld[1];
+	projection += (m_normal * -DotProduct(m_relativePosWorld[1], m_normal));
+
+	maxMagnitude = angularLimit * projection.GetLength();
+
+	if (angularMove[1] < -maxMagnitude)
+	{
+		float totalMove = angularMove[1] + linearMove[1];
+		angularMove[1] = -maxMagnitude;
+		linearMove[1] = totalMove - angularMove[1];
+	}
+	else if (angularMove[1] > maxMagnitude)
+	{
+		float totalMove = angularMove[1] + linearMove[1];
+		angularMove[1] = maxMagnitude;
+		linearMove[1] = totalMove - angularMove[1];
+	}
+
+	if (angularMove[1] == 0)
+		angularChange[1].ToDefault();
+	else 
+	{
+		Vector3 targetAngularDirection = m_relativePosWorld[1].Cross(m_normal);
+
+		Matrix33 iit;
+		iit = m_e2->GetIITWorld();
+
+		angularChange[1] = iit * targetAngularDirection * (angularMove[1] / angularInertia[1]);
+	}
+
+	linearChange[1] = m_normal * linearMove[1];
+
+	pos = m_e2->GetEntityCenter();
+	pos += (m_normal * linearMove[1]);
+	m_e2->SetEntityCenter(pos);
+
+	q = m_e2->GetQuaternion();
+	q.AddScaledVector(angularChange[1], 1.f);
+	m_e2->SetQuaternion(q);
+
+	// wake system
+}
+
 void Contact3::PrepareInternal(float deltaTime)
 {
 	if (m_e1 == nullptr)
+	{
+		ASSERT_RECOVERABLE(false, "First entity of collision pair should not be nullptr even before swapping");
 		SwapEntities();
+	}
 	ASSERT_OR_DIE(m_e1 != nullptr, "Swapped body should not be null");
 
 	// contact matrix
-	MakeToWorld(m_toWorld);
+	MakeToWorld();
 
 	m_relativePosWorld[0] = m_point - m_e1->GetEntityCenter();
 	if (m_e2 != nullptr)
@@ -415,7 +582,7 @@ void Contact3::PrepareInternal(float deltaTime)
 
 	// desired change in vel as resolving coherent contacts
 	//ComputeDesiredVelDeltaCoherent();
-	ComputeDesiredVelDeltaResting(deltaTime);
+	//ComputeDesiredVelDeltaResting(deltaTime);
 }
 
 void Contact3::SwapEntities()
@@ -434,20 +601,23 @@ void Contact3::SwapEntities()
 
 Vector3 Contact3::ComputeContactVelocity(int idx, Entity3* ent, float deltaTime)
 {
-	Rigidbody3* rigid = static_cast<Rigidbody3*>(ent);
-	Vector3 vel = rigid->GetAngularVelocity().Cross(m_relativePosWorld[idx]);
-	vel += rigid->GetLinearVelocity();
+	//Rigidbody3* rigid = static_cast<Rigidbody3*>(ent);
+	Vector3 velocity = ent->GetAngularVelocity().Cross(m_relativePosWorld[idx]);
+	velocity += ent->GetLinearVelocity();
+
+	// contact coord basis is orthonormal, so we use transpose as inverse 
 	const Matrix33& toContact = m_toWorld.Transpose();
-	Vector3 contactVel = toContact * vel;	// to contact coord
+	Vector3 contactVelocity = toContact * velocity;	// to contact coord
 
-	Vector3 accVel = rigid->m_lastFrameLinearAcc * deltaTime;
-	accVel = toContact * accVel;
-	accVel.x = 0.f;					// ignore acceleration along local normal direction
+	// TODO: restore when validating friction pipeline
+	//Vector3 accVel = rigid->m_lastFrameLinearAcc * deltaTime;
+	//accVel = toContact * accVel;
+	//accVel.x = 0.f;					// ignore acceleration along local normal direction
 
-	// if there is enough friction this will be removed during vel resolution
-	contactVel += accVel;
+	//// if there is enough friction this will be removed during vel resolution
+	//contactVel += accVel;
 
-	return contactVel;
+	return contactVelocity;
 }
 
 // DEPRECATED

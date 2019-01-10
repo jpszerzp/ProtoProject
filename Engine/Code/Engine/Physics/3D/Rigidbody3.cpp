@@ -33,11 +33,11 @@ void Rigidbody3::SetQuaternion(const Quaternion& orientation)
 	m_orientation.Normalize();
 }
 
-void Rigidbody3::SetQuaternion(const float r, const float x, const float y, const float z)
-{
-	SetQuaternion(Quaternion(r, x, y, z));
-	m_orientation.Normalize();
-}
+//void Rigidbody3::SetQuaternion(const float r, const float x, const float y, const float z)
+//{
+//	SetQuaternion(Quaternion(r, x, y, z));
+//	m_orientation.Normalize();
+//}
 
 void Rigidbody3::SetAwake(bool awake)
 {

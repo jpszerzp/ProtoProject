@@ -83,7 +83,9 @@ void ContactResolver::ResolveContactsCoherent(float deltaTime)
 	PrepareContactsCoherent(deltaTime);
 
 	// resolve contact positions
-	ResolvePositionsCoherent(deltaTime);
+	TODO("may add a pass thru on all contacts before the iterative algorithm");
+	//ResolvePositionsCoherent(deltaTime);
+	RF_ResolvePositionsCoherent(deltaTime);
 
 	// resolve velocity
 	ResolveVelocityCoherent(deltaTime);
@@ -124,7 +126,7 @@ void ContactResolver::ResolvePositionsCoherent(float)
 		Contact3& maxContact = m_collision->m_contacts[idx];
 		
 		// sleep update
-		maxContact.WakeUp();
+		//maxContact.WakeUp();
 
 		// resolve max-penetration contact
 		maxContact.ResolvePositionCoherent(linearChange, angularChange);
@@ -144,7 +146,7 @@ void ContactResolver::ResolvePositionsCoherent(float)
 					deltaPos = angularChange[0].Cross(thisContact.m_relativePosWorld[0]);
 					deltaPos += linearChange[0];
 
-					TODO("Maybe multiply rotation amount later? how is that different? Need another array at that time");
+					//TODO("Maybe multiply rotation amount later? how is that different? Need another array at that time");
 					thisContact.m_penetration -= DotProduct(deltaPos, thisContact.m_normal);
 				}
 				else if (ent1 == maxContact.m_e2)
@@ -268,6 +270,67 @@ void ContactResolver::ResolveVelocityCoherent(float deltaTime)
 		}
 
 		iter++;
+	}
+}
+
+void ContactResolver::RF_ResolvePositionsCoherent(float deltaTime)
+{
+	unsigned i,index;
+	Vector3 linearChange[2], angularChange[2];
+	float max;
+	Vector3 deltaPosition;
+	uint numContacts = (uint)m_collision->m_contacts.size();
+
+	uint currentIter = 0;
+	while (currentIter < COHERENT_POS_ITER)
+	{
+		max = COHERENT_POS_EPSILON;
+		index = numContacts;
+
+		for (i=0; i<numContacts; i++)
+		{
+			if (m_collision->m_contacts[i].m_penetration > max)
+			{
+				max = m_collision->m_contacts[i].m_penetration;
+				index = i;
+			}
+		}
+		if (index == numContacts) 
+			break;
+
+		//m_collision->m_contacts[i].ResolvePositionCoherent(linearChange, angularChange);
+		m_collision->m_contacts[i].RF_ResolvePositionCoherent(linearChange, angularChange);
+
+		// Again this action may have changed the penetration of other
+		// bodies, so we update contacts.
+		for (i = 0; i < numContacts; i++)
+		{
+			// b == 0, d == 0
+			if (m_collision->m_contacts[i].m_e1 == m_collision->m_contacts[index].m_e1)
+			{
+				deltaPosition = linearChange[0] + angularChange[0].Cross(m_collision->m_contacts[i].m_relativePosWorld[0]);
+				m_collision->m_contacts[i].m_penetration += DotProduct(deltaPosition, m_collision->m_contacts[i].m_normal) * -1.f;
+			}
+			// b == 0, d == 1
+			if (m_collision->m_contacts[i].m_e1 == m_collision->m_contacts[index].m_e2)
+			{
+				deltaPosition = linearChange[1] + angularChange[1].Cross(m_collision->m_contacts[i].m_relativePosWorld[0]);
+				m_collision->m_contacts[i].m_penetration += DotProduct(deltaPosition, m_collision->m_contacts[i].m_normal) * -1.f;
+			}
+			// b == 1, d == 0
+			if (m_collision->m_contacts[i].m_e2 == m_collision->m_contacts[index].m_e1)
+			{
+				deltaPosition = linearChange[0] + angularChange[0].Cross(m_collision->m_contacts[i].m_relativePosWorld[1]);
+				m_collision->m_contacts[i].m_penetration += DotProduct(deltaPosition, m_collision->m_contacts[i].m_normal) * 1.f;
+			}
+			// b == 1, d == 1
+			if (m_collision->m_contacts[i].m_e2 == m_collision->m_contacts[index].m_e2)
+			{
+				deltaPosition = linearChange[1] + angularChange[1].Cross(m_collision->m_contacts[i].m_relativePosWorld[1]);
+				m_collision->m_contacts[i].m_penetration += DotProduct(deltaPosition, m_collision->m_contacts[i].m_normal) * 1.f;
+			}
+		}
+		currentIter++;
 	}
 }
 
