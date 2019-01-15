@@ -13,10 +13,9 @@
 #include "Engine/Core/Console/Command.hpp"
 #include "Engine/Core/Console/DevConsole.hpp"
 #include "Engine/Core/Profiler/ProfileSystem.hpp"
+#include "Engine/Core/ErrorWarningAssert.hpp"
 #include "Engine/Net/Net.hpp"
 #include "Engine/Net/NetAddress.hpp"
-
-#include "PxPhysicsAPI.h"
 
 TheApp::TheApp()
 {
@@ -29,6 +28,7 @@ TheApp::TheApp()
 	ProfilerStartup();
 	ConsoleStartup();
 	BlackboardStartup();
+	//PhysxStartup();
 }
 
 
@@ -288,4 +288,27 @@ void TheApp::BlackboardStartup()
 	gameConfigDoc.LoadFile("Data/GameConfig.xml");
 	g_gameConfigBlackboard = new Blackboard();
 	g_gameConfigBlackboard->PopulateFromXmlElementAttributes(*(gameConfigDoc.FirstChildElement()));
+}
+
+
+void TheApp::PhysxStartup()
+{
+	//// create physx foundation
+	//m_foundation = PxCreateFoundation(PX_PHYSICS_VERSION, m_DefaultAllocatorCallback, m_DefaultErrorCallback);
+	//if (!m_foundation)
+	//	ASSERT_OR_DIE(false, "PxCreateFoundation failed!");
+
+	//// create top-level physx object
+	//bool recordMemoryAllocations = true;
+
+	/*
+	// optional pvd instance
+	m_pvd = PxCreatePvd(*m_foundation);
+	PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 10);
+	m_pvd->connect(*transport, PxPvdInstrumentationFlag::eALL);
+	*/
+
+	//m_physics = PxCreatePhysics(PX_PHYSICS_VERSION, *m_foundation, PxTolerancesScale(), recordMemoryAllocations, m_pvd);
+	//if (!m_physics)
+	//	ASSERT_OR_DIE(false, "PxCreatePhysics failed!");
 }

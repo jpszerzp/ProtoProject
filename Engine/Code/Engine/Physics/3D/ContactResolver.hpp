@@ -48,6 +48,7 @@ public:
 	void ResolveVelocityCoherent(float deltaTime);
 
 	void RF_ResolvePositionsCoherent(float deltaTime);
+	void RF_ResolveVelocityCoherent(float deltaTime);
 
 	void ClearRecords();
 

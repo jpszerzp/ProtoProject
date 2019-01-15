@@ -29,6 +29,7 @@ public:
 	void operator*=(const float scalar);
 
 	float GetNorm() const;
+	float GetNormSqr() const;
 	void Normalize();
 	void ConvertToUnitNormQuaternion();
 	void RotateByVector(const Vector3& vec);

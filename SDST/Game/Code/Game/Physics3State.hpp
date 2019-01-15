@@ -67,7 +67,9 @@ public:
 	// pipeline of update
 	void UpdateInput(float deltaTime);
 	void UpdateGameobjects(float deltaTime);
+	void UpdateDebug(float deltaTime);
 	void UpdateDebugDraw(float deltaTime);
+	void UpdateDebugCore(float deltaTime);
 	void UpdateHulls(float deltaTime);
 	void UpdateWrapArounds();
 	void UpdateFireworksStatus();
@@ -155,4 +157,6 @@ public:
 	// bp
 	Mesh* m_bp_title = nullptr;
 	Mesh* m_bp_stat = nullptr;
+
+	Sphere* sph_holder;
 };

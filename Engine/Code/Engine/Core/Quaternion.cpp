@@ -126,6 +126,14 @@ float Quaternion::GetNorm() const
 }
 
 
+float Quaternion::GetNormSqr() const
+{
+	float realSquare = m_real * m_real;
+	float imaginarySquare = DotProduct(m_imaginary, m_imaginary);
+
+	return realSquare + imaginarySquare;
+}
+
 void Quaternion::Normalize()
 {
 	float norm = GetNorm();

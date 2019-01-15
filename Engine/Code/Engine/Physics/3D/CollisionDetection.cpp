@@ -293,8 +293,10 @@ Vector3 Contact3::RF_ComputeFrictionlessImpulse()
 
 void Contact3::ApplyImpulse()
 {
-	Vector3 pos_linearChange[2]; Vector3 pos_angularChange[2];
-	Vector3 vel_linearChange[2]; Vector3 vel_angularChange[2];
+	Vector3 pos_linearChange[2]; 
+	Vector3 pos_angularChange[2];
+	Vector3 vel_linearChange[2]; 
+	Vector3 vel_angularChange[2];
 	ResolveVelocityCoherent(vel_linearChange, vel_angularChange);
 	ResolvePositionCoherent(pos_linearChange, pos_angularChange);
 }
@@ -310,7 +312,6 @@ void Contact3::ResolveVelocityCoherent(Vector3 linearChange[2], Vector3 angularC
 	{
 		impulseWorld = ComputeWorldImpulseFriction();
 		TODO("review the system to see why i have to multiply here to make impulse work for plane collisions particularly");
-		//impulseWorld *= 2.f;			
 	}
 
 	if (rigid1 != nullptr && !rigid1->IsEntityStatic() && !rigid1->IsEntityKinematic())
@@ -428,6 +429,34 @@ void Contact3::ResolvePositionCoherent(Vector3 linearChange[2], Vector3 angularC
 	}
 }
 
+void Contact3::RF_ResolveVelocityCoherent(Vector3 linearChange[2], Vector3 angularChange[2])
+{
+	Vector3 impulseContact;
+
+	impulseContact = RF_ComputeFrictionlessImpulse();
+
+	Vector3 impulse = m_toWorld * impulseContact * 1.f;
+
+	Vector3 impulsiveTorque = m_relativePosWorld[0].Cross(impulse);
+	angularChange[0] = m_e1->GetIITWorld() * impulsiveTorque;
+	linearChange[0].ToDefault();
+	linearChange[0] += impulse * m_e1->m_massData.m_invMass;
+
+	m_e1->m_linearVelocity += linearChange[0];
+	m_e1->SetAngularVelocity(m_e1->GetAngularVelocity() + angularChange[0]);
+
+	if (m_e2 != nullptr)
+	{
+		impulsiveTorque = impulse.Cross(m_relativePosWorld[1]);
+		angularChange[1] = m_e2->GetIITWorld() * impulsiveTorque;
+		linearChange[1].ToDefault();
+		linearChange[1] += impulse * -m_e2->m_massData.m_invMass;
+
+		m_e2->m_linearVelocity += linearChange[1];
+		m_e2->SetAngularVelocity(m_e2->GetAngularVelocity() + angularChange[1]);
+	}
+}
+
 void Contact3::RF_ResolvePositionCoherent(Vector3 linearChange[2], Vector3 angularChange[2])
 {
 	const float angularLimit = 0.2f;
@@ -508,6 +537,8 @@ void Contact3::RF_ResolvePositionCoherent(Vector3 linearChange[2], Vector3 angul
 	m_e1->SetQuaternion(q);
 
 	// awake system
+	if (!m_e1->IsAwake())
+		m_e1->CacheData();
 
 	// i == 1
 	sign = -1.f;
@@ -555,6 +586,8 @@ void Contact3::RF_ResolvePositionCoherent(Vector3 linearChange[2], Vector3 angul
 	m_e2->SetQuaternion(q);
 
 	// wake system
+	if (!m_e2->IsAwake())
+		m_e2->CacheData();
 }
 
 void Contact3::PrepareInternal(float deltaTime)
@@ -581,7 +614,7 @@ void Contact3::PrepareInternal(float deltaTime)
 		m_closingVel -= ComputeContactVelocity(1, m_e2, deltaTime);
 
 	// desired change in vel as resolving coherent contacts
-	//ComputeDesiredVelDeltaCoherent();
+	ComputeDesiredVelDeltaCoherent(deltaTime);
 	//ComputeDesiredVelDeltaResting(deltaTime);
 }
 
@@ -610,21 +643,38 @@ Vector3 Contact3::ComputeContactVelocity(int idx, Entity3* ent, float deltaTime)
 	Vector3 contactVelocity = toContact * velocity;	// to contact coord
 
 	// TODO: restore when validating friction pipeline
-	//Vector3 accVel = rigid->m_lastFrameLinearAcc * deltaTime;
-	//accVel = toContact * accVel;
-	//accVel.x = 0.f;					// ignore acceleration along local normal direction
+	Vector3 accVelocity = ent->GetLastFrameLinearAcc() * deltaTime;
+	accVelocity = toContact * accVelocity;
+	accVelocity.x = 0.f;					// ignore acceleration along local normal direction
 
-	//// if there is enough friction this will be removed during vel resolution
-	//contactVel += accVel;
+	// if there is enough friction this will be removed during vel resolution
+	contactVelocity += accVelocity;
 
 	return contactVelocity;
 }
 
 // DEPRECATED
-void Contact3::ComputeDesiredVelDeltaCoherent()
+void Contact3::ComputeDesiredVelDeltaCoherent(float deltaTime)
 {
-	// closing vel should be in contact coord
-	m_desiredVelDelta = -m_closingVel.x * (1 + m_restitution);
+	const static float velocityLimit = .25f;
+
+	// Calculate the acceleration induced velocity accumulated this frame
+	float velocityFromAcc = 0;
+
+	if (m_e1->IsAwake())
+		velocityFromAcc += DotProduct(m_e1->GetLastFrameLinearAcc() * deltaTime, m_normal);
+
+	if (m_e2 && m_e2->IsAwake())
+		velocityFromAcc -= DotProduct(m_e2->GetLastFrameLinearAcc() * deltaTime, m_normal);
+
+	// If the velocity is very slow, limit the restitution
+	float thisRestitution = m_restitution;
+	if (abs(m_closingVel.x) < velocityLimit)
+		thisRestitution = 0.f;
+
+	// Combine the bounce velocity with the removed
+	// acceleration velocity.
+	m_desiredVelDelta = -m_closingVel.x - thisRestitution * (m_closingVel.x - velocityFromAcc);
 }
 
 // built on ComputeDesiredVelDeltaCoherent()
@@ -659,11 +709,13 @@ void Contact3::WakeUp()
 		return;
 
 	// only rigid body binds up with sleep system
-	Rigidbody3* rigid1 = dynamic_cast<Rigidbody3*>(m_e1);
-	Rigidbody3* rigid2 = dynamic_cast<Rigidbody3*>(m_e2);
+	//Rigidbody3* rigid1 = dynamic_cast<Rigidbody3*>(m_e1);
+	//Rigidbody3* rigid2 = dynamic_cast<Rigidbody3*>(m_e2);
 
-	bool firstAwake = rigid1->IsAwake();
-	bool secondAwake = rigid2->IsAwake();
+	//bool firstAwake = rigid1->IsAwake();
+	//bool secondAwake = rigid2->IsAwake();
+	bool firstAwake = m_e1->IsAwake();
+	bool secondAwake = m_e2->IsAwake();
 
 	bool processing = firstAwake ^ secondAwake;
 
@@ -671,9 +723,9 @@ void Contact3::WakeUp()
 	if (processing)
 	{
 		if (firstAwake)
-			rigid2->SetAwake(true);
+			m_e2->SetAwake(true);
 		else
-			rigid1->SetAwake(true);
+			m_e1->SetAwake(true);
 	}
 }
 
@@ -981,7 +1033,7 @@ bool CollisionDetector::Sphere3VsSphere3Core(const Sphere3& s1, const Sphere3& s
 	TODO("Hook friction with physics material with both entities");
 	// for the contact type we do not care, so it is by default NO_CARE
 	// also in this case we do not care which feature the contact comes from, so leave it FEATURE_NO_CARE
-	Contact3 theContact = Contact3(s1.GetEntity(), s2.GetEntity(), normal, point, penetration, .8f, 0.05f);	
+	Contact3 theContact = Contact3(s1.GetEntity(), s2.GetEntity(), normal, point, penetration, 1.f);	
 	contact = theContact;
 
 	return true;

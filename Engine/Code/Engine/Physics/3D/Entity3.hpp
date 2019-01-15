@@ -135,8 +135,10 @@ public:
 	void SetVerletScheme(eVerletScheme scheme) { m_verlet_scheme = scheme; }
 	void SetFrozen(bool value) { m_frozen = value; }
 	void SetTransform(const Transform& t) { m_entityTransform = t; }
+	virtual void SetAwake(bool awake){}
 	virtual void SetEntityForPrimitive(){}
 	virtual void SetQuaternion(const Quaternion& orientation) { ASSERT_OR_DIE(false, "This virtual function should NOT be called from Entity."); }
+	virtual void SetAngularVelocity(const Vector3& angular) { ASSERT_OR_DIE(false, "This virtual function should NOT be called from Entity."); }
 
 	bool HasInfiniteMass() const;
 	bool IsConst() const { return (m_moveStatus == MOVE_STATIC); }
@@ -160,6 +162,8 @@ public:
 	virtual Vector3 GetAngularVelocity() const { ASSERT_OR_DIE(false, "This virtual function should NOT be called."); return Vector3::ZERO; }
 	virtual Matrix33 GetIITWorld() const { ASSERT_OR_DIE(false, "This virtual function should NOT be called."); return Matrix33(); }
 	virtual Quaternion GetQuaternion() const { ASSERT_OR_DIE(false, "This virtual function should NOT be called."); return Quaternion(); }
+	virtual bool IsAwake() const { ASSERT_OR_DIE(false, "This virtual function should NOT be called."); return false; }
+	virtual Vector3 GetLastFrameLinearAcc() const { ASSERT_OR_DIE(false, "This virtual function should NOT be called."); return Vector3::ZERO; }
 
 	virtual void UpdatePrimitives(){}	// do not know which primitive this entity has, hence virtual
 	virtual void UpdateTransforms();		// all transforms
@@ -177,4 +181,5 @@ public:
 	void VelocityIntegrate(float deltaTime);
 	void ClearForce() { SetNetForce(Vector3::ZERO); }
 	virtual void AddForce(Vector3 force);	// all forces need to be added/updated before integration step
+	virtual void CacheData(){ ASSERT_OR_DIE(false, "This virtual function should NOT be called."); }
 };

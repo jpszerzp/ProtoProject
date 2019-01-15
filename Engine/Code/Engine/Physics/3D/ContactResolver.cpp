@@ -88,7 +88,8 @@ void ContactResolver::ResolveContactsCoherent(float deltaTime)
 	RF_ResolvePositionsCoherent(deltaTime);
 
 	// resolve velocity
-	ResolveVelocityCoherent(deltaTime);
+	//ResolveVelocityCoherent(deltaTime);
+	RF_ResolveVelocityCoherent(deltaTime);
 }
 
 void ContactResolver::PrepareContactsCoherent(float deltaTime)
@@ -298,8 +299,10 @@ void ContactResolver::RF_ResolvePositionsCoherent(float deltaTime)
 		if (index == numContacts) 
 			break;
 
+		m_collision->m_contacts[index].WakeUp();
+
 		//m_collision->m_contacts[i].ResolvePositionCoherent(linearChange, angularChange);
-		m_collision->m_contacts[i].RF_ResolvePositionCoherent(linearChange, angularChange);
+		m_collision->m_contacts[index].RF_ResolvePositionCoherent(linearChange, angularChange);
 
 		// Again this action may have changed the penetration of other
 		// bodies, so we update contacts.
@@ -330,7 +333,71 @@ void ContactResolver::RF_ResolvePositionsCoherent(float deltaTime)
 				m_collision->m_contacts[i].m_penetration += DotProduct(deltaPosition, m_collision->m_contacts[i].m_normal) * 1.f;
 			}
 		}
+
 		currentIter++;
+	}
+}
+
+void ContactResolver::RF_ResolveVelocityCoherent(float deltaTime)
+{
+	Vector3 velocityChange[2], rotationChange[2];
+	Vector3 deltaVel;
+	uint numContacts = (uint)m_collision->m_contacts.size();
+
+	uint iter = 0;
+	while(iter < COHERENT_VEL_ITER)
+	{
+		float max = COHERENT_VEL_EPSILON;
+		uint idx = numContacts;
+
+		for (uint i = 0; i < numContacts; ++i)
+		{
+			if (m_collision->m_contacts[i].m_desiredVelDelta > max)
+			{
+				max = m_collision->m_contacts[i].m_desiredVelDelta;
+				idx = i;
+			}
+		}
+		if (idx == numContacts)
+			break;
+
+		m_collision->m_contacts[idx].WakeUp();
+
+		m_collision->m_contacts[idx].RF_ResolveVelocityCoherent(velocityChange, rotationChange);
+
+		for (uint i = 0; i < numContacts; ++i)
+		{
+			// b == 0, d == 0
+			if (m_collision->m_contacts[i].m_e1 == m_collision->m_contacts[idx].m_e1)
+			{
+				deltaVel = velocityChange[0] + rotationChange[0].Cross(m_collision->m_contacts[i].m_relativePosWorld[0]);
+				m_collision->m_contacts[i].m_closingVel += m_collision->m_contacts[i].m_toWorld.MultiplyTranspose(deltaVel) * 1.f;
+				m_collision->m_contacts[i].ComputeDesiredVelDeltaCoherent(deltaTime);
+			}
+			// b == 0, d == 1
+			if (m_collision->m_contacts[i].m_e1 == m_collision->m_contacts[idx].m_e2)
+			{
+				deltaVel = velocityChange[1] + rotationChange[1].Cross(m_collision->m_contacts[i].m_relativePosWorld[0]);
+				m_collision->m_contacts[i].m_closingVel += m_collision->m_contacts[i].m_toWorld.MultiplyTranspose(deltaVel) * 1.f;
+				m_collision->m_contacts[i].ComputeDesiredVelDeltaCoherent(deltaTime);
+			}
+			// b == 1, d == 0
+			if (m_collision->m_contacts[i].m_e2 == m_collision->m_contacts[idx].m_e1)
+			{
+				deltaVel = velocityChange[0] + rotationChange[0].Cross(m_collision->m_contacts[i].m_relativePosWorld[1]);
+				m_collision->m_contacts[i].m_closingVel += m_collision->m_contacts[i].m_toWorld.MultiplyTranspose(deltaVel) * -1.f;
+				m_collision->m_contacts[i].ComputeDesiredVelDeltaCoherent(deltaTime);
+			}
+			// b == 1, d == 1
+			if (m_collision->m_contacts[i].m_e2 == m_collision->m_contacts[idx].m_e2)
+			{
+				deltaVel = velocityChange[1] + rotationChange[1].Cross(m_collision->m_contacts[i].m_relativePosWorld[1]);
+				m_collision->m_contacts[i].m_closingVel += m_collision->m_contacts[i].m_toWorld.MultiplyTranspose(deltaVel) * -1.f;
+				m_collision->m_contacts[i].ComputeDesiredVelDeltaCoherent(deltaTime);
+			}
+		}
+
+		iter++;
 	}
 }
 

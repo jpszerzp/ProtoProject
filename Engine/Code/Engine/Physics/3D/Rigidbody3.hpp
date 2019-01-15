@@ -30,14 +30,14 @@ public:
 	void InitializeRigid();
 
 	virtual void SetQuaternion(const Quaternion& orientation) override;
+	virtual void SetAwake(bool awake) override;
+	void SetAngularVelocity(const Vector3& angular) override { m_angularVelocity = angular; }
 	void SetQuaternionIdentity();
 	//void SetQuaternion(const float r, const float x, const float y, const float z);
-	void SetAwake(bool awake);
 	void SetCanSleep(bool value);
-	void SetAngularVelocity(const Vector3& angular) { m_angularVelocity = angular; }
 
 	// just before integration
-	void CacheData();
+	void CacheData() override;
 	void CacheTransform(Matrix44& transform, 
 		const Vector3& position, const Quaternion& orientation);
 	void CacheInverseInertiaTensorWorld(
@@ -64,6 +64,7 @@ public:
 	virtual Matrix33 GetIITWorld() const override { return m_inverseInertiaTensorWorld; }
 	virtual Vector3 GetAngularVelocity() const override { return m_angularVelocity; }
 	virtual Quaternion GetQuaternion() const override { return m_orientation; }
+	virtual bool IsAwake() const override { return m_awake; }
+	virtual Vector3 GetLastFrameLinearAcc() const override { return m_lastFrameLinearAcc; }
 	bool CanSleep() const { return m_canSleep; }
-	bool IsAwake() const { return m_awake; }
 };

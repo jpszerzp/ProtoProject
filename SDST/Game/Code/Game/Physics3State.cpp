@@ -126,13 +126,11 @@ Physics3State::Physics3State()
 		Vector3(25.f, 305.f, 5.f), Vector3(35.f, 305.f, 5.f),
 		Vector3(25.f, 315.f, -5.f), Vector3(35.f, 315.f, -5.f),
 		Vector3(25.f, 315.f, 5.f), Vector3(35.f, 315.f, 5.f));
-	Sphere* sph_11 = InitializePhysSphere(1.f, Vector3(30.f, 310.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::GREEN, MOVE_DYNAMIC, BODY_RIGID);
-	SphereRB3* sph_rb_11 = static_cast<SphereRB3*>(sph_11->m_physEntity);
-	sph_rb_11->SetAngularVelocity(Vector3(0.f, 0.f, 0.f));
+	sph_holder = InitializePhysSphere(1.f, Vector3(30.f, 310.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::GREEN, MOVE_DYNAMIC, BODY_RIGID);
+	SphereRB3* sph_rb_11 = static_cast<SphereRB3*>(sph_holder->m_physEntity);
 	sph_rb_11->SetAwake(true);
 	sph_rb_11->SetCanSleep(true);
-
-	m_wraparound_sphere_only->m_gos.push_back(sph_11);
+	m_wraparound_sphere_only->m_gos.push_back(sph_holder);
 	
 	m_wraparound_box_only = new WrapAround(Vector3(50.f, 300.f, -10.f), Vector3(70.f, 320.f, 10.f),
 		Vector3(55.f, 305.f, -5.f), Vector3(65.f, 305.f, -5.f),
@@ -462,7 +460,7 @@ void Physics3State::Update(float deltaTime)
 	UpdateForceRegistry(deltaTime);		// update force registry
 	UpdateGameobjects(deltaTime);		// update gameobjects
 	UpdateContacts(deltaTime);
-	UpdateDebugDraw(deltaTime);			// update debug draw
+	UpdateDebug(deltaTime);			
 	UpdateUI();
 }
 
@@ -1006,7 +1004,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_5))
 		WrapAroundTestSphere(m_wraparound_bvh, false, false);
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_6))
-		WrapAroundTestSphere(m_wraparound_sphere_only, false, false, true, Vector3(31.5f, 315.f, 0.f), Vector3::ZERO, Vector3::ONE);
+		WrapAroundTestSphere(m_wraparound_sphere_only, false, false, true, Vector3(31.f, 315.f, 0.5f), Vector3::ZERO, Vector3::ONE);
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_8))
 		WrapAroundTestBox(m_wraparound_box_only, false, false, true, Vector3(60.6f, 315.f, 0.f), Vector3(50.f, 50.f, 50.f), Vector3::ONE); // pos - (60.8f, 315.f, 0.f), rot - (-20.f, 0.f, -20.f) gives visual appealing result
 
@@ -1066,6 +1064,13 @@ void Physics3State::UpdateGameobjects(float deltaTime)
 	UpdateGameobjectsCore(deltaTime);		// update GO core
 }
 
+void Physics3State::UpdateDebug(float deltaTime)
+{
+	UpdateDebugCore(deltaTime);
+
+	UpdateDebugDraw(deltaTime);
+}
+
 void Physics3State::UpdateDebugDraw(float deltaTime)
 {
 	DebugRenderUpdate(deltaTime);
@@ -1112,6 +1117,13 @@ void Physics3State::UpdateDebugDraw(float deltaTime)
 			DebugRenderLine(.1f, start, end, 10.f, Rgba::MEGENTA, Rgba::MEGENTA, DEBUG_RENDER_USE_DEPTH);
 		}
 	}
+}
+
+void Physics3State::UpdateDebugCore(float deltaTime)
+{
+	const Vector3& euler = sph_holder->m_renderable->m_transform.GetLocalRotation();
+
+	DebuggerPrintf("sph holder euler: %f, %f, %f\n", euler.x, euler.y, euler.z);
 }
 
 void Physics3State::UpdateHulls(float)

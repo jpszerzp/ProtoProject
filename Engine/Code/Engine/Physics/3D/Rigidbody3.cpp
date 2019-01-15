@@ -258,11 +258,13 @@ void Rigidbody3::UpdateDynamicsCore(float usedTime)
 	{
 		// acc
 		m_lastFrameLinearAcc = m_linearAcceleration;
-		m_linearAcceleration = m_netforce * m_massData.m_invMass;
+		//m_linearAcceleration = m_netforce * m_massData.m_invMass;
+		m_lastFrameLinearAcc = m_netforce * m_massData.m_invMass;
 		Vector3 angularAcc = m_inverseInertiaTensorWorld * m_torqueAcc;
 
 		// vel
-		m_linearVelocity += m_linearAcceleration * usedTime;
+		//m_linearVelocity += m_linearAcceleration * usedTime;
+		m_linearVelocity += m_lastFrameLinearAcc * usedTime;
 		m_angularVelocity += angularAcc * usedTime;
 
 		// damp on vel
@@ -270,7 +272,8 @@ void Rigidbody3::UpdateDynamicsCore(float usedTime)
 		m_angularVelocity *= powf(m_angularDamp, usedTime);
 
 		// first-order Newton
-		if (m_linearAcceleration.GetLength() < ACC_LIMIT && angularAcc.GetLength() < ACC_LIMIT)
+		//if (m_linearAcceleration.GetLength() < ACC_LIMIT && angularAcc.GetLength() < ACC_LIMIT)
+		if (m_lastFrameLinearAcc.GetLength() < ACC_LIMIT && angularAcc.GetLength() < ACC_LIMIT)
 		{
 			m_center += m_linearVelocity * usedTime;							// pos
 			m_orientation.AddScaledVector(m_angularVelocity, usedTime);		// rot
@@ -279,13 +282,14 @@ void Rigidbody3::UpdateDynamicsCore(float usedTime)
 		// used when either linear or angular acc goes too large - in this case use second-order is safer yet costly
 		else
 		{
-			m_center += (m_linearVelocity * usedTime + m_linearAcceleration * usedTime * usedTime * .5f);
+			//m_center += (m_linearVelocity * usedTime + m_linearAcceleration * usedTime * usedTime * .5f);
+			m_center += (m_linearVelocity * usedTime + m_lastFrameLinearAcc * usedTime * usedTime * .5f);
 			m_orientation.AddScaledVector(m_angularVelocity, usedTime);
 			m_orientation.AddScaledVector(angularAcc, usedTime * usedTime * .5f);
 		}
-
-		CacheData();
 	}
+
+	CacheData();
 
 	ClearAccs();
 }

@@ -9,7 +9,7 @@
 #include "Engine/Core/ErrorWarningAssert.hpp"
 
 #define MAX_CONTACTS 2000
-#define COHERENT_THRESHOLD 0.005f
+#define COHERENT_THRESHOLD 0.01f
 
 enum eContactType
 {
@@ -74,13 +74,14 @@ public:
 	void ApplyImpulse();
 	void ResolveVelocityCoherent(Vector3 linearChange[2], Vector3 angularChange[2]);
 	void ResolvePositionCoherent(Vector3 linearChange[2], Vector3 angularChange[2]);
+	void RF_ResolveVelocityCoherent(Vector3 linearChange[2], Vector3 angularChange[2]);
 	void RF_ResolvePositionCoherent(Vector3 linearChange[2], Vector3 angularChange[2]);
 
 	// coherent
 	void PrepareInternal(float deltaTime);
 	void SwapEntities();
 	Vector3 ComputeContactVelocity(int idx, Entity3* ent, float deltaTime);
-	void ComputeDesiredVelDeltaCoherent();
+	void ComputeDesiredVelDeltaCoherent(float deltaTime);
 
 	// resting
 	void ComputeDesiredVelDeltaResting(float deltaTime);

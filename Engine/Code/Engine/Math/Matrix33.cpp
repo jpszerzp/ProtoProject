@@ -208,3 +208,9 @@ Matrix33 Matrix33::Transpose() const
 	Vector3 newK = Vector3(Iz, Jz, Kz);
 	return Matrix33(newI, newJ, newK);
 }
+
+Vector3 Matrix33::MultiplyTranspose(const Vector3& v) const
+{
+	Matrix33 t = this->Transpose();
+	return t * v;
+}
