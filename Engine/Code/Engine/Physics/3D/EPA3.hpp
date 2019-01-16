@@ -20,8 +20,6 @@
 
 struct sEPAEdgeRef
 {
-	//Vector3 one_end;
-	//Vector3 the_other_end;
 	std::vector<Vector3> ends;
 	int ref_count=0;
 

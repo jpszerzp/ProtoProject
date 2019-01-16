@@ -433,15 +433,19 @@ void Contact3::RF_ResolveVelocityCoherent(Vector3 linearChange[2], Vector3 angul
 {
 	Vector3 impulseContact;
 
+	// compute impulse in contact coordinate
 	impulseContact = RF_ComputeFrictionlessImpulse();
 
-	Vector3 impulse = m_toWorld * impulseContact * 1.f;
+	// convert to world coordinate
+	Vector3 impulse = m_toWorld * impulseContact;
 
+	// linear and angular change
 	Vector3 impulsiveTorque = m_relativePosWorld[0].Cross(impulse);
 	angularChange[0] = m_e1->GetIITWorld() * impulsiveTorque;
 	linearChange[0].ToDefault();
 	linearChange[0] += impulse * m_e1->m_massData.m_invMass;
 
+	// apply the change
 	m_e1->m_linearVelocity += linearChange[0];
 	m_e1->SetAngularVelocity(m_e1->GetAngularVelocity() + angularChange[0]);
 

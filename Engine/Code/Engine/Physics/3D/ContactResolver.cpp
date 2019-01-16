@@ -83,12 +83,9 @@ void ContactResolver::ResolveContactsCoherent(float deltaTime)
 	PrepareContactsCoherent(deltaTime);
 
 	// resolve contact positions
-	TODO("may add a pass thru on all contacts before the iterative algorithm");
-	//ResolvePositionsCoherent(deltaTime);
 	RF_ResolvePositionsCoherent(deltaTime);
 
 	// resolve velocity
-	//ResolveVelocityCoherent(deltaTime);
 	RF_ResolveVelocityCoherent(deltaTime);
 }
 
