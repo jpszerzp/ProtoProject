@@ -1100,6 +1100,11 @@ void ControlGroup::UpdateUI()
 			mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, pen_str, VERT_PCU);
 			m_view.push_back(mesh);
 			min -= Vector2(0.f, m_textHeight);
+
+			std::string pt_str = Stringf("point: %f, %f, %f", epa_support_pt_pos);
+			mesh = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_textHeight, .5f, pt_str, VERT_PCU);
+			m_view.push_back(mesh);
+			min -= Vector2(0.f, m_textHeight);
 		}
 	}
 		break;
