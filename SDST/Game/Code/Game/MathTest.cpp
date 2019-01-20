@@ -67,15 +67,37 @@ void MathTest::MatrixTest()
 	Vector3 euler = Vector3(50.f);
 	mat3 = Matrix33::FromEuler(euler);
 
-	Vector3 i_correct = Vector3(0.4131759f, 0.8696072f, 0.2703130f);
-	Vector3 j_correct = Vector3(-0.4924039f, -0.0363574f, 0.8696072f);
-	Vector3 k_correct = Vector3(0.7660444f, -0.4924039f, 0.4131759f);
+	Vector3 i_correct = Vector3(0.8627092, 0.4924039, -0.1152006);
+	Vector3 j_correct = Vector3(-0.1152006, 0.4131759, 0.9033352);
+	Vector3 k_correct = Vector3(0.4924039, -0.7660444, 0.4131759);
 	Matrix33 mat3_correct = Matrix33(i_correct, j_correct, k_correct);
 
 	bool pass = IsCloseEnoughMat3(mat3, mat3_correct);
 
 	ASSERT_OR_DIE(pass, "euler to rotation matrix3 fails");
-	DebuggerPrintf("euler to rotation matrix3 succeeds");
+	DebuggerPrintf("euler to rotation matrix3 succeeds\n");
+
+	// from matrix to quaternion
+	Quaternion q = Quaternion::FromMatrix(mat3);
+	Quaternion q_correct = Quaternion(0.8199178 , Vector3(0.5090082, 0.1852638, 0.1852638));
+
+	pass = IsCloseEnoughQuaternion(q, q_correct);
+
+	ASSERT_OR_DIE(pass, "matrix to quaternion fails");
+	DebuggerPrintf("matrix to quaternion succeeds\n");
+
+	euler = Vector3(34.f, 5.f, 23.f);
+	mat3 = Matrix33::FromEuler(euler);
+
+	i_correct = Vector3(0.9360451, 0.3239308, 0.1374353);
+	j_correct = Vector3(-0.3443817, 0.7631331, 0.5468355);
+	k_correct = Vector3(0.0722554, -0.5591929, 0.8258829);
+	mat3_correct = Matrix33(i_correct, j_correct, k_correct);
+
+	pass = IsCloseEnoughMat3(mat3, mat3_correct);
+
+	ASSERT_OR_DIE(pass, "euler to rotation matrix3 fails");
+	DebuggerPrintf("euler to rotation matrix3 succeeds\n");
 }
 
 bool IsCloseEnoughFloats(const float& f1, const float& f2)
@@ -91,4 +113,9 @@ bool IsCloseEnoughVec3(const Vector3& v1, const Vector3& v2)
 bool IsCloseEnoughMat3(const Matrix33& m1, const Matrix33& m2)
 {
 	return IsCloseEnoughVec3(m1.GetI(), m2.GetI()) && IsCloseEnoughVec3(m1.GetJ(), m2.GetJ()) && IsCloseEnoughVec3(m1.GetK(), m2.GetK());
+}
+
+bool IsCloseEnoughQuaternion(const Quaternion& q1, const Quaternion& q2)
+{
+	return IsCloseEnoughFloats(q1.m_real, q2.m_real) && IsCloseEnoughVec3(q1.m_imaginary, q2.m_imaginary);
 }

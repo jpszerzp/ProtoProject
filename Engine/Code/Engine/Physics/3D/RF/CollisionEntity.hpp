@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Engine/Physics/3D/RF/CollisionPrimitive.hpp"
 #include "Engine/Physics/MassData.hpp"
 #include "Engine/Core/Quaternion.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
@@ -61,6 +60,7 @@ public:
 	void Integrate(float deltaTime) override;
 	void ClearAcc() override;
 	CollisionRigidBody(const Vector3& center, const Quaternion& orientation);
+	CollisionRigidBody(const Vector3& center, const Vector3& euler);
 	~CollisionRigidBody(){}
 
 	void CacheData() override;

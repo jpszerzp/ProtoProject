@@ -140,6 +140,11 @@ float Matrix33::GetDeterminant() const
 	return det;
 }
 
+float Matrix33::GetTrace() const
+{
+	return Ix + Jy + Kz;
+}
+
 void Matrix33::SetRight(Vector3 right)
 {
 	Ix = right.x; Iy = right.y; Iz = right.z;

@@ -264,105 +264,55 @@ Matrix44 Quaternion::GetMatrixWithPosition(const Quaternion& q, const Vector3& p
 
 Quaternion Quaternion::FromMatrix(const Matrix33& rot)
 {
-	Quaternion res;
+	Quaternion q;
 
-	float m11 = rot.Ix;
-	float m12 = rot.Jx;
-	float m13 = rot.Kx;
-	float m21 = rot.Iy;
-	float m22 = rot.Jy;
-	float m23 = rot.Ky;
-	float m31 = rot.Iz;
-	float m32 = rot.Jz;
-	float m33 = rot.Kz;
+	float trace = rot.GetTrace();
 
-	//float w = 0.f;
-	//float x = 0.f;
-	//float y = 0.f;
-	//float z = 0.f;
-
-	float w_sqrf = m11 + m22 + m33;
-	float x_sqrf = m11 - m22 - m33;
-	float y_sqrf = m22 - m11 - m33;
-	float z_sqrf = m33 - m11 - m22;
-
-	int idx = 0;
-	float biggest = w_sqrf;
-	if (x_sqrf > biggest)
+	if (trace > 0.f)
 	{
-		biggest = x_sqrf;
-		idx = 1;
+		float s = .5f / sqrtf(trace + 1.f);
+		q.m_real = .25f / s;
+		q.m_imaginary.x = (rot.Jz - rot.Ky) * s;
+		q.m_imaginary.y = (rot.Kx - rot.Iz) * s;
+		q.m_imaginary.z = (rot.Iy - rot.Jx) * s;
 	}
-	if (y_sqrf > biggest)
+	else
 	{
-		biggest = y_sqrf;
-		idx = 2;
-	}
-	if (z_sqrf > biggest)
-	{
-		biggest = z_sqrf;
-		idx = 3;
-	}
-
-	float big_sqrt = sqrtf(biggest + 1.f) * .5f;
-	float mult = .25f / big_sqrt;
-
-	switch (idx)
-	{
-	case 0:
-	{
-		res.m_real = big_sqrt;
-		res.m_imaginary.x = (m23 - m32) * mult;
-		res.m_imaginary.y = (m31 - m13) * mult;
-		res.m_imaginary.z = (m12 - m21) * mult;
-	}
-		break;
-	case 1:
-	{
-		res.m_imaginary.x = big_sqrt;
-		res.m_real = (m23 - m32) * mult;
-		res.m_imaginary.y = (m12 + m21) * mult;
-		res.m_imaginary.z = (m31 + m13) * mult;
-	}
-		break;
-	case 2:
-	{
-		res.m_imaginary.y = big_sqrt;
-		res.m_real = (m31 - m13) * mult;
-		res.m_imaginary.x = (m12 + m21) * mult;
-		res.m_imaginary.z = (m23 + m32) * mult;
-	}
-		break;
-	case 3:
-	{
-		res.m_imaginary.z = big_sqrt;
-		res.m_real = (m12 - m21) * mult;
-		res.m_imaginary.x = (m31 + m13) * mult;
-		res.m_imaginary.y = (m23 + m32) * mult;
-	}
-		break;
-	default:
-		break;
+		if (rot.Ix > rot.Jy && rot.Ix > rot.Kz)
+		{
+			float s = 2.f * sqrtf(1.f + rot.Ix - rot.Jy - rot.Kz);
+			q.m_real = (rot.Jz - rot.Ky) / s;
+			q.m_imaginary.x = .25f * s;
+			q.m_imaginary.y = (rot.Jx + rot.Iy) / s;
+			q.m_imaginary.z = (rot.Kx + rot.Iz) / s;
+		}
+		else if (rot.Jy > rot.Kz)
+		{
+			float s = 2.f * sqrtf(1.f + rot.Jy - rot.Ix - rot.Kz);
+			q.m_real = (rot.Kx - rot.Iz) / s;
+			q.m_imaginary.x = (rot.Jx + rot.Iy) / s;
+			q.m_imaginary.y = .25f * s;
+			q.m_imaginary.z = (rot.Ky + rot.Jz) / s;
+		}
+		else
+		{
+			float s = 2.f * sqrtf(1.f + rot.Kz - rot.Ix - rot.Jy);
+			q.m_real = (rot.Iy - rot.Jx) / s;
+			q.m_imaginary.x = (rot.Kx + rot.Iz) / s;
+			q.m_imaginary.y = (rot.Ky + rot.Jz) / s;
+			q.m_imaginary.z = .25f * s;
+		}
 	}
 
-	return res;
+	return q;
 }
 
 Quaternion Quaternion::FromEuler(const Vector3& euler)
 {
-	double c1 = cos(euler.y/2);
-	double s1 = sin(euler.y/2);
-	double c2 = cos(euler.x/2);
-	double s2 = sin(euler.x/2);
-	double c3 = cos(euler.z/2);
-	double s3 = sin(euler.z/2);
-	double c1c2 = c1*c2;
-	double s1s2 = s1*s2;
-
 	Quaternion q;
-	q.m_real =c1c2*c3 - s1s2*s3;
-	q.m_imaginary.x =c1c2*s3 + s1s2*c3;
-	q.m_imaginary.y =s1*c2*c3 + c1*s2*s3;
-	q.m_imaginary.z =c1*s2*c3 - s1*c2*s3;
+
+	Matrix33 mat = Matrix33::FromEuler(euler);
+	q = Quaternion::FromMatrix(mat);
+
 	return q;
 }
