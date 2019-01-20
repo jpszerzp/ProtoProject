@@ -291,6 +291,64 @@ Vector3 Contact3::RF_ComputeFrictionlessImpulse()
 	return impulseContact;
 }
 
+Vector3 Contact3::RF_ComputeFrictionalImpulse()
+{
+	Vector3 impulse_contact;
+	float im = m_e1->GetInverseMass();
+
+	// use skewmatrix to commit cross product
+	Matrix33 impulse_to_torque;
+	impulse_to_torque.SetSkewSymmetric(m_relativePosWorld[0]);
+
+	Matrix33 del_vel_world = impulse_to_torque;
+	del_vel_world *= m_e1->GetInverseInertiaTensor();
+	del_vel_world *= impulse_to_torque;
+	del_vel_world *= -1;
+
+	if (m_e2 != nullptr)
+	{
+		impulse_to_torque.SetSkewSymmetric(m_relativePosWorld[1]);
+
+		Matrix33 del_vel_world_other = impulse_to_torque;
+		del_vel_world_other *= m_e2->GetInverseInertiaTensor();
+		del_vel_world_other *= impulse_to_torque;
+		del_vel_world_other *= -1;
+
+		del_vel_world += del_vel_world_other;
+
+		im += m_e2->GetInverseMass();
+	}
+
+	Matrix33 del_vel = m_toWorld.Transpose();
+	del_vel *= del_vel_world;
+	del_vel *= m_toWorld;
+
+	del_vel.Ix += im;
+	del_vel.Jy += im;
+	del_vel.Kz += im;
+
+	Matrix33 impulse_mat = del_vel.Invert();
+
+	Vector3 vel_cancel = Vector3(m_desiredVelDelta, -m_closingVel.y, -m_closingVel.z);
+
+	impulse_contact = impulse_mat * vel_cancel;
+
+	// static and dynamic friction
+	float planar_impulse =  sqrtf(impulse_contact.y * impulse_contact.y + impulse_contact.z * impulse_contact.z);
+	if (planar_impulse > impulse_contact.x * m_friction)
+	{
+		impulse_contact.y /= planar_impulse;
+		impulse_contact.z /= planar_impulse;
+
+		impulse_contact.x = del_vel.Ix + del_vel.Jx * m_friction * impulse_contact.y + del_vel.Kx * m_friction * impulse_contact.z;
+		impulse_contact.x = m_desiredVelDelta / impulse_contact.x;
+		impulse_contact.y *= m_friction * impulse_contact.x;
+		impulse_contact.z *= m_friction * impulse_contact.x;
+	}
+
+	return impulse_contact;
+}
+
 void Contact3::ApplyImpulse()
 {
 	Vector3 pos_linearChange[2]; 
@@ -433,8 +491,11 @@ void Contact3::RF_ResolveVelocityCoherent(Vector3 linearChange[2], Vector3 angul
 {
 	Vector3 impulseContact;
 
-	// compute impulse in contact coordinate
-	impulseContact = RF_ComputeFrictionlessImpulse();
+	if (!IsFrictional())
+		// compute impulse in contact coordinate
+		impulseContact = RF_ComputeFrictionlessImpulse();
+	else
+		impulseContact = RF_ComputeFrictionalImpulse();
 
 	// convert to world coordinate
 	Vector3 impulse = m_toWorld * impulseContact;
@@ -1037,7 +1098,7 @@ bool CollisionDetector::Sphere3VsSphere3Core(const Sphere3& s1, const Sphere3& s
 	TODO("Hook friction with physics material with both entities");
 	// for the contact type we do not care, so it is by default NO_CARE
 	// also in this case we do not care which feature the contact comes from, so leave it FEATURE_NO_CARE
-	Contact3 theContact = Contact3(s1.GetEntity(), s2.GetEntity(), normal, point, penetration, 1.f);	
+	Contact3 theContact = Contact3(s1.GetEntity(), s2.GetEntity(), normal, point, penetration, 1.f, .1f);	
 	contact = theContact;
 
 	return true;
@@ -2813,7 +2874,7 @@ bool CollisionDetector::OBB3VsOBB3Core(const OBB3& obb1, const OBB3& obb2, Conta
 		penetration = pen;
 
 		// the contact is obb2 vert against obb1 face
-		contact = Contact3(obb1.GetEntity(), obb2.GetEntity(), usedNormal, contactPoint, penetration, .8f, 0.01f);
+		contact = Contact3(obb1.GetEntity(), obb2.GetEntity(), usedNormal, contactPoint, penetration, .8f, .1f);
 		contact.m_type = POINT_FACE;
 		contact.m_f1 = obb1_face.m_feature;
 		contact.m_f2 = obb2_vert.m_feature;
@@ -2828,7 +2889,7 @@ bool CollisionDetector::OBB3VsOBB3Core(const OBB3& obb1, const OBB3& obb2, Conta
 		contactPoint = vert1 + normal * pen;
 		penetration = pen;
 
-		contact = Contact3(obb1.GetEntity(), obb2.GetEntity(), usedNormal, contactPoint, penetration, .8f, 0.01f);
+		contact = Contact3(obb1.GetEntity(), obb2.GetEntity(), usedNormal, contactPoint, penetration, .8f, .1f);
 		contact.m_type = POINT_FACE;
 		contact.m_f1 = obb1_vert.m_feature;
 		contact.m_f2 = obb2_face.m_feature;
@@ -2843,7 +2904,7 @@ bool CollisionDetector::OBB3VsOBB3Core(const OBB3& obb1, const OBB3& obb2, Conta
 		contactPoint = close_pt2;
 		penetration = pen;
 
-		contact = Contact3(obb1.GetEntity(), obb2.GetEntity(), usedNormal, contactPoint, penetration, .8f, 0.01f);
+		contact = Contact3(obb1.GetEntity(), obb2.GetEntity(), usedNormal, contactPoint, penetration, .8f, .1f);
 		contact.m_type = EDGE_EDGE;
 		contact.m_f1 = obb1_edge.m_feature;
 		contact.m_f2 = obb2_edge.m_feature;

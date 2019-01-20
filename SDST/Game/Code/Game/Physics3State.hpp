@@ -158,5 +158,7 @@ public:
 	Mesh* m_bp_title = nullptr;
 	Mesh* m_bp_stat = nullptr;
 
+	Mesh* m_time_ui;
+
 	Sphere* sph_holder;
 };

@@ -55,6 +55,7 @@ public:
 	void SetFPS(float fps) { m_fps = fps; }
 	void SetDeveloperMode (bool value) { m_developerMode = value; }
 	void SetStateMachine(StateMachine* states) {m_states = states;}
+	void SetDeltaTime(const float& delta) { m_deltaTime = delta; }
 
 	// getters
 	float			GetFPS() const { return m_fps; }

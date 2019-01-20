@@ -37,7 +37,7 @@ public:
 	Vector3 m_point;
 
 	float m_restitution;
-	float m_friction;
+	float m_friction = 0.f;
 
 	// transformation convenience properties
 	Matrix33 m_toWorld;		// matrix transform basis from contact coord to world coord, with local basis of contact coord as components
@@ -67,6 +67,9 @@ public:
 
 	// iit short for inverse inertia tensor
 	Vector3 RF_ComputeFrictionlessImpulse();
+	Vector3 RF_ComputeFrictionalImpulse();
+
+	bool IsFrictional() const { return m_friction != 0.f; }
 
 	// pos change
 	void SolveNonlinearProjection( float angularInertia[2], float linearInertia[2], float angularMove[2], float linearMove[2]);

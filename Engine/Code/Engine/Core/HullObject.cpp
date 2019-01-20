@@ -36,7 +36,7 @@ void HullObject::Update(float)
 }
 
 HullObject::HullObject(const Vector3& pos, const Vector3& ext, const Vector3& rot, const Vector3& scale, const Rgba& tint,
-	std::string matName, eMoveStatus moveStat, eBodyIdentity bid, int sampleCount, std::string fileName /*= ""*/, 
+	std::string matName, eMoveStatus, eBodyIdentity, int sampleCount, std::string fileName /*= ""*/, 
 	bool multipass /*= false*/, eDepthCompare compare /*= COMPARE_LESS*/, eCullMode cull /*= CULLMODE_BACK*/, eWindOrder wind /*= WIND_COUNTER_CLOCKWISE*/)
 {
 	Renderer* r = Renderer::GetInstance();

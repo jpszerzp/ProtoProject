@@ -135,10 +135,10 @@ public:
 	void SetVerletScheme(eVerletScheme scheme) { m_verlet_scheme = scheme; }
 	void SetFrozen(bool value) { m_frozen = value; }
 	void SetTransform(const Transform& t) { m_entityTransform = t; }
-	virtual void SetAwake(bool awake){}
+	virtual void SetAwake(bool){}
 	virtual void SetEntityForPrimitive(){}
-	virtual void SetQuaternion(const Quaternion& orientation) { ASSERT_OR_DIE(false, "This virtual function should NOT be called from Entity."); }
-	virtual void SetAngularVelocity(const Vector3& angular) { ASSERT_OR_DIE(false, "This virtual function should NOT be called from Entity."); }
+	virtual void SetQuaternion(const Quaternion&) { ASSERT_OR_DIE(false, "This virtual function should NOT be called from Entity."); }
+	virtual void SetAngularVelocity(const Vector3&) { ASSERT_OR_DIE(false, "This virtual function should NOT be called from Entity."); }
 
 	bool HasInfiniteMass() const;
 	bool IsConst() const { return (m_moveStatus == MOVE_STATIC); }
@@ -159,6 +159,8 @@ public:
 	bool IsFrozen() const { return m_frozen; }
 	eBodyIdentity GetEntityBodyID() const { return m_bodyID; }
 	BoundingSphere GetBoundingSphere() const { return m_boundSphere; }
+	float GetInverseMass() const { return m_massData.m_invMass; }
+	Matrix33 GetInverseInertiaTensor() const { return m_massData.m_invTensor; }
 	virtual Vector3 GetAngularVelocity() const { ASSERT_OR_DIE(false, "This virtual function should NOT be called."); return Vector3::ZERO; }
 	virtual Matrix33 GetIITWorld() const { ASSERT_OR_DIE(false, "This virtual function should NOT be called."); return Matrix33(); }
 	virtual Quaternion GetQuaternion() const { ASSERT_OR_DIE(false, "This virtual function should NOT be called."); return Quaternion(); }

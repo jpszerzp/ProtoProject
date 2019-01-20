@@ -1,5 +1,7 @@
 #include "Engine/Core/ErrorWarningAssert.hpp"
 #include "Engine/Core/Transform.hpp"
+#include "Engine/Core/Quaternion.hpp"
+#include "Engine/Core/Util/StringUtils.hpp"
 #include "Game/MathTest.hpp"
 
 void MathTest::RunMathTest()
@@ -22,9 +24,20 @@ void MathTest::QuaternionTest()
 	Vector3 rotateAxis = Vector3(1.f, 0.f, 0.f);
 	Vector3 rotationRes = rotatedVec3.RotateAboutAxisWithAngle(90.f, rotateAxis);
 	Vector3 rotationRes_true = Vector3(0.f, 0.f, 1.f);
-	bool pass_rotation = rotationRes == rotationRes_true;
-	ASSERT_OR_DIE(pass_rotation, "rotation: quaternion rotation of vector based on axis is wrong!");
+	bool pass = rotationRes == rotationRes_true;
+	ASSERT_OR_DIE(pass, "rotation: quaternion rotation of vector based on axis is wrong!");
 	DebuggerPrintf("rotation: quaternion rotation of vector based on axis is correct\n");
+
+	//// from euler to quaternion
+	//Vector3 euler = Vector3(50.f);
+	//Quaternion q = Quaternion::FromEuler(euler);
+	//Quaternion q_correct = Quaternion(.669f, .509f, .185f, .509f);
+	//pass = q == q_correct;
+	//std::string err_msg = Stringf("q converted is: %f, %f, %f, %f; correct q is %f, %f, %f, %f",
+	//	q.m_real, q.m_imaginary.x, q.m_imaginary.y, q.m_imaginary.z,
+	//	q_correct.m_real, q_correct.m_imaginary.x, q_correct.m_imaginary.y, q_correct.m_imaginary.z);
+	//ASSERT_RECOVERABLE(pass, err_msg);
+	//DebuggerPrintf("quaternion from euler passed\n");
 }
 
 void MathTest::MatrixTest()
@@ -49,9 +62,33 @@ void MathTest::MatrixTest()
 	ASSERT_OR_DIE(match_k, "inverse 33 k does not match");
 
 	DebuggerPrintf("inverse matrix matches\n");
+
+	// from euler to matrix
+	Vector3 euler = Vector3(50.f);
+	mat3 = Matrix33::FromEuler(euler);
+
+	Vector3 i_correct = Vector3(0.4131759f, 0.8696072f, 0.2703130f);
+	Vector3 j_correct = Vector3(-0.4924039f, -0.0363574f, 0.8696072f);
+	Vector3 k_correct = Vector3(0.7660444f, -0.4924039f, 0.4131759f);
+	Matrix33 mat3_correct = Matrix33(i_correct, j_correct, k_correct);
+
+	bool pass = IsCloseEnoughMat3(mat3, mat3_correct);
+
+	ASSERT_OR_DIE(pass, "euler to rotation matrix3 fails");
+	DebuggerPrintf("euler to rotation matrix3 succeeds");
 }
 
 bool IsCloseEnoughFloats(const float& f1, const float& f2)
 {
 	return (abs(f1 - f2) < 0.01f);
+}
+
+bool IsCloseEnoughVec3(const Vector3& v1, const Vector3& v2)
+{
+	return IsCloseEnoughFloats(v1.x, v2.x) && IsCloseEnoughFloats(v1.y, v2.y) && IsCloseEnoughFloats(v1.z, v2.z);
+}
+
+bool IsCloseEnoughMat3(const Matrix33& m1, const Matrix33& m2)
+{
+	return IsCloseEnoughVec3(m1.GetI(), m2.GetI()) && IsCloseEnoughVec3(m1.GetJ(), m2.GetJ()) && IsCloseEnoughVec3(m1.GetK(), m2.GetK());
 }

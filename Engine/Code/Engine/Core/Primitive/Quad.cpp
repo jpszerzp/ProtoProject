@@ -112,7 +112,7 @@ Quad::~Quad()
 
 void Quad::Update(float deltaTime)
 {
-	if (m_physDriven)
+	if (m_physEntity)
 	{
 		if (m_physEntity->GetEntityMoveStatus() != MOVE_STATIC)
 		{

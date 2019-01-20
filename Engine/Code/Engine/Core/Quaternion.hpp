@@ -27,6 +27,7 @@ public:
 	void operator-=(const Quaternion& rhs);
 	void operator*=(const Quaternion& rhs);
 	void operator*=(const float scalar);
+	bool operator==(const Quaternion& rhs);
 
 	float GetNorm() const;
 	float GetNormSqr() const;

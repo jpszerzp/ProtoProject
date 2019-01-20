@@ -44,6 +44,53 @@ Sphere::Sphere(const float& mass, const Vector3& pos, const Vector3& rot, const 
 	m_physEntity->SetEntityForPrimitive();
 }
 
+
+Sphere::Sphere(const float& mass, const Vector3& pos, const Vector3& rot, const Vector3& scale, const Rgba& tint)
+{
+	Renderer* renderer = Renderer::GetInstance();
+
+	Material* material = renderer->CreateOrGetMaterial("default");
+
+	Mesh* mesh = renderer->CreateOrGetMesh("sphere_pcu");
+
+	Transform transform = Transform(pos, rot, scale);
+
+	Vector4 tintVec4;
+	tint.GetAsFloats(tintVec4.x, tintVec4.y, tintVec4.z, tintVec4.w);
+
+	m_renderable = new Renderable(material, mesh, transform, tintVec4);
+
+	m_desiredCompare = COMPARE_LESS;
+	m_desiredCull = CULLMODE_BACK;
+	m_desiredOrder = WIND_COUNTER_CLOCKWISE;
+
+	// orientation
+	Quaternion orientation = Quaternion::FromEuler(rot);
+
+	m_ent = new CollisionRigidBody(pos, orientation);
+	
+	m_ent->SetMass(mass);
+	m_ent->SetInvMass(1.f / mass);
+
+	float factor = .4f * mass * scale.x * scale.x;
+	Vector3 tensor_i = Vector3(factor, 0.f, 0.f);
+	Vector3 tensor_j = Vector3(0.f, factor, 0.f);
+	Vector3 tensor_k = Vector3(0.f, 0.f, factor);
+	Matrix33 tensor = Matrix33(tensor_i, tensor_j, tensor_k);
+
+	m_ent->SetTensor(tensor);
+	m_ent->SetInvTensor(tensor.Invert());
+
+	// set model transform mat for ent
+	m_ent->CacheData();
+
+	// make sure the transform of ent (in mat4 form) means same thing as renderable transform above
+	const Matrix44& verified_transform_mat = m_ent->GetTransformMat4();
+	Vector3 verified_euler = Matrix44::DecomposeMatrixIntoEuler(verified_transform_mat);
+	ASSERT_OR_DIE(verified_euler == rot, "euler of game object and rigid body do not match");
+}
+
+
 Sphere::~Sphere()
 {
 	delete m_renderable;
@@ -74,16 +121,21 @@ float Sphere::GetRadius() const
 
 void Sphere::Update(float deltaTime)
 {
-	if (m_physDriven)
-	{
-		if (m_physEntity->GetEntityMoveStatus() != MOVE_STATIC)
-		{
-			m_physEntity->Integrate(deltaTime);
-			m_physEntity->UpdateTransforms();
-			m_physEntity->UpdatePrimitives();
+	//if (m_physEntity)
+	//{
+	//	if (m_physEntity->GetEntityMoveStatus() != MOVE_STATIC)
+	//	{
+	//		m_physEntity->Integrate(deltaTime);
+	//		m_physEntity->UpdateTransforms();
+	//		m_physEntity->UpdatePrimitives();
 
-			m_renderable->m_transform = m_physEntity->GetEntityTransform();
-		}
+	//		m_renderable->m_transform = m_physEntity->GetEntityTransform();
+	//	}
+	//}
+
+	if (m_ent)
+	{
+		m_ent->Integrate(deltaTime);
 	}
 
 	UpdateBasis();

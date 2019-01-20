@@ -271,7 +271,7 @@ void ContactResolver::ResolveVelocityCoherent(float deltaTime)
 	}
 }
 
-void ContactResolver::RF_ResolvePositionsCoherent(float deltaTime)
+void ContactResolver::RF_ResolvePositionsCoherent(float)
 {
 	unsigned i,index;
 	Vector3 linearChange[2], angularChange[2];

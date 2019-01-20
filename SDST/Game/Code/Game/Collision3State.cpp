@@ -67,7 +67,7 @@ Collision3State::Collision3State()
 	eDynamicScheme scheme = DISCRETE;
 	Sphere* sph = new Sphere(1.f, pos, rot, scale, tint, meshName, matName, stat, bid, multipass, compare, cull, wind, scheme);
 	Rigidbody3* rigid = static_cast<Rigidbody3*>(sph->GetEntity());
-	sph->m_physDriven = true;
+	//sph->m_physDriven = true;
 	rigid->SetGameobject(sph);
 	rigid->SetAwake(true);
 	rigid->SetCanSleep(false);
@@ -77,7 +77,7 @@ Collision3State::Collision3State()
 	scale = Vector3(2.f, 2.f, 2.f);
 	Sphere* sph_0 = new Sphere(1.f, pos, rot, scale, tint, meshName, matName, stat, bid, multipass, compare, cull, wind, scheme);
 	rigid = static_cast<Rigidbody3*>(sph_0->GetEntity());
-	sph_0->m_physDriven = true;
+	//sph_0->m_physDriven = true;
 	rigid->SetGameobject(sph_0);
 	rigid->SetAwake(true);
 	rigid->SetCanSleep(false);
@@ -91,7 +91,7 @@ Collision3State::Collision3State()
 	scale = Vector3::ONE;
 	Sphere* sph_1 = new Sphere(1.f, pos, rot, scale, tint, meshName, matName, stat, bid, multipass, compare, cull, wind, scheme);
 	rigid = static_cast<Rigidbody3*>(sph_1->GetEntity());
-	sph_1->m_physDriven = true;
+	//sph_1->m_physDriven = true;
 	rigid->SetGameobject(sph_1);
 	rigid->SetAwake(true);
 	rigid->SetCanSleep(false);
@@ -103,7 +103,7 @@ Collision3State::Collision3State()
 	stat = MOVE_KINEMATIC;
 	Quad* pl = new Quad(pos, rot, scale, tint, "quad_pcu", matName, stat, bid, multipass, compare, CULLMODE_FRONT, wind, scheme);
 	rigid = static_cast<Rigidbody3*>(pl->GetEntity());
-	pl->m_physDriven = true;
+	//pl->m_physDriven = true;
 	rigid->SetGameobject(pl);
 	rigid->SetAwake(true);
 	rigid->SetCanSleep(false);
@@ -121,7 +121,7 @@ Collision3State::Collision3State()
 	scale = Vector3::ONE;
 	Box* b = new Box(pos, rot, scale, tint, "cube_pcu", "default", stat, bid, multipass, compare, cull, wind);
 	rigid = static_cast<Rigidbody3*>(b->GetEntity());
-	b->m_physDriven = true;
+	//b->m_physDriven = true;
 	rigid->SetGameobject(b);
 	rigid->SetAwake(true);
 	rigid->SetCanSleep(false);
@@ -132,7 +132,7 @@ Collision3State::Collision3State()
 	scale = Vector3(4.f, 4.f, 1.f);
 	Quad* pl_0 = new Quad(pos, rot, scale, tint, "quad_pcu", matName, stat, bid, multipass, compare, CULLMODE_FRONT, wind, scheme);
 	rigid = static_cast<Rigidbody3*>(pl_0->GetEntity());
-	pl_0->m_physDriven = true;
+	//pl_0->m_physDriven = true;
 	rigid->SetGameobject(pl_0);
 	rigid->SetAwake(true);
 	rigid->SetCanSleep(false);
@@ -150,7 +150,7 @@ Collision3State::Collision3State()
 	scale = Vector3::ONE;
 	Box* b_0 = new Box(pos, rot, scale, tint, "cube_pcu", "default", stat, bid, multipass, compare, cull, wind);
 	rigid = static_cast<Rigidbody3*>(b_0->GetEntity());
-	b_0->m_physDriven = true;
+	//b_0->m_physDriven = true;
 	rigid->SetGameobject(b_0);
 	rigid->SetAwake(true);
 	rigid->SetCanSleep(false);
@@ -160,7 +160,7 @@ Collision3State::Collision3State()
 	rot = Vector3::ZERO;
 	Sphere* sph_2 = new Sphere(1.f, pos, rot, scale, tint, meshName, matName, stat, bid, multipass, compare, cull, wind);
 	rigid = static_cast<Rigidbody3*>(sph_2->GetEntity());
-	sph_2->m_physDriven = true;
+	//sph_2->m_physDriven = true;
 	rigid->SetGameobject(sph_2);
 	rigid->SetAwake(true);
 	rigid->SetCanSleep(false);
@@ -177,7 +177,7 @@ Collision3State::Collision3State()
 	rot = Vector3(rand_rot_x, rand_rot_y, rand_rot_z);
 	Box* b_1 = new Box(pos, rot, scale, tint, "cube_pcu", "default", stat, bid, multipass, compare, cull, wind);
 	rigid = static_cast<Rigidbody3*>(b_1->GetEntity());
-	b_1->m_physDriven = true;
+	//b_1->m_physDriven = true;
 	rigid->SetGameobject(b_1);
 	rigid->SetAwake(true);
 	rigid->SetCanSleep(false);
@@ -190,7 +190,7 @@ Collision3State::Collision3State()
 	rot = Vector3(rand_rot_x, rand_rot_y, rand_rot_z);
 	Box* b_2 = new Box(pos, rot, scale, tint, "cube_pcu", "default", stat, bid, multipass, compare, cull, wind);
 	rigid = static_cast<Rigidbody3*>(b_2->GetEntity());
-	b_2->m_physDriven = true;
+	//b_2->m_physDriven = true;
 	rigid->SetGameobject(b_2);
 	rigid->SetAwake(true);
 	rigid->SetCanSleep(false);

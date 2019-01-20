@@ -90,7 +90,7 @@ void TheGame::InitializeClock()
 
 void TheGame::Update()
 {
-	UpdateTime();
+	//UpdateTime();
 	
 	m_states->Update(m_deltaTime);
 
@@ -101,8 +101,8 @@ void TheGame::Update()
 
 void TheGame::UpdateTime()
 {
-	PassTimeToRenderer();
-	m_deltaTime = m_clock->frame.seconds;
+	//PassTimeToRenderer();
+	//m_deltaTime = m_clock->frame.seconds;
 }
 
 

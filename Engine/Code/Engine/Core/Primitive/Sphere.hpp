@@ -21,5 +21,8 @@ public:
 		eDynamicScheme = DISCRETE);
 	~Sphere();
 
+	// RF
+	Sphere(const float& mass, const Vector3& pos, const Vector3& rot, const Vector3& scale, const Rgba& tint);
+
 	float GetRadius() const;
 };

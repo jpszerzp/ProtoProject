@@ -134,7 +134,7 @@ void Vector3::operator-=( const Vector3& vecToSubtract )
 
 
 //-----------------------------------------------------------------------------------------------
-void Vector3::operator*=( const float uniformScale )
+void Vector3::operator*=( const float& uniformScale )
 {
 	x = x * uniformScale; // #MP1Fixme
 	y = y * uniformScale; // #MP1Fixme
@@ -143,7 +143,7 @@ void Vector3::operator*=( const float uniformScale )
 
 
 //-----------------------------------------------------------------------------------------------
-void Vector3::operator/=( const float uniformDivisor )
+void Vector3::operator/=( const float& uniformDivisor )
 {
 	x = x / uniformDivisor; // #MP1Fixme
 	y = y / uniformDivisor; // #MP1Fixme

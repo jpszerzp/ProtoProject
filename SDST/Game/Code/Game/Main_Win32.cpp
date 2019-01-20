@@ -8,6 +8,7 @@
 #include "Engine/Core/Log/LogSystem.hpp"
 #include "Engine/Renderer/GLFunctions.hpp"
 #include "Engine/Renderer/Window.hpp"
+#include "Engine/Physics/3D/RF/PhysTime.hpp"
 
 #include <math.h>
 #include <cassert>
@@ -109,6 +110,8 @@ void Initialize( HINSTANCE )
 	Window* theWindow = Window::GetInstance();
 	theWindow->RegisterHandler(HandleMsg);
 	LogSystemStartup();
+
+	TimingData::Init();
 	
 	/*
 	LogHideTag("test");			// by default filter has blacklist
@@ -132,6 +135,8 @@ void Initialize( HINSTANCE )
 //-----------------------------------------------------------------------------------------------
 void Shutdown()
 {
+	TimingData::Release();
+
 	GLShutdown();
 	LogSystemShutdown();
 
@@ -147,17 +152,18 @@ int WINAPI WinMain( HINSTANCE applicationInstanceHandle, HINSTANCE, LPSTR comman
 {
 	UNUSED( commandLineString );
 	srand( (unsigned int) time( NULL ) );
+
 	Initialize( applicationInstanceHandle );
 
 	// Program main loop; keep running frames until it's time to quit
 	while( !g_theApp->IsQuitting() )
 	{
-		Profiler* profiler = Profiler::GetInstance();
-		profiler->ProfileMarkFrame();
+		//Profiler* profiler = Profiler::GetInstance();
+		//profiler->ProfileMarkFrame();
 
-		// update last frame hpc duration for profiling
-		std::string appFrameTag = "TheApp::RunFrame";
-		PROFILE_LOG_SCOPED(appFrameTag.c_str());
+		//// update last frame hpc duration for profiling
+		//std::string appFrameTag = "TheApp::RunFrame";
+		//PROFILE_LOG_SCOPED(appFrameTag.c_str());
 
 		g_theApp->RunFrame();
 	}

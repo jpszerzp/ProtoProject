@@ -29,8 +29,8 @@ public:
 	const bool operator>=(const Vector3& compared) const;
 	void operator+=( const Vector3& vecToAdd );						
 	void operator-=( const Vector3& vecToSubtract );				
-	void operator*=( const float uniformScale );					
-	void operator/=( const float uniformDivisor );					
+	void operator*=( const float& uniformScale );					
+	void operator/=( const float& uniformDivisor );					
 	void operator=( const Vector3& copyFrom );						
 	bool operator==( const Vector3& compare ) const;				
 	bool operator!=( const Vector3& compare ) const;	
