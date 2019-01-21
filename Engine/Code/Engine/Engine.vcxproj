@@ -370,6 +370,7 @@
     <ClCompile Include="Physics\3D\QuadEntity3.cpp" />
     <ClCompile Include="Physics\3D\QuadRB3.cpp" />
     <ClCompile Include="Physics\3D\RF\CollisionEntity.cpp" />
+    <ClCompile Include="Physics\3D\RF\CollisionKeep.cpp" />
     <ClCompile Include="Physics\3D\RF\CollisionPrimitive.cpp" />
     <ClCompile Include="Physics\3D\RF\PhysTime.cpp" />
     <ClCompile Include="Physics\3D\Rigidbody3.cpp" />
@@ -544,6 +545,7 @@
     <ClInclude Include="Physics\3D\QuadEntity3.hpp" />
     <ClInclude Include="Physics\3D\QuadRB3.hpp" />
     <ClInclude Include="Physics\3D\RF\CollisionEntity.hpp" />
+    <ClInclude Include="Physics\3D\RF\CollisionKeep.hpp" />
     <ClInclude Include="Physics\3D\RF\CollisionPrimitive.hpp" />
     <ClInclude Include="Physics\3D\RF\PhysTime.hpp" />
     <ClInclude Include="Physics\3D\Rigidbody3.hpp" />

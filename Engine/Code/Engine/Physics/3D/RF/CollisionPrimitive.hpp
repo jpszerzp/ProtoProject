@@ -16,9 +16,9 @@ class CollisionPrimitive
 	Texture* m_texture = nullptr;
 	Vector4 m_tint;
 
+public:
 	virtual void AttachToRigidBody(CollisionRigidBody* rb);
 
-public:
 	void SetRigidBody(CollisionRigidBody* rb) { m_rigid_body = rb; }
 	void SetPrimitiveTransformMat4(const Matrix44& transform) { m_transform_mat = transform; }
 	void SetMesh(Mesh* mesh) { m_mesh = mesh; }
@@ -29,6 +29,8 @@ public:
 	void Update(float deltaTime);
 
 	void Render(Renderer* renderer);
+
+	CollisionRigidBody* GetRigidBody() const { return m_rigid_body; }
 };
 
 class CollisionSphere : public CollisionPrimitive

@@ -69,10 +69,10 @@ Physics3State::Physics3State()
 		Vector3(25.f, 305.f, 5.f), Vector3(35.f, 305.f, 5.f),
 		Vector3(25.f, 315.f, -5.f), Vector3(35.f, 315.f, -5.f),
 		Vector3(25.f, 315.f, 5.f), Vector3(35.f, 315.f, 5.f));
-	CollisionSphere* sph = new CollisionSphere(1.f);
+	m_handle_0 = new CollisionSphere(1.f);
 	CollisionRigidBody* rb = new CollisionRigidBody(1.f, Vector3(30.f, 310.f, 0.f), Vector3(0.f));
-	sph->AttachToRigidBody(rb);
-	m_primitives.push_back(sph);
+	m_handle_0->AttachToRigidBody(rb);
+	m_sphere_primitives.push_back(m_handle_0);
 
 	// debug
 	DebugRenderSet3DCamera(m_camera);
@@ -307,7 +307,7 @@ void Physics3State::Update(float deltaTime)
 	//UpdateForceRegistry(deltaTime);		// update force registry
 	UpdateGameobjects(deltaTime);		// update gameobjects
 	UpdateContacts(deltaTime);
-	//UpdateDebug(deltaTime);			
+	UpdateDebug(deltaTime);			
 	UpdateUI();
 }
 
@@ -880,6 +880,23 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		//	go->m_physEntity->m_slowed = 1.f;
 	}
 
+	//CollisionRigidBody* rb = m_handle_0->GetRigidBody();
+
+	//if (g_input->IsKeyDown(InputSystem::KEYBOARD_UP_ARROW))
+	//	rb->SetAngularVelocity(Vector3(5.f, 0.f, 0.f));
+	//else if (g_input->IsKeyDown(InputSystem::KEYBOARD_DOWN_ARROW))
+	//	rb->SetAngularVelocity(Vector3(-5.f, 0.f, 0.f));
+	//else if (g_input->IsKeyDown(InputSystem::KEYBOARD_LEFT_ARROW))
+	//	rb->SetAngularVelocity(Vector3(0.f, 5.f, 0.f));
+	//else if (g_input->IsKeyDown(InputSystem::KEYBOARD_RIGHT_ARROW))
+	//	rb->SetAngularVelocity(Vector3(0.f, -5.f, 0.f));
+	//else if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEUP))
+	//	rb->SetAngularVelocity(Vector3(0.f, 0.f, 5.f));
+	//else if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEDOWN))
+	//	rb->SetAngularVelocity(Vector3(0.f, 0.f, -5.f));
+	//else
+	//	rb->SetAngularVelocity(Vector3::ZERO);
+
 	// camera update from input
 	Vector3 camForward = m_camera->GetLocalForward(); 
 	Vector3 camUp = m_camera->GetLocalUp(); 
@@ -913,7 +930,7 @@ void Physics3State::UpdateGameobjects(float deltaTime)
 
 void Physics3State::UpdateDebug(float deltaTime)
 {
-	UpdateDebugCore(deltaTime);
+	//UpdateDebugCore(deltaTime);
 
 	UpdateDebugDraw(deltaTime);
 }
@@ -921,49 +938,6 @@ void Physics3State::UpdateDebug(float deltaTime)
 void Physics3State::UpdateDebugDraw(float deltaTime)
 {
 	DebugRenderUpdate(deltaTime);
-
-	// debug draw for all-at-once resolver
-	// do not need to worry about continuous pairs because they will not use all_resolver
-	for (int i = 0; i < m_allResolver->GetCollisionData()->m_contacts.size(); ++i)
-	{
-		Contact3& contact = m_allResolver->GetCollisionData()->m_contacts[i];
-
-		Vector3 point = contact.m_point;
-		Vector3 end = point + contact.m_normal * contact.m_penetration;
-		DebugRenderLine(0.f, point, end, 5.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
-	}
-
-	// debug draw for iterative resolver
-	TODO("Debug draw for iterative resolver");
-
-	// debug draw for coherent resolver
-	for (int i = 0; i < m_coherentResolver->GetCollisionData()->m_contacts.size(); ++i)
-	{
-		Contact3& contact = m_coherentResolver->GetCollisionData()->m_contacts[i];
-
-		// do not draw continuous pairs as the simulated time is not accurate
-		if (!(contact.m_e1->IsContinuous() && contact.m_e2->IsContinuous()))
-		{
-			Vector3 point = contact.m_point;
-			Vector3 end = point + contact.m_normal * contact.m_penetration;
-			DebugRenderLine(0.1f, point, end, 5.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
-		}
-	}
-
-	// draw a trail after continuous spheres
-	for (int i = 0; i < m_spheres.size(); ++i)
-	{
-		Sphere* sph = m_spheres[i];
-		SphereRB3* rb = static_cast<SphereRB3*>(sph->m_physEntity);
-
-		if (rb != nullptr)
-		{
-			const Vector3& start = sph->GetPhysicsCenter();
-			const Vector3& vel_norm = rb->GetLinearVelocity().GetNormalized();
-			const Vector3& end = start + vel_norm * 0.1f;
-			DebugRenderLine(.1f, start, end, 10.f, Rgba::MEGENTA, Rgba::MEGENTA, DEBUG_RENDER_USE_DEPTH);
-		}
-	}
 }
 
 void Physics3State::UpdateDebugCore(float)
@@ -1183,9 +1157,9 @@ void Physics3State::UpdateGameobjectsDynamics(float deltaTime)
 		//}
 	//}
 
-	for (std::vector<CollisionPrimitive*>::size_type idx = 0; idx < m_primitives.size(); ++idx)
+	for (std::vector<CollisionPrimitive*>::size_type idx = 0; idx < m_sphere_primitives.size(); ++idx)
 	{
-		m_primitives[idx]->Update(deltaTime);
+		m_sphere_primitives[idx]->Update(deltaTime);
 	}
 }
 
@@ -1200,7 +1174,9 @@ void Physics3State::UpdateContactGeneration()
 {
 	//UpdateResolverEnd();
 
-	UpdateContactGenerationCore();
+	//UpdateContactGenerationCore();
+
+
 }
 
 void Physics3State::UpdateContactGenerationCore()
@@ -1546,7 +1522,7 @@ void Physics3State::Render(Renderer* renderer)
 
 	RenderGameobjects(renderer);
 	
-	//RenderForwardPath(renderer);
+	RenderForwardPath(renderer);
 
 	RenderWrapArounds(renderer);
 }
@@ -1559,9 +1535,9 @@ void Physics3State::RenderGameobjects(Renderer* renderer)
 			m_gameObjects[idx]->Render(renderer);
 	}*/
 
-	for (std::vector<CollisionPrimitive*>::size_type idx = 0; idx < m_primitives.size(); ++idx)
+	for (std::vector<CollisionPrimitive*>::size_type idx = 0; idx < m_sphere_primitives.size(); ++idx)
 	{
-		m_primitives[idx]->Render(renderer);
+		m_sphere_primitives[idx]->Render(renderer);
 	}
 }
 

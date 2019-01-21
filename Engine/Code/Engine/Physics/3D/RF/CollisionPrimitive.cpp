@@ -1,6 +1,7 @@
 #include "Engine/Physics/3D/RF/CollisionPrimitive.hpp"
+#include "Engine/Renderer/DebugRenderer.hpp"
 
-void CollisionPrimitive::AttachToRigidBody(CollisionRigidBody* rb)
+void CollisionPrimitive::AttachToRigidBody(CollisionRigidBody*)
 {
 
 }
@@ -30,6 +31,26 @@ void CollisionPrimitive::Render(Renderer* renderer)
 
 	// draw
 	renderer->DrawMesh(m_mesh);
+
+	// draw debug basis
+	const Vector3& start = m_rigid_body->GetCenter();
+
+	Vector3 right_dir = m_transform_mat.GetRight();
+	right_dir.Normalize();
+
+	Vector3 up_dir = m_transform_mat.GetUp();
+	up_dir.Normalize();
+
+	Vector3 forward_dir = m_transform_mat.GetForward();
+	forward_dir.Normalize();
+
+	Vector3 right_end = start + right_dir * 3.f;
+	Vector3 up_end = start + up_dir * 3.f;
+	Vector3 forward_end = start + forward_dir * 3.f;
+
+	DebugRenderLine(.05f, start, right_end, 3.f, Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderLine(.05f, start, up_end, 3.f, Rgba::GREEN, Rgba::GREEN, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderLine(.05f, start, forward_end, 3.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
 }
 
 CollisionSphere::CollisionSphere(const float& radius)

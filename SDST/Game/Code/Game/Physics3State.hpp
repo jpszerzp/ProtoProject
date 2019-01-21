@@ -164,5 +164,6 @@ public:
 	Sphere* sph_holder;
 
 	// refactor
-	std::vector<CollisionPrimitive*> m_primitives;
+	std::vector<CollisionSphere*> m_sphere_primitives;
+	CollisionSphere* m_handle_0;
 };

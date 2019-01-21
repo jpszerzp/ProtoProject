@@ -33,9 +33,11 @@ public:
 	void SetMass(const float& mass) { m_mass = mass; }
 	void SetInvMass(const float& inv_mass) { m_inv_mass = inv_mass; }
 	void SetCenter(const Vector3& center) { m_center = center; }
+	void SetLinearVelocity(const Vector3& lin_vel) { m_lin_vel = lin_vel; }
 
 	virtual void CacheData(){}
 
+	virtual void SetAngularVelocity(const Vector3& ang_vel) { ASSERT_OR_DIE(false, "entity does not have angular velocity"); }
 	virtual void SetTensor(const Matrix33&){ ASSERT_OR_DIE(false, "entity does not have tensor"); }
 	virtual void SetInvTensor(const Matrix33&){ ASSERT_OR_DIE(false, "entity does not have inverse tensor"); }
 	virtual void SetInvTensorWorld(const Matrix33&){ ASSERT_OR_DIE(false, "entity does not have inverse tensor world"); }
@@ -72,6 +74,7 @@ public:
 	void SetTensor(const Matrix33& tensor) override { m_tensor = tensor; }
 	void SetInvTensor(const Matrix33& inv_tensor) override { m_inv_tensor = inv_tensor; }
 	void SetInvTensorWorld(const Matrix33& inv_tensor_world) override { m_inv_tensor_world = inv_tensor_world; }
+	void SetAngularVelocity(const Vector3& ang_vel) override { m_ang_vel = ang_vel; }
 
 	Quaternion GetOrientation() const { return m_orientation; }
 };
