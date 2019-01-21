@@ -11,6 +11,7 @@ layout(binding=2, std140) uniform uboCamera
 layout(binding=5, std140) uniform uboObject
 {
 	mat4 MODEL;
+    mat4 INV_MODEL;
 };
 
 // Attributes - input to this shader stage (constant as far as the code is concerned)

@@ -69,14 +69,10 @@ Physics3State::Physics3State()
 		Vector3(25.f, 305.f, 5.f), Vector3(35.f, 305.f, 5.f),
 		Vector3(25.f, 315.f, -5.f), Vector3(35.f, 315.f, -5.f),
 		Vector3(25.f, 315.f, 5.f), Vector3(35.f, 315.f, 5.f));
-	//CollisionSphere* sph = new CollisionSphere(Vector3(30.f, 310.f, 0.f), Vector3::ZERO, Vector3::ONE);
-	//CollisionSphere* sph = new CollisionSphere(1.f);
-	//CollisionRigidBody* rb = new CollisionRigidBody(Vector3(30.f, 310.f, 0.f), Vector3(0.f));
-	//sph->AttachToRigidBody(rb);
-	//sph_holder = new Sphere(1.f, Vector3(30.f, 310.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::GREEN);
-	////sph_holder->m_physDriven = true;
-	//m_gameObjects.push_back(sph_holder);
-	//m_wraparound_sphere_only->m_gos.push_back(sph_holder);
+	CollisionSphere* sph = new CollisionSphere(1.f);
+	CollisionRigidBody* rb = new CollisionRigidBody(1.f, Vector3(30.f, 310.f, 0.f), Vector3(0.f));
+	sph->AttachToRigidBody(rb);
+	m_primitives.push_back(sph);
 
 	// debug
 	DebugRenderSet3DCamera(m_camera);
@@ -1170,9 +1166,9 @@ void Physics3State::UpdateGameobjectContinuous(float deltaTime)
 void Physics3State::UpdateGameobjectsDynamics(float deltaTime)
 {
 	// core of update
-	for (std::vector<GameObject*>::size_type idx = 0; idx < m_gameObjects.size(); ++idx)
-	{
-		m_gameObjects[idx]->Update(deltaTime);
+	//for (std::vector<GameObject*>::size_type idx = 0; idx < m_gameObjects.size(); ++idx)
+	//{
+		//m_gameObjects[idx]->Update(deltaTime);
 		//if (m_gameObjects[idx]->m_dead)
 		//{
 		//	GameObject* to_be_deleted = m_gameObjects[idx];
@@ -1185,6 +1181,11 @@ void Physics3State::UpdateGameobjectsDynamics(float deltaTime)
 		//	delete to_be_deleted;
 		//	to_be_deleted = nullptr;
 		//}
+	//}
+
+	for (std::vector<CollisionPrimitive*>::size_type idx = 0; idx < m_primitives.size(); ++idx)
+	{
+		m_primitives[idx]->Update(deltaTime);
 	}
 }
 
@@ -1552,10 +1553,15 @@ void Physics3State::Render(Renderer* renderer)
 
 void Physics3State::RenderGameobjects(Renderer* renderer)
 {
-	for (std::vector<GameObject*>::size_type idx = 0; idx < m_gameObjects.size(); ++idx)
+/*	for (std::vector<GameObject*>::size_type idx = 0; idx < m_gameObjects.size(); ++idx)
 	{
 		if (!m_gameObjects[idx]->m_isInForwardPath)
 			m_gameObjects[idx]->Render(renderer);
+	}*/
+
+	for (std::vector<CollisionPrimitive*>::size_type idx = 0; idx < m_primitives.size(); ++idx)
+	{
+		m_primitives[idx]->Render(renderer);
 	}
 }
 

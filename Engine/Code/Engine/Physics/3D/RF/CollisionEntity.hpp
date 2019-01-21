@@ -19,7 +19,7 @@ protected:
 	float m_mass;
 	float m_inv_mass;
 
-	Matrix44 m_transform_mat;
+	Matrix44 m_transform_mat;	// changes every frame
 	//Transform m_transform;
 
 	float m_lin_damp = 1.f;
@@ -41,6 +41,8 @@ public:
 	virtual void SetInvTensorWorld(const Matrix33&){ ASSERT_OR_DIE(false, "entity does not have inverse tensor world"); }
 
 	Matrix44 GetTransformMat4() const { return m_transform_mat; }
+	Vector3 GetCenter() const { return m_center; }
+	float GetMass() const { return m_mass; }
 };
 
 class CollisionRigidBody : public CollisionEntity
@@ -54,13 +56,13 @@ protected:
 
 	Matrix33 m_tensor;
 	Matrix33 m_inv_tensor;
-	Matrix33 m_inv_tensor_world;
+	Matrix33 m_inv_tensor_world;	// changes every frame
 
 public:
 	void Integrate(float deltaTime) override;
 	void ClearAcc() override;
-	CollisionRigidBody(const Vector3& center, const Quaternion& orientation);
-	CollisionRigidBody(const Vector3& center, const Vector3& euler);
+	//CollisionRigidBody(const Vector3& center, const Quaternion& orientation);
+	CollisionRigidBody(const float& mass, const Vector3& center, const Vector3& euler);
 	~CollisionRigidBody(){}
 
 	void CacheData() override;
@@ -70,4 +72,6 @@ public:
 	void SetTensor(const Matrix33& tensor) override { m_tensor = tensor; }
 	void SetInvTensor(const Matrix33& inv_tensor) override { m_inv_tensor = inv_tensor; }
 	void SetInvTensorWorld(const Matrix33& inv_tensor_world) override { m_inv_tensor_world = inv_tensor_world; }
+
+	Quaternion GetOrientation() const { return m_orientation; }
 };

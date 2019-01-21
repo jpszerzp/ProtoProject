@@ -67,27 +67,27 @@ Sphere::Sphere(const float& mass, const Vector3& pos, const Vector3& rot, const 
 	// orientation
 	Quaternion orientation = Quaternion::FromEuler(rot);
 
-	m_ent = new CollisionRigidBody(pos, orientation);
-	
-	m_ent->SetMass(mass);
-	m_ent->SetInvMass(1.f / mass);
+	//m_ent = new CollisionRigidBody(pos, orientation);
+	//
+	//m_ent->SetMass(mass);
+	//m_ent->SetInvMass(1.f / mass);
 
-	float factor = .4f * mass * scale.x * scale.x;
-	Vector3 tensor_i = Vector3(factor, 0.f, 0.f);
-	Vector3 tensor_j = Vector3(0.f, factor, 0.f);
-	Vector3 tensor_k = Vector3(0.f, 0.f, factor);
-	Matrix33 tensor = Matrix33(tensor_i, tensor_j, tensor_k);
+	//float factor = .4f * mass * scale.x * scale.x;
+	//Vector3 tensor_i = Vector3(factor, 0.f, 0.f);
+	//Vector3 tensor_j = Vector3(0.f, factor, 0.f);
+	//Vector3 tensor_k = Vector3(0.f, 0.f, factor);
+	//Matrix33 tensor = Matrix33(tensor_i, tensor_j, tensor_k);
 
-	m_ent->SetTensor(tensor);
-	m_ent->SetInvTensor(tensor.Invert());
+	//m_ent->SetTensor(tensor);
+	//m_ent->SetInvTensor(tensor.Invert());
 
-	// set model transform mat for ent
-	m_ent->CacheData();
+	//// set model transform mat for ent
+	//m_ent->CacheData();
 
-	// make sure the transform of ent (in mat4 form) means same thing as renderable transform above
-	const Matrix44& verified_transform_mat = m_ent->GetTransformMat4();
-	Vector3 verified_euler = Matrix44::DecomposeMatrixIntoEuler(verified_transform_mat);
-	ASSERT_OR_DIE(verified_euler == rot, "euler of game object and rigid body do not match");
+	//// make sure the transform of ent (in mat4 form) means same thing as renderable transform above
+	//const Matrix44& verified_transform_mat = m_ent->GetTransformMat4();
+	//Vector3 verified_euler = Matrix44::DecomposeMatrixIntoEuler(verified_transform_mat);
+	//ASSERT_OR_DIE(verified_euler == rot, "euler of game object and rigid body do not match");
 }
 
 
@@ -133,10 +133,10 @@ void Sphere::Update(float deltaTime)
 	//	}
 	//}
 
-	if (m_ent)
-	{
-		m_ent->Integrate(deltaTime);
-	}
+	//if (m_ent)
+	//{
+	//	m_ent->Integrate(deltaTime);
+	//}
 
 	UpdateBasis();
 }

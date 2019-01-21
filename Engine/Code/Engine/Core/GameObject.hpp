@@ -35,7 +35,7 @@ public:
 
 	Entity3* m_physEntity = nullptr;
 
-	CollisionEntity* m_ent = nullptr;
+	//CollisionEntity* m_ent = nullptr;
 
 public:
 	virtual void Update(float){}

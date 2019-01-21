@@ -46,5 +46,5 @@ public:
 	static Quaternion FromMatrix(const Matrix33& rot);
 
 	static Quaternion FromEuler(const Vector3& euler);
-	Vector3 ToEuler() const;
+	//Vector3 ToEuler() const;
 };

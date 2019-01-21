@@ -36,16 +36,21 @@ void CollisionRigidBody::ClearAcc()
 	m_net_torque.ToDefault();
 }
 
-CollisionRigidBody::CollisionRigidBody(const Vector3& center, const Quaternion& orientation)
-	: m_orientation(orientation)
-{
-	SetCenter(center);
-}
+//CollisionRigidBody::CollisionRigidBody(const Vector3& center, const Quaternion& orientation)
+//	: m_orientation(orientation)
+//{
+//	SetCenter(center);
+//}
 
-CollisionRigidBody::CollisionRigidBody(const Vector3& center, const Vector3& euler)
+CollisionRigidBody::CollisionRigidBody(const float& mass, const Vector3& center, const Vector3& euler)
 {
+	// orientation from euler
 	m_orientation = Quaternion::FromEuler(euler);
+
 	SetCenter(center);
+
+	m_mass = mass;
+	m_inv_mass = 1.f / mass;
 }
 
 void CollisionRigidBody::CacheData()
