@@ -83,6 +83,24 @@ Physics3State::Physics3State()
 
 	m_wraparound_sphere_only->m_primitives.push_back(m_handle_0);
 
+	m_wraparound_box_only = new WrapAround(Vector3(50.f, 300.f, -10.f), Vector3(70.f, 320.f, 10.f),
+		Vector3(55.f, 305.f, -5.f), Vector3(65.f, 305.f, -5.f),
+		Vector3(55.f, 305.f, 5.f), Vector3(65.f, 305.f, 5.f),
+		Vector3(55.f, 315.f, -5.f), Vector3(65.f, 315.f, -5.f),
+		Vector3(55.f, 315.f, 5.f), Vector3(65.f, 315.f, 5.f));
+
+	CollisionBox* box_0 = new CollisionBox(Vector3(.5f));
+
+	rb = new CollisionRigidBody(1.f, Vector3(60.f, 310.f, 0.f), Vector3::ZERO);
+	rb->SetAwake(true);
+	rb->SetSleepable(false);
+
+	box_0->AttachToRigidBody(rb);
+
+	m_box_primitives.push_back(box_0);
+
+	m_wraparound_box_only->m_primitives.push_back(box_0);
+
 	// debug
 	DebugRenderSet3DCamera(m_camera);
 	DebugRenderSet2DCamera(m_UICamera);
@@ -92,6 +110,9 @@ Physics3State::~Physics3State()
 {
 	delete m_wraparound_sphere_only;
 	m_wraparound_sphere_only = nullptr;
+
+	delete m_wraparound_box_only;
+	m_wraparound_box_only = nullptr;
 }
 
 void Physics3State::PostConstruct()
@@ -199,10 +220,16 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	{
 		for (CollisionPrimitive* primitive : m_wraparound_sphere_only->m_primitives)
 			primitive->GetRigidBody()->SetSlow(.01f);
+
+		for (CollisionPrimitive* primitive : m_wraparound_box_only->m_primitives)
+			primitive->GetRigidBody()->SetSlow(.01f);
 	}
 	else
 	{
 		for (CollisionPrimitive* primitive : m_wraparound_sphere_only->m_primitives)
+			primitive->GetRigidBody()->SetSlow(1.f);
+
+		for (CollisionPrimitive* primitive : m_wraparound_box_only->m_primitives)
 			primitive->GetRigidBody()->SetSlow(1.f);
 	}
 
@@ -264,6 +291,7 @@ void Physics3State::UpdateDebugDraw(float deltaTime)
 void Physics3State::UpdateWrapArounds()
 {
 	m_wraparound_sphere_only->Update();
+	m_wraparound_box_only->Update();
 }
 
 
@@ -297,9 +325,10 @@ void Physics3State::UpdateGameobjectsCore(float deltaTime)
 void Physics3State::UpdateGameobjectsDynamics(float deltaTime)
 {
 	for (std::vector<CollisionSphere*>::size_type idx = 0; idx < m_sphere_primitives.size(); ++idx)
-	{
 		m_sphere_primitives[idx]->Update(deltaTime);
-	}
+
+	for (std::vector<CollisionBox*>::size_type idx = 0; idx < m_box_primitives.size(); ++idx)
+		m_box_primitives[idx]->Update(deltaTime);
 }
 
 void Physics3State::UpdateContacts(float deltaTime)
@@ -361,14 +390,16 @@ void Physics3State::Render(Renderer* renderer)
 void Physics3State::RenderGameobjects(Renderer* renderer)
 {
 	for (std::vector<CollisionSphere*>::size_type idx = 0; idx < m_sphere_primitives.size(); ++idx)
-	{
 		m_sphere_primitives[idx]->Render(renderer);
-	}
+
+	for (std::vector<CollisionBox*>::size_type idx = 0; idx < m_box_primitives.size(); ++idx)
+		m_box_primitives[idx]->Render(renderer);
 }
 
 void Physics3State::RenderWrapArounds(Renderer* renderer)
 {
 	m_wraparound_sphere_only->Render(renderer);
+	m_wraparound_box_only->Render(renderer);
 }
 
 void Physics3State::RenderForwardPath(Renderer*)

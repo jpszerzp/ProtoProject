@@ -116,6 +116,7 @@ public:
 
 	// refactor
 	std::vector<CollisionSphere*> m_sphere_primitives;
+	std::vector<CollisionBox*> m_box_primitives;
 	CollisionSphere* m_handle_0;	// temp
 
 	Collision m_storage[MAX_CONTACT_NUM];
@@ -125,4 +126,5 @@ public:
 	CollisionSolver m_solver;
 
 	WrapAround* m_wraparound_sphere_only;
+	WrapAround* m_wraparound_box_only;
 };

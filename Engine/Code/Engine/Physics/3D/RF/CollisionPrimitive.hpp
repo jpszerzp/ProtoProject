@@ -46,3 +46,15 @@ public:
 
 	float GetRadius() const { return m_radius; }
 };
+
+class CollisionBox : public CollisionPrimitive
+{
+	Vector3 m_half_size;
+
+public:
+	CollisionBox(const Vector3& half);
+
+	void AttachToRigidBody(CollisionRigidBody* rb) override;
+
+	Vector3 GetHalfSize() const { return m_half_size; }
+};

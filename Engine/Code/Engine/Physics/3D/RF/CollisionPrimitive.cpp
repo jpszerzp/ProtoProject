@@ -123,3 +123,43 @@ void CollisionSphere::AttachToRigidBody(CollisionRigidBody* rb)
 	// use same transform mat for primitive
 	SetPrimitiveTransformMat4(rb->GetTransformMat4());
 }
+
+CollisionBox::CollisionBox(const Vector3& half)
+	: m_half_size(half)
+{
+	Renderer* renderer = Renderer::GetInstance();
+
+	SetMesh(renderer->CreateOrGetMesh("cube_pcu"));
+	SetShader(renderer->CreateOrGetShader("default"));
+	SetTexture(renderer->CreateOrGetTexture("Data/Images/perspective_test.png"));
+
+	Vector4 tintV4;
+	Rgba tint = Rgba::WHITE;
+	tint.GetAsFloats(tintV4.x, tintV4.y, tintV4.z, tintV4.w);
+	SetTint(tintV4);
+}
+
+void CollisionBox::AttachToRigidBody(CollisionRigidBody* rb)
+{
+	SetRigidBody(rb);
+
+	// initialize box inertia tensor as needed
+	const float& mass = rb->GetMass();
+	float ext_x = m_half_size.x * 2.f;
+	float ext_y = m_half_size.y * 2.f;
+	float ext_z = m_half_size.z * 2.f;
+	float factor_i = (1.f / 12.f) * mass * (ext_y * ext_y + ext_z * ext_z);
+	float factor_j = (1.f / 12.f) * mass * (ext_x * ext_x + ext_z * ext_z);
+	float factor_k = (1.f / 12.f) * mass * (ext_x * ext_x + ext_y * ext_y);
+	Vector3 tensor_i = Vector3(factor_i, 0.f, 0.f);
+	Vector3 tensor_j = Vector3(0.f, factor_j, 0.f);
+	Vector3 tensor_k = Vector3(0.f, 0.f, factor_k);
+	Matrix33 tensor = Matrix33(tensor_i, tensor_j, tensor_k);
+
+	rb->SetTensor(tensor);
+	rb->SetInvTensor(tensor.Invert());
+
+	rb->CacheData();
+
+	SetPrimitiveTransformMat4(rb->GetTransformMat4());
+}
