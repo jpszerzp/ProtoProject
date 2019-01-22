@@ -1,6 +1,9 @@
 #include "Engine/Physics/3D/RF/CollisionEntity.hpp"
+#include "Engine/Math/MathUtils.hpp"
 
-void CollisionEntity::Integrate(float deltaTime)
+#define SLEEP_THRESHOLD 0.1f
+
+void CollisionEntity::Integrate(float)
 {
 
 }
@@ -10,8 +13,31 @@ void CollisionEntity::ClearAcc()
 
 }
 
+
+void CollisionEntity::SetSleepable(bool sleepable)
+{
+	m_sleepable = sleepable;
+
+	if (!m_sleepable && !m_awake)
+		// make sure it is awake if it is not sleepable and not awake
+		SetAwake(true);
+}
+
+void CollisionEntity::AddLinearVelocity(const Vector3& v)
+{
+	m_lin_vel += v;
+}
+
+void CollisionEntity::AddForce(const Vector3& f)
+{
+	m_net_force += f;
+}
+
 void CollisionRigidBody::Integrate(float deltaTime)
 {
+	if (!m_awake)
+		return;
+
 	m_last_lin_acc = m_lin_acc;
 	m_last_lin_acc += (m_net_force * m_inv_mass);
 	Vector3 ang_acc = m_inv_tensor_world * m_net_torque;
@@ -28,6 +54,20 @@ void CollisionRigidBody::Integrate(float deltaTime)
 	CacheData();
 
 	ClearAcc();
+
+	if (m_sleepable)
+	{
+		float currentMotion = DotProduct(m_lin_vel, m_lin_vel) +
+			DotProduct(m_ang_vel, m_ang_vel);
+
+		float bias = powf(0.5, deltaTime);
+		m_motion = bias*m_motion + (1-bias)*currentMotion;
+
+		if (m_motion < SLEEP_THRESHOLD) 
+			SetAwake(false);
+		else if (m_motion > 10 * SLEEP_THRESHOLD) 
+			m_motion = 10 * SLEEP_THRESHOLD;
+	}
 }
 
 void CollisionRigidBody::ClearAcc()
@@ -35,12 +75,6 @@ void CollisionRigidBody::ClearAcc()
 	m_net_force.ToDefault();
 	m_net_torque.ToDefault();
 }
-
-//CollisionRigidBody::CollisionRigidBody(const Vector3& center, const Quaternion& orientation)
-//	: m_orientation(orientation)
-//{
-//	SetCenter(center);
-//}
 
 CollisionRigidBody::CollisionRigidBody(const float& mass, const Vector3& center, const Vector3& euler)
 {
@@ -101,4 +135,31 @@ void CollisionRigidBody::CacheIITWorld(Matrix33& iitw, const Matrix33& iit, cons
 	iitw.Iz = t52 * transfrom_mat.Ix + t57 * transfrom_mat.Jx + t62 * transfrom_mat.Kx;
 	iitw.Jz = t52 * transfrom_mat.Iy + t57 * transfrom_mat.Jy + t62 * transfrom_mat.Ky;
 	iitw.Kz = t52 * transfrom_mat.Iz + t57 * transfrom_mat.Jz + t62 * transfrom_mat.Kz;
+}
+
+void CollisionRigidBody::SetAwake(bool awake)
+{
+	if (awake) 
+	{
+		m_awake = true;
+
+		// Add a bit of motion to avoid it falling asleep immediately.
+		m_motion = SLEEP_THRESHOLD*2.f;
+	} 
+	else 
+	{
+		m_awake = false;
+		m_lin_vel.ToDefault();
+		m_ang_vel.ToDefault();
+	}
+}
+
+void CollisionRigidBody::GetIITWorld(Matrix33* iitw) const
+{
+	*iitw = m_inv_tensor_world;
+}
+
+void CollisionRigidBody::AddAngularVelocity(const Vector3& v)
+{
+	m_ang_vel += v;
 }

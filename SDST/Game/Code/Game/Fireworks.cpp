@@ -36,14 +36,14 @@ void Fireworks::Update(float deltaTime)
 	}
 	else
 	{		
-		if (!m_lastRound)
-		{
-			Physics3State* state = dynamic_cast<Physics3State*>(g_theGame->GetStateMachine()->GetCurrentState());
+		//if (!m_lastRound)
+		//{
+		//	Physics3State* state = dynamic_cast<Physics3State*>(g_theGame->GetStateMachine()->GetCurrentState());
 
-			// add payload
-			for (uint i = 0; i < 30; ++i)
-				state->SetupFireworks(5.f, GetWorldPosition(), m_physEntity->GetLinearVelocity(), Vector3(2.f), Vector3(-2.f), true);
-		}
+		//	// add payload
+		//	for (uint i = 0; i < 30; ++i)
+		//		state->SetupFireworks(5.f, GetWorldPosition(), m_physEntity->GetLinearVelocity(), Vector3(2.f), Vector3(-2.f), true);
+		//}
 	}
 
 	// for fireworks, do not draw basis 

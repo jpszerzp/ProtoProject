@@ -12,7 +12,7 @@ void CollisionPrimitive::Update(float deltaTime)
 	// take rigid body and integrate
 	m_rigid_body->Integrate(deltaTime);
 
-	// update primitive transform based on updated rigid body
+	// calculate internal
 	m_transform_mat = m_rigid_body->GetTransformMat4();
 }
 
@@ -33,24 +33,58 @@ void CollisionPrimitive::Render(Renderer* renderer)
 	renderer->DrawMesh(m_mesh);
 
 	// draw debug basis
-	const Vector3& start = m_rigid_body->GetCenter();
+	//const Vector3& start = m_rigid_body->GetCenter();
 
-	Vector3 right_dir = m_transform_mat.GetRight();
-	right_dir.Normalize();
+	//Vector3 right_dir = m_transform_mat.GetRight();
+	//right_dir.Normalize();
 
-	Vector3 up_dir = m_transform_mat.GetUp();
-	up_dir.Normalize();
+	//Vector3 up_dir = m_transform_mat.GetUp();
+	//up_dir.Normalize();
 
-	Vector3 forward_dir = m_transform_mat.GetForward();
-	forward_dir.Normalize();
+	//Vector3 forward_dir = m_transform_mat.GetForward();
+	//forward_dir.Normalize();
 
-	Vector3 right_end = start + right_dir * 3.f;
-	Vector3 up_end = start + up_dir * 3.f;
-	Vector3 forward_end = start + forward_dir * 3.f;
+	//Vector3 right_end = start + right_dir * 3.f;
+	//Vector3 up_end = start + up_dir * 3.f;
+	//Vector3 forward_end = start + forward_dir * 3.f;
 
-	DebugRenderLine(.05f, start, right_end, 3.f, Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
-	DebugRenderLine(.05f, start, up_end, 3.f, Rgba::GREEN, Rgba::GREEN, DEBUG_RENDER_USE_DEPTH);
-	DebugRenderLine(.05f, start, forward_end, 3.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
+	//DebugRenderLine(.05f, start, right_end, 3.f, Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	//DebugRenderLine(.05f, start, up_end, 3.f, Rgba::GREEN, Rgba::GREEN, DEBUG_RENDER_USE_DEPTH);
+	//DebugRenderLine(.05f, start, forward_end, 3.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
+}
+
+Vector3 CollisionPrimitive::GetBasisAndPosition(uint index) const
+{
+	// 0 gives I - right, 1 gives J - up, 2 gives K - forward
+	Vector3 res;
+
+	if (index == 0)
+		res = m_transform_mat.GetRight();
+
+	else if (index == 1)
+		res = m_transform_mat.GetUp();
+
+	else if (index == 2)
+		res = m_transform_mat.GetForward();
+
+	else if (index == 3)
+		res = m_transform_mat.GetTranslation();
+
+	else 
+		ASSERT_OR_DIE(false, "Invalid index for axis");
+
+	return res;
+}
+
+void CollisionPrimitive::SetRigidBodyPosition(const Vector3& pos)
+{
+	m_rigid_body->SetCenter(pos);
+
+	// position changed, update cache
+	m_rigid_body->CacheData();
+
+	// update primitive transform at last
+	m_transform_mat = m_rigid_body->GetTransformMat4();
 }
 
 CollisionSphere::CollisionSphere(const float& radius)

@@ -1683,7 +1683,7 @@ void Renderer::SetColorUBO( GLuint )
 }
 
 
-void Renderer::SetSingleLightUBO(GLuint handle)
+void Renderer::SetSingleLightUBO(GLuint)
 {
 	m_uboSingleLight->CopyToGPU(sizeof(sSingleLightData), &m_singleLightData);
 	glBindBufferBase(GL_UNIFORM_BUFFER, SINGLE_LIGHT_BUFFER_BIND_IDX, m_uboSingleLight->GetHandle());

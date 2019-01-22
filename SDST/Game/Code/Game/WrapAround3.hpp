@@ -4,6 +4,7 @@
 #include "Engine/Core/GameObject.hpp"
 #include "Engine/Physics/3D/Rigidbody3.hpp"
 #include "Engine/Physics/3D/BVH3.hpp"
+#include "Engine/Physics/3D/RF/CollisionPrimitive.hpp"
 
 #include <vector>
 
@@ -15,7 +16,8 @@ class WrapAround
 {
 public:
 	AABB3 m_bounds;
-	std::vector<GameObject*> m_gos;
+	//std::vector<GameObject*> m_gos;
+	std::vector<CollisionPrimitive*> m_primitives;
 	Mesh* m_mesh = nullptr;
 	Transform m_transform;
 	Vector3 m_positions[8];

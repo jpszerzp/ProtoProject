@@ -447,7 +447,7 @@ void RemoteCommand(Command& cmd)
 		//g_rcs->SendMsg(clientIdx, 1, cmdStr.c_str());
 		g_rcs->SendMsg(clientIdx, 2, cmdStr.c_str());
 	}
-	catch (std::invalid_argument& i)
+	catch (std::invalid_argument&)
 	{
 		// so, idx is 0; echo is false since we didn't use echo cmd
 		//g_rcs->SendMsg(0, 1, indexStr.c_str());

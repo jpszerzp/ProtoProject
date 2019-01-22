@@ -7,6 +7,8 @@
 #include "Engine/Physics/3D/SphereRB3.hpp"
 #include "Engine/Physics/3D/CCDResolver.hpp"
 #include "Engine/Physics/3D/RF/CollisionPrimitive.hpp"
+#include "Engine/Physics/3D/RF/CollisionKeep.hpp"
+#include "Engine/Physics/3D/RF/CollisionSolver.hpp"
 #include "Engine/Core/Primitive/Sphere.hpp"
 #include "Engine/Core/Primitive/Cube.hpp"
 #include "Engine/Core/Primitive/Quad.hpp"
@@ -108,62 +110,19 @@ public:
 	void WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, const Vector3& rot, const Vector3& scale);
 
 public:
-	GravityRigidForceGenerator* m_gravity;
-
-	//Rod* m_rod;
-	Spring* m_spring;
-	AnchorSpring* m_anchorSpring;
-	GeneralRigidAnchorSpring* m_rigidAnchorSpring;
-
-	ParticleForceRegistry* m_particleRegistry = nullptr;
-	RigidForceRegistry* m_rigidRegistry = nullptr;
-
-	// entities
-	std::vector<Sphere*> m_spheres;
-	std::vector<Cube*>	 m_cubes;
-	std::vector<Quad*>	 m_quads;
-	std::vector<Point*>  m_points;
-	std::vector<Fireworks*>  m_fw_points;
-	std::vector<Box*>	 m_boxes;
-
-	// continuous convenience
-	Sphere* m_ball_ccd_test_discrete = nullptr;
-	Sphere* m_ball_ccd_test_continuous = nullptr;
-	Quad* m_quad_ccd_test = nullptr;
-	std::vector<Vector3> m_inspection;
-	int m_insepction_count = 0;
-	// we do need some structure to observe continuous objects conveniently
-	std::vector<Sphere*> m_ccd_spheres;
-	std::vector<Quad*> m_ccd_planes;
-
-	ContactResolver* m_allResolver;		
-	ContactResolver* m_coherentResolver;
-
-	// QH
-	QuickHull* m_qh = nullptr;
-	eHullGenerationStep m_genStep = HULL_GEN_FORM_CONFLICTS;
-	
-	WrapAround* m_wraparound_continuous;
-	WrapAround* m_wraparound_verlet;
-	WrapAround* m_wraparound_general;
-	WrapAround* m_wraparound_sphere_only;
-	WrapAround* m_wraparound_box_only;
-	WrapAround* m_wraparound_bvh;
-
-	// assimp test
-	AssimpLoader* m_assimp_0 = nullptr;
-	std::set<Vector3> m_modelPoints;
-	std::vector<Mesh*> m_modelPointMeshes;
-
-	// bp
-	Mesh* m_bp_title = nullptr;
-	Mesh* m_bp_stat = nullptr;
+	const static uint MAX_CONTACT_NUM = 256;
 
 	Mesh* m_time_ui;
-
-	Sphere* sph_holder;
 
 	// refactor
 	std::vector<CollisionSphere*> m_sphere_primitives;
 	CollisionSphere* m_handle_0;
+
+	Collision m_storage[MAX_CONTACT_NUM];
+
+	CollisionKeep m_keep;
+
+	CollisionSolver m_solver;
+
+	WrapAround* m_wraparound_sphere_only;
 };

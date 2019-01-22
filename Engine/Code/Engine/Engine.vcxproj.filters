@@ -556,6 +556,15 @@
     <ClCompile Include="Physics\3D\RF\CollisionKeep.cpp">
       <Filter>General</Filter>
     </ClCompile>
+    <ClCompile Include="Physics\3D\RF\TheCollision.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\3D\RF\CollisionDetector.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\3D\RF\CollisionSolver.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -955,5 +964,9 @@
     <ClInclude Include="Physics\3D\RF\CollisionPrimitive.hpp" />
     <ClInclude Include="Physics\3D\RF\PhysTime.hpp" />
     <ClInclude Include="Physics\3D\RF\CollisionKeep.hpp" />
+    <ClInclude Include="Physics\3D\RF\TheCollision.hpp" />
+    <ClInclude Include="Physics\3D\RF\CollisionDetector.hpp" />
+    <ClInclude Include="Physics\3D\RF\CollisionResolver.hpp" />
+    <ClInclude Include="Physics\3D\RF\CollisionSolver.hpp" />
   </ItemGroup>
 </Project>

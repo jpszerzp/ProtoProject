@@ -25,12 +25,14 @@ public:
 	void SetShader(Shader* shader) { m_shader = shader; }
 	void SetTexture(Texture* texture) { m_texture = texture; }
 	void SetTint(const Vector4& tint) { m_tint = tint; }
+	void SetRigidBodyPosition(const Vector3& pos);
 
 	void Update(float deltaTime);
 
 	void Render(Renderer* renderer);
 
 	CollisionRigidBody* GetRigidBody() const { return m_rigid_body; }
+	Vector3 GetBasisAndPosition(uint index) const;
 };
 
 class CollisionSphere : public CollisionPrimitive
@@ -41,4 +43,6 @@ public:
 	CollisionSphere(const float& radius);
 
 	void AttachToRigidBody(CollisionRigidBody* rb) override;
+
+	float GetRadius() const { return m_radius; }
 };
