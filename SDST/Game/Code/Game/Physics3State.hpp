@@ -116,7 +116,7 @@ public:
 
 	// refactor
 	std::vector<CollisionSphere*> m_sphere_primitives;
-	CollisionSphere* m_handle_0;
+	CollisionSphere* m_handle_0;	// temp
 
 	Collision m_storage[MAX_CONTACT_NUM];
 

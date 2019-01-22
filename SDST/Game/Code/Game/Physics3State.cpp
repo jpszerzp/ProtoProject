@@ -81,6 +81,8 @@ Physics3State::Physics3State()
 
 	m_sphere_primitives.push_back(m_handle_0);
 
+	m_wraparound_sphere_only->m_primitives.push_back(m_handle_0);
+
 	// debug
 	DebugRenderSet3DCamera(m_camera);
 	DebugRenderSet2DCamera(m_UICamera);
@@ -195,11 +197,13 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	// slow
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_0))
 	{
-
+		for (CollisionPrimitive* primitive : m_wraparound_sphere_only->m_primitives)
+			primitive->GetRigidBody()->SetSlow(.01f);
 	}
 	else
 	{
-
+		for (CollisionPrimitive* primitive : m_wraparound_sphere_only->m_primitives)
+			primitive->GetRigidBody()->SetSlow(1.f);
 	}
 
 	//CollisionRigidBody* rb = m_handle_0->GetRigidBody();

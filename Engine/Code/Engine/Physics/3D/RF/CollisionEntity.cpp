@@ -38,6 +38,8 @@ void CollisionRigidBody::Integrate(float deltaTime)
 	if (!m_awake)
 		return;
 
+	deltaTime *= m_slow;
+
 	m_last_lin_acc = m_lin_acc;
 	m_last_lin_acc += (m_net_force * m_inv_mass);
 	Vector3 ang_acc = m_inv_tensor_world * m_net_torque;

@@ -28,6 +28,8 @@ protected:
 	float m_lin_damp = 1.f;
 	float m_ang_damp = 1.f;
 
+	float m_slow = 1.f;
+
 public:
 	virtual void Integrate(float deltaTime);
 	virtual void ClearAcc();
@@ -39,6 +41,7 @@ public:
 	void SetLinearVelocity(const Vector3& lin_vel) { m_lin_vel = lin_vel; }
 	void SetSleepable(bool sleepable);
 	void SetBaseLinearAcceleration(const Vector3& acc) { m_lin_acc = acc; }
+	void SetSlow(const float& slow) { m_slow = slow; }
 
 	virtual void CacheData(){}
 
