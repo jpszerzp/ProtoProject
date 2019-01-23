@@ -1,7 +1,7 @@
 #include "Engine/Physics/3D/RF/CollisionEntity.hpp"
 #include "Engine/Math/MathUtils.hpp"
 
-#define SLEEP_THRESHOLD 0.1f
+#define SLEEP_THRESHOLD 1.f
 
 void CollisionEntity::Integrate(float)
 {
@@ -21,6 +21,11 @@ void CollisionEntity::SetSleepable(bool sleepable)
 	if (!m_sleepable && !m_awake)
 		// make sure it is awake if it is not sleepable and not awake
 		SetAwake(true);
+}
+
+float CollisionEntity::GetRealTimeMotion() const
+{
+	return DotProduct(m_lin_vel, m_lin_vel);
 }
 
 void CollisionEntity::AddLinearVelocity(const Vector3& v)
@@ -59,8 +64,7 @@ void CollisionRigidBody::Integrate(float deltaTime)
 
 	if (m_sleepable)
 	{
-		float currentMotion = DotProduct(m_lin_vel, m_lin_vel) +
-			DotProduct(m_ang_vel, m_ang_vel);
+		float currentMotion = GetRealTimeMotion();
 
 		float bias = powf(0.5, deltaTime);
 		m_motion = bias*m_motion + (1-bias)*currentMotion;
@@ -159,6 +163,11 @@ void CollisionRigidBody::SetAwake(bool awake)
 void CollisionRigidBody::GetIITWorld(Matrix33* iitw) const
 {
 	*iitw = m_inv_tensor_world;
+}
+
+float CollisionRigidBody::GetRealTimeMotion() const
+{
+	return DotProduct(m_lin_vel, m_lin_vel) + DotProduct(m_ang_vel, m_ang_vel);
 }
 
 void CollisionRigidBody::AddAngularVelocity(const Vector3& v)

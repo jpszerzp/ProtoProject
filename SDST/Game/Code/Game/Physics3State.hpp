@@ -104,21 +104,25 @@ public:
 	void WrapAroundTestGeneral(bool give_ang_vel, bool register_g);
 	void WrapAroundTestSphere(bool give_ang_vel, bool register_g);
 	void WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, bool register_g);
-	void WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, const Vector3& rot, const Vector3& scale);
+	CollisionSphere* WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, const Vector3& rot, const Vector3& scale);
 	void WrapAroundTestBox(bool give_ang_vel, bool register_g);
 	void WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool register_g);
-	void WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, const Vector3& rot, const Vector3& scale);
+	CollisionBox* WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, const Vector3& rot, const Vector3& scale);
 
 public:
 	const static uint MAX_CONTACT_NUM = 256;
 
+	// ui
 	Mesh* m_time_ui;
+	Mesh* m_motion_ui;
 
 	// refactor
 	std::vector<CollisionSphere*> m_spheres;
 	std::vector<CollisionBox*> m_boxes;
 	std::vector<CollisionPlane*> m_planes;
-	CollisionSphere* m_handle_0;	// temp
+
+	// temp
+	CollisionSphere* m_handle_0;
 
 	Collision m_storage[MAX_CONTACT_NUM];
 

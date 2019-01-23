@@ -240,6 +240,9 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_7))
 		WrapAroundTestBox(m_wraparound_box_only, false, false, true, Vector3(60.8f, 315.f, 0.f), Vector3::ZERO, Vector3::ONE);
 
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_8))
+		m_handle_0 = WrapAroundTestSphere(m_wraparound_sphere_plane, true, false, true, Vector3(28.f, 355.f, 0.f), Vector3::ZERO, Vector3::ONE);
+
 	// slow
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_0))
 	{
@@ -339,6 +342,17 @@ void Physics3State::UpdateUI()
 
 	std::string time_ui = Stringf("Time: %f", TimingData::GetTimeSeconds());
 	m_time_ui = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, time_ui, VERT_PCU);
+
+	titleMin -= Vector2(0.f, txtHeight);
+
+	if (m_motion_ui != nullptr)
+	{
+		delete m_motion_ui;
+		m_motion_ui = nullptr;
+	}
+
+	std::string motion_ui = Stringf("Motion of handle 0: %f", m_handle_0->GetRigidBody()->GetRealTimeMotion());
+	m_motion_ui = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, motion_ui, VERT_PCU);
 }
 
 void Physics3State::UpdateGameobjectsCore(float deltaTime)
@@ -390,6 +404,17 @@ void Physics3State::UpdateContactGeneration()
 
 			// spawn collisions in the keep
 			CollisionSensor::SphereVsSphere(*sph0, *sph1, &m_keep);
+		}
+
+		// sphere vs plane
+		for (std::vector<CollisionPlane*>::size_type idx1 = 0; idx1 < m_planes.size(); ++idx1)
+		{
+			if (!m_keep.AllowMoreCollision())
+				return;
+
+			CollisionPlane* pl = m_planes[idx1];
+
+			CollisionSensor::SphereVsPlane(*sph0, *pl, &m_keep);
 		}
 	}
 
@@ -460,10 +485,11 @@ void Physics3State::RenderForwardPath(Renderer*)
 void Physics3State::RenderUI(Renderer*)
 {
 	DrawTextCut(m_time_ui);
+	DrawTextCut(m_motion_ui);
 }
 
 
-void Physics3State::WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, const Vector3& rot, const Vector3&)
+CollisionSphere* Physics3State::WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, const Vector3& rot, const Vector3&)
 {
 	CollisionSphere* sph = new CollisionSphere(1.f);
 
@@ -493,9 +519,11 @@ void Physics3State::WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, boo
 	}
 
 	wpa->m_primitives.push_back(sph);
+
+	return sph;
 }
 
-void Physics3State::WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, const Vector3& rot, const Vector3&)
+CollisionBox* Physics3State::WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, const Vector3& rot, const Vector3&)
 {
 	CollisionBox* box = new CollisionBox(Vector3(.5f));
 
@@ -525,4 +553,6 @@ void Physics3State::WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool g
 	}
 
 	wpa->m_primitives.push_back(box);
+
+	return box;
 }

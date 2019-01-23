@@ -60,6 +60,7 @@ public:
 	bool IsAwake() const { return m_awake; }
 	bool IsSleepable() const { return m_sleepable; }
 	virtual Vector3 GetAngularVelocity() const { ASSERT_OR_DIE(false, "entity does not have angular velocity"); }
+	virtual float GetRealTimeMotion() const;
 
 	void AddLinearVelocity(const Vector3& v);
 	void AddForce(const Vector3& f);
@@ -101,6 +102,7 @@ public:
 	Quaternion GetOrientation() const { return m_orientation; }
 	void GetIITWorld(Matrix33* iitw) const;
 	Vector3 GetAngularVelocity() const override { return m_ang_vel; }
+	float GetRealTimeMotion() const override;
 
 	void AddAngularVelocity(const Vector3& v);
 };

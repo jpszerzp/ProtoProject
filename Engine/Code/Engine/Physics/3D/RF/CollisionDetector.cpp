@@ -248,3 +248,39 @@ uint CollisionSensor::BoxVsBox(const CollisionBox& b1, const CollisionBox& b2, C
 }
 
 #undef CHECK_OVERLAP
+
+uint CollisionSensor::SphereVsPlane(const CollisionSphere& sphere, const CollisionPlane& plane, CollisionKeep* c_data)
+{
+	if (c_data->m_collision_left <= 0)
+		return 0;
+
+	Vector3 position = sphere.GetBasisAndPosition(3);
+
+	float dist = DotProduct(plane.GetNormal(), position) - plane.GetOffset();
+
+	if (dist * dist > sphere.GetRadius() * sphere.GetRadius())
+		return 0;
+
+	Vector3 normal = plane.GetNormal();
+	float penetration = -dist;
+	
+	if (dist < 0.f)
+	{
+		normal *= -1.f;
+		penetration *= -1.f;
+	}
+
+	penetration += sphere.GetRadius();
+
+	Collision* collision = c_data->m_collision;
+	collision->m_normal = normal;
+	collision->m_penetration = penetration;
+	collision->m_pos = position - plane.GetNormal() * dist;
+	collision->SetBodies(sphere.GetRigidBody(), nullptr);		// plane is environment, not considered in resolution
+	collision->SetFriction(c_data->m_global_friction);
+	collision->SetRestitution(c_data->m_global_restitution);
+
+	c_data->NotifyAddedCollisions(1);
+
+	return 1;
+}
