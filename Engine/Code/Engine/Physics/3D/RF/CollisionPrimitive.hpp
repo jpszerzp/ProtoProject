@@ -33,6 +33,7 @@ public:
 
 	CollisionRigidBody* GetRigidBody() const { return m_rigid_body; }
 	Vector3 GetBasisAndPosition(uint index) const;
+	Matrix44 GetTransformMat4() const { return m_transform_mat; }
 };
 
 class CollisionSphere : public CollisionPrimitive

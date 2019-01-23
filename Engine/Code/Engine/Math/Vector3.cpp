@@ -62,6 +62,17 @@ const float Vector3::operator[](const int idx) const
 	}
 }
 
+float& Vector3::operator[](const int& idx)
+{
+	if (idx == 1)
+		return x;
+
+	if (idx == 2)
+		return y;
+
+	return z;
+}
+
 //-----------------------------------------------------------------------------------------------
 const Vector3 Vector3::operator-( const Vector3& vecToSubtract ) const
 {

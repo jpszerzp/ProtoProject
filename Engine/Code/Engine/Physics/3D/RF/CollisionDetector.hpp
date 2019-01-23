@@ -8,4 +8,6 @@ class CollisionSensor
 {
 public:
 	static uint SphereVsSphere(const CollisionSphere& s1, const CollisionSphere& s2, CollisionKeep* c_data);
+
+	static uint BoxVsBox(const CollisionBox& b1, const CollisionBox& b2, CollisionKeep* c_data);
 };

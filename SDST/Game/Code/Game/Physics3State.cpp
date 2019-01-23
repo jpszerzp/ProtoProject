@@ -215,6 +215,9 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_6))
 		WrapAroundTestSphere(m_wraparound_sphere_only, false, false, true, Vector3(31.8f, 315.f, 0.f), Vector3::ZERO, Vector3::ONE);
 
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_8))
+		WrapAroundTestBox(m_wraparound_box_only, false, false, true, Vector3(60.8f, 315.f, 0.f), Vector3::ZERO, Vector3::ONE);
+
 	// slow
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_0))
 	{
@@ -351,6 +354,7 @@ void Physics3State::UpdateContactGeneration()
 	{
 		CollisionSphere* sph0 = m_sphere_primitives[idx0];
 
+		// sphere vs sphere
 		for (std::vector<CollisionSphere*>::size_type idx1 = idx0 + 1; idx1 < m_sphere_primitives.size(); ++idx1)
 		{
 			if (!m_keep.AllowMoreCollision())
@@ -360,6 +364,22 @@ void Physics3State::UpdateContactGeneration()
 
 			// spawn collisions in the keep
 			CollisionSensor::SphereVsSphere(*sph0, *sph1, &m_keep);
+		}
+	}
+
+	for (std::vector<CollisionBox*>::size_type idx0 = 0; idx0 < m_box_primitives.size(); ++idx0)
+	{
+		CollisionBox* box0 = m_box_primitives[idx0];
+
+		// box vs box
+		for (std::vector<CollisionBox*>::size_type idx1 = idx0 + 1; idx1 < m_box_primitives.size(); ++idx1)
+		{
+			if (!m_keep.AllowMoreCollision())
+				return;
+
+			CollisionBox* box1 = m_box_primitives[idx1];
+
+			CollisionSensor::BoxVsBox(*box0, *box1, &m_keep);
 		}
 	}
 }
@@ -427,7 +447,7 @@ void Physics3State::WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, boo
 
 	if(register_g)
 	{
-		Vector3 gravity = (Vector3::GRAVITY / 2.f) * rb->GetMass();
+		Vector3 gravity = (Vector3::GRAVITY / 2.f);
 		rb->SetBaseLinearAcceleration(gravity);
 	}
 
@@ -443,4 +463,36 @@ void Physics3State::WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, boo
 	}
 
 	wpa->m_primitives.push_back(sph);
+}
+
+void Physics3State::WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, const Vector3& rot, const Vector3&)
+{
+	CollisionBox* box = new CollisionBox(Vector3(.5f));
+
+	CollisionRigidBody* rb = new CollisionRigidBody(1.f, position, rot);
+	rb->SetAwake(true);
+	rb->SetSleepable(false);
+
+	box->AttachToRigidBody(rb);
+
+	m_box_primitives.push_back(box);
+
+	if(register_g)
+	{
+		Vector3 gravity = (Vector3::GRAVITY / 2.f);
+		rb->SetBaseLinearAcceleration(gravity);
+	}
+
+	if (give_lin_vel)
+		rb->SetLinearVelocity(GetRandomVector3() * 5.f);
+
+	if (give_ang_vel)
+	{
+		float ang_v_x = GetRandomFloatInRange(-5.f, 5.f);
+		float ang_v_y = GetRandomFloatInRange(-5.f, 5.f);
+		float ang_v_z = GetRandomFloatInRange(-5.f, 5.f);
+		rb->SetAngularVelocity(Vector3(ang_v_x, ang_v_y, ang_v_z));
+	}
+
+	wpa->m_primitives.push_back(box);
 }

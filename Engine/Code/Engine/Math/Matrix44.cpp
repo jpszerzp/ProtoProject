@@ -523,6 +523,24 @@ Vector4 Matrix44::operator*(const Vector4& rhs) const
 }
 
 
+Vector3 Matrix44::operator*(const Vector3& rhs) const
+{
+	Vector3 row1 = Vector3(Ix, Jx, Kx);
+	Vector3 row2 = Vector3(Iy, Jy, Ky);
+	Vector3 row3 = Vector3(Iz, Jz, Kz);
+
+	float x = DotProduct(row1, rhs);
+	float y = DotProduct(row2, rhs);
+	float z = DotProduct(row3, rhs);
+
+	// also considers translation
+	x += Tx;
+	y += Ty;
+	z += Tz;
+
+	return Vector3(x, y, z);
+}
+
 Matrix44 Matrix44::Invert() const
 {
 	float inv[16];

@@ -71,6 +71,7 @@ public:
 
 	Matrix44 operator*(const Matrix44& rhs) const;
 	Vector4 operator*(const Vector4& rhs) const;
+	Vector3 operator*(const Vector3& rhs) const;
 
 	Vector3 GetForward() const;
 	Vector3 GetUp() const;

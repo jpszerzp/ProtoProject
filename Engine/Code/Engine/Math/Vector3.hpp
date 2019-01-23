@@ -35,6 +35,7 @@ public:
 	bool operator==( const Vector3& compare ) const;				
 	bool operator!=( const Vector3& compare ) const;	
 	const float operator[](const int idx) const;
+	float& operator[](const int& idx);
 	const Vector3 operator-() const;
  
 	float	GetLength() const;
