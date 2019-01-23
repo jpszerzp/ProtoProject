@@ -23,6 +23,7 @@ public:
 	Vector2() {}											// default constructor: do nothing (for speed)
 	Vector2( const Vector2& copyFrom );						// copy constructor (from another vec2)
 	explicit Vector2( float initialX, float initialY );		// explicit constructor (from x, y)
+	explicit Vector2( const float& initialXY );
 
 	// Operators
 	const Vector2 operator+( const Vector2& vecToAdd ) const;		// vec2 + vec2

@@ -34,6 +34,10 @@ public:
 	CollisionRigidBody* GetRigidBody() const { return m_rigid_body; }
 	Vector3 GetBasisAndPosition(uint index) const;
 	Matrix44 GetTransformMat4() const { return m_transform_mat; }
+	Mesh* GetMesh() const { return m_mesh; }
+	Shader* GetShader() const { return m_shader; }
+	Texture* GetTexture() const { return m_texture; }
+	Vector4 GetTint() const { return m_tint; }
 };
 
 class CollisionSphere : public CollisionPrimitive
@@ -58,4 +62,21 @@ public:
 	void AttachToRigidBody(CollisionRigidBody* rb) override;
 
 	Vector3 GetHalfSize() const { return m_half_size; }
+};
+
+class CollisionPlane : public CollisionPrimitive
+{
+	Vector3 m_normal;
+
+	float m_offset;
+
+	Vector2 m_bound;
+
+public:
+	CollisionPlane(const Vector2& bound, const Vector3& normal, const float& offset);
+
+	void AttachToRigidBody(CollisionRigidBody* rb) override;
+
+	Vector3 GetNormal() const { return m_normal; }
+	float GetOffset() const { return m_offset; }
 };

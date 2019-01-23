@@ -115,8 +115,9 @@ public:
 	Mesh* m_time_ui;
 
 	// refactor
-	std::vector<CollisionSphere*> m_sphere_primitives;
-	std::vector<CollisionBox*> m_box_primitives;
+	std::vector<CollisionSphere*> m_spheres;
+	std::vector<CollisionBox*> m_boxes;
+	std::vector<CollisionPlane*> m_planes;
 	CollisionSphere* m_handle_0;	// temp
 
 	Collision m_storage[MAX_CONTACT_NUM];
@@ -127,4 +128,5 @@ public:
 
 	WrapAround* m_wraparound_sphere_only;
 	WrapAround* m_wraparound_box_only;
+	WrapAround* m_wraparound_sphere_plane;
 };

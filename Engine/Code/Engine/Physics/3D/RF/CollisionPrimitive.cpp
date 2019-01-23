@@ -163,3 +163,40 @@ void CollisionBox::AttachToRigidBody(CollisionRigidBody* rb)
 
 	SetPrimitiveTransformMat4(rb->GetTransformMat4());
 }
+
+CollisionPlane::CollisionPlane(const Vector2& bound, const Vector3& normal, const float& offset)
+	: m_bound(bound), m_normal(normal), m_offset(offset)
+{
+	Renderer* renderer = Renderer::GetInstance();
+
+	SetMesh(renderer->CreateOrGetMesh("quad_pcu_20"));
+	SetShader(renderer->CreateOrGetShader("default"));
+	SetTexture(renderer->CreateOrGetTexture("Data/Images/perspective_test.png"));
+
+	Vector4 tintV4;
+	Rgba tint = Rgba::WHITE;
+	tint.GetAsFloats(tintV4.x, tintV4.y, tintV4.z, tintV4.w);
+	SetTint(tintV4);
+}
+
+void CollisionPlane::AttachToRigidBody(CollisionRigidBody* rb)
+{
+	SetRigidBody(rb);
+	
+	const float& mass = rb->GetMass();
+	float factor_1 = m_bound.y * m_bound.y;
+	float factor_2 = m_bound.x * m_bound.x;
+	float factor_3 = m_bound.GetLengthSquared();				// x ^ 2 + y ^ 2
+	Vector3 tensor_i = Vector3(mass * factor_1 / 12.f, 0.f, 0.f);
+	Vector3 tensor_j = Vector3(0.f, mass * factor_2 / 12.f, 0.f);
+	Vector3 tensor_k = Vector3(0.f, 0.f, mass * factor_3 / 12.f);
+	Matrix33 tensor = Matrix33(tensor_i, tensor_j, tensor_k);
+
+	rb->SetTensor(tensor);
+	rb->SetInvTensor(tensor.Invert());
+
+	// transform and inv tensor world prepared
+	rb->CacheData();
+
+	SetPrimitiveTransformMat4(rb->GetTransformMat4());
+}

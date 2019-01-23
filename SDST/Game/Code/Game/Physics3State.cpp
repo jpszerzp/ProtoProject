@@ -65,6 +65,7 @@ Physics3State::Physics3State()
 	// solver
 	m_solver = CollisionSolver(MAX_CONTACT_NUM * 8, .01f, .01f);
 
+	// a sphere
 	m_wraparound_sphere_only = new WrapAround(Vector3(20.f, 300.f, -10.f), Vector3(40.f, 320.f, 10.f),
 		Vector3(25.f, 305.f, -5.f), Vector3(35.f, 305.f, -5.f),
 		Vector3(25.f, 305.f, 5.f), Vector3(35.f, 305.f, 5.f),
@@ -79,10 +80,11 @@ Physics3State::Physics3State()
 
 	m_handle_0->AttachToRigidBody(rb);
 
-	m_sphere_primitives.push_back(m_handle_0);
+	m_spheres.push_back(m_handle_0);
 
 	m_wraparound_sphere_only->m_primitives.push_back(m_handle_0);
 
+	// a box
 	m_wraparound_box_only = new WrapAround(Vector3(50.f, 300.f, -10.f), Vector3(70.f, 320.f, 10.f),
 		Vector3(55.f, 305.f, -5.f), Vector3(65.f, 305.f, -5.f),
 		Vector3(55.f, 305.f, 5.f), Vector3(65.f, 305.f, 5.f),
@@ -97,9 +99,29 @@ Physics3State::Physics3State()
 
 	box_0->AttachToRigidBody(rb);
 
-	m_box_primitives.push_back(box_0);
+	m_boxes.push_back(box_0);
 
 	m_wraparound_box_only->m_primitives.push_back(box_0);
+
+	// a plane
+	m_wraparound_sphere_plane = new WrapAround(Vector3(20.f, 340.f, -10.f), Vector3(40.f, 360.f, 10.f),
+		Vector3(25.f, 345.f, -5.f), Vector3(35.f, 345.f, -5.f),
+		Vector3(25.f, 345.f, 5.f), Vector3(35.f, 345.f, 5.f),
+		Vector3(25.f, 355.f, -5.f), Vector3(35.f, 355.f, -5.f),
+		Vector3(25.f, 355.f, 5.f), Vector3(35.f, 355.f, 5.f));
+
+	CollisionPlane* plane_0 = new CollisionPlane(Vector2(20.f), Vector3(0.f, 1.f, 0.f), 342.f);
+
+	rb = new CollisionRigidBody(1.f, Vector3(30.f, 342.f, 0.f), Vector3(90.f, 0.f, 0.f));
+	rb->SetAwake(true);
+	rb->SetSleepable(false);
+
+	plane_0->AttachToRigidBody(rb);
+
+	m_planes.push_back(plane_0);
+
+	// do not include plane in wraparound
+	//m_wraparound_sphere_plane->m_primitives.push_back(plane_0);
 
 	// debug
 	DebugRenderSet3DCamera(m_camera);
@@ -215,7 +237,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_6))
 		WrapAroundTestSphere(m_wraparound_sphere_only, false, false, true, Vector3(31.8f, 315.f, 0.f), Vector3::ZERO, Vector3::ONE);
 
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_8))
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_7))
 		WrapAroundTestBox(m_wraparound_box_only, false, false, true, Vector3(60.8f, 315.f, 0.f), Vector3::ZERO, Vector3::ONE);
 
 	// slow
@@ -295,6 +317,7 @@ void Physics3State::UpdateWrapArounds()
 {
 	m_wraparound_sphere_only->Update();
 	m_wraparound_box_only->Update();
+	m_wraparound_sphere_plane->Update();
 }
 
 
@@ -327,11 +350,14 @@ void Physics3State::UpdateGameobjectsCore(float deltaTime)
 
 void Physics3State::UpdateGameobjectsDynamics(float deltaTime)
 {
-	for (std::vector<CollisionSphere*>::size_type idx = 0; idx < m_sphere_primitives.size(); ++idx)
-		m_sphere_primitives[idx]->Update(deltaTime);
+	for (std::vector<CollisionSphere*>::size_type idx = 0; idx < m_spheres.size(); ++idx)
+		m_spheres[idx]->Update(deltaTime);
 
-	for (std::vector<CollisionBox*>::size_type idx = 0; idx < m_box_primitives.size(); ++idx)
-		m_box_primitives[idx]->Update(deltaTime);
+	for (std::vector<CollisionBox*>::size_type idx = 0; idx < m_boxes.size(); ++idx)
+		m_boxes[idx]->Update(deltaTime);
+
+	for (std::vector<CollisionPlane*>::size_type idx = 0; idx < m_planes.size(); ++idx)
+		m_planes[idx]->Update(deltaTime);
 }
 
 void Physics3State::UpdateContacts(float deltaTime)
@@ -350,34 +376,34 @@ void Physics3State::UpdateContactGeneration()
 	m_keep.m_tolerance = .1f;
 
 	// generate collisions
-	for (std::vector<CollisionSphere*>::size_type idx0 = 0; idx0 < m_sphere_primitives.size(); ++idx0)
+	for (std::vector<CollisionSphere*>::size_type idx0 = 0; idx0 < m_spheres.size(); ++idx0)
 	{
-		CollisionSphere* sph0 = m_sphere_primitives[idx0];
+		CollisionSphere* sph0 = m_spheres[idx0];
 
 		// sphere vs sphere
-		for (std::vector<CollisionSphere*>::size_type idx1 = idx0 + 1; idx1 < m_sphere_primitives.size(); ++idx1)
+		for (std::vector<CollisionSphere*>::size_type idx1 = idx0 + 1; idx1 < m_spheres.size(); ++idx1)
 		{
 			if (!m_keep.AllowMoreCollision())
 				return;
 
-			CollisionSphere* sph1 = m_sphere_primitives[idx1];
+			CollisionSphere* sph1 = m_spheres[idx1];
 
 			// spawn collisions in the keep
 			CollisionSensor::SphereVsSphere(*sph0, *sph1, &m_keep);
 		}
 	}
 
-	for (std::vector<CollisionBox*>::size_type idx0 = 0; idx0 < m_box_primitives.size(); ++idx0)
+	for (std::vector<CollisionBox*>::size_type idx0 = 0; idx0 < m_boxes.size(); ++idx0)
 	{
-		CollisionBox* box0 = m_box_primitives[idx0];
+		CollisionBox* box0 = m_boxes[idx0];
 
 		// box vs box
-		for (std::vector<CollisionBox*>::size_type idx1 = idx0 + 1; idx1 < m_box_primitives.size(); ++idx1)
+		for (std::vector<CollisionBox*>::size_type idx1 = idx0 + 1; idx1 < m_boxes.size(); ++idx1)
 		{
 			if (!m_keep.AllowMoreCollision())
 				return;
 
-			CollisionBox* box1 = m_box_primitives[idx1];
+			CollisionBox* box1 = m_boxes[idx1];
 
 			CollisionSensor::BoxVsBox(*box0, *box1, &m_keep);
 		}
@@ -409,17 +435,21 @@ void Physics3State::Render(Renderer* renderer)
 
 void Physics3State::RenderGameobjects(Renderer* renderer)
 {
-	for (std::vector<CollisionSphere*>::size_type idx = 0; idx < m_sphere_primitives.size(); ++idx)
-		m_sphere_primitives[idx]->Render(renderer);
+	for (std::vector<CollisionSphere*>::size_type idx = 0; idx < m_spheres.size(); ++idx)
+		m_spheres[idx]->Render(renderer);
 
-	for (std::vector<CollisionBox*>::size_type idx = 0; idx < m_box_primitives.size(); ++idx)
-		m_box_primitives[idx]->Render(renderer);
+	for (std::vector<CollisionBox*>::size_type idx = 0; idx < m_boxes.size(); ++idx)
+		m_boxes[idx]->Render(renderer);
+
+	for (std::vector<CollisionPlane*>::size_type idx = 0; idx < m_planes.size(); ++idx)
+		m_planes[idx]->Render(renderer);
 }
 
 void Physics3State::RenderWrapArounds(Renderer* renderer)
 {
 	m_wraparound_sphere_only->Render(renderer);
 	m_wraparound_box_only->Render(renderer);
+	m_wraparound_sphere_plane->Render(renderer);
 }
 
 void Physics3State::RenderForwardPath(Renderer*)
@@ -443,7 +473,7 @@ void Physics3State::WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, boo
 
 	sph->AttachToRigidBody(rb);
 
-	m_sphere_primitives.push_back(sph);
+	m_spheres.push_back(sph);
 
 	if(register_g)
 	{
@@ -475,7 +505,7 @@ void Physics3State::WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool g
 
 	box->AttachToRigidBody(rb);
 
-	m_box_primitives.push_back(box);
+	m_boxes.push_back(box);
 
 	if(register_g)
 	{
