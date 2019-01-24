@@ -287,6 +287,11 @@ uint CollisionSensor::SphereVsPlane(const CollisionSphere& sphere, const Collisi
 
 uint CollisionSensor::BoxVsHalfPlane(const CollisionBox& box, const CollisionPlane& plane, CollisionKeep* c_data)
 {
+	// since it is half space, do not consider collisions if box is in negative space of plane
+	float center_dist = DotProduct(box.GetRigidBody()->GetCenter(), plane.GetNormal());
+	if (center_dist <= plane.GetOffset())
+		return 0;
+
 	if (c_data->m_collision_left <= 0) 
 		return 0;
 
