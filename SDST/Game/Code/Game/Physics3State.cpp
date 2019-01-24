@@ -123,6 +123,29 @@ Physics3State::Physics3State()
 	// do not include plane in wraparound
 	//m_wraparound_sphere_plane->m_primitives.push_back(plane_0);
 
+	// stack
+	Vector3 stack_pos_origin = Vector3(25.f, 342.5f, -2.f);
+	int stack_side = 5;
+	for (int k = 0; k < 5; ++k)
+	{
+		for (int i = 0; i < stack_side; ++i)
+		{
+			float stack_x = stack_pos_origin.x + i * 1.f; 
+
+			for (int j = 0; j < stack_side; ++j)
+			{
+				float stack_z = stack_pos_origin.z + j * 1.f;
+
+				Vector3 stack_pos = Vector3(stack_x, stack_pos_origin.y, stack_z);
+
+				WrapAroundTestBox(m_wraparound_plane, false, false, true, stack_pos, Vector3::ZERO, Vector3::ONE);
+			}
+		}
+
+		stack_side--;
+		stack_pos_origin = Vector3(stack_pos_origin.x + .5f, stack_pos_origin.y + 1.f, stack_pos_origin.z + .5f);
+	}
+
 	// debug
 	DebugRenderSet3DCamera(m_camera);
 	DebugRenderSet2DCamera(m_UICamera);
