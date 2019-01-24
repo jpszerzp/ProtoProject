@@ -284,3 +284,47 @@ uint CollisionSensor::SphereVsPlane(const CollisionSphere& sphere, const Collisi
 
 	return 1;
 }
+
+uint CollisionSensor::BoxVsHalfPlane(const CollisionBox& box, const CollisionPlane& plane, CollisionKeep* c_data)
+{
+	if (c_data->m_collision_left <= 0) 
+		return 0;
+
+	static float components[8][3] = {{1,1,1},{-1,1,1},{1,-1,1},{-1,-1,1},
+	{1,1,-1},{-1,1,-1},{1,-1,-1},{-1,-1,-1}};
+
+	Collision* collision = c_data->m_collision;
+	uint contactsUsed = 0;
+	for (uint i = 0; i < 8; i++) 
+	{
+		Vector3 vertexPos = Vector3(components[i][0], components[i][1], components[i][2]);
+		vertexPos = vertexPos * box.GetHalfSize();
+		vertexPos = box.GetTransformMat4() * vertexPos;
+
+		float vertexDistance = DotProduct(vertexPos, plane.GetNormal());
+
+		if (vertexDistance <= plane.GetOffset())
+		{
+			collision->m_pos = plane.GetNormal();
+			collision->m_pos *= (vertexDistance-plane.GetOffset());
+			collision->m_pos += vertexPos;
+			collision->m_normal = plane.GetNormal();
+			collision->m_penetration = plane.GetOffset() - vertexDistance;
+
+			collision->SetBodies(box.GetRigidBody(), nullptr);
+
+			collision->SetFriction(c_data->m_global_friction);
+			collision->SetRestitution(c_data->m_global_restitution);
+
+			// Move onto the next contact
+			collision++;
+			contactsUsed++;
+			if (contactsUsed == (uint)c_data->m_collision_left) 
+				return contactsUsed;
+		}
+	}
+
+	c_data->NotifyAddedCollisions(contactsUsed);
+
+	return contactsUsed;
+}

@@ -104,7 +104,7 @@ Physics3State::Physics3State()
 	m_wraparound_box_only->m_primitives.push_back(box_0);
 
 	// a plane
-	m_wraparound_sphere_plane = new WrapAround(Vector3(20.f, 340.f, -10.f), Vector3(40.f, 360.f, 10.f),
+	m_wraparound_plane = new WrapAround(Vector3(20.f, 340.f, -10.f), Vector3(40.f, 360.f, 10.f),
 		Vector3(25.f, 345.f, -5.f), Vector3(35.f, 345.f, -5.f),
 		Vector3(25.f, 345.f, 5.f), Vector3(35.f, 345.f, 5.f),
 		Vector3(25.f, 355.f, -5.f), Vector3(35.f, 355.f, -5.f),
@@ -241,7 +241,10 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		WrapAroundTestBox(m_wraparound_box_only, false, false, true, Vector3(60.8f, 315.f, 0.f), Vector3::ZERO, Vector3::ONE);
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_8))
-		m_handle_0 = WrapAroundTestSphere(m_wraparound_sphere_plane, true, false, true, Vector3(28.f, 355.f, 0.f), Vector3::ZERO, Vector3::ONE);
+		m_handle_0 = WrapAroundTestSphere(m_wraparound_plane, true, false, true, Vector3(25.f, 355.f, 0.f), Vector3::ZERO, Vector3::ONE);
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_9))
+		WrapAroundTestBox(m_wraparound_plane, true, false, true, Vector3(35.f, 355.f, 0.f), Vector3::ZERO, Vector3::ONE);
 
 	// slow
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_0))
@@ -320,7 +323,7 @@ void Physics3State::UpdateWrapArounds()
 {
 	m_wraparound_sphere_only->Update();
 	m_wraparound_box_only->Update();
-	m_wraparound_sphere_plane->Update();
+	m_wraparound_plane->Update();
 }
 
 
@@ -432,6 +435,16 @@ void Physics3State::UpdateContactGeneration()
 
 			CollisionSensor::BoxVsBox(*box0, *box1, &m_keep);
 		}
+
+		for (std::vector<CollisionPlane*>::size_type idx1 = 0; idx1 < m_planes.size(); ++idx1)
+		{
+			if (!m_keep.AllowMoreCollision())
+				return;
+
+			CollisionPlane* pl = m_planes[idx1];
+
+			CollisionSensor::BoxVsHalfPlane(*box0, *pl, &m_keep);
+		} 
 	}
 }
 
@@ -474,7 +487,7 @@ void Physics3State::RenderWrapArounds(Renderer* renderer)
 {
 	m_wraparound_sphere_only->Render(renderer);
 	m_wraparound_box_only->Render(renderer);
-	m_wraparound_sphere_plane->Render(renderer);
+	m_wraparound_plane->Render(renderer);
 }
 
 void Physics3State::RenderForwardPath(Renderer*)

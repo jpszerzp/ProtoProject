@@ -132,5 +132,5 @@ public:
 
 	WrapAround* m_wraparound_sphere_only;
 	WrapAround* m_wraparound_box_only;
-	WrapAround* m_wraparound_sphere_plane;
+	WrapAround* m_wraparound_plane;
 };

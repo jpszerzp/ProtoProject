@@ -86,6 +86,17 @@ const Vector3 Vector3::operator*( float uniformScale ) const
 	return Vector3( x * uniformScale, y * uniformScale, z * uniformScale ); // #MP1Fixme
 }
 
+// changes current vector
+const Vector3 Vector3::operator*(const Vector3& toMultiply) const
+{
+	Vector3 res;
+
+	res.x = x * toMultiply.x;
+	res.y = y * toMultiply.y;
+	res.z = z * toMultiply.z;
+
+	return res;
+}
 
 //-----------------------------------------------------------------------------------------------
 const Vector3 Vector3::operator/( float inverseScale ) const
