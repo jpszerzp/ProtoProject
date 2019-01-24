@@ -130,7 +130,7 @@ public:
 
 	CollisionSolver m_solver;
 
-	WrapAround* m_wraparound_sphere_only;
-	WrapAround* m_wraparound_box_only;
+	WrapAround* m_wraparound_sphere;
+	WrapAround* m_wraparound_box;
 	WrapAround* m_wraparound_plane;
 };

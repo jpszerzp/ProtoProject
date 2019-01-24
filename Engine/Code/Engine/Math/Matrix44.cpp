@@ -827,6 +827,20 @@ bool Matrix44::Invert(const float m[16], float invOut[16])
 }
 
 
+Vector3 Matrix44::MultiplyInverse(const Vector3& vector) const
+{
+	Vector3 tmp = vector;
+	tmp.x -= Tx;
+	tmp.y -= Ty;
+	tmp.z -= Tz;
+
+	float x = tmp.x * Ix + tmp.y * Iy + tmp.z * Iz;
+	float y = tmp.x * Jx + tmp.y * Jy + tmp.z * Jz;
+	float z = tmp.x * Kx + tmp.y * Ky + tmp.z * Kz;
+
+	return Vector3(x, y, z);
+}
+
 Matrix44 Matrix44::Transpose()
 {
 	Vector4 newI = Vector4(Ix, Jx, Kx, Tx);

@@ -333,3 +333,65 @@ uint CollisionSensor::BoxVsHalfPlane(const CollisionBox& box, const CollisionPla
 
 	return contactsUsed;
 }
+
+uint CollisionSensor::BoxVsSphere(const CollisionBox& box, const CollisionSphere& sphere, CollisionKeep* c_data)
+{
+	// Transform the centre of the sphere into box coordinates
+	Vector3 centre = sphere.GetBasisAndPosition(3);
+	Vector3 relCentre = box.GetTransformMat4().MultiplyInverse(centre);
+
+	// Early out check to see if we can exclude the contact
+	if (abs(relCentre.x) - sphere.GetRadius() > box.GetHalfSize().x ||
+		abs(relCentre.y) - sphere.GetRadius() > box.GetHalfSize().y ||
+		abs(relCentre.z) - sphere.GetRadius() > box.GetHalfSize().z)
+	{
+		return 0;
+	}
+
+	Vector3 closestPt(0,0,0);
+	float dist;
+
+	// Clamp each coordinate to the box.
+	dist = relCentre.x;
+	if (dist > box.GetHalfSize().x) 
+		dist = box.GetHalfSize().x;
+	if (dist < -box.GetHalfSize().x)
+		dist = -box.GetHalfSize().x;
+	closestPt.x = dist;
+
+	dist = relCentre.y;
+	if (dist > box.GetHalfSize().y) 
+		dist = box.GetHalfSize().y;
+	if (dist < -box.GetHalfSize().y) 
+		dist = -box.GetHalfSize().y;
+	closestPt.y = dist;
+
+	dist = relCentre.z;
+	if (dist > box.GetHalfSize().z) 
+		dist = box.GetHalfSize().z;
+	if (dist < -box.GetHalfSize().z) 
+		dist = -box.GetHalfSize().z;
+	closestPt.z = dist;
+
+	// Check we're in contact
+	dist = (closestPt - relCentre).GetLengthSquared();
+	if (dist > sphere.GetRadius() * sphere.GetRadius()) 
+		return 0;
+
+	// Compile the contact
+	Vector3 closestPtWorld = box.GetTransformMat4() * closestPt;
+
+	Collision* collision = c_data->m_collision;
+	collision->m_normal = (closestPtWorld - centre);
+	collision->m_normal.Normalize();
+	collision->m_pos = closestPtWorld;
+	collision->m_penetration = sphere.GetRadius() - sqrtf(dist);
+	collision->SetBodies(box.GetRigidBody(), sphere.GetRigidBody());
+
+	collision->SetFriction(c_data->m_global_friction);
+	collision->SetRestitution(c_data->m_global_restitution);
+
+	c_data->NotifyAddedCollisions(1);
+
+	return 1;
+}

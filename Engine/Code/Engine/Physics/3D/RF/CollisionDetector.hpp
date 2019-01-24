@@ -14,4 +14,6 @@ public:
 	static uint SphereVsPlane(const CollisionSphere& sphere, const CollisionPlane& plane, CollisionKeep* c_data);
 
 	static uint BoxVsHalfPlane(const CollisionBox& box, const CollisionPlane& plane, CollisionKeep* c_data);
+
+	static uint BoxVsSphere(const CollisionBox& box, const CollisionSphere& sphere, CollisionKeep* c_data);
 };
