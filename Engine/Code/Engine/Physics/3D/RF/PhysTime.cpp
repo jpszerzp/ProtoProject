@@ -6,13 +6,13 @@
 #include <ctime>
 #pragma comment(lib, "winmm.lib")  
 
-static bool m_flag;
+static bool m_hpc_used;
 static double m_frequency;
 static PhysTimeSystem* theTime = nullptr;
 
 uint GetSysTime()
 {
-	if (m_flag)
+	if (m_hpc_used)
 	{
 		static LONGLONG time_per_tick;
 		QueryPerformanceCounter((LARGE_INTEGER*)&time_per_tick);
@@ -52,9 +52,9 @@ void InitTime()
 {
 	LONGLONG time;
 
-	m_flag = (QueryPerformanceFrequency((LARGE_INTEGER*)&time) > 0);
+	m_hpc_used = (QueryPerformanceFrequency((LARGE_INTEGER*)&time) > 0);
 
-	if (m_flag)
+	if (m_hpc_used)
 		m_frequency = 1000.f / time;
 }
 

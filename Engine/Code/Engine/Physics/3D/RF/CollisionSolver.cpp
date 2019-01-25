@@ -43,7 +43,7 @@ void CollisionSolver::PrepareCollision(Collision* collisions, uint collision_num
 
 	for (Collision* col = collisions; col != last_collision; ++col)
 	{
-		col->PrepareInternal(duration);
+		col->CacheData(duration);
 	}
 }
 
@@ -71,7 +71,7 @@ void CollisionSolver::SolveVelocities(Collision* collisions, uint collision_num,
 			break;
 
 		// Match the awake state at the contact
-		collisions[index].CheckAwakeState();
+		collisions[index].CheckAwake();
 
 		// Do the resolution on the contact that came out top.
 		collisions[index].ApplyVelocityChange(velocityChange, rotationChange);
@@ -98,7 +98,7 @@ void CollisionSolver::SolveVelocities(Collision* collisions, uint collision_num,
 							// The sign of the change is negative if we're dealing
 							// with the second body in a contact.
 							collisions[i].m_closing_vel += collisions[i].m_to_world.MultiplyTranspose(deltaVel) * (b?-1.f:1.f);
-							collisions[i].CalculateDesiredDeltaVelocity(duration);
+							collisions[i].ComputeDesiredDeltaVelocity(duration);
 						}
 					}
 				}
@@ -134,7 +134,7 @@ void CollisionSolver::SolvePositions(Collision* collisions, uint collision_num, 
 			break;
 
 		// Match the awake state at the contact
-		collisions[index].CheckAwakeState();
+		collisions[index].CheckAwake();
 
 		// Resolve the penetration.
 		collisions[index].ApplyPositionChange(linearChange, angularChange, max);

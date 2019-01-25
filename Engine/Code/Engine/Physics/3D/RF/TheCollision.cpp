@@ -7,37 +7,35 @@ void Collision::SetBodies(CollisionRigidBody* first, CollisionRigidBody* second)
 	m_bodies[1] = second;
 }
 
-void Collision::PrepareInternal(float duration)
+void Collision::CacheData(float deltaTime)
 {
 	if (!m_bodies[0])
-		SwapBodies();
+		SwapRigidBodies();
 	ASSERT_OR_DIE(m_bodies[0] != nullptr, "first body is empty when preparing for collision");
 
 	// basis at contact
-	CalculateContactBasis();
+	ComputeContactCoord();
 
-	// relative pos between contact and bodies
-	m_relative_pos[0] = m_pos - m_bodies[0]->GetCenter();
-	if (m_bodies[1]) 
-		m_relative_pos[1] = m_pos - m_bodies[1]->GetCenter();
+	// cache contact pos in world coord
+	ComputeRelativePosWorldCoord();
 
-	m_closing_vel = CalculateLocalVelocity(0, duration);
-	if (m_bodies[1])
-		m_closing_vel -= CalculateLocalVelocity(1, duration);
+	// closing velocity
+	ComputeClosingVelocityContactCoord(deltaTime);
 	
-	CalculateDesiredDeltaVelocity(duration);
+	// desired velocity
+	ComputeDesiredDeltaVelocity(deltaTime);
 }
 
-void Collision::SwapBodies()
+void Collision::SwapRigidBodies()
 {
-	m_normal *= -1;
-
 	CollisionRigidBody* temp = m_bodies[0];
 	m_bodies[0] = m_bodies[1];
 	m_bodies[1] = temp;
+
+	m_normal *= -1;
 }
 
-void Collision::CalculateContactBasis()
+void Collision::ComputeContactCoord()
 {
 	Vector3 contact_tangent[2];
 
@@ -75,7 +73,22 @@ void Collision::CalculateContactBasis()
 	m_to_world.SetBasis(m_normal, contact_tangent[0], contact_tangent[1]);
 }
 
-Vector3 Collision::CalculateLocalVelocity(uint idx, float duration)
+void Collision::ComputeRelativePosWorldCoord()
+{
+	// relative pos between contact and bodies
+	m_relative_pos[0] = m_pos - m_bodies[0]->GetCenter();
+	if (m_bodies[1] != nullptr) 
+		m_relative_pos[1] = m_pos - m_bodies[1]->GetCenter();
+}
+
+void Collision::ComputeClosingVelocityContactCoord(float deltaTime)
+{
+	m_closing_vel = ComputeLocalVelocity(0, deltaTime);
+	if (m_bodies[1])
+		m_closing_vel -= ComputeLocalVelocity(1, deltaTime);
+}
+
+Vector3 Collision::ComputeLocalVelocity(uint idx, float deltaTime)
 {
 	CollisionRigidBody* rb = m_bodies[idx];
 
@@ -85,7 +98,7 @@ Vector3 Collision::CalculateLocalVelocity(uint idx, float duration)
 	Vector3 contact_vel = m_to_world.MultiplyTranspose(vel);
 
 	// force without reaction
-	Vector3 acc_induced_vel = rb->GetLastFrameLinearAcc() * duration;
+	Vector3 acc_induced_vel = rb->GetLastFrameLinearAcc() * deltaTime;
 
 	// velocity in contact coord
 	acc_induced_vel = m_to_world.MultiplyTranspose(acc_induced_vel);
@@ -97,26 +110,26 @@ Vector3 Collision::CalculateLocalVelocity(uint idx, float duration)
 	return contact_vel;
 }
 
-void Collision::CalculateDesiredDeltaVelocity(float duration)
+void Collision::ComputeDesiredDeltaVelocity(float deltaTime)
 {
 	static const float vel_limit = .25f;
 
 	float vel_from_acc = 0.f;
 
 	if (m_bodies[0]->IsAwake())
-		vel_from_acc += DotProduct(m_bodies[0]->GetLastFrameLinearAcc() * duration, m_normal);
+		vel_from_acc += DotProduct(m_bodies[0]->GetLastFrameLinearAcc() * deltaTime, m_normal);
 
 	if (m_bodies[1] && m_bodies[1]->IsAwake())
-		vel_from_acc -= DotProduct(m_bodies[1]->GetLastFrameLinearAcc() * duration, m_normal);
+		vel_from_acc -= DotProduct(m_bodies[1]->GetLastFrameLinearAcc() * deltaTime, m_normal);
 
-	float real_restitution = m_restitution;
+	float real_restitution = m_mat.m_restitution;
 	if (abs(m_closing_vel.x) < vel_limit)
 		real_restitution = 0.f;
 
 	m_desired_vel = -m_closing_vel.x - real_restitution * (m_closing_vel.x - vel_from_acc);
 }
 
-void Collision::CheckAwakeState()
+void Collision::CheckAwake()
 {
 	// Collisions with the world never cause a body to wake up.
 	if (!m_bodies[1])
@@ -265,16 +278,16 @@ void Collision::ApplyVelocityChange(Vector3 linear[2], Vector3 angular[2])
 	// We will calculate the impulse for each contact axis
 	Vector3 impulseContact;
 
-	if (m_friction == 0.f)
+	if (m_mat.m_friction == 0.f)
 	{
 		// Use the short format for frictionless contacts
-		impulseContact = CalculateFrictionlessImpulse(inverseInertiaTensor);
+		impulseContact = ComputeFrictionlessImpulse(inverseInertiaTensor);
 	}
 	else
 	{
 		// Otherwise we may have impulses that aren't in the direction of the
 		// contact, so we need the more complex version.
-		impulseContact = CalculateFrictionImpulse(inverseInertiaTensor);
+		impulseContact = ComputeFrictionalImpulse(inverseInertiaTensor);
 	}
 
 	// Convert impulse to world coordinates
@@ -304,7 +317,7 @@ void Collision::ApplyVelocityChange(Vector3 linear[2], Vector3 angular[2])
 	}
 }
 
-Vector3 Collision::CalculateFrictionlessImpulse(Matrix33* iit)
+Vector3 Collision::ComputeFrictionlessImpulse(Matrix33* iit)
 {
 	Vector3 impulseContact;
 
@@ -343,7 +356,7 @@ Vector3 Collision::CalculateFrictionlessImpulse(Matrix33* iit)
 	return impulseContact;
 }
 
-Vector3 Collision::CalculateFrictionImpulse(Matrix33* iit)
+Vector3 Collision::ComputeFrictionalImpulse(Matrix33* iit)
 {
 	Vector3 impulseContact;
 	float inverseMass = m_bodies[0]->GetInvMass();
@@ -403,19 +416,17 @@ Vector3 Collision::CalculateFrictionImpulse(Matrix33* iit)
 	float planarImpulse = sqrtf(impulseContact.y*impulseContact.y 
 		+ impulseContact.z*impulseContact.z );
 
-	if (planarImpulse > impulseContact.x * m_friction)
+	if (planarImpulse > impulseContact.x * m_mat.m_friction)
 	{
 		// We need to use dynamic friction
 		impulseContact.y /= planarImpulse;
 		impulseContact.z /= planarImpulse;
 
-		impulseContact.x = deltaVelocity.Ix +
-			deltaVelocity.Jx*m_friction*impulseContact.y +
-			deltaVelocity.Kx*m_friction*impulseContact.z;
+		impulseContact.x = deltaVelocity.Ix + deltaVelocity.Jx * m_mat.m_friction * impulseContact.y + deltaVelocity.Kx * m_mat.m_friction * impulseContact.z;
 
 		impulseContact.x = m_desired_vel / impulseContact.x;
-		impulseContact.y *= m_friction * impulseContact.x;
-		impulseContact.z *= m_friction * impulseContact.x;
+		impulseContact.y *= m_mat.m_friction * impulseContact.x;
+		impulseContact.z *= m_mat.m_friction * impulseContact.x;
 	}
 
 	return impulseContact;
