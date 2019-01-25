@@ -146,8 +146,6 @@ void FillPointFaceBoxBox(const CollisionBox& b1, const CollisionBox& b2,
 	collision->SetRestitution(c_data->m_global_restitution);
 }
 
-#define CHECK_OVERLAP(axis, index) \
-	if (!TryAxis(b1, b2, (axis), disp, (index), pen, best)) return 0;
 
 uint CollisionSensor::BoxVsBox(const CollisionBox& b1, const CollisionBox& b2, CollisionKeep* c_data)
 {
@@ -160,26 +158,59 @@ uint CollisionSensor::BoxVsBox(const CollisionBox& b1, const CollisionBox& b2, C
 	unsigned best = 0xffffff;
 
 	// b1 basis 
-	CHECK_OVERLAP(b1.GetBasisAndPosition(0), 0);
-	CHECK_OVERLAP(b1.GetBasisAndPosition(1), 1);
-	CHECK_OVERLAP(b1.GetBasisAndPosition(2), 2);
+	if (!TryAxis(b1, b2, b1.GetBasisAndPosition(0), disp, 0, pen, best))
+		return 0;
+	if (!TryAxis(b1, b2, b1.GetBasisAndPosition(1), disp, 1, pen, best))
+		return 0;
+	if (!TryAxis(b1, b2, b1.GetBasisAndPosition(2), disp, 2, pen, best))
+		return 0;
 
 	// b2 basis
-	CHECK_OVERLAP(b2.GetBasisAndPosition(0), 3);
-	CHECK_OVERLAP(b2.GetBasisAndPosition(1), 4);
-	CHECK_OVERLAP(b2.GetBasisAndPosition(2), 5);
+	if (!TryAxis(b1, b2, b2.GetBasisAndPosition(0), disp, 3, pen, best))
+		return 0;
+	if (!TryAxis(b1, b2, b2.GetBasisAndPosition(1), disp, 4, pen, best))
+		return 0;
+	if (!TryAxis(b1, b2, b2.GetBasisAndPosition(2), disp, 5, pen, best))
+		return 0;
 
 	unsigned best_major_axis = best;
 
-	CHECK_OVERLAP(b1.GetBasisAndPosition(0).Cross(b2.GetBasisAndPosition(0)), 6);
-	CHECK_OVERLAP(b1.GetBasisAndPosition(0).Cross(b2.GetBasisAndPosition(1)), 7);
-	CHECK_OVERLAP(b1.GetBasisAndPosition(0).Cross(b2.GetBasisAndPosition(2)), 8);
-	CHECK_OVERLAP(b1.GetBasisAndPosition(1).Cross(b2.GetBasisAndPosition(0)), 9);
-	CHECK_OVERLAP(b1.GetBasisAndPosition(1).Cross(b2.GetBasisAndPosition(1)), 10);
-	CHECK_OVERLAP(b1.GetBasisAndPosition(1).Cross(b2.GetBasisAndPosition(2)), 11);
-	CHECK_OVERLAP(b1.GetBasisAndPosition(2).Cross(b2.GetBasisAndPosition(0)), 12);
-	CHECK_OVERLAP(b1.GetBasisAndPosition(2).Cross(b2.GetBasisAndPosition(1)), 13);
-	CHECK_OVERLAP(b1.GetBasisAndPosition(2).Cross(b2.GetBasisAndPosition(2)), 14);
+	// cross product axis
+	Vector3 cross = b1.GetBasisAndPosition(0).Cross(b2.GetBasisAndPosition(0));
+	if (!TryAxis(b1, b2, cross, disp, 6, pen, best))
+		return 0;
+
+	cross = b1.GetBasisAndPosition(0).Cross(b2.GetBasisAndPosition(1));
+	if (!TryAxis(b1, b2, cross, disp, 7, pen, best))
+		return 0;
+
+	cross = b1.GetBasisAndPosition(0).Cross(b2.GetBasisAndPosition(2));
+	if (!TryAxis(b1, b2, cross, disp, 8, pen, best))
+		return 0;
+
+	cross = b1.GetBasisAndPosition(1).Cross(b2.GetBasisAndPosition(0));
+	if (!TryAxis(b1, b2, cross, disp, 9, pen, best))
+		return 0;
+
+	cross = b1.GetBasisAndPosition(1).Cross(b2.GetBasisAndPosition(1));
+	if (!TryAxis(b1, b2, cross, disp, 10, pen, best))
+		return 0;
+
+	cross = b1.GetBasisAndPosition(1).Cross(b2.GetBasisAndPosition(2));
+	if (!TryAxis(b1, b2, cross, disp, 11, pen, best))
+		return 0;
+
+	cross = b1.GetBasisAndPosition(2).Cross(b2.GetBasisAndPosition(0));
+	if (!TryAxis(b1, b2, cross, disp, 12, pen, best))
+		return 0;
+
+	cross = b1.GetBasisAndPosition(2).Cross(b2.GetBasisAndPosition(1));
+	if (!TryAxis(b1, b2, cross, disp, 13, pen, best))
+		return 0;
+
+	cross = b1.GetBasisAndPosition(2).Cross(b2.GetBasisAndPosition(2));
+	if (!TryAxis(b1, b2, cross, disp, 14, pen, best))
+		return 0;
 
 	ASSERT_OR_DIE(best != 0xffffff, "should have penetration");
 
@@ -247,7 +278,6 @@ uint CollisionSensor::BoxVsBox(const CollisionBox& b1, const CollisionBox& b2, C
 	return 0;
 }
 
-#undef CHECK_OVERLAP
 
 uint CollisionSensor::SphereVsPlane(const CollisionSphere& sphere, const CollisionPlane& plane, CollisionKeep* c_data)
 {
