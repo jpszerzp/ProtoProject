@@ -111,7 +111,7 @@ void Initialize( HINSTANCE )
 	theWindow->RegisterHandler(HandleMsg);
 	LogSystemStartup();
 
-	TimingData::Init();
+	PhysTimeSystem::InitTimeSystem();
 	
 	/*
 	LogHideTag("test");			// by default filter has blacklist
@@ -135,7 +135,7 @@ void Initialize( HINSTANCE )
 //-----------------------------------------------------------------------------------------------
 void Shutdown()
 {
-	TimingData::Release();
+	PhysTimeSystem::DestroyTimeSystem();
 
 	GLShutdown();
 	LogSystemShutdown();
