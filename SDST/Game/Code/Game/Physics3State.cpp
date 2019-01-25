@@ -481,27 +481,27 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	}
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_A))
 	{
-		leftRight = -50.f;
+		leftRight = -100.f;
 	}
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_D))
 	{
-		leftRight = 50.f;
+		leftRight = 100.f;
 	}
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_W))
 	{
-		forwardBack = 50.f;
+		forwardBack = 100.f;
 	}
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_S))
 	{
-		forwardBack = -50.f;
+		forwardBack = -100.f;
 	}
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_Q))
 	{
-		upDown = 50.f;
+		upDown = 100.f;
 	}
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_E))
 	{
-		upDown = -50.f;
+		upDown = -100.f;
 	}
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_Z))
 	{
