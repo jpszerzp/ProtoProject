@@ -126,7 +126,7 @@ Physics3State::Physics3State()
 	// stack
 	Vector3 stack_pos_origin = Vector3(25.f, 342.5f, -2.f);
 	int stack_side = 5;
-	for (int k = 0; k < 2; ++k)
+	for (int k = 0; k < 5; ++k)
 	{
 		for (int i = 0; i < stack_side; ++i)
 		{
