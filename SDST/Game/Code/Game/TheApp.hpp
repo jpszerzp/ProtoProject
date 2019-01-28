@@ -29,8 +29,6 @@ public:
 	PxFoundation* m_foundation = nullptr;
 	PxPvd* m_pvd = nullptr;
 	PxPhysics* m_physics = nullptr;
-	PhysAllocator m_phys_allocator;
-	PhysErrorCallback m_phys_error_cb;
 
 public:
 	TheApp();
@@ -68,7 +66,10 @@ public:
 	void ProfilerStartup();
 	void ConsoleStartup();
 	void BlackboardStartup();
+
+	// Physx
 	void PhysxStartup();
+	void PhysxShutdown();
 };
 
 extern TheApp* g_theApp;

@@ -29,9 +29,8 @@ TheApp::TheApp()
 	ProfilerStartup();
 	ConsoleStartup();
 	BlackboardStartup();
-	//PhysxStartup();
+	PhysxStartup();
 }
-
 
 TheApp::~TheApp()
 {
@@ -57,6 +56,8 @@ TheApp::~TheApp()
 
 	delete g_masterClock;
 	g_masterClock = nullptr;
+
+	PhysxShutdown();
 }
 
 
@@ -304,22 +305,34 @@ void TheApp::BlackboardStartup()
 
 void TheApp::PhysxStartup()
 {
-	//// create physx foundation
-	//m_foundation = PxCreateFoundation(PX_PHYSICS_VERSION, m_DefaultAllocatorCallback, m_DefaultErrorCallback);
-	//if (!m_foundation)
-	//	ASSERT_OR_DIE(false, "PxCreateFoundation failed!");
+	static PhysErrorCallback gErrorCB;
+	static PhysAllocator gAllocator;
 
-	//// create top-level physx object
-	//bool recordMemoryAllocations = true;
+	// create physx foundation
+	m_foundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCB);
+	if (!m_foundation)
+		ASSERT_OR_DIE(false, "PxCreateFoundation failed!");
+
+	// create top-level physx object
+	bool recordMemoryAllocations = true;
 
 	/*
-	// optional pvd instance
+	// optional pvd instance, need a HOST
 	m_pvd = PxCreatePvd(*m_foundation);
 	PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 10);
 	m_pvd->connect(*transport, PxPvdInstrumentationFlag::eALL);
 	*/
 
-	//m_physics = PxCreatePhysics(PX_PHYSICS_VERSION, *m_foundation, PxTolerancesScale(), recordMemoryAllocations, m_pvd);
-	//if (!m_physics)
-	//	ASSERT_OR_DIE(false, "PxCreatePhysics failed!");
+	m_physics = PxCreatePhysics(PX_PHYSICS_VERSION, *m_foundation, PxTolerancesScale(), recordMemoryAllocations, m_pvd);
+	if (!m_physics)
+		ASSERT_OR_DIE(false, "PxCreatePhysics failed!");
+}
+
+void TheApp::PhysxShutdown()
+{
+	// release PxPhysics object
+	m_physics->release();
+
+	// release foundation
+	m_foundation->release();
 }
