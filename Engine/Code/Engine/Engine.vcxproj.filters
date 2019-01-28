@@ -565,6 +565,12 @@
     <ClCompile Include="Physics\3D\RF\CollisionSolver.cpp">
       <Filter>General</Filter>
     </ClCompile>
+    <ClCompile Include="Physics\3D\PHYSX\PhysAllocator.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\3D\PHYSX\PhysErrorCallback.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -968,5 +974,7 @@
     <ClInclude Include="Physics\3D\RF\CollisionDetector.hpp" />
     <ClInclude Include="Physics\3D\RF\CollisionResolver.hpp" />
     <ClInclude Include="Physics\3D\RF\CollisionSolver.hpp" />
+    <ClInclude Include="Physics\3D\PHYSX\PhysAllocator.hpp" />
+    <ClInclude Include="Physics\3D\PHYSX\PhysErrorCallback.hpp" />
   </ItemGroup>
 </Project>

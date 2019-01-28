@@ -58,7 +58,7 @@ public:
 
 	// below are all based on particles, NOT on rigidbodies
 	Fireworks* SetupFireworks(float age, Vector3 pos, Vector3 inheritVel, Vector3 maxVel, Vector3 minVel, bool lastRound = false);
-	Ballistics* SetupBallistics(eBallisticsType type, Vector3 pos, bool frozen, Rgba color);
+	//Ballistics* SetupBallistics(eBallisticsType type, Vector3 pos, bool frozen, Rgba color);
 	Spring* SetupSpring(Point* end1, Point* end2, float coef, float rl);
 	AnchorSpring* SetupAnchorSpring(Point* end1, Point* end2, float coef, float rl);
 	Rod* SetupRod(float length, Point* p1, Point* p2);

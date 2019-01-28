@@ -294,6 +294,7 @@ void Vector3::ToDefault()
 	z = 0.f;
 }
 
+
 Vector3 Vector3::RotateAboutAxisWithAngle(float angle, Vector3 axis)
 {
 	// pure quaternion for rotated vector - zero scalar
