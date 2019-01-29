@@ -18,6 +18,8 @@
 
 #include <algorithm>
 
+// this is the physics state for thesis
+
 bool IsGameobjectDead(GameObject* go) { return go->m_dead; }
 
 Physics3State::Physics3State()
@@ -32,7 +34,7 @@ Physics3State::Physics3State()
 	float height = window->GetWindowHeight();
 	float aspect = width / height;
 
-	m_cameraInitialPos = Vector3(30.f, 310.f, -7.f);
+	m_cameraInitialPos = Vector3(75.f, 350.f, 45.f);
 	m_cameraRotationSpd = 50.f;
 
 	if (!m_camera)
@@ -104,15 +106,15 @@ Physics3State::Physics3State()
 	m_wraparound_box->m_primitives.push_back(box_0);
 
 	// a plane
-	m_wraparound_plane = new WrapAround(Vector3(20.f, 340.f, -10.f), Vector3(40.f, 360.f, 10.f),
+	m_wraparound_plane = new WrapAround(Vector3(20.f, 340.f, -10.f), Vector3(130.f, 360.f, 100.f),
 		Vector3(25.f, 345.f, -5.f), Vector3(35.f, 345.f, -5.f),
 		Vector3(25.f, 345.f, 5.f), Vector3(35.f, 345.f, 5.f),
 		Vector3(25.f, 355.f, -5.f), Vector3(35.f, 355.f, -5.f),
 		Vector3(25.f, 355.f, 5.f), Vector3(35.f, 355.f, 5.f));
 
-	CollisionPlane* plane_0 = new CollisionPlane(Vector2(20.f), Vector3(0.f, 1.f, 0.f), 342.f);
+	CollisionPlane* plane_0 = new CollisionPlane(Vector2(110.f), Vector3(0.f, 1.f, 0.f), 342.f);
 
-	rb = new CollisionRigidBody(1.f, Vector3(30.f, 342.f, 0.f), Vector3(90.f, 0.f, 0.f));
+	rb = new CollisionRigidBody(1.f, Vector3(75.f, 342.f, 45.f), Vector3(90.f, 0.f, 0.f));
 	rb->SetAwake(true);
 	rb->SetSleepable(false);
 
@@ -124,27 +126,7 @@ Physics3State::Physics3State()
 	//m_wraparound_sphere_plane->m_primitives.push_back(plane_0);
 
 	// stack
-	Vector3 stack_pos_origin = Vector3(25.f, 342.5f, -2.f);
-	int stack_side = 5;
-	for (int k = 0; k < 5; ++k)
-	{
-		for (int i = 0; i < stack_side; ++i)
-		{
-			float stack_x = stack_pos_origin.x + i * 1.f; 
-
-			for (int j = 0; j < stack_side; ++j)
-			{
-				float stack_z = stack_pos_origin.z + j * 1.f;
-
-				Vector3 stack_pos = Vector3(stack_x, stack_pos_origin.y, stack_z);
-
-				WrapAroundTestBox(m_wraparound_plane, false, false, true, stack_pos, Vector3::ZERO, Vector3::ONE);
-			}
-		}
-
-		stack_side--;
-		stack_pos_origin = Vector3(stack_pos_origin.x + .5f, stack_pos_origin.y + 1.f, stack_pos_origin.z + .5f);
-	}
+	//SpawnStack(Vector3(75.f, 342.5f, 45.f), 5, 5);
 
 	// debug
 	DebugRenderSet3DCamera(m_camera);
@@ -269,10 +251,13 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		WrapAroundTestBox(m_wraparound_box, false, false, true, Vector3(60.8f, 315.f, 0.f), Vector3::ZERO, Vector3::ONE);
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_8))
-		m_handle_0 = WrapAroundTestSphere(m_wraparound_plane, true, false, true, Vector3(25.f, 355.f, 0.f), Vector3::ZERO, Vector3::ONE);
-
+		SpawnRandomSphere(m_wraparound_plane, 10, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 360.f, 100.f));
+		
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_9))
-		WrapAroundTestBox(m_wraparound_plane, true, false, true, Vector3(35.f, 355.f, 0.f), Vector3::ZERO, Vector3::ONE);
+		SpawnRandomBox(m_wraparound_plane, 10, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 360.f, 100.f));
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_SPACE))
+		ShootSphere(m_wraparound_plane);
 
 	// slow
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_0))
@@ -615,4 +600,58 @@ CollisionBox* Physics3State::WrapAroundTestBox(WrapAround* wpa, bool give_ang_ve
 	wpa->m_primitives.push_back(box);
 
 	return box;
+}
+
+void Physics3State::SpawnStack(const Vector3& origin , uint sideLength, uint stackHeight)
+{
+	Vector3 stack_pos_origin = origin;		 // copy the origin, the origin is at bottom left corner of the stack
+
+	for (uint k = 0; k < stackHeight; ++k)
+	{
+		for (uint i = 0; i < sideLength; ++i)
+		{
+			float stack_x = stack_pos_origin.x + i * 1.f; 
+
+			for (int j = 0; j < sideLength; ++j)
+			{
+				float stack_z = stack_pos_origin.z + j * 1.f;
+
+				Vector3 stack_pos = Vector3(stack_x, stack_pos_origin.y, stack_z);
+
+				WrapAroundTestBox(m_wraparound_plane, false, false, true, stack_pos, Vector3::ZERO, Vector3::ONE);
+			}
+		}
+
+		sideLength--;
+		stack_pos_origin = Vector3(stack_pos_origin.x + .5f, stack_pos_origin.y + 1.f, stack_pos_origin.z + .5f);
+	}
+}
+
+void Physics3State::SpawnRandomBox(WrapAround* wpa, uint num, const Vector3& min, const Vector3& max)
+{
+	AABB3 bound(min, max);
+
+	for (uint i = 0; i < num; ++i)
+	{
+		const Vector3& rand_pos = GetRandomLocationWithin(bound);
+		WrapAroundTestBox(wpa, true, false, true, rand_pos, Vector3::ZERO, Vector3::ONE);
+	}
+}
+
+void Physics3State::SpawnRandomSphere(WrapAround* wpa, uint num, const Vector3& min, const Vector3& max)
+{
+	AABB3 bound(min, max);
+
+	for (uint i = 0; i < num; ++i)
+	{
+		const Vector3& rand_pos = GetRandomLocationWithin(bound);
+		WrapAroundTestSphere(wpa, true, false, true, rand_pos, Vector3::ZERO, Vector3::ONE);
+	}
+}
+
+void Physics3State::ShootSphere(WrapAround* wpa)
+{
+	// handle_0 is a sphere rb
+	m_handle_0 = WrapAroundTestSphere(wpa, true, false, true, m_camera->GetWorldPosition(), Vector3::ZERO, Vector3::ONE);
+	m_handle_0->GetRigidBody()->SetLinearVelocity(m_camera->GetWorldForward().GetNormalized() * 100.f);
 }

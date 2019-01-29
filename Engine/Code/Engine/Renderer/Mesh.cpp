@@ -204,6 +204,44 @@ Mesh* Mesh::CreateQuad20(eVertexType type)
 	return mb.CreateMesh(type, DRAW_TRIANGLE);
 }
 
+Mesh* Mesh::CreateQuad110(eVertexType type)
+{
+	MeshBuilder mb;
+
+	Vector3 center = Vector3::ZERO;
+	Vector3 size = Vector3(110.f, 110.f, 1.f);
+
+	Vector3 bl = center + Vector3(-size.x / 2.f, -size.y / 2.f, 0.f);
+	Vector3 br = center + Vector3(size.x / 2.f, -size.y / 2.f, 0.f);
+	Vector3 tl = center + Vector3(-size.x / 2.f, size.y / 2.f, 0.f);
+	Vector3 tr = center + Vector3(size.x / 2.f, size.y / 2.f, 0.f);
+
+	mb.Begin(DRAW_TRIANGLE, true);
+	mb.SetColor(Rgba::WHITE);
+
+	// Quad
+	mb.SetNormal(Vector3(0.f, 0.f, -1.f));
+	mb.SetTangent(Vector4(1.f, 0.f, 0.f, 1.f));
+
+	mb.SetUV(Vector2(0.f, 0.f));
+	uint idx = mb.PushVertex(bl);
+
+	mb.SetUV(Vector2(1.f, 0.f));
+	mb.PushVertex(br);
+
+	mb.SetUV(Vector2(0.f, 1.f));
+	mb.PushVertex(tl);
+
+	mb.SetUV(Vector2(1.f, 1.f));
+	mb.PushVertex(tr);
+
+	mb.AddQuad(idx, idx + 1, idx + 2, idx + 3);
+
+	mb.End();
+
+	return mb.CreateMesh(type, DRAW_TRIANGLE);
+}
+
 Mesh* Mesh::CreateQuadTextured(eVertexType type, Vector2 uvBL, Vector2 uvBR, Vector2 uvTL, Vector2 uvTR)
 {
 	MeshBuilder mb;

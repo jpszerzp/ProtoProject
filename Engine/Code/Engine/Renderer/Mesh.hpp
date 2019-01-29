@@ -26,6 +26,7 @@ public:
 	static Mesh* CreatePointImmediate(eVertexType type, const Vector3& pos, const Rgba& color);
 	static Mesh* CreateQuad(eVertexType type);
 	static Mesh* CreateQuad20(eVertexType type);
+	static Mesh* CreateQuad110(eVertexType type);
 	static Mesh* CreateQuadImmediate(eVertexType type, const Vector3& bl, const Vector3& br, 
 		const Vector3& tl, const Vector3& tr, const Rgba& tint);
 	static Mesh* CreateQuadTextured(eVertexType, Vector2 uvBL, Vector2 uvBR, Vector2 uvTL, Vector2 uvTR);

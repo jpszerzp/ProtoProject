@@ -169,7 +169,7 @@ CollisionPlane::CollisionPlane(const Vector2& bound, const Vector3& normal, cons
 {
 	Renderer* renderer = Renderer::GetInstance();
 
-	SetMesh(renderer->CreateOrGetMesh("quad_pcu_20"));
+	SetMesh(renderer->CreateOrGetMesh("quad_pcu_110"));
 	SetShader(renderer->CreateOrGetShader("default"));
 	SetTexture(renderer->CreateOrGetTexture("Data/Images/perspective_test.png"));
 
