@@ -288,8 +288,8 @@ void ControlGroup::ProcessInput()
 		{
 			if (fake_hull == nullptr)
 			{
-				HullObject* hull_0 = dynamic_cast<HullObject*>(g0);
-				HullObject* hull_1 = dynamic_cast<HullObject*>(g1);
+				HullObject* hull_0 = static_cast<HullObject*>(g0);
+				HullObject* hull_1 = static_cast<HullObject*>(g1);
 
 				QuickHull* qh_0 = hull_0->GetHullPrimitive();
 				QuickHull* qh_1 = hull_1->GetHullPrimitive();

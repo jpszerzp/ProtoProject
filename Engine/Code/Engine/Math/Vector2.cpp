@@ -147,8 +147,10 @@ float Vector2::NormalizeAndGetLength()
 {
 	float length = GetLength();
 
-	x = x / length;
-	y = y / length;
+	float scale = 1.f / length;
+
+	x = x * scale;
+	y = y * scale;
 
 	return length;
 }
@@ -157,9 +159,11 @@ Vector2 Vector2::GetNormalized() const
 {
 	float length = GetLength();
 
-	float newX = x / length;
-	float newY = y / length;
-	
+	float scale = 1.f / length;
+
+	float newX = x * scale;
+	float newY = y * scale;
+
 	return Vector2(newX, newY);
 }
 

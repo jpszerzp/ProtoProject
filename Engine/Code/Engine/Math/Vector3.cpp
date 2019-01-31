@@ -214,9 +214,11 @@ float Vector3::NormalizeAndGetLength()
 {
 	float length = GetLength();
 
-	x = x / length;
-	y = y / length;
-	z = z / length;
+	float scale = 1.f / length;
+
+	x = x * scale;
+	y = y * scale;
+	z = z * scale;
 
 	return length;
 }
@@ -225,18 +227,23 @@ float Vector3::NormalizeAndGetLength()
 void Vector3::Normalize()
 {
 	float length = GetLength();
-	x = x / length;
-	y = y / length;
-	z = z / length;
+
+	float scale = 1.f / length;
+
+	x = x * scale;
+	y = y * scale;
+	z = z * scale;
 }
 
 Vector3 Vector3::GetNormalized() const
 {
 	float length = GetLength();
 
-	float newX = x / length;
-	float newY = y / length;
-	float newZ = z / length;
+	float scale = 1.f / length;
+
+	float newX = x * scale;
+	float newY = y * scale;
+	float newZ = z * scale;
 
 	return Vector3(newX, newY, newZ);
 }

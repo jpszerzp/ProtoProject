@@ -31,7 +31,7 @@ Physics3State::Physics3State()
 	float height = window->GetWindowHeight();
 	float aspect = width / height;
 
-	m_cameraInitialPos = Vector3(0.f, 0.f, -7.f);
+	m_cameraInitialPos = Vector3(-250.f, 50.f, -100.f);
 	m_cameraRotationSpd = 50.f;
 
 	if (!m_camera)
@@ -83,7 +83,7 @@ Physics3State::Physics3State()
 	// auto-gen qh 
 	qhMin = Vector3(-300.f, 0.f, 0.f);
 	qhMax = Vector3(-200, 100.f, 100.f);
-	m_qh = new QuickHull(20, qhMin, qhMax, true);
+	m_qh = new QuickHull(40, qhMin, qhMax, true);
 
 	// bvh title
 	std::string bp_title = "Broadphase status: ";
