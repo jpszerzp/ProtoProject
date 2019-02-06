@@ -15,10 +15,14 @@
 #include "Engine/Physics/3D/QuadRB3.hpp"
 #include "Engine/Physics/3D/RF/PhysTime.hpp"
 #include "Engine/Physics/3D/RF/CollisionDetector.hpp"
+#include "Engine/Physics/3D/RF/ConvexHull.hpp"
+#include "Engine/Physics/3D/RF/ConvexPolyhedron.hpp"
 
 #include <algorithm>
 
 // this is the physics state for thesis
+
+static ConvexPolyhedron* s_convex_poly = nullptr;
 
 bool IsGameobjectDead(GameObject* go) { return go->m_dead; }
 
@@ -127,6 +131,19 @@ Physics3State::Physics3State()
 
 	// stack
 	//SpawnStack(Vector3(75.f, 342.5f, 45.f), 5, 5);
+
+	// convex hull
+	Plane p1 = Plane(Vector3(0.f, -1.f, 0.f), 5.f);
+	Plane p2 = Plane(Vector3(-1.f, 1.f, 1.f).GetNormalized(), 5.f);
+	Plane p3 = Plane(Vector3(1.f, 1.f, 1.f).GetNormalized(), 5.f);
+	Plane p4 = Plane(Vector3(0.f, 1.f, -1.f).GetNormalized(), 5.f);
+	std::vector<Plane> hull_planes;
+	hull_planes.push_back(p1);
+	hull_planes.push_back(p2);
+	hull_planes.push_back(p3);
+	hull_planes.push_back(p4);
+	ConvexHull* cHull = new ConvexHull(hull_planes);
+	s_convex_poly = new ConvexPolyhedron(cHull);
 
 	// debug
 	DebugRenderSet3DCamera(m_camera);
@@ -497,6 +514,8 @@ void Physics3State::Render(Renderer* renderer)
 	renderer->SetCamera(m_camera);
 
 	RenderGameobjects(renderer);
+
+	s_convex_poly->Render(renderer);
 	
 	RenderForwardPath(renderer);
 

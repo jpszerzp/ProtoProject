@@ -30,4 +30,6 @@ public:
 	Entity3* GetEntity() const { return m_entity; }
 
 	void SetEntity(Entity3* ent) { m_entity = ent; }
+
+	//bool operator<(const Plane& pl) const;
 };

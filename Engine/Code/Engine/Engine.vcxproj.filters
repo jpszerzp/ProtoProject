@@ -571,6 +571,12 @@
     <ClCompile Include="Physics\3D\PHYSX\PhysErrorCallback.cpp">
       <Filter>General</Filter>
     </ClCompile>
+    <ClCompile Include="Physics\3D\RF\ConvexHull.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\3D\RF\ConvexPolyhedron.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -976,5 +982,7 @@
     <ClInclude Include="Physics\3D\RF\CollisionSolver.hpp" />
     <ClInclude Include="Physics\3D\PHYSX\PhysAllocator.hpp" />
     <ClInclude Include="Physics\3D\PHYSX\PhysErrorCallback.hpp" />
+    <ClInclude Include="Physics\3D\RF\ConvexHull.hpp" />
+    <ClInclude Include="Physics\3D\RF\ConvexPolyhedron.hpp" />
   </ItemGroup>
 </Project>
