@@ -10,20 +10,22 @@
 
 struct ConvexPolygon
 {
-	Vector3 m_normal;
+	Vector3 m_normal = Vector3::ZERO;
 	std::vector<int> m_vert_idx;
-	//std::deque<int> m_sorted_vert_idx;
 
 	// unsorted indices
+	ConvexPolygon(){}
+	ConvexPolygon(const Vector3& normal)
+		: m_normal(normal){}
 	ConvexPolygon(const std::vector<int>& idx, const Vector3& normal)
 		: m_vert_idx(idx), m_normal(normal){}
 	~ConvexPolygon(){}
 
-	//bool operator==(ConvexPolygon& other_polygon);
-
 	int GetVertNum() const { return m_vert_idx.size(); }
+	void AddVertexIndex(const int& vert_idx) { m_vert_idx.push_back(vert_idx); }
 };
 
+// DEPRECATED, use CollisionConvexObject instead
 class ConvexPolyhedron
 {
 private:
@@ -31,13 +33,13 @@ private:
 
 	std::vector<Vector3> m_verts;
 
-	//std::vector<IntVector2> m_edges;
-
-	//std::map<Plane, ConvexPolygon> m_plane_face;
-	//std::vector<ConvexPolygon> m_faces;
-
 	MeshBuilder m_cpu_mesh;
 	Mesh* m_gpu_mesh = nullptr;
+
+public:
+	Vector3 pos = Vector3::ZERO;
+	Vector3 rot = Vector3::ZERO;
+	Vector3 scale = Vector3::ONE;
 
 public:
 	ConvexPolyhedron(ConvexHull* hull);
@@ -47,11 +49,10 @@ public:
 
 	Vector3 ComputeIntersectionPoint(const Plane& p1, const Plane& p2, const Plane& p3);
 
-	//Plane GetPlaneFromConvexPolygon(ConvexPolygon& polygon);
 	void SortVerticesCCW(ConvexPolygon& polygon);
 
 	void AppendPolygonMesh(ConvexPolygon& polygon);
 };
 
-Vector3 GetPolygonCentroid(const std::vector<Vector3>& verts, const ConvexPolygon& polygon);
-int GetPolygonRandomVert(const std::vector<Vector3>& verts, const ConvexPolygon& polygon, Vector3& pos);
+//Vector3 GetPolygonCentroid(const std::vector<Vector3>& verts, const ConvexPolygon& polygon);
+int GetPolygonFirstVert(const std::vector<Vector3>& verts, const ConvexPolygon& polygon, Vector3& pos);

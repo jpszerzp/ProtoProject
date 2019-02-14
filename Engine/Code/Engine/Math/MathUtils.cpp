@@ -1605,6 +1605,11 @@ float DistPointToPlaneSigned(const Vector3& pt, const Plane& plane)
 	return (dot_pt - offset);
 }
 
+bool IsPointOutwardPlane(const Vector3& pt, const Plane& plane)
+{
+	return DistPointToPlaneSigned(pt, plane) > 0.f;
+}
+
 float DistPointToPlaneUnsigned(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3)
 {
 	return abs(DistPointToPlaneSigned(pt, vert1, vert2, vert3));
@@ -1749,4 +1754,75 @@ QHFeature* DistPointToQuadHull(const Vector3& pt, const Vector3& vert1,
 		dist = dist134;
 		return feature134;
 	}
+}
+
+Vector3 ComputePlaneIntersectionPoint(const Plane& p1, const Plane& p2, const Plane& p3)
+{
+	const Vector3& n1 = p1.GetNormal();
+	const Vector3& n2 = p2.GetNormal();
+	const Vector3& n3 = p3.GetNormal();
+
+	const float& d1 = p1.GetOffset();
+	const float& d2 = p2.GetOffset();
+	const float& d3 = p3.GetOffset();
+
+	Vector3 ns_i = Vector3(n1.x, n2.x, n3.x);
+	Vector3 ns_j = Vector3(n1.y, n2.y, n3.y);
+	Vector3 ns_k = Vector3(n1.z, n2.z, n3.z);
+	Matrix33 ns = Matrix33(ns_i, ns_j, ns_k);
+
+	Vector3 dv = Vector3(d1, d2, d3);
+
+	const Matrix33& ns_inv = ns.Invert();
+
+	return ns_inv * dv;
+}
+
+Vector3 GetPolygonCentroid(const std::vector<Vector3>& verts, const ConvexPolygon& polygon)
+{
+	Vector3 centroid = Vector3::ZERO;
+
+	const std::vector<int>& vert_indices = polygon.m_vert_idx;
+
+	for (int i = 0; i < vert_indices.size(); ++i)
+	{
+		centroid += verts[vert_indices[i]];
+	}
+
+	uint vert_num = vert_indices.size();
+
+	centroid /= vert_num;
+
+	return centroid;
+}
+
+Matrix33 GetCanonicalTetrahedronCovariance()
+{
+	float a = 1.f / 60.f;
+	float b = 1.f / 120.f;
+
+	Vector3 i = Vector3(a, b, b);
+	Vector3 j = Vector3(b, a, b);
+	Vector3 k = Vector3(b, b, a);
+
+	return Matrix33(i, j, k);
+}
+
+Matrix33 GetInertiaTensorFromCovariance(const Matrix33& cov)
+{
+	Matrix33 res = Matrix33::IDENTITY;
+	res *= cov.GetTrace();
+
+	res -= cov;
+
+	return res;
+}
+
+Matrix33 TranslateCovariance(const Matrix33& cov, const Vector3& com, const float& mass, const Vector3& offset)
+{
+	float dot1 = DotProduct(offset, com);
+	float dot2 = DotProduct(com, offset);
+	float dot3 = DotProduct(offset, offset);
+
+	return (cov + mass * (dot1 + dot2 + dot3));
 }

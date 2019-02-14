@@ -81,6 +81,12 @@ protected:
 	// derived data
 	Matrix33 m_inv_tensor_world;	
 
+	//// kinematics
+	//bool kinematics = false;
+	//Vector3 pos;
+	//Vector3 rot;
+	//Vector3 scale;
+
 public:
 	void Integrate(float deltaTime) override;
 	void ClearAcc() override;

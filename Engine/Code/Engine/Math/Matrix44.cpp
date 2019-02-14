@@ -281,6 +281,69 @@ Vector3 Matrix44::DecomposeMatrixIntoEuler(Matrix44 mat)
 	return euler;
 }
 
+void Matrix44::RotateX(const float& deg)
+{
+	this->Append(MakeRotationXAxis(deg));
+}
+
+void Matrix44::RotateY(const float& deg)
+{
+	this->Append(MakeRotationYAxis(deg));
+}
+
+void Matrix44::RotateZ(const float& deg)
+{
+	this->Append(MakeRotationZAxis(deg));
+}
+
+Matrix44 Matrix44::MakeRotationXAxis(const float& deg)
+{
+	Matrix44 res;
+
+	res.Jy = CosDegrees(deg);
+	res.Jz = -SinDegrees(deg);
+	res.Ky = SinDegrees(deg);
+	res.Kz = CosDegrees(deg);
+	//res.Jy = CosDegrees(deg);
+	//res.Jz = SinDegrees(deg);
+	//res.Ky = -SinDegrees(deg);
+	//res.Kz = CosDegrees(deg);
+
+	return res;
+}
+
+Matrix44 Matrix44::MakeRotationYAxis(const float& deg)
+{
+	Matrix44 res;
+
+	res.Ix = CosDegrees(deg);
+	res.Iz = SinDegrees(deg);
+	res.Kx = -SinDegrees(deg);
+	res.Kz = CosDegrees(deg);
+	//res.Ix = CosDegrees(deg);
+	//res.Iz = -SinDegrees(deg);
+	//res.Kx = SinDegrees(deg);
+	//res.Kz = CosDegrees(deg);
+
+	return res;
+}
+
+Matrix44 Matrix44::MakeRotationZAxis(const float& deg)
+{
+	Matrix44 res;
+
+	res.Ix = CosDegrees(deg);
+	res.Iy = -SinDegrees(deg);
+	res.Jx = SinDegrees(deg);
+	res.Jy = CosDegrees(deg);
+	//res.Ix = CosDegrees(deg);
+	//res.Iy = SinDegrees(deg);
+	//res.Jx = -SinDegrees(deg);
+	//res.Jy = CosDegrees(deg);
+
+	return res;
+}
+
 Matrix44 Matrix44::MakeTranslation2D(const Vector2& translation)
 {
 	Matrix44 res;

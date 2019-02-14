@@ -19,8 +19,7 @@ public:
 
 public:
 	Plane(){}
-	Plane(Vector3 normal, float offset)
-		: m_normal(normal), m_offset(offset) {}
+	Plane(Vector3 normal, float offset);
 	~Plane(){}
 
 	void Translate(Vector3 translation);
@@ -30,6 +29,4 @@ public:
 	Entity3* GetEntity() const { return m_entity; }
 
 	void SetEntity(Entity3* ent) { m_entity = ent; }
-
-	//bool operator<(const Plane& pl) const;
 };

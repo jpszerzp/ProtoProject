@@ -3,33 +3,28 @@
 #include "Engine/Renderer/DebugRenderer.hpp"
 #include "Engine/Math/MathUtils.hpp"
 
+//Vector3 GetPolygonCentroid(const std::vector<Vector3>& verts, const ConvexPolygon& polygon)
+//{
+//	Vector3 centroid = Vector3::ZERO;
+//
+//	const std::vector<int>& vert_indices = polygon.m_vert_idx;
+//
+//	for (int i = 0; i < vert_indices.size(); ++i)
+//	{
+//		centroid += verts[vert_indices[i]];
+//	}
+//
+//	uint vert_num = vert_indices.size();
+//
+//	centroid /= vert_num;
+//
+//	return centroid;
+//}
 
-Vector3 GetPolygonCentroid(const std::vector<Vector3>& verts, const ConvexPolygon& polygon)
+int GetPolygonFirstVert(const std::vector<Vector3>& verts, const ConvexPolygon& polygon, Vector3& pos)
 {
-	Vector3 centroid = Vector3::ZERO;
-
-	const std::vector<int>& vert_indices = polygon.m_vert_idx;
-
-	for (int i = 0; i < vert_indices.size(); ++i)
-	{
-		centroid += verts[vert_indices[i]];
-	}
-
-	uint vert_num = vert_indices.size();
-
-	centroid /= vert_num;
-
-	return centroid;
-}
-
-// this function simply find a random vertex of polygon
-// could be ANY points, no requirements
-int GetPolygonRandomVert(const std::vector<Vector3>& verts, const ConvexPolygon& polygon, Vector3& pos)
-{
-	int idx = GetRandomIntInRange(0, polygon.m_vert_idx.size() - 1);
-
+	int idx = polygon.m_vert_idx[0];
 	pos = verts[idx];
-
 	return idx;
 }
 
@@ -45,28 +40,90 @@ ConvexPolyhedron::ConvexPolyhedron(ConvexHull* hull)
 	const Plane& p3 = m_hull->GetPlane(2);
 	const Plane& p4 = m_hull->GetPlane(3);
 
-	// p123
+	// samples
+	DebugRenderPoint(10000.f, 10.f, Vector3(0.f, 0.f, 0.f)     , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderPoint(10000.f, 10.f, Vector3(5.f, 0.f, 0.f)     , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderPoint(10000.f, 10.f, Vector3(-5.f, 0.f, 0.f)    , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderPoint(10000.f, 10.f, Vector3(0.f, 0.f, -3.f)    , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderPoint(10000.f, 10.f, Vector3(0.f, 0.f, -6.f)    , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderPoint(10000.f, 10.f, Vector3(0.f, 0.f, 2.f)     , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderPoint(10000.f, 10.f, Vector3(0.f, 0.f, 4.f)     , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderPoint(10000.f, 10.f, Vector3(0.f, -3.f, 0.f)    , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderPoint(10000.f, 10.f, Vector3(0.f, -4.5f, 0.f)   , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderPoint(10000.f, 10.f, Vector3(0.f, 2.f, 0.f)     , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderPoint(10000.f, 10.f, Vector3(0.f, 4.f, 0.f)     , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderPoint(10000.f, 10.f, Vector3(7.f, 0.f, 0.f)     , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderPoint(10000.f, 10.f, Vector3(-7.f, 0.f, 0.f)    , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderPoint(10000.f, 10.f, Vector3(3.f, 1.5f, 2.f)    , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderPoint(10000.f, 10.f, Vector3(3.f, -1.5f, 2.f)   , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderPoint(10000.f, 10.f, Vector3(-3.f, -1.5f, 2.f)  , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderPoint(10000.f, 10.f, Vector3(-3.f, 1.5f, 2.f)   , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderPoint(10000.f, 10.f, Vector3(3.f, 2.f, 3.f)     , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderPoint(10000.f, 10.f, Vector3(4.f, -2.f, 3.f)    , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderPoint(10000.f, 10.f, Vector3(-4.f, -2.f, 3.f)   , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderPoint(10000.f, 10.f, Vector3(-3.f, 2.f, 3.f)    , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderPoint(10000.f, 10.f, Vector3(5.f, -2.f, -5.f)   , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderPoint(10000.f, 10.f, Vector3(5.f, 2.f, -4.f)    , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderPoint(10000.f, 10.f, Vector3(-5.f, 2.f, -4.f)   , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderPoint(10000.f, 10.f, Vector3(-5.f, -2.f, -5.f)  , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderPoint(10000.f, 10.f, Vector3(8.f, -3.3f, -7.f)  , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderPoint(10000.f, 10.f, Vector3(-8.f, -3.3f, -7.f) , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderPoint(10000.f, 10.f, Vector3(13.f, -4.1f, -9.f) , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderPoint(10000.f, 10.f, Vector3(-13.f, -4.1f, -9.f), Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	DebugRenderPoint(10000.f, 10.f, Vector3(0.f, -2.5f, 7.5f)  , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	//m_hull->AddSample( Vector3(0.f, 0.f, 0.f)      );
+	//m_hull->AddSample( Vector3(5.f, 0.f, 0.f)      );
+	//m_hull->AddSample( Vector3(-5.f, 0.f, 0.f)     );
+	//m_hull->AddSample( Vector3(0.f, 0.f, -3.f)     );
+	//m_hull->AddSample( Vector3(0.f, 0.f, -6.f)     );
+	//m_hull->AddSample( Vector3(0.f, 0.f, 2.f)      );
+	//m_hull->AddSample( Vector3(0.f, 0.f, 4.f)      );
+	//m_hull->AddSample( Vector3(0.f, -3.f, 0.f)     );
+	//m_hull->AddSample( Vector3(0.f, -4.5f, 0.f)    );
+	//m_hull->AddSample( Vector3(0.f, 2.f, 0.f)      );
+	//m_hull->AddSample( Vector3(0.f, 4.f, 0.f)      );
+	//m_hull->AddSample( Vector3(7.f, 0.f, 0.f)      );
+	//m_hull->AddSample( Vector3(-7.f, 0.f, 0.f)     );
+	//m_hull->AddSample( Vector3(3.f, 1.5f, 2.f)     );
+	//m_hull->AddSample( Vector3(3.f, -1.5f, 2.f)    );
+	//m_hull->AddSample( Vector3(-3.f, -1.5f, 2.f)   );
+	//m_hull->AddSample( Vector3(-3.f, 1.5f, 2.f)    );
+	//m_hull->AddSample( Vector3(3.f, 2.f, 3.f)      );
+	//m_hull->AddSample( Vector3(4.f, -2.f, 3.f)     );
+	//m_hull->AddSample( Vector3(-4.f, -2.f, 3.f)    );
+	//m_hull->AddSample( Vector3(-3.f, 2.f, 3.f)     );
+	//m_hull->AddSample( Vector3(5.f, -2.f, -5.f)    );
+	//m_hull->AddSample( Vector3(5.f, 2.f, -4.f)     );
+	//m_hull->AddSample( Vector3(-5.f, 2.f, -4.f)    );
+	//m_hull->AddSample( Vector3(-5.f, -2.f, -5.f)   );
+	//m_hull->AddSample( Vector3(8.f, -3.3f, -7.f)   );
+	//m_hull->AddSample( Vector3(-8.f, -3.3f, -7.f)  );
+	//m_hull->AddSample( Vector3(13.f, -4.1f, -9.f)  );
+	//m_hull->AddSample( Vector3(-13.f, -4.1f, -9.f) );
+	//m_hull->AddSample( Vector3(0.f, -2.5f, 7.5f)   );
+
+	// p123, (0, -5, 13)
 	const Vector3& p123 = ComputeIntersectionPoint(p1, p2, p3);
 	m_verts.push_back(p123);		// 0	
 
-	// p124
+	// p124, (-25, -5, -12)
 	const Vector3& p124 = ComputeIntersectionPoint(p1, p2, p4);
 	m_verts.push_back(p124);		// 1
 
-	// p134
+	// p134, (25, -5, -12)
 	const Vector3& p134 = ComputeIntersectionPoint(p1, p3, p4);
 	m_verts.push_back(p134);		// 2
 
-	// p234
+	// p234, (0, 7, 0.7)
 	const Vector3& p234 = ComputeIntersectionPoint(p2, p3, p4);
 	m_verts.push_back(p234);		// 3
 
 	TODO("Later consider cases with more than 4 faces");
 
-	DebugRenderPoint(10000.f, 10.f, p123, Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
-	DebugRenderPoint(10000.f, 10.f, p124, Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
-	DebugRenderPoint(10000.f, 10.f, p134, Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
-	DebugRenderPoint(10000.f, 10.f, p234, Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	//DebugRenderPoint(10000.f, 10.f, p123, Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	//DebugRenderPoint(10000.f, 10.f, p124, Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	//DebugRenderPoint(10000.f, 10.f, p134, Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	//DebugRenderPoint(10000.f, 10.f, p234, Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
 
 	// f1 unsorted
 	std::vector<int> f1;
@@ -74,7 +131,6 @@ ConvexPolyhedron::ConvexPolyhedron(ConvexHull* hull)
 	f1.push_back(1);	// p124
 	f1.push_back(2);	// p134
 	ConvexPolygon cp1 = ConvexPolygon(f1, p1.m_normal);
-	//m_plane_face.emplace(p1, cp1);
 
 	// f2 unsorted
 	std::vector<int> f2;
@@ -82,29 +138,20 @@ ConvexPolyhedron::ConvexPolyhedron(ConvexHull* hull)
 	f2.push_back(1);	// p124
 	f2.push_back(3);	// p234
 	ConvexPolygon cp2 = ConvexPolygon(f2, p2.m_normal);
-	//m_plane_face.emplace(p2, cp2);
 
 	// f3 unsorted
 	std::vector<int> f3;
 	f3.push_back(0);	// p123
 	f3.push_back(2);	// p134
 	f3.push_back(3);	// p234
-	//f3.push_back(1);	// p124
-	//f3.push_back(2);	// p134
-	//f3.push_back(3);	// p234
 	ConvexPolygon cp3 = ConvexPolygon(f3, p3.m_normal);
-	//m_plane_face.emplace(p3, cp3);
 
 	// f4 unsorted
 	std::vector<int> f4;
-	//f4.push_back(0);	// p123
-	//f4.push_back(2);	// p134
-	//f4.push_back(3);	// p234
 	f4.push_back(1);	// p124
 	f4.push_back(2);	// p134
 	f4.push_back(3);	// p234
 	ConvexPolygon cp4 = ConvexPolygon(f4, p4.m_normal);
-	//m_plane_face.emplace(p4, cp4);
 
 	SortVerticesCCW(cp1);
 	SortVerticesCCW(cp2);
@@ -149,7 +196,19 @@ void ConvexPolyhedron::Render(Renderer* rdr)
 		rdr->SetSampler2D(0, tex->GetSampler());
 
 		rdr->m_colorData.rgba = tintV4;
-		rdr->m_objectData.model = Matrix44::IDENTITY;
+
+		// model, in trs
+		Matrix44 model = Matrix44::IDENTITY;
+		Matrix44 t = Matrix44::MakeTranslation3D(pos);
+		Matrix44 r = Matrix44::IDENTITY;
+		r.RotateZ(rot.z);
+		r.RotateX(rot.x);
+		r.RotateY(rot.y);
+		Matrix44 s = Matrix44::MakeScale3D(scale.x, scale.y, scale.z);
+		model.Append(t);
+		model.Append(r);
+		model.Append(s);
+		rdr->m_objectData.model = model;
 
 		rdr->DrawMesh(m_gpu_mesh);
 	}
@@ -177,17 +236,6 @@ Vector3 ConvexPolyhedron::ComputeIntersectionPoint(const Plane& p1, const Plane&
 	return ns_inv * dv;
 }
 
-//Plane ConvexPolyhedron::GetPlaneFromConvexPolygon(ConvexPolygon& polygon)
-//{
-	//for (std::map<Plane, ConvexPolygon>::iterator it = m_plane_face.begin(); it != m_plane_face.end(); ++it)
-	//{
-	//	if (it->second == polygon)
-	//	{
-	//		return it->first;
-	//	}
-	//}
-//}
-
 void ConvexPolyhedron::SortVerticesCCW(ConvexPolygon& polygon)
 {
 	// f1 centroid
@@ -197,18 +245,15 @@ void ConvexPolyhedron::SortVerticesCCW(ConvexPolygon& polygon)
 
 	// after centroid it is to start at a point in face
 	Vector3 wind_pos;
-	int wind_idx = GetPolygonRandomVert(m_verts, polygon, wind_pos);
+	int wind_idx = GetPolygonFirstVert(m_verts, polygon, wind_pos);
 	sorted_idx.push_back(wind_idx);
 
 	// plane normal cross centroid->wind_start is the CCW filter plane
-	//const Plane& correct_pl = GetPlaneFromConvexPolygon(polygon);
-	//const Vector3& pl_normal = correct_pl.GetNormal();
 	const Vector3& pl_normal = polygon.m_normal;
 
 	// start point of wind
 	// (can probably optimize the following with do-while)
 	Vector3 to_wind_vert = wind_pos - centroid;
-	//Vector3 fileter_pl_normal = pl_normal.Cross(to_wind_vert);		// not normalized
 	Vector3 fileter_pl_normal = to_wind_vert.Cross(pl_normal);		// not normalized
 
 	// keep the vert set small, or this becomes very bad for performance
@@ -254,11 +299,8 @@ void ConvexPolyhedron::SortVerticesCCW(ConvexPolygon& polygon)
 		sorted_idx.push_back(win_index);
 
 		to_wind_vert = wind_pos - centroid;
-		//fileter_pl_normal = pl_normal.Cross(to_wind_vert);	
 		fileter_pl_normal = to_wind_vert.Cross(pl_normal);	
 	}
-
-	//ASSERT_OR_DIE(sorted_idx.size() == polygon.m_vert_idx.size(), "sorted verts size matches");
 
 	// at the end, sorted_index contains sorted CCW vert index
 	polygon.m_vert_idx = sorted_idx;
@@ -269,8 +311,6 @@ void ConvexPolyhedron::SortVerticesCCW(ConvexPolygon& polygon)
 
 void ConvexPolyhedron::AppendPolygonMesh(ConvexPolygon& polygon)
 {
-	//const Plane& correct_pl = GetPlaneFromConvexPolygon(polygon);
-
 	// triangulate
 	for (int i = 2; i < polygon.m_vert_idx.size(); ++i)
 	{
@@ -292,10 +332,3 @@ void ConvexPolyhedron::AppendPolygonMesh(ConvexPolygon& polygon)
 		m_cpu_mesh.AddTriangle(idx, idx + 1, idx + 2);
 	}
 }
-
-//bool ConvexPolygon::operator==(ConvexPolygon& other_polygon)
-//{
-//	std::sort(m_vert_idx.begin(), m_vert_idx.end());
-//	std::sort(other_polygon.m_vert_idx.begin(), other_polygon.m_vert_idx.end());
-//	return (m_vert_idx == other_polygon.m_vert_idx);
-//}

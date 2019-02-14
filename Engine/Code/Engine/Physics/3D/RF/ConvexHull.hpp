@@ -14,6 +14,7 @@ public:
 	ConvexHull(const std::vector<Plane>& planes);
 	~ConvexHull(){}
 
-	Plane GetPlane(uint idx);
-	uint GetPlaneNum();
+	Plane GetPlane(uint idx) const;
+	uint GetPlaneNum() const;
+	std::vector<Plane> GetPlaneCopies() const { return m_planes; }
 };

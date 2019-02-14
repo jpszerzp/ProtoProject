@@ -15,10 +15,13 @@ public:
 	explicit Matrix33(const float* entries);
 	explicit Matrix33(const Vector3& i, const Vector3& j, const Vector3& k);
 
+	Matrix33 operator+(const float& rhs) const;
+	Matrix33 operator+(const Matrix33& rhs) const;
 	Matrix33 operator*(const Matrix33& rhs) const;
 	void operator*=(const Matrix33& rhs);
 	void operator*=(const float scale);
 	void operator+=(const Matrix33& rhs);
+	void operator-=(const Matrix33& rhs);
 	Vector3 operator*(const Vector3& rhs) const;
 	void operator*(const float rhs);
 	const float operator[](const int idx) const;
@@ -44,4 +47,6 @@ public:
 	Vector3 MultiplyTranspose(const Vector3& v) const;
 
 	static Matrix33 FromEuler(const Vector3& euler);
+
+	void Append(const Matrix33& mat);
 };

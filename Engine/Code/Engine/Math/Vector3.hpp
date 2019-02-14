@@ -2,7 +2,7 @@
 
 #include "Engine/Math/Vector4.hpp"
 
-#define VEC3_IDENTITY_THRESHOLD 0.00001f
+#define VEC3_IDENTITY_THRESHOLD 0.001f
 
 class Vector3
 {

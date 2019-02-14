@@ -14,6 +14,7 @@
 #include "Engine/Math/QuickHull.hpp"
 #include "Engine/Math/Line3.hpp"
 #include "Engine/Core/Interval.hpp"
+#include "Engine/Physics/3D/RF/ConvexPolyhedron.hpp"
 
 #include <set>
 
@@ -151,7 +152,13 @@ float DistPointToEdge(const Vector3& pt, const Vector3& vert1, const Vector3& ve
 float DistPointToPlaneSigned(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3);
 float DistPointToPlaneUnsigned(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3);
 float DistPointToPlaneSigned(const Vector3& pt, const Plane& plane);
+bool IsPointOutwardPlane(const Vector3& pt, const Plane& plane);
 
 // qh
 QHFeature* DistPointToTriangleHull(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3, float& dist, Vector3& closest);
 QHFeature* DistPointToQuadHull(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3, const Vector3& vert4, float& dist, Vector3& closest);
+Vector3 ComputePlaneIntersectionPoint(const Plane& p1, const Plane& p2, const Plane& p3);
+Vector3 GetPolygonCentroid(const std::vector<Vector3>& verts, const ConvexPolygon& polygon);
+Matrix33 GetCanonicalTetrahedronCovariance();
+Matrix33 GetInertiaTensorFromCovariance(const Matrix33& cov);
+Matrix33 TranslateCovariance(const Matrix33& cov, const Vector3& com, const float& mass, const Vector3& offset);
