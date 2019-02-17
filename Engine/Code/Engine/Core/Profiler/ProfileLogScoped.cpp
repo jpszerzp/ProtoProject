@@ -30,6 +30,7 @@ ProfileLogScoped::~ProfileLogScoped()
 
 void ProfileLogScoped::ProfilePush()
 {
+	/*
 	// form tree represented by an array
 	int idx = g_gameConfigBlackboard->m_profiledFunctionIdx;
 	if (g_gameConfigBlackboard->m_functionHpcInfoPairs.empty())
@@ -52,10 +53,12 @@ void ProfileLogScoped::ProfilePush()
 	// update of map
 	UInt64Vector2 startOnly = UInt64Vector2(m_hpcStart, 0);
 	g_gameConfigBlackboard->m_functionHpcInfoPairs.emplace(m_node, startOnly);
+	*/
 }
 
 void ProfileLogScoped::ProfilePop()
 {
+	/*
 	std::map<ProfilerNode*, UInt64Vector2>::iterator it =
 		g_gameConfigBlackboard->m_functionHpcInfoPairs.find(m_node);
 	it->second.uy = m_hpcEnd;
@@ -63,4 +66,5 @@ void ProfileLogScoped::ProfilePop()
 	// return the scope control to parent
 	g_gameConfigBlackboard->m_scopeIdx -= 1;			
 	// when poping root, this effectively set scope idx to -1, so need to reset every frame
+	*/
 }
