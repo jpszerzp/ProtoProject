@@ -138,6 +138,7 @@ Physics3State::Physics3State()
 		Vector3(85.f, 315.f, 5.f), Vector3(95.f, 315.f, 5.f));
 	const Vector3& wrap_center = m_wraparound_convex->m_bounds.GetCenter();
 
+	/*
 	// planes and hull
 	Plane p1 = Plane(Vector3(0.f, -1.f, 0.f), 1.f);
 	Plane p2 = Plane(Vector3(-1.f, 1.f, 1.f).GetNormalized(), 1.2f);
@@ -169,19 +170,44 @@ Physics3State::Physics3State()
 	// IMPORTANT: if we use com here, the object is back to the mother object whose com we precomputed
 	// we can also use com as the mother origin, give it an offset to have infinite copies of this mesh EVERYWHERE
 	// THIS is actually what I am going to do...
-	//const Vector3& com = cObj->GetInitialCOM();		 // could use com to spawn a cObj perfectly overlapping the MOTHER(initial) data, but do not have to 
 	const float& mass = cObj->GetInitialMass();
-	const Vector3& true_center =  wrap_center;			 // com + (wrap_center - com);
+	const Vector3& true_center = wrap_center;			 // com + (wrap_center - com); based on ORIGIN
 	rb = new CollisionRigidBody(mass, true_center, Vector3::ZERO);
 	rb->SetAwake(true);
 	rb->SetSleepable(false);
 	
 	cObj->AttachToRigidBody(rb);
-
 	m_convex_objs.push_back(cObj);
+	m_cobj_handle_0 = cObj;
+	m_wraparound_convex->m_primitives.push_back(cObj);
+	*/
 
-	m_cobj_handle = cObj;
+	Plane p1 = Plane(Vector3(.1f, 0.f, .9f), 1.f);
+	Plane p2 = Plane(Vector3(.1f, 0.f, -.9f), 1.f);
+	Plane p3 = Plane(Vector3(-.9f, 0.f, -.1f), 1.f);
+	Plane p4 = Plane(Vector3(.9f, 0.f, -.1f), 1.f);
+	Plane p5 = Plane(Vector3(-.1f, .9f, -.1f), 1.f);
+	Plane p6 = Plane(Vector3(-.05f, -.9f, .1f), 1.f);
+	std::vector<Plane> hull_planes;
+	hull_planes.push_back(p1);
+	hull_planes.push_back(p2);
+	hull_planes.push_back(p3);
+	hull_planes.push_back(p4);
+	hull_planes.push_back(p5);
+	hull_planes.push_back(p6);
+	ConvexHull* cHull = new ConvexHull(hull_planes);
 
+	CollisionConvexObject* cObj = new CollisionConvexObject(*cHull);
+
+	const float& mass = cObj->GetInitialMass();
+	const Vector3& true_center = wrap_center;			 // com + (wrap_center - com); based on ORIGIN
+	rb = new CollisionRigidBody(mass, true_center, Vector3::ZERO);
+	rb->SetAwake(true);
+	rb->SetSleepable(false);
+
+	cObj->AttachToRigidBody(rb);
+	m_convex_objs.push_back(cObj);
+	m_cobj_handle_0 = cObj;
 	m_wraparound_convex->m_primitives.push_back(cObj);
 
 	// debug
@@ -369,7 +395,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	//else
 	//	rb->SetAngularVelocity(Vector3::ZERO);
 
-	CollisionRigidBody* rb = m_cobj_handle->GetRigidBody();
+	CollisionRigidBody* rb = m_cobj_handle_0->GetRigidBody();
 
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_UP_ARROW))
 		rb->SetAngularVelocity(Vector3(5.f, 0.f, 0.f));

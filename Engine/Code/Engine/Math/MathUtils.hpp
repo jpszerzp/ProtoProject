@@ -157,7 +157,8 @@ bool IsPointOutwardPlane(const Vector3& pt, const Plane& plane);
 // qh
 QHFeature* DistPointToTriangleHull(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3, float& dist, Vector3& closest);
 QHFeature* DistPointToQuadHull(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3, const Vector3& vert4, float& dist, Vector3& closest);
-Vector3 ComputePlaneIntersectionPoint(const Plane& p1, const Plane& p2, const Plane& p3);
+Vector3 ComputePlaneIntersectionPointLA(const Plane& p1, const Plane& p2, const Plane& p3);
+bool ComputePlaneIntersectionPoint(const Plane& p1, const Plane& p2, const Plane& p3, Vector3& p);
 Vector3 GetPolygonCentroid(const std::vector<Vector3>& verts, const ConvexPolygon& polygon);
 Matrix33 GetCanonicalTetrahedronCovariance();
 Matrix33 GetInertiaTensorFromCovariance(const Matrix33& cov);

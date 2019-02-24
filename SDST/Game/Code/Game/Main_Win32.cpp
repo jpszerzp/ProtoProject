@@ -109,6 +109,7 @@ void Initialize( HINSTANCE )
 	g_theApp = new TheApp();
 	Window* theWindow = Window::GetInstance();
 	theWindow->RegisterHandler(HandleMsg);
+
 	LogSystemStartup();
 
 	PhysTimeSystem::InitTimeSystem();

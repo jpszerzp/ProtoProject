@@ -130,7 +130,7 @@ public:
 
 	// temp
 	CollisionSphere* m_sph_handle_0;
-	CollisionConvexObject* m_cobj_handle;
+	CollisionConvexObject* m_cobj_handle_0;
 
 	Collision m_storage[MAX_CONTACT_NUM];
 

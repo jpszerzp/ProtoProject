@@ -45,26 +45,6 @@ void CollisionPrimitive::Render(Renderer* renderer)
 
 	// draw
 	renderer->DrawMesh(m_mesh);
-
-	// draw debug basis
-	//const Vector3& start = m_rigid_body->GetCenter();
-
-	//Vector3 right_dir = m_transform_mat.GetRight();
-	//right_dir.Normalize();
-
-	//Vector3 up_dir = m_transform_mat.GetUp();
-	//up_dir.Normalize();
-
-	//Vector3 forward_dir = m_transform_mat.GetForward();
-	//forward_dir.Normalize();
-
-	//Vector3 right_end = start + right_dir * 3.f;
-	//Vector3 up_end = start + up_dir * 3.f;
-	//Vector3 forward_end = start + forward_dir * 3.f;
-
-	//DebugRenderLine(.05f, start, right_end, 3.f, Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
-	//DebugRenderLine(.05f, start, up_end, 3.f, Rgba::GREEN, Rgba::GREEN, DEBUG_RENDER_USE_DEPTH);
-	//DebugRenderLine(.05f, start, forward_end, 3.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
 }
 
 Vector3 CollisionPrimitive::GetBasisAndPosition(uint index) const
@@ -230,102 +210,36 @@ void CollisionPlane::AttachToRigidBody(CollisionRigidBody* rb)
 	SetPrimitiveTransformMat4(rb->GetTransformMat4());
 }
 
+Vector3 CollisionConvexObject::s_ref = Vector3::ZERO;
+
 CollisionConvexObject::CollisionConvexObject(const ConvexHull& hull)
 	: m_hull(hull)
 {
 	// common initialization for general primitive object
+	// shader, texture, tint...
 	BuildCommon();
 
-	// initialize hull vertices from planes in hull
-	// in world space
-	//BuildVertices(hull);
-
-	// initialize polygon faces with above vertices
-	// in world space
-	//BuildPolygons(hull);
-
+	// intersection verts and born polygons
 	BuildVerticesAndPolygons(hull);
-	
-	//// debug render for vertices
-	//for (int i = 0; i < m_verts.size(); ++i)
-	//{
-	//	const Vector3& vert_pos = m_verts[i];
-	//	DebugRenderPoint(1000.f, 1.5f, vert_pos, Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
-	//}
 
-	// vertices in above polygons may be random ordered, sort them CCW 
+	// vertices (represented by indices) in above polygons may be random ordered, sort them CCW 
 	SortPolygonVerticesCCW();
 
-	// triangulate with vert index
-	std::vector<IntVector3> triangle_vert_idx;
-	for (int i = 0; i < m_polygons.size(); ++i)
-	{
-		// copy of this polygon
-		const ConvexPolygon& polygon = m_polygons[i];
-		
-		// vert indices of this polygon
-		const std::vector<int>& polygon_vert_indices = polygon.m_vert_idx;
-
-		for (int j = 2; j < polygon_vert_indices.size(); ++j)
-		{
-			IntVector3 indices = IntVector3(polygon_vert_indices[0], 
-				polygon_vert_indices[j - 1], polygon_vert_indices[j]);
-
-			triangle_vert_idx.push_back(indices);
-		}
-	}
+	// triangulated vert index for each polygon
+	// polygon may NOT be a triangle (there may be more than one triangle for a polygon)
+	std::vector<IntVector3> triangle_vert_idx = GetTriangulationIndices();
 
 	// for each triangle mesh, compute a B - tetrahedron body
 	// in world space (w1, w2, w3 are in world space)
-	std::vector<TetrahedronBody> tBodies;
-	const Vector3 w0 = Vector3::ZERO;
-	Matrix33 c_canonical = GetCanonicalTetrahedronCovariance();
-	for (int i = 0; i < triangle_vert_idx.size(); ++i)
-	{
-		const IntVector3& indices = triangle_vert_idx[i];
-
-		const Vector3& w1 = m_verts[indices.x];
-		const Vector3& w2 = m_verts[indices.y];
-		const Vector3& w3 = m_verts[indices.z];
-
-		Matrix33 affine = Matrix33(w1 - w0, w2 - w0, w3 - w0);
-
-		// c1 - distortion
-		float abs_det_a = abs(affine.GetDeterminant());
-		//float abs_det_a = affine.GetDeterminant();
-		const Matrix33& affine_transpose = affine.Transpose();
-		Matrix33 c1 = Matrix33::IDENTITY;
-		c1.Append(affine);
-		c1.Append(c_canonical);
-		c1.Append(affine_transpose);
-		c1 *= abs_det_a;
-
-		// mass, from volume and density
-		static const float tDensity = .005f;
-		float tVolume = (1.f / 6.f) * abs_det_a;
-		float tMass = tDensity * tVolume;
-
-		// since b is a tetrahedron, com is centroid
-		Vector3 com = (w0 + w1 + w2 + w3) / 4.f;		
-
-		TetrahedronBody tBody = TetrahedronBody(c1, com, tMass);
-
-		tBodies.push_back(tBody);
-	}
+	std::vector<TetrahedronBody> tBodies = GetTetrahedronBodies(triangle_vert_idx);
 
 	// accumulate tbody to get info for total body
 	// in world space
-	TetrahedronBody total_body;
-	for (int i = 0; i < tBodies.size(); ++i)
-	{
-		total_body += tBodies[i];
-	}
+	TetrahedronBody total_body = GetSummedTetrahedronBody(tBodies);
 
 	// now we get total covariance against ref point, we adjust it to be against com; todo: total_body.m_com - ref?
 	// c_total is in local space, but total_body in world space still
-	Matrix33 c_total = TranslateCovariance(total_body.m_covariance, total_body.m_com, total_body.m_mass, w0 - total_body.m_com);
-	//Matrix33 c_total = total_body.TranslateTetrahedronWithOffsetToGetCovariance(w0 - total_body.m_com);
-	//Matrix33 c_total = total_body.TranslateTetrahedronWithOffsetToGetCovariance(total_body.m_com - ref);
+	Matrix33 c_total = TranslateCovariance(total_body.m_covariance, total_body.m_com, total_body.m_mass, s_ref - total_body.m_com);
 
 	// with adjusted total covariance the inertia tensor can be derived
 	// m_it in local space
@@ -334,29 +248,8 @@ CollisionConvexObject::CollisionConvexObject(const ConvexHull& hull)
 	// mass
 	m_initial_mass = total_body.m_mass;
 
-	/*
-	// mass check
-	const Vector3& v1 = m_verts[0];
-	const Vector3& v2 = m_verts[1];
-	const Vector3& v3 = m_verts[2];
-	const Vector3& v4 = m_verts[3];
-	Matrix33 mass_test = Matrix33(v1 - v4, v2 - v4, v3 - v4);
-	float desired_mass = (1.f / 6.f) * abs(mass_test.GetDeterminant()) * 1.f;
-	ASSERT_OR_DIE(desired_mass == total_body.m_mass, "masses are supposed to be the same");
-
-	// if this is tetrahedron, may not work with com below because com of tetrahedron is straightforward to compute
-	// and does not need to be calculated in this way, it is more of a first egg or first chicken problem?
-	// want to have a sanity check of two "centers", which should be the same point
-	Vector3 poi1 = total_body.m_com;
-	Vector3 poi2 = Vector3::ZERO;
-	std::for_each(m_verts.begin(), m_verts.end(), [&](Vector3 n) {poi2 += n;});
-	poi2 /= m_verts.size();
-	ASSERT_OR_DIE(Vector3::AreVectorsNearlyIdentical(poi1, poi2), "two centers are not the same points");
-	*/
-
 	// "point of interest" - candidate of com
 	m_initial_poi = total_body.m_com;
-	//DebugRenderPoint(1000.f, 5.f, m_initial_poi, Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
 
 	// with polygon verts sorted, build meshes out of them
 	BuildPolygonMeshes();
@@ -372,131 +265,6 @@ void CollisionConvexObject::AttachToRigidBody(CollisionRigidBody* rb)
 	rb->CacheData();
 
 	SetPrimitiveTransformMat4(rb->GetTransformMat4());
-}
-
-void CollisionConvexObject::BuildVertices(const ConvexHull& hull)
-{
-	//const Plane& p1 = hull.GetPlane(0);
-	//const Plane& p2 = hull.GetPlane(1);
-	//const Plane& p3 = hull.GetPlane(2);
-	//const Plane& p4 = hull.GetPlane(3);
-	//const Plane& p5 = hull.GetPlane(4);
-
-	//// p123, (0, -5, 13)
-	//const Vector3& p123 = ComputePlaneIntersectionPoint(p1, p2, p3);
-	//m_verts.push_back(p123);		// 0	
-
-	//								// p124, (-25, -5, -12)
-	//const Vector3& p124 = ComputePlaneIntersectionPoint(p1, p2, p4);
-	//m_verts.push_back(p124);		// 1
-
-	//								// p134, (25, -5, -12)
-	//const Vector3& p134 = ComputePlaneIntersectionPoint(p1, p3, p4);
-	//m_verts.push_back(p134);		// 2
-
-	//								// p234, (0, 7, 0.7)
-	//const Vector3& p234 = ComputePlaneIntersectionPoint(p2, p3, p4);
-	//m_verts.push_back(p234);		// 3
-
-	// list of planes
-	const std::vector<Plane>& planes = hull.GetPlaneCopies();
-
-	uint plane_num = planes.size();
-	m_polygons.reserve(plane_num);
-	for (int i = 0; i < plane_num; ++i)
-	{
-		const Plane& plane_ref = planes[i];
-		const Vector3& n = plane_ref.GetNormal();
-		
-		ConvexPolygon polygon = ConvexPolygon(n);
-		m_polygons[i] = polygon;
-	}
-
-	for (int i = 0; i <= plane_num - 3; ++i)
-	{
-		for (int j = i; j <= plane_num - 2; ++j)
-		{
-			for (int k = j; k <= plane_num - 1; ++k)
-			{
-				bool legal = true;
-				
-				const Plane& p_i = planes[i];
-				const Plane& p_j = planes[j];
-				const Plane& p_k = planes[k];
-
-				const Vector3& intersection = ComputePlaneIntersectionPoint(p_i, p_j, p_k);
-
-				// for this new intersection point, see if it is valid
-				// if it is outside any plane, it is NOT valid
-				for (int m = 0; m <= plane_num - 1; ++m)
-				{
-					const Plane& subject_plane = planes[m];
-
-					if (IsPointOutwardPlane(intersection, subject_plane))
-					{
-						legal = false;
-						break;
-					}
-				}
-
-				if (legal)
-				{
-					m_verts.push_back(intersection);
-
-					int this_idx = m_verts.size() - 1;
-
-					m_polygons[i].AddVertexIndex(this_idx);
-					m_polygons[j].AddVertexIndex(this_idx);
-					m_polygons[k].AddVertexIndex(this_idx);
-				}
-			}
-		}
-	}
-	// post-condition:
-	// convex hull has all planes
-	// m_verts has all verts
-	// m_polygons has all polys recording all points and correct normal
-}
-
-void CollisionConvexObject::BuildPolygons(const ConvexHull& hull)
-{
-	const Plane& p1 = hull.GetPlane(0);
-	const Plane& p2 = hull.GetPlane(1);
-	const Plane& p3 = hull.GetPlane(2);
-	const Plane& p4 = hull.GetPlane(3);
-
-	// f1 unsorted
-	std::vector<int> f1;
-	f1.push_back(0);	// p123
-	f1.push_back(1);	// p124
-	f1.push_back(2);	// p134
-	ConvexPolygon cp1 = ConvexPolygon(f1, p1.m_normal);
-
-	// f2 unsorted
-	std::vector<int> f2;
-	f2.push_back(0);	// p123
-	f2.push_back(1);	// p124
-	f2.push_back(3);	// p234
-	ConvexPolygon cp2 = ConvexPolygon(f2, p2.m_normal);
-
-	// f3 unsorted
-	std::vector<int> f3;
-	f3.push_back(0);	// p123
-	f3.push_back(2);	// p134
-	f3.push_back(3);	// p234
-	ConvexPolygon cp3 = ConvexPolygon(f3, p3.m_normal);
-
-	// f4 unsorted
-	std::vector<int> f4;
-	f4.push_back(1);	// p124
-	f4.push_back(2);	// p134
-	f4.push_back(3);	// p234
-	ConvexPolygon cp4 = ConvexPolygon(f4, p4.m_normal);
-
-	m_polygons.push_back(cp1);
-	m_polygons.push_back(cp2);
-	m_polygons.push_back(cp3);
-	m_polygons.push_back(cp4);
 }
 
 void CollisionConvexObject::BuildVerticesAndPolygons(const ConvexHull& hull)
@@ -529,30 +297,40 @@ void CollisionConvexObject::BuildVerticesAndPolygons(const ConvexHull& hull)
 					const Plane& p_j = planes[j];
 					const Plane& p_k = planes[k];
 
-					const Vector3& intersection = ComputePlaneIntersectionPoint(p_i, p_j, p_k);
+					Vector3 intersection;
+					bool intersected = ComputePlaneIntersectionPoint(p_i, p_j, p_k, intersection);
 
-					// for this new intersection point, see if it is valid
-					// if it is outside any plane, it is NOT valid
-					for (int m = 0; m <= plane_num - 1; ++m)
+					if (intersected)
 					{
-						const Plane& subject_plane = planes[m];
+						// if this point has existed?
+						// if yes, go to next check of planes directly
+						bool found = std::find(m_verts.begin(), m_verts.end(), intersection) != m_verts.end();
+						if (found)
+							continue;
 
-						if (IsPointOutwardPlane(intersection, subject_plane))
+						// for this new intersection point, see if it is valid
+						// if it is outside ANY plane, it is NOT valid
+						for (int m = 0; m <= plane_num - 1; ++m)
 						{
-							legal = false;
-							break;
+							const Plane& subject_plane = planes[m];
+
+							if (IsPointOutwardPlane(intersection, subject_plane))
+							{
+								legal = false;
+								break;		
+							}
 						}
-					}
 
-					if (legal)
-					{
-						m_verts.push_back(intersection);
+						if (legal)
+						{
+							m_verts.push_back(intersection);
 
-						int this_idx = m_verts.size() - 1;
+							int this_idx = m_verts.size() - 1;
 
-						m_polygons[i].AddVertexIndex(this_idx);
-						m_polygons[j].AddVertexIndex(this_idx);
-						m_polygons[k].AddVertexIndex(this_idx);
+							m_polygons[i].AddVertexIndex(this_idx);
+							m_polygons[j].AddVertexIndex(this_idx);
+							m_polygons[k].AddVertexIndex(this_idx);
+						}
 					}
 				}
 			}
@@ -581,99 +359,6 @@ void CollisionConvexObject::BuildPolygonMeshes()
 	Mesh* gpu_mesh = mb.CreateMesh(VERT_PCU, DRAW_TRIANGLE);
 	SetMesh(gpu_mesh);
 }
-
-//float CollisionConvexObject::GetTensorContributionIX(const Vector3& sample_location) const
-//{
-//	// displacement to x axis
-//	Vector3 disp_to_vol_center = sample_location - m_poi;
-//
-//	const Vector3& right = GetPrimitiveRight().GetNormalized();		// x
-//
-//	// distance to x axis
-//	Vector3 disp_vert_to_vol_center = disp_to_vol_center - (right * DotProduct(disp_to_vol_center, right));
-//	float dist_vert_to_vol_center_squared = disp_vert_to_vol_center.GetLengthSquared();
-//	return dist_vert_to_vol_center_squared * (GetBodyMass() / m_hull.GetSampleNum());
-//}
-//
-//float CollisionConvexObject::GetTensorContributionIY(const Vector3& sample_location) const
-//{
-//	// displacement to y axis
-//	Vector3 disp_to_vol_center = sample_location - m_poi;
-//
-//	const Vector3& up = GetPrimitiveUp().GetNormalized();		// y
-//
-//	// distance to y axis
-//	Vector3 disp_vert_to_vol_center = disp_to_vol_center - (up * DotProduct(disp_to_vol_center, up));
-//	float dist_vert_to_vol_center_squared = disp_vert_to_vol_center.GetLengthSquared();
-//	return dist_vert_to_vol_center_squared * (GetBodyMass() / m_hull.GetSampleNum());
-//}
-//
-//float CollisionConvexObject::GetTensorContributionIZ(const Vector3& sample_location) const
-//{
-//	// displacement to z axis
-//	Vector3 disp_to_vol_center = sample_location - m_poi;
-//
-//	const Vector3& forward = GetPrimitiveForward().GetNormalized();		// z
-//
-//	// distance to y axis
-//	Vector3 disp_vert_to_vol_center = disp_to_vol_center - (forward * DotProduct(disp_to_vol_center, forward));
-//	float dist_vert_to_vol_center_squared = disp_vert_to_vol_center.GetLengthSquared();
-//	return dist_vert_to_vol_center_squared * (GetBodyMass() / m_hull.GetSampleNum());
-//}
-//
-//float CollisionConvexObject::GetTensorContributionIXY(const Vector3& sample_location) const
-//{
-//	Vector3 disp_to_vol_center = sample_location - m_poi;
-//
-//	const Vector3& right = GetPrimitiveRight().GetNormalized();		// x
-//	const Vector3& up = GetPrimitiveUp().GetNormalized();			// y
-//
-//	// distance to x axis
-//	Vector3 disp_vert_to_vol_center_x = disp_to_vol_center - (right * DotProduct(disp_to_vol_center, right));
-//	float dist_vert_to_vol_center_x = disp_vert_to_vol_center_x.GetLength();
-//
-//	// distance to y axis
-//	Vector3 disp_vert_to_vol_center_y = disp_to_vol_center - (up * DotProduct(disp_to_vol_center, up));
-//	float dist_vert_to_vol_center_y = disp_vert_to_vol_center_y.GetLength();
-//
-//	return (dist_vert_to_vol_center_x * dist_vert_to_vol_center_y) * (GetBodyMass() / m_hull.GetSampleNum());
-//}
-//
-//float CollisionConvexObject::GetTensorContributionIXZ(const Vector3& sample_location) const
-//{
-//	Vector3 disp_to_vol_center = sample_location - m_poi;
-//
-//	const Vector3& right = GetPrimitiveRight().GetNormalized();				// x
-//	const Vector3& forward = GetPrimitiveForward().GetNormalized();			// z
-//	
-//	// distance to x axis
-//	Vector3 disp_vert_to_vol_center_x = disp_to_vol_center - (right * DotProduct(disp_to_vol_center, right));
-//	float dist_vert_to_vol_center_x = disp_vert_to_vol_center_x.GetLength();
-//
-//	// distance to z axis
-//	Vector3 disp_vert_to_vol_center_z = disp_to_vol_center - (forward * DotProduct(disp_to_vol_center, forward));
-//	float dist_vert_to_vol_center_z = disp_vert_to_vol_center_z.GetLength();
-//
-//	return (dist_vert_to_vol_center_x * dist_vert_to_vol_center_z) * (GetBodyMass() / m_hull.GetSampleNum());
-//}
-//
-//float CollisionConvexObject::GetTensorContributionIYZ(const Vector3& sample_location) const
-//{
-//	Vector3 disp_to_vol_center = sample_location - m_poi;
-//
-//	const Vector3& up = GetPrimitiveUp().GetNormalized();					// y
-//	const Vector3& forward = GetPrimitiveForward().GetNormalized();			// z
-//
-//	// distance to y axis
-//	Vector3 disp_vert_to_vol_center_y = disp_to_vol_center - (up * DotProduct(disp_to_vol_center, up));
-//	float dist_vert_to_vol_center_y = disp_vert_to_vol_center_y.GetLength();
-//
-//	// distance to z axis
-//	Vector3 disp_vert_to_vol_center_z = disp_to_vol_center - (forward * DotProduct(disp_to_vol_center, forward));
-//	float dist_vert_to_vol_center_z = disp_vert_to_vol_center_z.GetLength();
-//
-//	return (dist_vert_to_vol_center_y * dist_vert_to_vol_center_z) * (GetBodyMass() / m_hull.GetSampleNum());
-//}
 
 void CollisionConvexObject::SortVerticesCCW(ConvexPolygon& polygon)
 {
@@ -757,6 +442,82 @@ void CollisionConvexObject::SortPolygonVerticesCCW()
 	}
 }
 
+std::vector<IntVector3> CollisionConvexObject::GetTriangulationIndices() const
+{
+	std::vector<IntVector3> triangle_vert_idx;
+	for (int i = 0; i < m_polygons.size(); ++i)
+	{
+		// copy of this polygon
+		const ConvexPolygon& polygon = m_polygons[i];
+
+		// vert indices of this polygon
+		const std::vector<int>& polygon_vert_indices = polygon.m_vert_idx;
+
+		for (int j = 2; j < polygon_vert_indices.size(); ++j)
+		{
+			IntVector3 indices = IntVector3(polygon_vert_indices[0], 
+				polygon_vert_indices[j - 1], polygon_vert_indices[j]);
+
+			triangle_vert_idx.push_back(indices);
+		}
+	}
+
+	return triangle_vert_idx;
+}
+
+std::vector<TetrahedronBody> CollisionConvexObject::GetTetrahedronBodies(const std::vector<IntVector3>& triangle_vert_idx) const
+{
+	std::vector<TetrahedronBody> tBodies;
+	const Vector3& w0 = s_ref;			// "random" ref point
+	Matrix33 c_canonical = GetCanonicalTetrahedronCovariance();
+	for (int i = 0; i < triangle_vert_idx.size(); ++i)
+	{
+		const IntVector3& indices = triangle_vert_idx[i];
+
+		const Vector3& w1 = m_verts[indices.x];
+		const Vector3& w2 = m_verts[indices.y];
+		const Vector3& w3 = m_verts[indices.z];
+
+		Matrix33 affine = Matrix33(w1 - w0, w2 - w0, w3 - w0);
+
+		// C - covariance
+		// todo: use abs value or not?
+		float abs_det_a = abs(affine.GetDeterminant());
+		//float abs_det_a = affine.GetDeterminant();
+		const Matrix33& affine_transpose = affine.Transpose();
+		Matrix33 c1 = Matrix33::IDENTITY;
+		c1.Append(affine);
+		c1.Append(c_canonical);
+		c1.Append(affine_transpose);
+		c1 *= abs_det_a;
+
+		// mass, from volume and density
+		static const float tDensity = .005f;
+		float tVolume = (1.f / 6.f) * abs_det_a;		// todo: use abs or not?
+		float tMass = tDensity * tVolume;
+
+		// since b is a tetrahedron, com is centroid
+		Vector3 com = (w0 + w1 + w2 + w3) / 4.f;		
+
+		TetrahedronBody tBody = TetrahedronBody(c1, com, tMass);
+
+		tBodies.push_back(tBody);
+	}
+
+	return tBodies;
+}
+
+TetrahedronBody CollisionConvexObject::GetSummedTetrahedronBody(const std::vector<TetrahedronBody>& bodies) const
+{
+	TetrahedronBody total_body;
+	for (int i = 0; i < bodies.size(); ++i)
+	{
+		total_body += bodies[i];
+	}
+
+	return total_body;
+}
+
 void CollisionConvexObject::AppendPolygonMesh(MeshBuilder& mb, ConvexPolygon& polygon)
 {
 	// triangulate
@@ -767,6 +528,7 @@ void CollisionConvexObject::AppendPolygonMesh(MeshBuilder& mb, ConvexPolygon& po
 		Vector3 vert2 = m_verts[polygon.m_vert_idx[i]];
 
 		// to use transform, build mesh in local space
+		// vert0/1/2 turns to direction (not position) after thiss
 		vert0 -= m_initial_poi;
 		vert1 -= m_initial_poi;
 		vert2 -= m_initial_poi;
@@ -819,6 +581,7 @@ Vector3 CollisionConvexObject::ComputeGeometricCentroid() const
 	return centroid;
 }
 
+// TETRAHEDRONBODY
 TetrahedronBody TetrahedronBody::operator+(const TetrahedronBody& other) const
 {
 	TetrahedronBody sum_body;

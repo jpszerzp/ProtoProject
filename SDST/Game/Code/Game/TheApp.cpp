@@ -326,6 +326,8 @@ void TheApp::PhysxStartup()
 	m_physics = PxCreatePhysics(PX_PHYSICS_VERSION, *m_foundation, PxTolerancesScale(), recordMemoryAllocations, m_pvd);
 	if (!m_physics)
 		ASSERT_OR_DIE(false, "PxCreatePhysics failed!");
+
+	TODO("optional startups: cooking, extensions, articulations, height fields");
 }
 
 void TheApp::PhysxShutdown()

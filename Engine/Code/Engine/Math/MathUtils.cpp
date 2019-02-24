@@ -1756,7 +1756,7 @@ QHFeature* DistPointToQuadHull(const Vector3& pt, const Vector3& vert1,
 	}
 }
 
-Vector3 ComputePlaneIntersectionPoint(const Plane& p1, const Plane& p2, const Plane& p3)
+Vector3 ComputePlaneIntersectionPointLA(const Plane& p1, const Plane& p2, const Plane& p3)
 {
 	const Vector3& n1 = p1.GetNormal();
 	const Vector3& n2 = p2.GetNormal();
@@ -1776,6 +1776,29 @@ Vector3 ComputePlaneIntersectionPoint(const Plane& p1, const Plane& p2, const Pl
 	const Matrix33& ns_inv = ns.Invert();
 
 	return ns_inv * dv;
+}
+
+bool ComputePlaneIntersectionPoint(const Plane& p1, const Plane& p2, const Plane& p3, Vector3& p)
+{
+	const Vector3& n1 = p1.GetNormal();
+	const Vector3& n2 = p2.GetNormal();
+	const Vector3& n3 = p3.GetNormal();
+
+	const float& d1 = p1.GetOffset();
+	const float& d2 = p2.GetOffset();
+	const float& d3 = p3.GetOffset();
+
+	float denom = DotProduct(n1, n2.Cross(n3));
+	if (denom == 0)
+		return false;
+
+	Vector3 f1 = (n2.Cross(n3)) * d1;
+	Vector3 f2 = (n3.Cross(n1)) * d2;
+	Vector3 f3 = (n1.Cross(n2)) * d3;
+
+	p = (f1 + f2 + f3) / denom;
+
+	return true;
 }
 
 Vector3 GetPolygonCentroid(const std::vector<Vector3>& verts, const ConvexPolygon& polygon)

@@ -117,6 +117,8 @@ class CollisionConvexObject : public CollisionPrimitive
 
 	std::vector<ConvexPolygon> m_polygons;
 
+	// BAD DESIGN, ONLY USED ONCE...
+	// the mystery of GO contains an entity or an entity owns a GO
 	// to find inertia tensor: the covariance method
 	Vector3 m_initial_poi;
 
@@ -126,25 +128,23 @@ class CollisionConvexObject : public CollisionPrimitive
 	// record the initial mass so that it can be reused
 	float m_initial_mass;
 
+	// random ref point of covariance method (to compute inertia tensor)
+	static Vector3 s_ref;
+
 public:
 	CollisionConvexObject(const ConvexHull& hull);
 
 	void AttachToRigidBody(CollisionRigidBody* rb) override;
 
-	void BuildVertices(const ConvexHull& hull);
-	void BuildPolygons(const ConvexHull& hull);
 	void BuildVerticesAndPolygons(const ConvexHull& hull);
 	void BuildPolygonMeshes();
 
-	//float GetTensorContributionIX(const Vector3& sample_location) const;
-	//float GetTensorContributionIY(const Vector3& sample_location) const;
-	//float GetTensorContributionIZ(const Vector3& sample_location) const;
-	//float GetTensorContributionIXY(const Vector3& sample_location) const;
-	//float GetTensorContributionIXZ(const Vector3& sample_location) const;
-	//float GetTensorContributionIYZ(const Vector3& sample_location) const;
-
 	void SortVerticesCCW(ConvexPolygon& polygon);
 	void SortPolygonVerticesCCW();
+
+	std::vector<IntVector3> GetTriangulationIndices() const;
+	std::vector<TetrahedronBody> GetTetrahedronBodies(const std::vector<IntVector3>& triangle_vert_idx) const;
+	TetrahedronBody GetSummedTetrahedronBody(const std::vector<TetrahedronBody>& bodies) const; 
 
 	void AppendPolygonMesh(MeshBuilder& mb, ConvexPolygon& polygon);
 
