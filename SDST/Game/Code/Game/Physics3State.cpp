@@ -77,17 +77,17 @@ Physics3State::Physics3State()
 		Vector3(25.f, 315.f, -5.f), Vector3(35.f, 315.f, -5.f),
 		Vector3(25.f, 315.f, 5.f), Vector3(35.f, 315.f, 5.f));
 
-	m_sph_handle_0 = new CollisionSphere(1.f);
+	CollisionSphere* csph = new CollisionSphere(1.f);
 
 	CollisionRigidBody* rb = new CollisionRigidBody(1.f, Vector3(30.f, 310.f, 0.f), Vector3(0.f));
 	rb->SetAwake(true);
 	rb->SetSleepable(false);
 
-	m_sph_handle_0->AttachToRigidBody(rb);
+	csph->AttachToRigidBody(rb);
 
-	m_spheres.push_back(m_sph_handle_0);
+	m_spheres.push_back(csph);
 
-	m_wraparound_sphere->m_primitives.push_back(m_sph_handle_0);
+	m_wraparound_sphere->m_primitives.push_back(csph);
 
 	// a box
 	m_wraparound_box = new WrapAround(Vector3(50.f, 300.f, -10.f), Vector3(70.f, 320.f, 10.f),
@@ -138,50 +138,6 @@ Physics3State::Physics3State()
 		Vector3(85.f, 315.f, 5.f), Vector3(95.f, 315.f, 5.f));
 	const Vector3& wrap_center = m_wraparound_convex->m_bounds.GetCenter();
 
-	/*
-	// planes and hull
-	Plane p1 = Plane(Vector3(0.f, -1.f, 0.f), 1.f);
-	Plane p2 = Plane(Vector3(-1.f, 1.f, 1.f).GetNormalized(), 1.2f);
-	Plane p3 = Plane(Vector3(1.2f, .9f, 1.f).GetNormalized(), 1.15f);
-	Plane p4 = Plane(Vector3(0.f, 1.f, -1.f).GetNormalized(), 1.2f);
-	Plane p5 = Plane(Vector3(0.f, 1.f, 0.f), 1.f);
-	std::vector<Plane> hull_planes;
-	hull_planes.push_back(p1);
-	hull_planes.push_back(p2);
-	hull_planes.push_back(p3);
-	hull_planes.push_back(p4);
-	hull_planes.push_back(p5);
-	ConvexHull* cHull = new ConvexHull(hull_planes);
-
-	CollisionConvexObject* cObj = new CollisionConvexObject(*cHull);
-	// now the cObj has the initial com and IT info recorded, they are NOT safe to reuse after initialization 
-
-	// initial transform needs to be IDENTITY because we start with using immediate positions for vertices
-	// the problem is, if the "identity-transform" scheme is used, the integrate pipeline cannot be used, since 
-	// it does not reflect the difference between the geometric center and COM
-	// To used old pipeline, we HAVE TO make sure m_center IS the COM
-	// To do that:
-	// 1. compute that COM 
-	// 2. compute the translation between COM and origin, that decides the translation in initial transform
-	// 3. use that transform as the starting transform, this means the same shader with the transform NOT being IDENTITY
-	// 4. it also means that the mesh builder needs to build meshes in local space
-	
-	// for cObjs, the pipeline has com, IT and mass info already
-	// IMPORTANT: if we use com here, the object is back to the mother object whose com we precomputed
-	// we can also use com as the mother origin, give it an offset to have infinite copies of this mesh EVERYWHERE
-	// THIS is actually what I am going to do...
-	const float& mass = cObj->GetInitialMass();
-	const Vector3& true_center = wrap_center;			 // com + (wrap_center - com); based on ORIGIN
-	rb = new CollisionRigidBody(mass, true_center, Vector3::ZERO);
-	rb->SetAwake(true);
-	rb->SetSleepable(false);
-	
-	cObj->AttachToRigidBody(rb);
-	m_convex_objs.push_back(cObj);
-	m_cobj_handle_0 = cObj;
-	m_wraparound_convex->m_primitives.push_back(cObj);
-	*/
-
 	Plane p1 = Plane(Vector3(.1f, 0.f, .9f), 1.f);
 	Plane p2 = Plane(Vector3(.1f, 0.f, -.9f), 1.f);
 	Plane p3 = Plane(Vector3(-.9f, 0.f, -.1f), 1.f);
@@ -207,8 +163,49 @@ Physics3State::Physics3State()
 
 	cObj->AttachToRigidBody(rb);
 	m_convex_objs.push_back(cObj);
-	m_cobj_handle_0 = cObj;
+	m_focus = cObj;
+
+	// acc/vel setup
+	Vector3 gravity = (Vector3::GRAVITY / 2.f);
+	rb->SetBaseLinearAcceleration(gravity);
+
+	//rb->SetLinearVelocity(Vector3(0.f, -10.f, 0.f));
+
+	float ang_v_x = GetRandomFloatInRange(-5.f, 5.f);
+	float ang_v_y = GetRandomFloatInRange(-5.f, 5.f);
+	float ang_v_z = GetRandomFloatInRange(-5.f, 5.f);
+	rb->SetAngularVelocity(Vector3(ang_v_x, ang_v_y, ang_v_z));
+
 	m_wraparound_convex->m_primitives.push_back(cObj);
+
+	// local tensor is fixed
+	// the format is motion - mass - tensor - velocity (to be modified)
+	BitmapFont* font = theRenderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
+	float txtHeight = height / 70.f;
+	Vector2 titleMin = Vector2(-width/ 2.f, height / 2.f - txtHeight);
+	titleMin -= Vector2(0.f, txtHeight);
+	titleMin -= Vector2(0.f, txtHeight);
+
+	std::string tensor_ui = Stringf("Local Tensor:");
+	Mesh* t_mesh = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, tensor_ui, VERT_PCU);
+	m_tensor_ui.push_back(t_mesh);
+	titleMin -= Vector2(0.f, txtHeight);
+
+	const Matrix33& tensor_mat = m_focus->GetRigidBody()->GetTensor();
+	tensor_ui = Stringf("%f, %f, %f", tensor_mat.GetI().x, tensor_mat.GetJ().x, tensor_mat.GetK().x);
+	t_mesh = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, tensor_ui, VERT_PCU);
+	m_tensor_ui.push_back(t_mesh);
+	titleMin -= Vector2(0.f, txtHeight);
+
+	tensor_ui = Stringf("%f, %f, %f", tensor_mat.GetI().y, tensor_mat.GetJ().y, tensor_mat.GetK().y);
+	t_mesh = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, tensor_ui, VERT_PCU);
+	m_tensor_ui.push_back(t_mesh);
+	titleMin -= Vector2(0.f, txtHeight);
+
+	tensor_ui = Stringf("%f, %f, %f", tensor_mat.GetI().z, tensor_mat.GetJ().z, tensor_mat.GetK().z);
+	t_mesh = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, tensor_ui, VERT_PCU);
+	m_tensor_ui.push_back(t_mesh);
+	titleMin -= Vector2(0.f, txtHeight);
 
 	// debug
 	DebugRenderSet3DCamera(m_camera);
@@ -395,7 +392,8 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	//else
 	//	rb->SetAngularVelocity(Vector3::ZERO);
 
-	CollisionRigidBody* rb = m_cobj_handle_0->GetRigidBody();
+	/*
+	CollisionRigidBody* rb = m_focus->GetRigidBody();
 
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_UP_ARROW))
 		rb->SetAngularVelocity(Vector3(5.f, 0.f, 0.f));
@@ -426,6 +424,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		rb->SetLinearVelocity(Vector3(0.f, -5.f, 0.f));
 	else
 		rb->SetLinearVelocity(Vector3::ZERO);
+		*/
 
 	// camera update from input
 	Vector3 camForward = m_camera->GetLocalForward(); 
@@ -476,34 +475,44 @@ void Physics3State::UpdateWrapArounds()
 
 void Physics3State::UpdateUI()
 {
+	// motion
 	Renderer* theRenderer = Renderer::GetInstance();
 	Window* window = Window::GetInstance();
 	float window_height = window->GetWindowHeight();
 	float window_width = window->GetWindowWidth();
 	BitmapFont* font = theRenderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
-	float txtHeight = window_height / 50.f;
+	float txtHeight = window_height / 70.f;
 	Vector2 titleMin = Vector2(-window_width / 2.f, window_height / 2.f - txtHeight);
 
-	if (m_time_ui != nullptr)
-	{
-		delete m_time_ui;
-		m_time_ui= nullptr;
-	}
+	delete m_motion_ui;
+	m_motion_ui = nullptr;
 
-	PhysTimeSystem& time = PhysTimeSystem::GetTimeSystem();
-	std::string time_ui = Stringf("Time: %f", time.GetTimeSeconds());
-	m_time_ui = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, time_ui, VERT_PCU);
-
+	std::string motion_ui = Stringf("Motion of focused: %f", m_focus->GetRigidBody()->GetRealTimeMotion());
+	m_motion_ui = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, motion_ui, VERT_PCU);
 	titleMin -= Vector2(0.f, txtHeight);
 
-	if (m_motion_ui != nullptr)
-	{
-		delete m_motion_ui;
-		m_motion_ui = nullptr;
-	}
+	// mass
+	delete m_mass_ui;
+	m_mass_ui = nullptr;
 
-	std::string motion_ui = Stringf("Motion of handle 0: %f", m_sph_handle_0->GetRigidBody()->GetRealTimeMotion());
-	m_motion_ui = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, motion_ui, VERT_PCU);
+	std::string mass_ui = Stringf("Mass: %f", m_focus->GetRigidBody()->GetMass());
+	m_mass_ui = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, mass_ui, VERT_PCU);
+	titleMin -= Vector2(0.f, txtHeight);
+
+	// considering tensor takes 4 lines
+	for (int i = 0; i < 4; ++i)
+		titleMin -= Vector2(0.f, txtHeight);
+
+	// velocity
+	delete m_vel_ui;
+	m_vel_ui = nullptr;
+
+	const Vector3& lin_vel = m_focus->GetRigidBody()->GetLinearVelocity();
+	const Vector3& ang_vel = m_focus->GetRigidBody()->GetAngularVelocity();
+	std::string vel_ui = Stringf("Linear and angular velocity of the focused: (%f, %f, %f), (%f, %f, %f)", 
+		lin_vel.x, lin_vel.y, lin_vel.z, ang_vel.x, ang_vel.y, ang_vel.z);
+	m_vel_ui = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, vel_ui, VERT_PCU);
+	titleMin -= Vector2(0.f, txtHeight);
 }
 
 void Physics3State::UpdateGameobjectsCore(float deltaTime)
@@ -609,6 +618,24 @@ void Physics3State::UpdateContactGeneration()
 			CollisionSensor::BoxVsSphere(*box0, *sph, &m_keep);
 		}
 	}
+
+	/*
+	for (std::vector<CollisionConvexObject*>::size_type idx0 = 0; idx0 < m_convex_objs.size(); ++idx0)
+	{
+		CollisionConvexObject* c_obj_0 = m_convex_objs[idx0];
+
+		// convex vs convex
+		for (std::vector<CollisionConvexObject*>::size_type idx1 = idx0 + 1; idx1 < m_convex_objs.size(); ++idx1)
+		{
+			if (!m_keep.AllowMoreCollision())
+				return;
+
+			CollisionConvexObject* c_obj_1 = m_convex_objs[idx1];
+
+			CollisionSensor::ConvexVsConvex(*c_obj_0, *c_obj_1, &m_keep);
+		}
+	}
+	*/
 }
 
 
@@ -664,8 +691,13 @@ void Physics3State::RenderForwardPath(Renderer*)
 
 void Physics3State::RenderUI(Renderer*)
 {
-	DrawTextCut(m_time_ui);
 	DrawTextCut(m_motion_ui);
+	DrawTextCut(m_mass_ui);
+
+	for (int i = 0; i < m_tensor_ui.size(); ++i)
+		DrawTextCut(m_tensor_ui[i]);
+
+	DrawTextCut(m_vel_ui);
 }
 
 
@@ -788,6 +820,6 @@ void Physics3State::SpawnRandomSphere(WrapAround* wpa, uint num, const Vector3& 
 void Physics3State::ShootSphere(WrapAround* wpa)
 {
 	// handle_0 is a sphere rb
-	m_sph_handle_0 = WrapAroundTestSphere(wpa, true, false, true, m_camera->GetWorldPosition(), Vector3::ZERO, Vector3::ONE);
-	m_sph_handle_0->GetRigidBody()->SetLinearVelocity(m_camera->GetWorldForward().GetNormalized() * 100.f);
+	CollisionSphere* sph = WrapAroundTestSphere(wpa, true, false, true, m_camera->GetWorldPosition(), Vector3::ZERO, Vector3::ONE);
+	sph->GetRigidBody()->SetLinearVelocity(m_camera->GetWorldForward().GetNormalized() * 100.f);
 }

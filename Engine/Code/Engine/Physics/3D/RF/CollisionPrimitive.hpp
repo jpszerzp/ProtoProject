@@ -154,4 +154,10 @@ public:
 	Vector3 GetInitialCOM() const { return m_initial_poi; }
 	Matrix33 GetInitialIT() const { return m_initial_it; }
 	float GetInitialMass() const { return m_initial_mass; }
+
+	// SAT
+	float ProjectVertToAxis(const Vector3& axis, const int& idx) const;
+	float ProjectCenterToAxis(const Vector3& axis) const;
+	void ProjectToAxisForInterval(const Vector3& axis, float& tmin, float& tmax, Vector3& vmin, Vector3& vmax) const;
+	std::vector<Vector3> GetAxes() const;
 };

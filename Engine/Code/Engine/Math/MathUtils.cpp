@@ -1610,6 +1610,81 @@ bool IsPointOutwardPlane(const Vector3& pt, const Plane& plane)
 	return DistPointToPlaneSigned(pt, plane) > 0.f;
 }
 
+bool SATTestBoxVsBox(const CollisionBox& b1, const CollisionBox& b2, Vector3 axis, const Vector3& disp, unsigned index, float& smallest_pen, unsigned& smallest_index)
+{
+	if (axis.GetLengthSquared() < .0001f)
+		return true;
+
+	axis.Normalize();
+
+	float penetration = SATTestPenetrationBoxVsBox(b1, b2, axis, disp);
+
+	if (penetration < 0.f)
+		return false;
+
+	if (penetration < smallest_pen)
+	{
+		smallest_pen = penetration;
+		smallest_index = index;
+	}
+
+	return true;
+}
+
+float SATTestPenetrationBoxVsBox(const CollisionBox& b1, const CollisionBox& b2, const Vector3& axis, const Vector3& disp)
+{
+	float half_project_1 = SATHalfProjectionBox(b1, axis);
+	float half_project_2 = SATHalfProjectionBox(b2, axis);
+
+	float dist = abs(DotProduct(disp, axis));
+
+	return (half_project_1 + half_project_2 - dist);
+}
+
+float SATHalfProjectionBox(const CollisionBox& b, const Vector3& axis)
+{
+	float x = b.GetHalfSize().x * abs(DotProduct(axis, b.GetBasisAndPosition(0)));
+	float y = b.GetHalfSize().y * abs(DotProduct(axis, b.GetBasisAndPosition(1)));
+	float z = b.GetHalfSize().z * abs(DotProduct(axis, b.GetBasisAndPosition(2)));
+
+	return x + y + z;
+}
+
+/*
+bool SATTestConvexVsConvex(const CollisionConvexObject& cobj1, const CollisionConvexObject& cobj2, Vector3 axis, const Vector3& disp, unsigned index, float& smallest_pen, unsigned& smallest_index)
+{
+	// for almost parallel axes do not check and contribute to best
+	if (axis.GetLengthSquared() < .0001f)
+		return true;
+
+	axis.Normalize();
+
+	float penetration = SATTestPenetrationConvexVsConvex(cobj1, cobj2, axis, disp);
+
+	if (penetration < 0.f)
+		return false;
+
+	if (penetration < smallest_pen)
+	{
+		smallest_pen = penetration;
+		smallest_pen = index;
+	}
+
+	return true;
+}
+
+// pre: axis is normalized
+float SATTestPenetrationConvexVsConvex(const CollisionConvexObject& cobj1, const CollisionConvexObject& cobj2, const Vector3& axis, const Vector3& disp)
+{
+	return 0.f;
+}
+
+float SATHalfProjectionConvex(const CollisionConvexObject& cobj, const Vector3& axis)
+{
+	return 0.f;
+}
+*/
+
 float DistPointToPlaneUnsigned(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3)
 {
 	return abs(DistPointToPlaneSigned(pt, vert1, vert2, vert3));

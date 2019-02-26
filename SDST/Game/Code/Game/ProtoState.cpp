@@ -604,7 +604,7 @@ void ProtoState::UpdateKeyboard(float deltaTime)
 		Vector3 gridTR = Vector3(100.f, 0.f, 100.f);
 		DebugRenderPlaneGrid(lifetime, gridBL, gridTL, gridTR, gridBR, 10.f, 10.f, 2.5f, mode);
 
-		DebugRenderPoint(lifetime, 10.f, pointPos, startTimeColor, endTimeColor, mode);
+		//DebugRenderPoint(lifetime, 10.f, pointPos, startTimeColor, endTimeColor, mode);
 	}
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_1))
 	{

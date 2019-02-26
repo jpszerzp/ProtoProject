@@ -345,6 +345,7 @@
     <ClInclude Include="CameraAnchor.hpp" />
     <ClInclude Include="Collision3State.hpp" />
     <ClInclude Include="ControlGroup.hpp" />
+    <ClInclude Include="ControlState3.hpp" />
     <ClInclude Include="DelegateTest.hpp" />
     <ClInclude Include="EngineBuildPreferences.hpp" />
     <ClInclude Include="Fireworks.hpp" />

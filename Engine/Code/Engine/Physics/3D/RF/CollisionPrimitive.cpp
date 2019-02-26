@@ -492,7 +492,7 @@ std::vector<TetrahedronBody> CollisionConvexObject::GetTetrahedronBodies(const s
 		c1 *= abs_det_a;
 
 		// mass, from volume and density
-		static const float tDensity = .005f;
+		static const float tDensity = .5f;
 		float tVolume = (1.f / 6.f) * abs_det_a;		// todo: use abs or not?
 		float tMass = tDensity * tVolume;
 
@@ -579,6 +579,74 @@ Vector3 CollisionConvexObject::ComputeGeometricCentroid() const
 	centroid /= vert_num;
 
 	return centroid;
+}
+
+// pre: axis is thru origin
+float CollisionConvexObject::ProjectVertToAxis(const Vector3& axis, const int& idx) const
+{
+	const Vector3& vert = m_verts[idx];
+
+	const Vector3& n_axis = axis.GetNormalized();
+	float ext = DotProduct(vert, n_axis);
+
+	return ext;
+}
+
+float CollisionConvexObject::ProjectCenterToAxis(const Vector3& axis) const
+{
+	const Vector3& n_axis = axis.GetNormalized();
+	
+	const Vector3& center = GetRigidBody()->GetCenter();
+
+	float ext = DotProduct(center, n_axis);
+
+	return ext;
+}
+
+void CollisionConvexObject::ProjectToAxisForInterval(const Vector3& axis, float& tmin, float& tmax, Vector3& vmin, Vector3& vmax) const
+{
+	float min = FLT_MAX;
+	float max = FLT_MIN;
+	Vector3 min_v = Vector3(FLT_MAX);
+	Vector3 max_v = Vector3(FLT_MIN);
+
+	for (int i = 0; i < m_verts.size(); ++i)
+	{
+		float ext = ProjectVertToAxis(axis, i);
+
+		if (ext < min)
+		{
+			min = ext;
+			min_v = m_verts[i];
+		}
+
+		if (ext > max)
+		{
+			max = ext;
+			max_v = m_verts[i];
+		}
+	}
+
+	tmin = min;
+	tmax = max;
+
+	vmin = min_v;
+	vmax = max_v;
+}
+
+std::vector<Vector3> CollisionConvexObject::GetAxes() const
+{
+	std::vector<Vector3> axes;
+
+	for (int i = 0; i < m_polygons.size(); ++i)
+	{
+		const ConvexPolygon& poly = m_polygons[i];
+		const Vector3& n = poly.m_normal;
+
+		axes.push_back(n);
+	}
+
+	return axes;
 }
 
 // TETRAHEDRONBODY

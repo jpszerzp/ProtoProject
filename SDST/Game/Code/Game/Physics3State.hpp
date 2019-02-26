@@ -121,6 +121,9 @@ public:
 	// ui
 	Mesh* m_time_ui;
 	Mesh* m_motion_ui;
+	Mesh* m_vel_ui;
+	Mesh* m_mass_ui;
+	std::vector<Mesh*> m_tensor_ui;
 
 	// refactor
 	std::vector<CollisionSphere*> m_spheres;
@@ -128,9 +131,8 @@ public:
 	std::vector<CollisionPlane*> m_planes;
 	std::vector<CollisionConvexObject*> m_convex_objs;
 
-	// temp
-	CollisionSphere* m_sph_handle_0;
-	CollisionConvexObject* m_cobj_handle_0;
+	// debug
+	CollisionPrimitive* m_focus;
 
 	Collision m_storage[MAX_CONTACT_NUM];
 

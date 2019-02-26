@@ -164,6 +164,7 @@
     <ClInclude Include="Collision3State.hpp">
       <Filter>General\States\Gallery</Filter>
     </ClInclude>
+    <ClInclude Include="ControlState3.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="..\..\Run_Win32\Data\Definitions\IsoSprite.xml" />
