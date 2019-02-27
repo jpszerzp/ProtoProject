@@ -1650,41 +1650,6 @@ float SATHalfProjectionBox(const CollisionBox& b, const Vector3& axis)
 	return x + y + z;
 }
 
-/*
-bool SATTestConvexVsConvex(const CollisionConvexObject& cobj1, const CollisionConvexObject& cobj2, Vector3 axis, const Vector3& disp, unsigned index, float& smallest_pen, unsigned& smallest_index)
-{
-	// for almost parallel axes do not check and contribute to best
-	if (axis.GetLengthSquared() < .0001f)
-		return true;
-
-	axis.Normalize();
-
-	float penetration = SATTestPenetrationConvexVsConvex(cobj1, cobj2, axis, disp);
-
-	if (penetration < 0.f)
-		return false;
-
-	if (penetration < smallest_pen)
-	{
-		smallest_pen = penetration;
-		smallest_pen = index;
-	}
-
-	return true;
-}
-
-// pre: axis is normalized
-float SATTestPenetrationConvexVsConvex(const CollisionConvexObject& cobj1, const CollisionConvexObject& cobj2, const Vector3& axis, const Vector3& disp)
-{
-	return 0.f;
-}
-
-float SATHalfProjectionConvex(const CollisionConvexObject& cobj, const Vector3& axis)
-{
-	return 0.f;
-}
-*/
-
 float DistPointToPlaneUnsigned(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3)
 {
 	return abs(DistPointToPlaneSigned(pt, vert1, vert2, vert3));
@@ -1887,9 +1852,9 @@ Vector3 GetPolygonCentroid(const std::vector<Vector3>& verts, const ConvexPolygo
 		centroid += verts[vert_indices[i]];
 	}
 
-	uint vert_num = vert_indices.size();
+	uint vert_num = (uint)vert_indices.size();
 
-	centroid /= vert_num;
+	centroid /= (float)vert_num;
 
 	return centroid;
 }

@@ -21,7 +21,7 @@ struct ConvexPolygon
 		: m_vert_idx(idx), m_normal(normal){}
 	~ConvexPolygon(){}
 
-	int GetVertNum() const { return m_vert_idx.size(); }
+	int GetVertNum() const { return (int)m_vert_idx.size(); }
 	void AddVertexIndex(const int& vert_idx) { m_vert_idx.push_back(vert_idx); }
 };
 

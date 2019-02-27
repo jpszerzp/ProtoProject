@@ -45,24 +45,6 @@ public:
 	~Physics3State();
 	void PostConstruct();
 
-	Sphere* InitializePhysSphere(const float& mass, const Vector3& pos, const Vector3& rot, const Vector3& scale,
-		const Rgba& tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme scheme = DISCRETE);
-	Cube* InitializePhysCube(Vector3 pos, Vector3 rot, Vector3 scale,
-		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid);
-	Point* InitializePhysPoint(Vector3 pos, Vector3 rot, float size, 
-		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid);
-	Quad* InitializePhysQuad(Vector3 pos, Vector3 rot, Vector3 scale,
-		Rgba tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme scheme = DISCRETE);
-	Box* InitializePhysBox(const Vector3& pos, const Vector3& rot, const Vector3& scale,
-		const Rgba& tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme scheme = DISCRETE);
-
-	// below are all based on particles, NOT on rigidbodies
-	Fireworks* SetupFireworks(float age, Vector3 pos, Vector3 inheritVel, Vector3 maxVel, Vector3 minVel, bool lastRound = false);
-	//Ballistics* SetupBallistics(eBallisticsType type, Vector3 pos, bool frozen, Rgba color);
-	Spring* SetupSpring(Point* end1, Point* end2, float coef, float rl);
-	AnchorSpring* SetupAnchorSpring(Point* end1, Point* end2, float coef, float rl);
-	Rod* SetupRod(float length, Point* p1, Point* p2);
-
 	void Update(float deltaTime) override;
 	void UpdateMouse(float deltaTime) override;
 	void UpdateKeyboard(float deltaTime) override;
@@ -72,47 +54,33 @@ public:
 	void UpdateGameobjects(float deltaTime);
 	void UpdateDebug(float deltaTime);
 	void UpdateDebugDraw(float deltaTime);
-	void UpdateDebugCore(float deltaTime);
-	void UpdateHulls(float deltaTime);
 	void UpdateWrapArounds();
-	void UpdateFireworksStatus();
 	void UpdateUI();
 
 	// update of GO
-	void UpdateForceRegistry(float deltaTime);
 	void UpdateGameobjectsCore(float deltaTime);
-	void UpdateGameobjectContinuous(float deltaTime);
 	void UpdateGameobjectsDynamics(float deltaTime);
 	void UpdateContacts(float deltaTime);
 	void UpdateContactGeneration();
-	void UpdateContactGenerationCore();
-	void UpdateContactGenerationOrdinary();
-	void UpdateContactGenerationBVH();
 	void UpdateContactResolution(float deltaTime);
-	void UpdateResolverEnd();
 
 	void Render(Renderer* renderer) override;
 	void RenderGameobjects(Renderer* renderer);
-	void RenderModelSamples(Renderer* renderer);
-	void RenderHulls(Renderer* renderer);
 	void RenderWrapArounds(Renderer* renderer);
 	void RenderForwardPath(Renderer* renderer);
-	void RenderAssimpModels(Renderer* renderer);
 	void RenderUI(Renderer* renderer);
 
 	// scene tests
-	void WrapAroundTestGeneral(bool give_ang_vel, bool register_g);
-	void WrapAroundTestSphere(bool give_ang_vel, bool register_g);
-	void WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, bool register_g);
 	CollisionSphere* WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, const Vector3& rot, const Vector3& scale);
-	void WrapAroundTestBox(bool give_ang_vel, bool register_g);
-	void WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool register_g);
 	CollisionBox* WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position,
+		const Vector3& rot, const Vector3& scale, const bool& awake = true, const bool& sleepable = false);
+	CollisionConvexObject* WrapAroundTestConvex(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position,
 		const Vector3& rot, const Vector3& scale, const bool& awake = true, const bool& sleepable = false);
 
 	void SpawnStack(const Vector3& origin, uint sideLength, uint stackHeight);
 	void SpawnRandomBox(WrapAround* wpa, uint num, const Vector3& min, const Vector3& max);
 	void SpawnRandomSphere(WrapAround* wpa, uint num, const Vector3& min, const Vector3& max);
+	void SpawnRandomConvex(WrapAround* wpa, uint num, const Vector3& min, const Vector3& max);
 	void ShootSphere(WrapAround* wpa);
 
 public:

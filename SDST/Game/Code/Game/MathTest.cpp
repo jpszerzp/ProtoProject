@@ -70,9 +70,9 @@ void MathTest::MatrixTest()
 	Vector3 euler = Vector3(50.f);
 	mat3 = Matrix33::FromEuler(euler);
 
-	Vector3 i_correct = Vector3(0.8627092, 0.4924039, -0.1152006);
-	Vector3 j_correct = Vector3(-0.1152006, 0.4131759, 0.9033352);
-	Vector3 k_correct = Vector3(0.4924039, -0.7660444, 0.4131759);
+	Vector3 i_correct = Vector3(0.8627092f, 0.4924039f, -0.1152006f);
+	Vector3 j_correct = Vector3(-0.1152006f, 0.4131759f, 0.9033352f);
+	Vector3 k_correct = Vector3(0.4924039f, -0.7660444f, 0.4131759f);
 	Matrix33 mat3_correct = Matrix33(i_correct, j_correct, k_correct);
 
 	bool pass = IsCloseEnoughMat3(mat3, mat3_correct);
@@ -82,7 +82,7 @@ void MathTest::MatrixTest()
 
 	// from matrix to quaternion
 	Quaternion q = Quaternion::FromMatrix(mat3);
-	Quaternion q_correct = Quaternion(0.8199178 , Vector3(0.5090082, 0.1852638, 0.1852638));
+	Quaternion q_correct = Quaternion(0.8199178f, Vector3(0.5090082f, 0.1852638f, 0.1852638f));
 
 	pass = IsCloseEnoughQuaternion(q, q_correct);
 
@@ -92,9 +92,9 @@ void MathTest::MatrixTest()
 	euler = Vector3(34.f, 5.f, 23.f);
 	mat3 = Matrix33::FromEuler(euler);
 
-	i_correct = Vector3(0.9360451, 0.3239308, 0.1374353);
-	j_correct = Vector3(-0.3443817, 0.7631331, 0.5468355);
-	k_correct = Vector3(0.0722554, -0.5591929, 0.8258829);
+	i_correct = Vector3(0.9360451f, 0.3239308f, 0.1374353f);
+	j_correct = Vector3(-0.3443817f, 0.7631331f, 0.5468355f);
+	k_correct = Vector3(0.0722554f, -0.5591929f, 0.8258829f);
 	mat3_correct = Matrix33(i_correct, j_correct, k_correct);
 
 	pass = IsCloseEnoughMat3(mat3, mat3_correct);

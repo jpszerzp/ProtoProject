@@ -38,7 +38,7 @@ class CollisionPrimitive
 	Vector4 m_tint;
 
 public:
-	void BuildCommon();
+	void BuildCommon(const std::string& shader = "default", const std::string& tx = "Data/Images/perspective_test.png");
 
 	virtual void AttachToRigidBody(CollisionRigidBody* rb);
 
@@ -101,7 +101,8 @@ class CollisionPlane : public CollisionPrimitive
 	Vector2 m_bound;
 
 public:
-	CollisionPlane(const Vector2& bound, const Vector3& normal, const float& offset);
+	CollisionPlane(const Vector2& bound, const Vector3& normal, const float& offset, const std::string& fp = "default", const std::string& tx = "Data/Images/perspective_test.png");
+	CollisionPlane(const Vector2& bound, const std::string& mn, const Vector3& normal, const float& offset, const std::string& fp = "default", const std::string& tx = "Data/Images/perspective_test.png");
 
 	void AttachToRigidBody(CollisionRigidBody* rb) override;
 
@@ -114,6 +115,7 @@ class CollisionConvexObject : public CollisionPrimitive
 	ConvexHull m_hull;
 
 	std::vector<Vector3> m_verts;
+	std::vector<Vector3> m_unit_verts;
 
 	std::vector<ConvexPolygon> m_polygons;
 
@@ -132,12 +134,13 @@ class CollisionConvexObject : public CollisionPrimitive
 	static Vector3 s_ref;
 
 public:
-	CollisionConvexObject(const ConvexHull& hull);
+	CollisionConvexObject(const ConvexHull& hull, const std::string& fp = "default", const std::string& tx = "Data/Images/perspective_test.png");
 
 	void AttachToRigidBody(CollisionRigidBody* rb) override;
 
 	void BuildVerticesAndPolygons(const ConvexHull& hull);
 	void BuildPolygonMeshes();
+	void BuildUnitVerts();
 
 	void SortVerticesCCW(ConvexPolygon& polygon);
 	void SortPolygonVerticesCCW();
@@ -154,6 +157,9 @@ public:
 	Vector3 GetInitialCOM() const { return m_initial_poi; }
 	Matrix33 GetInitialIT() const { return m_initial_it; }
 	float GetInitialMass() const { return m_initial_mass; }
+	int GetVertNum() const { return (int)m_verts.size(); }
+	Vector3 GetRawVert(const int& idx) const { return m_verts[idx]; }
+	Vector3 GetUnitVert(const int& idx) const { return m_unit_verts[idx]; }
 
 	// SAT
 	float ProjectVertToAxis(const Vector3& axis, const int& idx) const;

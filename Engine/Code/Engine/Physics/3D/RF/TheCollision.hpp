@@ -47,6 +47,8 @@ public:
 	void CheckAwake();
 
 	float GetPenetration() const { return m_penetration; }
+	Vector3 GetNormal() const { return m_normal; }
+	Vector3 GetPos() const { return m_pos; }
 
 	void ApplyPositionChange(Vector3 linear[2], Vector3 angular[2], float penetration);
 	void ApplyVelocityChange(Vector3 linear[2], Vector3 angular[2]);

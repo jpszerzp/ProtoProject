@@ -45,51 +45,6 @@ static Vector3 GenerateContactPoint(const Vector3& p1, const Vector3& d1,
 	}
 }
 
-/*
-// for box only
-static float ProjectToAxis(const CollisionBox& b, const Vector3& axis)
-{
-	float x = b.GetHalfSize().x * abs(DotProduct(axis, b.GetBasisAndPosition(0)));
-	float y = b.GetHalfSize().y * abs(DotProduct(axis, b.GetBasisAndPosition(1)));
-	float z = b.GetHalfSize().z * abs(DotProduct(axis, b.GetBasisAndPosition(2)));
-
-	return x + y + z;
-}
-
-static float PenetrationOnAxis(const CollisionBox& b1,
-	const CollisionBox& b2, const Vector3& axis, const Vector3& disp)
-{
-	float half_project_1 = ProjectToAxis(b1, axis);
-	float half_project_2 = ProjectToAxis(b2, axis);
-
-	float dist = abs(DotProduct(disp, axis));
-
-	return (half_project_1 + half_project_2 - dist);
-}
-
-static bool TryAxis(const CollisionBox& b1, const CollisionBox& b2, Vector3 axis, 
-	const Vector3& disp, unsigned index, float& smallest_pen, unsigned& smallest_index)
-{
-	if (axis.GetLengthSquared() < .0001)
-		return true;
-
-	axis.Normalize();
-
-	float penetration = PenetrationOnAxis(b1, b2, axis, disp);
-
-	if (penetration < 0.f)
-		return false;
-
-	if (penetration < smallest_pen)
-	{
-		smallest_pen = penetration;
-		smallest_index = index;
-	}
-
-	return true;
-}
-*/
-
 uint CollisionSensor::SphereVsSphere(const CollisionSphere& s1, const CollisionSphere& s2, CollisionKeep* c_data)
 {
 	// see if still allow collisions
@@ -428,30 +383,50 @@ uint CollisionSensor::BoxVsSphere(const CollisionBox& box, const CollisionSphere
 	return 1;
 }
 
-/*
-uint CollisionSensor::ConvexVsConvex(const CollisionConvexObject& cobj0, const CollisionConvexObject& cobj1, CollisionKeep* c_data)
+uint CollisionSensor::ConvexVsHalfPlane(const CollisionConvexObject& convex, const CollisionPlane& plane, CollisionKeep* c_data)
 {
-	if (c_data->m_collision_left <= 0)
+	// if negative half space, ignore
+	float center_dist = DotProduct(convex.GetRigidBody()->GetCenter(), plane.GetNormal());
+	if (center_dist <= plane.GetOffset())
 		return 0;
 
-	const Vector3& c1 = cobj0.GetBasisAndPosition(3);
-	const Vector3& c2 = cobj1.GetBasisAndPosition(3);
+	if (c_data->m_collision_left <= 0) 
+		return 0;
 
-	Vector3 disp = c2 - c1;
-
-	// want to find the min penetration and its index
-	float pen = FLT_MAX;
-	unsigned best = 0xffffff;
-
-	// axis for cobj0
-	// note that axis here are NOT basis anymore, they are normal of each polygon
-	const std::vector<Vector3>& axes1 = cobj0.GetAxes();
-	const std::vector<Vector3>& axes2 = cobj1.GetAxes();
-
-	// for each basis of cobj0, test SAT
-	for (int i = 0; i < axes1.size(); ++i)
+	Collision* collision = c_data->m_collision;
+	uint contactAcc = 0;
+	for (int i = 0; i < convex.GetVertNum(); ++i)
 	{
+		// this is unit vert
+		const Vector3& unit_vert_pos = convex.GetUnitVert(i);
+		
+		// ...need to transform it to world space
+		Vector3 world_vert = convex.GetTransformMat4() * unit_vert_pos;
 
+		// get its distance to plane 
+		float vert_dist = DotProduct(world_vert, plane.GetNormal());
+
+		// if the vert goes beyond the plane, consider it an overlap
+		if (vert_dist <= plane.GetOffset())
+		{
+			collision->m_pos = world_vert;
+			collision->m_normal = plane.GetNormal();
+			collision->m_penetration = plane.GetOffset() - vert_dist;
+
+			collision->SetBodies(convex.GetRigidBody(), nullptr);
+
+			collision->SetFriction(c_data->m_global_friction);
+			collision->SetRestitution(c_data->m_global_restitution);
+
+			// to the next contact
+			collision++;
+			contactAcc++;
+			if (contactAcc == (uint)c_data->m_collision_left)
+				return contactAcc;
+		}
 	}
+
+	c_data->NotifyAddedCollisions(contactAcc);
+
+	return contactAcc;
 }
-*/

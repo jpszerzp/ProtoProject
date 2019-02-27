@@ -2,12 +2,12 @@
 #include "Engine/Renderer/DebugRenderer.hpp"
 #include "Engine/Math/MathUtils.hpp"
 
-void CollisionPrimitive::BuildCommon()
+void CollisionPrimitive::BuildCommon(const std::string& shader, const std::string& tx)
 {
 	Renderer* rdr = Renderer::GetInstance();
 
-	SetShader(rdr->CreateOrGetShader("default"));
-	SetTexture(rdr->CreateOrGetTexture("Data/Images/perspective_test.png"));
+	SetShader(rdr->CreateOrGetShader(shader));
+	SetTexture(rdr->CreateOrGetTexture(tx));
 
 	Vector4 tintV4;
 	Rgba tint = Rgba::WHITE;
@@ -173,14 +173,29 @@ void CollisionBox::AttachToRigidBody(CollisionRigidBody* rb)
 	SetPrimitiveTransformMat4(rb->GetTransformMat4());
 }
 
-CollisionPlane::CollisionPlane(const Vector2& bound, const Vector3& normal, const float& offset)
+CollisionPlane::CollisionPlane(const Vector2& bound, const Vector3& normal, const float& offset, const std::string& fp, const std::string& tx)
 	: m_bound(bound), m_normal(normal), m_offset(offset)
 {
 	Renderer* renderer = Renderer::GetInstance();
 
 	SetMesh(renderer->CreateOrGetMesh("quad_pcu_110"));
-	SetShader(renderer->CreateOrGetShader("default"));
-	SetTexture(renderer->CreateOrGetTexture("Data/Images/perspective_test.png"));
+	SetShader(renderer->CreateOrGetShader(fp));
+	SetTexture(renderer->CreateOrGetTexture(tx));
+
+	Vector4 tintV4;
+	Rgba tint = Rgba::WHITE;
+	tint.GetAsFloats(tintV4.x, tintV4.y, tintV4.z, tintV4.w);
+	SetTint(tintV4);
+}
+
+CollisionPlane::CollisionPlane(const Vector2& bound, const std::string& mn, const Vector3& normal, const float& offset, const std::string& fp /*= "default"*/, const std::string& tx /*= "Data/Images/perspective_test.png"*/)
+	: m_bound(bound), m_normal(normal), m_offset(offset)
+{
+	Renderer* renderer = Renderer::GetInstance();
+
+	SetMesh(renderer->CreateOrGetMesh(mn));
+	SetShader(renderer->CreateOrGetShader(fp));
+	SetTexture(renderer->CreateOrGetTexture(tx));
 
 	Vector4 tintV4;
 	Rgba tint = Rgba::WHITE;
@@ -212,12 +227,12 @@ void CollisionPlane::AttachToRigidBody(CollisionRigidBody* rb)
 
 Vector3 CollisionConvexObject::s_ref = Vector3::ZERO;
 
-CollisionConvexObject::CollisionConvexObject(const ConvexHull& hull)
+CollisionConvexObject::CollisionConvexObject(const ConvexHull& hull, const std::string& fp, const std::string& tx)
 	: m_hull(hull)
 {
 	// common initialization for general primitive object
 	// shader, texture, tint...
-	BuildCommon();
+	BuildCommon(fp, tx);
 
 	// intersection verts and born polygons
 	BuildVerticesAndPolygons(hull);
@@ -253,6 +268,9 @@ CollisionConvexObject::CollisionConvexObject(const ConvexHull& hull)
 
 	// with polygon verts sorted, build meshes out of them
 	BuildPolygonMeshes();
+
+	// wish to keep a set of unit verts around origin
+	BuildUnitVerts();
 }
 
 void CollisionConvexObject::AttachToRigidBody(CollisionRigidBody* rb)
@@ -262,8 +280,10 @@ void CollisionConvexObject::AttachToRigidBody(CollisionRigidBody* rb)
 	rb->SetTensor(m_initial_it);
 	rb->SetInvTensor(m_initial_it.Invert());
 
+	// transform computed/cached here
 	rb->CacheData();
 
+	// align gameobject transform with rigidbody's
 	SetPrimitiveTransformMat4(rb->GetTransformMat4());
 }
 
@@ -272,7 +292,7 @@ void CollisionConvexObject::BuildVerticesAndPolygons(const ConvexHull& hull)
 	// list of planes
 	const std::vector<Plane>& planes = hull.GetPlaneCopies();
 
-	uint plane_num = planes.size();
+	int plane_num = (int)planes.size();
 	m_polygons.resize(plane_num);
 	for (int i = 0; i < plane_num; ++i)
 	{
@@ -325,7 +345,7 @@ void CollisionConvexObject::BuildVerticesAndPolygons(const ConvexHull& hull)
 						{
 							m_verts.push_back(intersection);
 
-							int this_idx = m_verts.size() - 1;
+							int this_idx = (int)m_verts.size() - 1;
 
 							m_polygons[i].AddVertexIndex(this_idx);
 							m_polygons[j].AddVertexIndex(this_idx);
@@ -358,6 +378,15 @@ void CollisionConvexObject::BuildPolygonMeshes()
 
 	Mesh* gpu_mesh = mb.CreateMesh(VERT_PCU, DRAW_TRIANGLE);
 	SetMesh(gpu_mesh);
+}
+
+void CollisionConvexObject::BuildUnitVerts()
+{
+	for (int i = 0; i < m_verts.size(); ++i)
+	{
+		Vector3 unit_vert = m_verts[i] - m_initial_poi;
+		m_unit_verts.push_back(unit_vert);
+	}
 }
 
 void CollisionConvexObject::SortVerticesCCW(ConvexPolygon& polygon)
@@ -574,9 +603,9 @@ Vector3 CollisionConvexObject::ComputeGeometricCentroid() const
 		centroid += m_verts[i];
 	}
 
-	uint vert_num = m_verts.size();
+	uint vert_num = (uint)m_verts.size();
 
-	centroid /= vert_num;
+	centroid /= (float)vert_num;
 
 	return centroid;
 }

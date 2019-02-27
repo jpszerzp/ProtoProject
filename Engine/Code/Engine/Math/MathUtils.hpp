@@ -157,11 +157,6 @@ bool IsPointOutwardPlane(const Vector3& pt, const Plane& plane);
 bool SATTestBoxVsBox(const CollisionBox& b1, const CollisionBox& b2, Vector3 axis, const Vector3& disp, unsigned index, float& smallest_pen, unsigned& smallest_index);
 float SATTestPenetrationBoxVsBox(const CollisionBox& b1, const CollisionBox& b2, const Vector3& axis, const Vector3& disp);
 float SATHalfProjectionBox(const CollisionBox& b, const Vector3& axis);
-/*
-bool SATTestConvexVsConvex(const CollisionConvexObject& cobj1, const CollisionConvexObject& cobj2, Vector3 axis, const Vector3& disp, unsigned index, float& smallest_pen, unsigned& smallest_index);
-float SATTestPenetrationConvexVsConvex(const CollisionConvexObject& cobj1, const CollisionConvexObject& cobj2, const Vector3& axis, const Vector3& disp);
-float SATHalfProjectionConvex(const CollisionConvexObject& cobj, const Vector3& axis);
-*/
 
 // qh
 QHFeature* DistPointToTriangleHull(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3, float& dist, Vector3& closest);

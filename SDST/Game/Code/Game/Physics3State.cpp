@@ -165,19 +165,9 @@ Physics3State::Physics3State()
 	m_convex_objs.push_back(cObj);
 	m_focus = cObj;
 
-	// acc/vel setup
-	Vector3 gravity = (Vector3::GRAVITY / 2.f);
-	rb->SetBaseLinearAcceleration(gravity);
-
-	//rb->SetLinearVelocity(Vector3(0.f, -10.f, 0.f));
-
-	float ang_v_x = GetRandomFloatInRange(-5.f, 5.f);
-	float ang_v_y = GetRandomFloatInRange(-5.f, 5.f);
-	float ang_v_z = GetRandomFloatInRange(-5.f, 5.f);
-	rb->SetAngularVelocity(Vector3(ang_v_x, ang_v_y, ang_v_z));
-
 	m_wraparound_convex->m_primitives.push_back(cObj);
 
+	// UI
 	// local tensor is fixed
 	// the format is motion - mass - tensor - velocity (to be modified)
 	BitmapFont* font = theRenderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
@@ -341,6 +331,9 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_9))
 		SpawnRandomBox(m_wraparound_plane, 10, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 360.f, 100.f));
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_4))
+		SpawnRandomConvex(m_wraparound_plane, 1, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 360.f, 100.f));
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_SPACE))
 		ShootSphere(m_wraparound_plane);
@@ -619,23 +612,21 @@ void Physics3State::UpdateContactGeneration()
 		}
 	}
 
-	/*
 	for (std::vector<CollisionConvexObject*>::size_type idx0 = 0; idx0 < m_convex_objs.size(); ++idx0)
 	{
 		CollisionConvexObject* c_obj_0 = m_convex_objs[idx0];
 
-		// convex vs convex
-		for (std::vector<CollisionConvexObject*>::size_type idx1 = idx0 + 1; idx1 < m_convex_objs.size(); ++idx1)
+		// convex vs plane
+		for (std::vector<CollisionPlane*>::size_type idx1 = 0; idx1 < m_planes.size(); ++idx1)
 		{
 			if (!m_keep.AllowMoreCollision())
 				return;
 
-			CollisionConvexObject* c_obj_1 = m_convex_objs[idx1];
+			CollisionPlane* pl = m_planes[idx1];
 
-			CollisionSensor::ConvexVsConvex(*c_obj_0, *c_obj_1, &m_keep);
+			CollisionSensor::ConvexVsHalfPlane(*c_obj_0, *pl, &m_keep);
 		}
 	}
-	*/
 }
 
 
@@ -770,6 +761,56 @@ CollisionBox* Physics3State::WrapAroundTestBox(WrapAround* wpa, bool give_ang_ve
 	return box;
 }
 
+CollisionConvexObject* Physics3State::WrapAroundTestConvex(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, const Vector3& rot, const Vector3& scale, const bool& awake /*= true*/, const bool& sleepable /*= false*/)
+{
+	Plane p1 = Plane(Vector3(.1f, 0.f, .9f), 1.f);
+	Plane p2 = Plane(Vector3(.1f, 0.f, -.9f), 1.f);
+	Plane p3 = Plane(Vector3(-.9f, 0.f, -.1f), 1.f);
+	Plane p4 = Plane(Vector3(.9f, 0.f, -.1f), 1.f);
+	Plane p5 = Plane(Vector3(-.1f, .9f, -.1f), 1.f);
+	Plane p6 = Plane(Vector3(-.05f, -.9f, .1f), 1.f);
+	std::vector<Plane> hull_planes;
+	hull_planes.push_back(p1);
+	hull_planes.push_back(p2);
+	hull_planes.push_back(p3);
+	hull_planes.push_back(p4);
+	hull_planes.push_back(p5);
+	hull_planes.push_back(p6);
+	ConvexHull* cHull = new ConvexHull(hull_planes);
+
+	CollisionConvexObject* cObj = new CollisionConvexObject(*cHull);
+
+	const float& mass = cObj->GetInitialMass();
+	CollisionRigidBody* rb = new CollisionRigidBody(mass, position, Vector3::ZERO);
+	rb->SetAwake(awake);
+	rb->SetSleepable(sleepable);
+
+	cObj->AttachToRigidBody(rb);
+
+	m_convex_objs.push_back(cObj);
+
+	if(register_g)
+	{
+		Vector3 gravity = (Vector3::GRAVITY / 2.f);
+		rb->SetBaseLinearAcceleration(gravity);
+	}
+
+	if (give_lin_vel)
+		rb->SetLinearVelocity(GetRandomVector3() * 5.f);
+
+	if (give_ang_vel)
+	{
+		float ang_v_x = GetRandomFloatInRange(-5.f, 5.f);
+		float ang_v_y = GetRandomFloatInRange(-5.f, 5.f);
+		float ang_v_z = GetRandomFloatInRange(-5.f, 5.f);
+		rb->SetAngularVelocity(Vector3(ang_v_x, ang_v_y, ang_v_z));
+	}
+
+	wpa->m_primitives.push_back(cObj);
+
+	return cObj;
+}
+
 void Physics3State::SpawnStack(const Vector3& origin , uint sideLength, uint stackHeight)
 {
 	Vector3 stack_pos_origin = origin;		 // copy the origin, the origin is at bottom left corner of the stack
@@ -780,7 +821,7 @@ void Physics3State::SpawnStack(const Vector3& origin , uint sideLength, uint sta
 		{
 			float stack_x = stack_pos_origin.x + i * 1.f; 
 
-			for (int j = 0; j < sideLength; ++j)
+			for (uint j = 0; j < sideLength; ++j)
 			{
 				float stack_z = stack_pos_origin.z + j * 1.f;
 
@@ -814,6 +855,17 @@ void Physics3State::SpawnRandomSphere(WrapAround* wpa, uint num, const Vector3& 
 	{
 		const Vector3& rand_pos = GetRandomLocationWithin(bound);
 		WrapAroundTestSphere(wpa, true, false, true, rand_pos, Vector3::ZERO, Vector3::ONE);
+	}
+}
+
+void Physics3State::SpawnRandomConvex(WrapAround* wpa, uint num, const Vector3& min, const Vector3& max)
+{
+	AABB3 bound(min, max);
+
+	for (uint i = 0; i < num; ++i)
+	{
+		const Vector3& rand_pos = GetRandomLocationWithin(bound);
+		WrapAroundTestConvex(wpa, true, false, true, rand_pos, Vector3::ZERO, Vector3::ONE);
 	}
 }
 
