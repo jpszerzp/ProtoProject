@@ -154,9 +154,14 @@ float DistPointToPlaneSigned(const Vector3& pt, const Vector3& vert1, const Vect
 float DistPointToPlaneUnsigned(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3);
 float DistPointToPlaneSigned(const Vector3& pt, const Plane& plane);
 bool IsPointOutwardPlane(const Vector3& pt, const Plane& plane);
+
+// SAT
 bool SATTestBoxVsBox(const CollisionBox& b1, const CollisionBox& b2, Vector3 axis, const Vector3& disp, unsigned index, float& smallest_pen, unsigned& smallest_index);
 float SATTestPenetrationBoxVsBox(const CollisionBox& b1, const CollisionBox& b2, const Vector3& axis, const Vector3& disp);
 float SATHalfProjectionBox(const CollisionBox& b, const Vector3& axis);
+bool SATTestBoxVsConvex(const CollisionBox& b1, const CollisionConvexObject& cobj, Vector3 axis, const Vector3& disp, unsigned idx, float& smallest_pen, unsigned& smallest_idx,
+	Vector3& box_min, Vector3& box_max, Vector3& convex_min, Vector3& convex_max);
+//float SATTestPenetrationBoxVsConvex(const CollisionBox& b1, const CollisionConvexObject& cobj, const Vector3& axis, const Vector3& disp);
 
 // qh
 QHFeature* DistPointToTriangleHull(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3, float& dist, Vector3& closest);
@@ -167,3 +172,6 @@ Vector3 GetPolygonCentroid(const std::vector<Vector3>& verts, const ConvexPolygo
 Matrix33 GetCanonicalTetrahedronCovariance();
 Matrix33 GetInertiaTensorFromCovariance(const Matrix33& cov);
 Matrix33 TranslateCovariance(const Matrix33& cov, const Vector3& com, const float& mass, const Vector3& offset);
+
+// approximation
+bool AreFloatsCloseEnough(const float& f1, const float& f2);

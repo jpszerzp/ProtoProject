@@ -96,15 +96,15 @@ void CollisionPrimitive::SetRigidBodyPosition(const Vector3& pos)
 	m_transform_mat = m_rigid_body->GetTransformMat4();
 }
 
-CollisionSphere::CollisionSphere(const float& radius)
+CollisionSphere::CollisionSphere(const float& radius, const std::string& fp, const std::string& tx)
 	: m_radius(radius)
 {
 	Renderer* renderer = Renderer::GetInstance();
 
 	// render data
 	SetMesh(renderer->CreateOrGetMesh("sphere_pcu"));
-	SetShader(renderer->CreateOrGetShader("default"));
-	SetTexture(renderer->CreateOrGetTexture("Data/Images/perspective_test.png"));
+	SetShader(renderer->CreateOrGetShader(fp));
+	SetTexture(renderer->CreateOrGetTexture(tx));
 
 	Vector4 tintV4;
 	Rgba tint = Rgba::WHITE;
@@ -133,19 +133,64 @@ void CollisionSphere::AttachToRigidBody(CollisionRigidBody* rb)
 	SetPrimitiveTransformMat4(rb->GetTransformMat4());
 }
 
-CollisionBox::CollisionBox(const Vector3& half)
+CollisionBox::CollisionBox(const Vector3& half, const std::string& fp, const std::string& tx)
 	: m_half_size(half)
 {
 	Renderer* renderer = Renderer::GetInstance();
 
 	SetMesh(renderer->CreateOrGetMesh("cube_pcu"));
-	SetShader(renderer->CreateOrGetShader("default"));
-	SetTexture(renderer->CreateOrGetTexture("Data/Images/perspective_test.png"));
+	SetShader(renderer->CreateOrGetShader(fp));
+	SetTexture(renderer->CreateOrGetTexture(tx));
 
 	Vector4 tintV4;
 	Rgba tint = Rgba::WHITE;
 	tint.GetAsFloats(tintV4.x, tintV4.y, tintV4.z, tintV4.w);
 	SetTint(tintV4);
+}
+
+void CollisionBox::Update(float deltaTime)
+{
+	// take rigid body and integrate
+	GetRigidBody()->Integrate(deltaTime);
+
+	// calculate internal
+	SetPrimitiveTransformMat4(GetRigidBody()->GetTransformMat4());
+
+	// cache verts in world space
+	CacheWorldVerts();
+}
+
+void CollisionBox::CacheWorldVerts()
+{
+	const Vector3& centre = GetRigidBody()->GetCenter();
+	const Vector3& xdir = GetBasisAndPosition(0);
+	const Vector3& ydir = GetBasisAndPosition(1);
+	const Vector3& zdir = GetBasisAndPosition(2);
+
+	float x_sqr = xdir.GetLengthSquared();
+	float y_sqr = ydir.GetLengthSquared();
+	float z_sqr = zdir.GetLengthSquared();
+
+	ASSERT_OR_DIE(AreFloatsCloseEnough(x_sqr, 1.f), "basis should be unit vector");
+	ASSERT_OR_DIE(AreFloatsCloseEnough(y_sqr, 1.f), "basis should be unit vector");
+	ASSERT_OR_DIE(AreFloatsCloseEnough(z_sqr, 1.f), "basis should be unit vector");
+
+	Vector3 v1 = centre + xdir * m_half_size.x + ydir * m_half_size.y + zdir * m_half_size.z;
+	Vector3 v2 = centre - xdir * m_half_size.x + ydir * m_half_size.y + zdir * m_half_size.z;
+	Vector3 v3 = centre + xdir * m_half_size.x - ydir * m_half_size.y + zdir * m_half_size.z;
+	Vector3 v4 = centre + xdir * m_half_size.x + ydir * m_half_size.y - zdir * m_half_size.z;
+	Vector3 v5 = centre - xdir * m_half_size.x - ydir * m_half_size.y + zdir * m_half_size.z;
+	Vector3 v6 = centre + xdir * m_half_size.x - ydir * m_half_size.y - zdir * m_half_size.z;
+	Vector3 v7 = centre - xdir * m_half_size.x + ydir * m_half_size.y - zdir * m_half_size.z;
+	Vector3 v8 = centre - xdir * m_half_size.x - ydir * m_half_size.y - zdir * m_half_size.z;
+	m_world_verts.push_back(v1);
+	m_world_verts.push_back(v2);
+	m_world_verts.push_back(v3);
+	m_world_verts.push_back(v4);
+	m_world_verts.push_back(v5);
+	m_world_verts.push_back(v6);
+	m_world_verts.push_back(v7);
+	m_world_verts.push_back(v8);
 }
 
 void CollisionBox::AttachToRigidBody(CollisionRigidBody* rb)
@@ -171,6 +216,60 @@ void CollisionBox::AttachToRigidBody(CollisionRigidBody* rb)
 	rb->CacheData();
 
 	SetPrimitiveTransformMat4(rb->GetTransformMat4());
+}
+
+float CollisionBox::ProjectVertToAxis(const Vector3& axis, const int& idx) const
+{
+	const Vector3& v = m_world_verts[idx];
+
+	//const Vector3& n_axis = axis.GetNormalized();
+	//float ext = DotProduct(v, n_axis);
+	float ext = DotProduct(v, axis);
+
+	return ext;
+}
+
+float CollisionBox::ProjectCenterToAxis(const Vector3& axis) const
+{
+	//const Vector3& n_axis = axis.GetNormalized();
+
+	const Vector3& center = GetRigidBody()->GetCenter();
+
+	//float ext = DotProduct(center, n_axis);
+	float ext = DotProduct(center, axis);
+
+	return ext;
+}
+
+void CollisionBox::ProjectToAxisForInterval(const Vector3& axis, float& tmin, float& tmax, Vector3& vmin, Vector3& vmax) const
+{
+	float min = FLT_MAX;
+	float max = FLT_MIN;
+	Vector3 min_v = Vector3(FLT_MAX);
+	Vector3 max_v = Vector3(FLT_MIN);
+
+	for (int i = 0; i < m_world_verts.size(); ++i)
+	{
+		float ext = ProjectVertToAxis(axis, i);
+
+		if (ext < min)
+		{
+			min = ext;
+			min_v = m_world_verts[i];
+		}
+
+		if (ext > max)
+		{
+			max = ext;
+			max_v = m_world_verts[i];
+		}
+	}
+
+	tmin = min;
+	tmax = max;
+
+	vmin = min_v;
+	vmax = max_v;
 }
 
 CollisionPlane::CollisionPlane(const Vector2& bound, const Vector3& normal, const float& offset, const std::string& fp, const std::string& tx)
@@ -271,6 +370,10 @@ CollisionConvexObject::CollisionConvexObject(const ConvexHull& hull, const std::
 
 	// wish to keep a set of unit verts around origin
 	BuildUnitVerts();
+
+	// ...because GO update is before contact update, no need to compute world verts here	
+	// do that in update of GO and we will be fine...
+	//BuildWorldVerts();
 }
 
 void CollisionConvexObject::AttachToRigidBody(CollisionRigidBody* rb)
@@ -378,6 +481,17 @@ void CollisionConvexObject::BuildPolygonMeshes()
 
 	Mesh* gpu_mesh = mb.CreateMesh(VERT_PCU, DRAW_TRIANGLE);
 	SetMesh(gpu_mesh);
+}
+
+void CollisionConvexObject::BuildWorldVerts()
+{
+	m_world_verts.clear();
+
+	for (int i = 0; i < m_unit_verts.size(); ++i)
+	{
+		Vector3 world_vert = GetTransformMat4() * m_unit_verts[i];
+		m_world_verts.push_back(world_vert);
+	}
 }
 
 void CollisionConvexObject::BuildUnitVerts()
@@ -613,21 +727,26 @@ Vector3 CollisionConvexObject::ComputeGeometricCentroid() const
 // pre: axis is thru origin
 float CollisionConvexObject::ProjectVertToAxis(const Vector3& axis, const int& idx) const
 {
-	const Vector3& vert = m_verts[idx];
+	// need to use unit verts with transform
+	//const Vector3& vert = GetTransformMat4() * m_unit_verts[idx];
+	const Vector3& vert = GetTransformMat4() * m_world_verts[idx];
 
-	const Vector3& n_axis = axis.GetNormalized();
-	float ext = DotProduct(vert, n_axis);
+	//const Vector3& n_axis = axis.GetNormalized();
+	//float ext = DotProduct(vert, n_axis);
+	float ext = DotProduct(vert, axis);
 
 	return ext;
 }
 
 float CollisionConvexObject::ProjectCenterToAxis(const Vector3& axis) const
 {
-	const Vector3& n_axis = axis.GetNormalized();
+	//const Vector3& n_axis = axis.GetNormalized();
 	
+	// center is in world space, use it directly is fine
 	const Vector3& center = GetRigidBody()->GetCenter();
 
-	float ext = DotProduct(center, n_axis);
+	//float ext = DotProduct(center, n_axis);
+	float ext = DotProduct(center, axis);
 
 	return ext;
 }
@@ -639,20 +758,22 @@ void CollisionConvexObject::ProjectToAxisForInterval(const Vector3& axis, float&
 	Vector3 min_v = Vector3(FLT_MAX);
 	Vector3 max_v = Vector3(FLT_MIN);
 
-	for (int i = 0; i < m_verts.size(); ++i)
+	for (int i = 0; i < GetVertNum(); ++i)
 	{
 		float ext = ProjectVertToAxis(axis, i);
 
 		if (ext < min)
 		{
 			min = ext;
-			min_v = m_verts[i];
+			//min_v = GetTransformMat4() * m_unit_verts[i];
+			min_v = m_world_verts[i];
 		}
 
 		if (ext > max)
 		{
 			max = ext;
-			max_v = m_verts[i];
+			//max_v = GetTransformMat4() * m_unit_verts[i];
+			max_v = m_world_verts[i];
 		}
 	}
 
@@ -667,6 +788,7 @@ std::vector<Vector3> CollisionConvexObject::GetAxes() const
 {
 	std::vector<Vector3> axes;
 
+	// so the normals are stored in the SAME order as polys are stored
 	for (int i = 0; i < m_polygons.size(); ++i)
 	{
 		const ConvexPolygon& poly = m_polygons[i];
@@ -676,6 +798,23 @@ std::vector<Vector3> CollisionConvexObject::GetAxes() const
 	}
 
 	return axes;
+}
+
+ConvexPolygon CollisionConvexObject::GetPoly(int idx) const
+{
+	return m_polygons[idx];
+}
+
+void CollisionConvexObject::Update(float deltaTime)
+{
+	// take rigid body and integrate
+	GetRigidBody()->Integrate(deltaTime);
+
+	// calculate internal
+	SetPrimitiveTransformMat4(GetRigidBody()->GetTransformMat4());
+
+	// update world verts
+	BuildWorldVerts();
 }
 
 // TETRAHEDRONBODY

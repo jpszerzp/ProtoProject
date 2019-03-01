@@ -70,43 +70,43 @@ Physics3State::Physics3State()
 	// solver
 	m_solver = CollisionSolver(MAX_CONTACT_NUM * 8, .01f, .01f);
 
-	// a sphere
-	m_wraparound_sphere = new WrapAround(Vector3(20.f, 300.f, -10.f), Vector3(40.f, 320.f, 10.f),
-		Vector3(25.f, 305.f, -5.f), Vector3(35.f, 305.f, -5.f),
-		Vector3(25.f, 305.f, 5.f), Vector3(35.f, 305.f, 5.f),
-		Vector3(25.f, 315.f, -5.f), Vector3(35.f, 315.f, -5.f),
-		Vector3(25.f, 315.f, 5.f), Vector3(35.f, 315.f, 5.f));
+	//// a sphere
+	//m_wraparound_sphere = new WrapAround(Vector3(20.f, 300.f, -10.f), Vector3(40.f, 320.f, 10.f),
+	//	Vector3(25.f, 305.f, -5.f), Vector3(35.f, 305.f, -5.f),
+	//	Vector3(25.f, 305.f, 5.f), Vector3(35.f, 305.f, 5.f),
+	//	Vector3(25.f, 315.f, -5.f), Vector3(35.f, 315.f, -5.f),
+	//	Vector3(25.f, 315.f, 5.f), Vector3(35.f, 315.f, 5.f));
 
-	CollisionSphere* csph = new CollisionSphere(1.f);
+	//CollisionSphere* csph = new CollisionSphere(1.f);
 
-	CollisionRigidBody* rb = new CollisionRigidBody(1.f, Vector3(30.f, 310.f, 0.f), Vector3(0.f));
-	rb->SetAwake(true);
-	rb->SetSleepable(false);
+	//CollisionRigidBody* rb = new CollisionRigidBody(1.f, Vector3(30.f, 310.f, 0.f), Vector3(0.f));
+	//rb->SetAwake(true);
+	//rb->SetSleepable(false);
 
-	csph->AttachToRigidBody(rb);
+	//csph->AttachToRigidBody(rb);
 
-	m_spheres.push_back(csph);
+	//m_spheres.push_back(csph);
 
-	m_wraparound_sphere->m_primitives.push_back(csph);
+	//m_wraparound_sphere->m_primitives.push_back(csph);
 
-	// a box
-	m_wraparound_box = new WrapAround(Vector3(50.f, 300.f, -10.f), Vector3(70.f, 320.f, 10.f),
-		Vector3(55.f, 305.f, -5.f), Vector3(65.f, 305.f, -5.f),
-		Vector3(55.f, 305.f, 5.f), Vector3(65.f, 305.f, 5.f),
-		Vector3(55.f, 315.f, -5.f), Vector3(65.f, 315.f, -5.f),
-		Vector3(55.f, 315.f, 5.f), Vector3(65.f, 315.f, 5.f));
+	//// a box
+	//m_wraparound_box = new WrapAround(Vector3(50.f, 300.f, -10.f), Vector3(70.f, 320.f, 10.f),
+	//	Vector3(55.f, 305.f, -5.f), Vector3(65.f, 305.f, -5.f),
+	//	Vector3(55.f, 305.f, 5.f), Vector3(65.f, 305.f, 5.f),
+	//	Vector3(55.f, 315.f, -5.f), Vector3(65.f, 315.f, -5.f),
+	//	Vector3(55.f, 315.f, 5.f), Vector3(65.f, 315.f, 5.f));
 
-	CollisionBox* box_0 = new CollisionBox(Vector3(.5f));
+	//CollisionBox* box_0 = new CollisionBox(Vector3(.5f));
 
-	rb = new CollisionRigidBody(1.f, Vector3(60.f, 310.f, 0.f), Vector3::ZERO);
-	rb->SetAwake(true);
-	rb->SetSleepable(false);
+	//rb = new CollisionRigidBody(1.f, Vector3(60.f, 310.f, 0.f), Vector3::ZERO);
+	//rb->SetAwake(true);
+	//rb->SetSleepable(false);
 
-	box_0->AttachToRigidBody(rb);
+	//box_0->AttachToRigidBody(rb);
 
-	m_boxes.push_back(box_0);
+	//m_boxes.push_back(box_0);
 
-	m_wraparound_box->m_primitives.push_back(box_0);
+	//m_wraparound_box->m_primitives.push_back(box_0);
 
 	// a plane
 	m_wraparound_plane = new WrapAround(Vector3(20.f, 340.f, -10.f), Vector3(130.f, 360.f, 100.f),
@@ -117,7 +117,7 @@ Physics3State::Physics3State()
 
 	CollisionPlane* plane_0 = new CollisionPlane(Vector2(110.f), Vector3(0.f, 1.f, 0.f), 342.f);
 
-	rb = new CollisionRigidBody(1.f, Vector3(75.f, 342.f, 45.f), Vector3(90.f, 0.f, 0.f));
+	CollisionRigidBody* rb = new CollisionRigidBody(1.f, Vector3(75.f, 342.f, 45.f), Vector3(90.f, 0.f, 0.f));
 	rb->SetAwake(true);
 	rb->SetSleepable(false);
 
@@ -125,47 +125,49 @@ Physics3State::Physics3State()
 
 	m_planes.push_back(plane_0);
 
+	m_focus = plane_0;
+
 	// do not include plane in wraparound
 
 	// stack
 	//SpawnStack(Vector3(75.f, 342.5f, 45.f), 5, 5);
 
 	// convexity problem
-	m_wraparound_convex = new WrapAround(Vector3(80.f, 300.f, -10.f), Vector3(100.f, 320.f, 10.f),
-		Vector3(85.f, 305.f, -5.f), Vector3(95.f, 305.f, -5.f),
-		Vector3(85.f, 305.f, 5.f), Vector3(95.f, 305.f, 5.f),
-		Vector3(85.f, 315.f, -5.f), Vector3(95.f, 315.f, -5.f),
-		Vector3(85.f, 315.f, 5.f), Vector3(95.f, 315.f, 5.f));
-	const Vector3& wrap_center = m_wraparound_convex->m_bounds.GetCenter();
+	//m_wraparound_convex = new WrapAround(Vector3(80.f, 300.f, -10.f), Vector3(100.f, 320.f, 10.f),
+	//	Vector3(85.f, 305.f, -5.f), Vector3(95.f, 305.f, -5.f),
+	//	Vector3(85.f, 305.f, 5.f), Vector3(95.f, 305.f, 5.f),
+	//	Vector3(85.f, 315.f, -5.f), Vector3(95.f, 315.f, -5.f),
+	//	Vector3(85.f, 315.f, 5.f), Vector3(95.f, 315.f, 5.f));
+	//const Vector3& wrap_center = m_wraparound_convex->m_bounds.GetCenter();
 
-	Plane p1 = Plane(Vector3(.1f, 0.f, .9f), 1.f);
-	Plane p2 = Plane(Vector3(.1f, 0.f, -.9f), 1.f);
-	Plane p3 = Plane(Vector3(-.9f, 0.f, -.1f), 1.f);
-	Plane p4 = Plane(Vector3(.9f, 0.f, -.1f), 1.f);
-	Plane p5 = Plane(Vector3(-.1f, .9f, -.1f), 1.f);
-	Plane p6 = Plane(Vector3(-.05f, -.9f, .1f), 1.f);
-	std::vector<Plane> hull_planes;
-	hull_planes.push_back(p1);
-	hull_planes.push_back(p2);
-	hull_planes.push_back(p3);
-	hull_planes.push_back(p4);
-	hull_planes.push_back(p5);
-	hull_planes.push_back(p6);
-	ConvexHull* cHull = new ConvexHull(hull_planes);
+	//Plane p1 = Plane(Vector3(.1f, 0.f, .9f), 1.f);
+	//Plane p2 = Plane(Vector3(.1f, 0.f, -.9f), 1.f);
+	//Plane p3 = Plane(Vector3(-.9f, 0.f, -.1f), 1.f);
+	//Plane p4 = Plane(Vector3(.9f, 0.f, -.1f), 1.f);
+	//Plane p5 = Plane(Vector3(-.1f, .9f, -.1f), 1.f);
+	//Plane p6 = Plane(Vector3(-.05f, -.9f, .1f), 1.f);
+	//std::vector<Plane> hull_planes;
+	//hull_planes.push_back(p1);
+	//hull_planes.push_back(p2);
+	//hull_planes.push_back(p3);
+	//hull_planes.push_back(p4);
+	//hull_planes.push_back(p5);
+	//hull_planes.push_back(p6);
+	//ConvexHull* cHull = new ConvexHull(hull_planes);
 
-	CollisionConvexObject* cObj = new CollisionConvexObject(*cHull);
+	//CollisionConvexObject* cObj = new CollisionConvexObject(*cHull);
 
-	const float& mass = cObj->GetInitialMass();
-	const Vector3& true_center = wrap_center;			 // com + (wrap_center - com); based on ORIGIN
-	rb = new CollisionRigidBody(mass, true_center, Vector3::ZERO);
-	rb->SetAwake(true);
-	rb->SetSleepable(false);
+	//const float& mass = cObj->GetInitialMass();
+	//const Vector3& true_center = wrap_center;			 // com + (wrap_center - com); based on ORIGIN
+	//rb = new CollisionRigidBody(mass, true_center, Vector3::ZERO);
+	//rb->SetAwake(true);
+	//rb->SetSleepable(false);
 
-	cObj->AttachToRigidBody(rb);
-	m_convex_objs.push_back(cObj);
-	m_focus = cObj;
+	//cObj->AttachToRigidBody(rb);
+	//m_convex_objs.push_back(cObj);
+	//m_focus = cObj;
 
-	m_wraparound_convex->m_primitives.push_back(cObj);
+	//m_wraparound_convex->m_primitives.push_back(cObj);
 
 	// UI
 	// local tensor is fixed
@@ -204,25 +206,27 @@ Physics3State::Physics3State()
 
 Physics3State::~Physics3State()
 {
+	/*
 	delete m_wraparound_sphere;
 	m_wraparound_sphere = nullptr;
 
 	delete m_wraparound_box;
 	m_wraparound_box = nullptr;
 
-	delete m_wraparound_plane;
-	m_wraparound_plane = nullptr;
-
 	delete m_wraparound_convex;
 	m_wraparound_convex = nullptr;
+	*/
+
+	delete m_wraparound_plane;
+	m_wraparound_plane = nullptr;
 }
 
 void Physics3State::PostConstruct()
 {
-	m_wraparound_sphere->m_physState = this;
-	m_wraparound_box->m_physState = this;
+	//m_wraparound_sphere->m_physState = this;
+	//m_wraparound_box->m_physState = this;
+	//m_wraparound_convex->m_physState = this;
 	m_wraparound_plane->m_physState = this;
-	m_wraparound_convex->m_physState = this;
 }
 
 void Physics3State::Update(float deltaTime)
@@ -317,6 +321,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		DebugRenderPlaneGrid(lifetime, gridBL, gridTL, gridTR, gridBR, 10.f, 10.f, 2.5f, mode);
 	}
 
+	/*
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_5))
 		WrapAroundTestBox(m_wraparound_sphere, false, false, true, Vector3(31.2f, 315.f, 0.f), Vector3::ZERO, Vector3::ONE);
 
@@ -325,6 +330,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_7))
 		WrapAroundTestBox(m_wraparound_box, false, false, true, Vector3(60.8f, 315.f, 0.f), Vector3::ZERO, Vector3::ONE);
+		*/
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_8))
 		SpawnRandomSphere(m_wraparound_plane, 10, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 360.f, 100.f));
@@ -336,35 +342,42 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		SpawnRandomConvex(m_wraparound_plane, 1, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 360.f, 100.f));
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_SPACE))
+		ShootBox(m_wraparound_plane);
+	
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_CONTROL))
 		ShootSphere(m_wraparound_plane);
 
 	// slow
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_0))
 	{
+		/*
 		for (CollisionPrimitive* primitive : m_wraparound_sphere->m_primitives)
 			primitive->GetRigidBody()->SetSlow(.01f);
 
 		for (CollisionPrimitive* primitive : m_wraparound_box->m_primitives)
 			primitive->GetRigidBody()->SetSlow(.01f);
 
-		for (CollisionPrimitive* primitive : m_wraparound_plane->m_primitives)
-			primitive->GetRigidBody()->SetSlow(.01f);
-
 		for (CollisionPrimitive* primitive : m_wraparound_convex->m_primitives)
+			primitive->GetRigidBody()->SetSlow(.01f);
+			*/
+
+		for (CollisionPrimitive* primitive : m_wraparound_plane->m_primitives)
 			primitive->GetRigidBody()->SetSlow(.01f);
 	}
 	else
 	{
+		/*
 		for (CollisionPrimitive* primitive : m_wraparound_sphere->m_primitives)
 			primitive->GetRigidBody()->SetSlow(1.f);
 
 		for (CollisionPrimitive* primitive : m_wraparound_box->m_primitives)
 			primitive->GetRigidBody()->SetSlow(1.f);
 
-		for (CollisionPrimitive* primitive : m_wraparound_plane->m_primitives)
-			primitive->GetRigidBody()->SetSlow(1.f);
-
 		for (CollisionPrimitive* primitive : m_wraparound_convex->m_primitives)
+			primitive->GetRigidBody()->SetSlow(1.f);
+			*/
+
+		for (CollisionPrimitive* primitive : m_wraparound_plane->m_primitives)
 			primitive->GetRigidBody()->SetSlow(1.f);
 	}
 
@@ -459,10 +472,10 @@ void Physics3State::UpdateDebugDraw(float deltaTime)
 
 void Physics3State::UpdateWrapArounds()
 {
-	m_wraparound_sphere->Update();
-	m_wraparound_box->Update();
+	//m_wraparound_sphere->Update();
+	//m_wraparound_box->Update();
+	//m_wraparound_convex->Update();
 	m_wraparound_plane->Update();
-	m_wraparound_convex->Update();
 }
 
 
@@ -626,6 +639,32 @@ void Physics3State::UpdateContactGeneration()
 
 			CollisionSensor::ConvexVsHalfPlane(*c_obj_0, *pl, &m_keep);
 		}
+
+		/*
+		// ...vs box
+		for (std::vector<CollisionBox*>::size_type idx1 = 0; idx1 < m_boxes.size(); ++idx1)
+		{
+			if (!m_keep.AllowMoreCollision())
+				return;
+
+			CollisionBox* bx = m_boxes[idx1];
+
+			CollisionSensor::ConvexVsBox(*c_obj_0, *bx, &m_keep);
+		}
+		*/
+		
+		/*
+		// ...vs sphere
+		for (std::vector<CollisionSphere*>::size_type idx1 = 0; idx1 < m_spheres.size(); ++idx1)
+		{
+			if (!m_keep.AllowMoreCollision())
+				return;
+
+			CollisionSphere* sph = m_spheres[idx1];
+
+			CollisionSensor::ConvexVsSphere(*c_obj_0, *sph, &m_keep);
+		}
+		*/
 	}
 }
 
@@ -669,10 +708,10 @@ void Physics3State::RenderGameobjects(Renderer* renderer)
 
 void Physics3State::RenderWrapArounds(Renderer* renderer)
 {
-	m_wraparound_sphere->Render(renderer);
-	m_wraparound_box->Render(renderer);
+	//m_wraparound_sphere->Render(renderer);
+	//m_wraparound_box->Render(renderer);
+	//m_wraparound_convex->Render(renderer);
 	m_wraparound_plane->Render(renderer);
-	m_wraparound_convex->Render(renderer);
 }
 
 void Physics3State::RenderForwardPath(Renderer*)
@@ -873,5 +912,11 @@ void Physics3State::ShootSphere(WrapAround* wpa)
 {
 	// handle_0 is a sphere rb
 	CollisionSphere* sph = WrapAroundTestSphere(wpa, true, false, true, m_camera->GetWorldPosition(), Vector3::ZERO, Vector3::ONE);
-	sph->GetRigidBody()->SetLinearVelocity(m_camera->GetWorldForward().GetNormalized() * 100.f);
+	sph->GetRigidBody()->SetLinearVelocity(m_camera->GetWorldForward().GetNormalized() * 10.f);
+}
+
+void Physics3State::ShootBox(WrapAround* wpa)
+{
+	CollisionBox* bx = WrapAroundTestBox(wpa, true, false, true, m_camera->GetWorldPosition(), Vector3::ZERO, Vector3::ONE);
+	bx->GetRigidBody()->SetLinearVelocity(m_camera->GetWorldForward().GetNormalized() * 100.f);		// give it a speed boost
 }

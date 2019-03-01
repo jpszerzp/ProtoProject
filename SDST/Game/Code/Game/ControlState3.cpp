@@ -85,8 +85,8 @@ ControlState3::ControlState3()
 	rb->SetSleepable(false);
 
 	plane_0->AttachToRigidBody(rb);
-
 	m_planes.push_back(plane_0);
+	m_controlled_1 = plane_0;
 
 	// ui
 	BitmapFont* font = renderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
@@ -112,7 +112,7 @@ void ControlState3::Update(float deltaTime)
 {
 	UpdateKeyboard(deltaTime);
 	UpdateMouse(deltaTime);
-	UpdateObjects(deltaTime);
+	UpdatePair(deltaTime);
 	UpdateContacts(deltaTime);
 	UpdateDebugDraw(deltaTime);
 	UpdateUI(deltaTime);
@@ -155,22 +155,22 @@ void ControlState3::UpdateKeyboard(float deltaTime)
 	float upDown = 0.f; 
 
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_A))
-		leftRight = -50.f;
+		leftRight = -20.f;
 
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_D))
-		leftRight = 50.f;
+		leftRight = 20.f;
 
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_W))
-		forwardBack = 50.f;
+		forwardBack = 20.f;
 
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_S))
-		forwardBack = -50.f;
+		forwardBack = -20.f;
 
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_Q))
-		upDown = 50.f;
+		upDown = 20.f;
 
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_E))
-		upDown = -50.f;
+		upDown = -20.f;
 
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_I))
 		m_controlled_0->GetRigidBody()->SetLinearVelocity(Vector3(0.f, 0.f, 5.f));
@@ -195,6 +195,73 @@ void ControlState3::UpdateKeyboard(float deltaTime)
 		m_controlled_0->GetRigidBody()->SetAngularVelocity(Vector3(0.f, 0.f, 30.f));
 	else 
 		m_controlled_0->GetRigidBody()->SetAngularVelocity(Vector3::ZERO);
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_TAB))
+	{
+		switch (m_cid)
+		{
+		case CID_PLANE:
+			if (!m_boxes.empty())
+				m_controlled_1 = m_boxes[0];
+			else
+			{
+				CollisionBox* cbox = new CollisionBox(Vector3(.5f), "wireframe", "Data/Images/white.png");
+
+				CollisionRigidBody* rb = new CollisionRigidBody(1.f, Vector3::ZERO, Vector3::ZERO);
+				rb->SetAwake(true);
+				rb->SetSleepable(false);
+
+				cbox->AttachToRigidBody(rb);
+
+				m_boxes.push_back(cbox);
+
+				m_controlled_1 = cbox;
+			}
+
+			m_cid = CID_BOX;
+			break;
+		case CID_BOX:
+			if (!m_spheres.empty())
+				m_controlled_1 = m_spheres[0];
+			else
+			{
+				CollisionSphere* csph = new CollisionSphere(1.f, "wireframe", "Data/Images/white.png");
+
+				CollisionRigidBody* rb = new CollisionRigidBody(1.f, Vector3::ZERO, Vector3::ZERO);
+				rb->SetAwake(true);
+				rb->SetSleepable(false);
+
+				csph->AttachToRigidBody(rb);
+
+				m_spheres.push_back(csph);
+
+				m_controlled_1 = csph;
+			}
+
+			m_cid = CID_SPHERE;
+			break;
+		case CID_SPHERE:
+			if (!m_planes.empty())
+				m_controlled_1 = m_planes[0];
+			else
+			{
+				CollisionPlane* plane_0 = new CollisionPlane(Vector2(20.f), "quad_pcu_20", Vector3(0.f, 1.f, 0.f), 0.f, "wireframe", "Data/Images/white.png");
+
+				CollisionRigidBody* rb = new CollisionRigidBody(1.f, Vector3::ZERO, Vector3(90.f, 0.f, 0.f));
+				rb->SetAwake(true);
+				rb->SetSleepable(false);
+
+				plane_0->AttachToRigidBody(rb);
+				m_planes.push_back(plane_0);
+				m_controlled_1 = plane_0;
+			}
+
+			m_cid = CID_PLANE;
+			break;
+		default:
+			break;
+		}
+	}
 
 	// camera update from input
 	Vector3 camForward = m_camera->GetLocalForward(); 
@@ -221,13 +288,14 @@ void ControlState3::UpdateDebugDraw(float deltaTime)
 		const Vector3& pt = current->GetPos();
 		const float& pen = current->GetPenetration();
 
-		DebugRenderLine(.1f, pt, pt + n * pen, 2.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
+		DebugRenderLine(.1f, pt, pt + n * pen, 5.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
 
 		count++;
 		current = m_keep.m_collision_head + count;
 	}
 }
 
+/*
 void ControlState3::UpdateObjects(float deltaTime)
 {
 	for (int i = 0; i < m_convex_objs.size(); ++i)
@@ -235,6 +303,13 @@ void ControlState3::UpdateObjects(float deltaTime)
 
 	for (int i = 0; i < m_planes.size(); ++i)
 		m_planes[i]->Update(deltaTime);
+}
+*/
+
+void ControlState3::UpdatePair(float deltaTime)
+{
+	m_controlled_0->Update(deltaTime);
+	m_controlled_1->Update(deltaTime);
 }
 
 void ControlState3::UpdateContacts(float deltaTime)
@@ -248,15 +323,46 @@ void ControlState3::UpdateContacts(float deltaTime)
 	{
 		CollisionConvexObject* c_obj_0 = m_convex_objs[idx0];
 
-		// convex vs plane
-		for (std::vector<CollisionPlane*>::size_type idx1 = 0; idx1 < m_planes.size(); ++idx1)
+		if (m_cid == CID_PLANE)
 		{
-			if (!m_keep.AllowMoreCollision())
-				return;
+			// convex vs plane
+			for (std::vector<CollisionPlane*>::size_type idx1 = 0; idx1 < m_planes.size(); ++idx1)
+			{
+				if (!m_keep.AllowMoreCollision())
+					return;
 
-			CollisionPlane* pl = m_planes[idx1];
+				CollisionPlane* pl = m_planes[idx1];
 
-			CollisionSensor::ConvexVsHalfPlane(*c_obj_0, *pl, &m_keep);
+				CollisionSensor::ConvexVsHalfPlane(*c_obj_0, *pl, &m_keep);
+			}
+		}
+
+		// ...vs box
+		if (m_cid == CID_BOX)
+		{
+			for (std::vector<CollisionBox*>::size_type idx1 = 0; idx1 < m_boxes.size(); ++idx1)
+			{
+				if (!m_keep.AllowMoreCollision())
+					return;
+
+				CollisionBox* bx = m_boxes[idx1];
+
+				CollisionSensor::ConvexVsBox(*c_obj_0, *bx, &m_keep);
+			}
+		}
+
+		if (m_cid == CID_SPHERE)
+		{
+			// ... vs sphere
+			for (std::vector<CollisionSphere*>::size_type idx1 = 0; idx1 < m_spheres.size(); ++idx1)
+			{
+				if (!m_keep.AllowMoreCollision())
+					return;
+
+				CollisionSphere* sph = m_spheres[idx1];
+
+				CollisionSensor::ConvexVsSphere(*c_obj_0, *sph, &m_keep);
+			}
 		}
 	}
 }
@@ -275,11 +381,13 @@ void ControlState3::Render(Renderer* renderer)
 
 	// draw group contents
 	renderer->SetCamera(m_camera);
-	for (int i = 0; i < m_convex_objs.size(); ++i)
-		m_convex_objs[i]->Render(renderer);
-
-	for (int i = 0; i < m_planes.size(); ++i)
-		m_planes[i]->Render(renderer);
+	RenderPair(renderer);
 
 	m_forwardPath->RenderScene(m_sceneGraph);
+}
+
+void ControlState3::RenderPair(Renderer* renderer)
+{
+	m_controlled_0->Render(renderer);
+	m_controlled_1->Render(renderer);
 }

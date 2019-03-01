@@ -50,7 +50,7 @@ public:
 	void SetTint(const Vector4& tint) { m_tint = tint; }
 	void SetRigidBodyPosition(const Vector3& pos);
 
-	void Update(float deltaTime);
+	virtual void Update(float deltaTime);
 
 	void Render(Renderer* renderer);
 
@@ -62,6 +62,7 @@ public:
 	Shader* GetShader() const { return m_shader; }
 	Texture* GetTexture() const { return m_texture; }
 	Vector4 GetTint() const { return m_tint; }
+	Vector3 GetCenter() const { return m_rigid_body->GetCenter(); }
 
 	Vector3 GetPrimitiveRight() const;
 	Vector3 GetPrimitiveUp() const;
@@ -73,7 +74,7 @@ class CollisionSphere : public CollisionPrimitive
 	float m_radius;
 
 public:
-	CollisionSphere(const float& radius);
+	CollisionSphere(const float& radius, const std::string& fp = "default", const std::string& tx = "Data/Images/perspective_test.png");
 
 	void AttachToRigidBody(CollisionRigidBody* rb) override;
 
@@ -83,13 +84,22 @@ public:
 class CollisionBox : public CollisionPrimitive
 {
 	Vector3 m_half_size;
+	std::vector<Vector3> m_world_verts;
 
 public:
-	CollisionBox(const Vector3& half);
+	CollisionBox(const Vector3& half, const std::string& fp = "default", const std::string& tx = "Data/Images/perspective_test.png");
+
+	void Update(float deltaTime) override;
+	void CacheWorldVerts();
 
 	void AttachToRigidBody(CollisionRigidBody* rb) override;
 
 	Vector3 GetHalfSize() const { return m_half_size; }
+
+	// SAT
+	float ProjectVertToAxis(const Vector3& axis, const int& idx) const;
+	float ProjectCenterToAxis(const Vector3& axis) const;
+	void ProjectToAxisForInterval(const Vector3& axis, float& tmin, float& tmax, Vector3& vmin, Vector3& vmax) const;
 };
 
 class CollisionPlane : public CollisionPrimitive
@@ -116,6 +126,7 @@ class CollisionConvexObject : public CollisionPrimitive
 
 	std::vector<Vector3> m_verts;
 	std::vector<Vector3> m_unit_verts;
+	std::vector<Vector3> m_world_verts;
 
 	std::vector<ConvexPolygon> m_polygons;
 
@@ -141,6 +152,7 @@ public:
 	void BuildVerticesAndPolygons(const ConvexHull& hull);
 	void BuildPolygonMeshes();
 	void BuildUnitVerts();
+	void BuildWorldVerts();
 
 	void SortVerticesCCW(ConvexPolygon& polygon);
 	void SortPolygonVerticesCCW();
@@ -148,6 +160,7 @@ public:
 	std::vector<IntVector3> GetTriangulationIndices() const;
 	std::vector<TetrahedronBody> GetTetrahedronBodies(const std::vector<IntVector3>& triangle_vert_idx) const;
 	TetrahedronBody GetSummedTetrahedronBody(const std::vector<TetrahedronBody>& bodies) const; 
+	const std::vector<ConvexPolygon>& GetPolyRefs() const { return m_polygons; }
 
 	void AppendPolygonMesh(MeshBuilder& mb, ConvexPolygon& polygon);
 
@@ -158,7 +171,9 @@ public:
 	Matrix33 GetInitialIT() const { return m_initial_it; }
 	float GetInitialMass() const { return m_initial_mass; }
 	int GetVertNum() const { return (int)m_verts.size(); }
+	int GetPolyNum() const { return (int)m_polygons.size(); }
 	Vector3 GetRawVert(const int& idx) const { return m_verts[idx]; }
+	Vector3 GetWorldVert(const int& idx) const { return m_world_verts[idx]; }
 	Vector3 GetUnitVert(const int& idx) const { return m_unit_verts[idx]; }
 
 	// SAT
@@ -166,4 +181,7 @@ public:
 	float ProjectCenterToAxis(const Vector3& axis) const;
 	void ProjectToAxisForInterval(const Vector3& axis, float& tmin, float& tmax, Vector3& vmin, Vector3& vmax) const;
 	std::vector<Vector3> GetAxes() const;
+	ConvexPolygon GetPoly(int idx) const;
+
+	void Update(float deltaTime) override;
 };

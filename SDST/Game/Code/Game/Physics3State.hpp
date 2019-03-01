@@ -82,6 +82,7 @@ public:
 	void SpawnRandomSphere(WrapAround* wpa, uint num, const Vector3& min, const Vector3& max);
 	void SpawnRandomConvex(WrapAround* wpa, uint num, const Vector3& min, const Vector3& max);
 	void ShootSphere(WrapAround* wpa);
+	void ShootBox(WrapAround* wpa);
 
 public:
 	const static uint MAX_CONTACT_NUM = 256;
@@ -108,8 +109,8 @@ public:
 
 	CollisionSolver m_solver;
 
-	WrapAround* m_wraparound_sphere;
-	WrapAround* m_wraparound_box;
+	//WrapAround* m_wraparound_sphere;
+	//WrapAround* m_wraparound_box;
+	//WrapAround* m_wraparound_convex;
 	WrapAround* m_wraparound_plane;
-	WrapAround* m_wraparound_convex;
 };

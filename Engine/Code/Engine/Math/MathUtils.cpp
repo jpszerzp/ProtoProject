@@ -1650,6 +1650,70 @@ float SATHalfProjectionBox(const CollisionBox& b, const Vector3& axis)
 	return x + y + z;
 }
 
+// test of box and convex shapes along the given axis
+bool SATTestBoxVsConvex(const CollisionBox& b1, const CollisionConvexObject& cobj, Vector3 axis, const Vector3& disp, unsigned idx, float& smallest_pen, unsigned& smallest_idx,
+	Vector3& box_min, Vector3& box_max, Vector3& convex_min, Vector3& convex_max)
+{
+	// axes was parallel, ignore
+	if (axis.GetLengthSquared() < .0001f)
+		return true;
+
+	axis.Normalize();
+
+	float tmin_b, tmax_b, tmin_c, tmax_c; 
+	Vector3 vmin_b, vmax_b, vmin_c, vmax_c;
+
+	// intervals, all v are in world space
+	b1.ProjectToAxisForInterval(axis, tmin_b, tmax_b, vmin_b, vmax_b);
+	cobj.ProjectToAxisForInterval(axis, tmin_c, tmax_c, vmin_c, vmax_c);
+
+	if (!(tmin_c < tmax_b) && (tmax_c > tmin_b))
+		return false;
+
+	// get penetration
+	float pen;
+	if (tmax_c > tmax_b) 
+		pen = tmax_b - tmin_c;
+	else if (tmin_c < tmin_b)
+		pen = tmax_c - tmin_b;
+	else
+	{
+		if ((tmax_b - tmin_b) < (tmax_c - tmin_c))
+			pen = tmax_b - tmin_b;
+		else
+			pen = tmax_c - tmin_c;
+	}
+	//ASSERT_OR_DIE(pen > 0, "penetration should be larger than 0");
+
+	if (pen < smallest_pen)
+	{
+		smallest_pen = pen;
+		smallest_idx = idx;
+
+		box_min = vmin_b;
+		box_max = vmax_b;
+
+		convex_min = vmin_c;
+		convex_max = vmax_c;
+	}
+	
+	return true;
+}
+
+/*
+// penetration along the given axis
+float SATTestPenetrationBoxVsConvex(const CollisionBox& b1, const CollisionConvexObject& cobj, const Vector3& axis, const Vector3& disp)
+{
+	float tmin_b, tmax_b, tmin_c, tmax_c; 
+	Vector3 vmin_b, vmax_b, vmin_c, vmax_c;
+
+	// intervals
+	b1.ProjectToAxisForInterval(axis, tmin_b, tmax_b, vmin_b, vmax_b);
+	cobj.ProjectToAxisForInterval(axis, tmin_c, tmax_c, vmin_c, vmax_c);
+
+}
+*/
+
 float DistPointToPlaneUnsigned(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3)
 {
 	return abs(DistPointToPlaneSigned(pt, vert1, vert2, vert3));
@@ -1888,4 +1952,9 @@ Matrix33 TranslateCovariance(const Matrix33& cov, const Vector3& com, const floa
 	float dot3 = DotProduct(offset, offset);
 
 	return (cov + mass * (dot1 + dot2 + dot3));
+}
+
+bool AreFloatsCloseEnough(const float& f1, const float& f2)
+{	
+	return (abs(f1 - f2) < 0.01f);
 }

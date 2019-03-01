@@ -22,6 +22,8 @@ struct ConvexPolygon
 	~ConvexPolygon(){}
 
 	int GetVertNum() const { return (int)m_vert_idx.size(); }
+	Vector3 GetNormal() const { return m_normal; }
+
 	void AddVertexIndex(const int& vert_idx) { m_vert_idx.push_back(vert_idx); }
 };
 
