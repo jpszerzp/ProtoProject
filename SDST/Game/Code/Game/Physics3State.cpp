@@ -1,5 +1,6 @@
 ﻿#include "Game/Physics3State.hpp"
 #include "Game/GameCommon.hpp"
+#include "Game/TheApp.hpp"
 #include "Engine/Renderer/Window.hpp"
 #include "Engine/Renderer/DebugRenderer.hpp"
 #include "Engine/Core/Console/DevConsole.hpp"  
@@ -18,7 +19,12 @@
 #include "Engine/Physics/3D/RF/ConvexHull.hpp"
 #include "Engine/Physics/3D/RF/ConvexPolyhedron.hpp"
 
+#include "PsThread.h"
+#include "CmPhysXCommon.h"
+
 #include <algorithm>
+
+#define PVD_HOST "127.0.0.1"
 
 // this is the physics state for thesis
 
@@ -26,6 +32,8 @@ bool IsGameobjectDead(GameObject* go) { return go->m_dead; }
 
 Physics3State::Physics3State()
 {
+	PhysxStartup();
+
 	Renderer* theRenderer = Renderer::GetInstance();
 	m_sceneGraph = new RenderSceneGraph();
 	m_forwardPath = new ForwardRenderPath();
@@ -70,44 +78,6 @@ Physics3State::Physics3State()
 	// solver
 	m_solver = CollisionSolver(MAX_CONTACT_NUM * 8, .01f, .01f);
 
-	//// a sphere
-	//m_wraparound_sphere = new WrapAround(Vector3(20.f, 300.f, -10.f), Vector3(40.f, 320.f, 10.f),
-	//	Vector3(25.f, 305.f, -5.f), Vector3(35.f, 305.f, -5.f),
-	//	Vector3(25.f, 305.f, 5.f), Vector3(35.f, 305.f, 5.f),
-	//	Vector3(25.f, 315.f, -5.f), Vector3(35.f, 315.f, -5.f),
-	//	Vector3(25.f, 315.f, 5.f), Vector3(35.f, 315.f, 5.f));
-
-	//CollisionSphere* csph = new CollisionSphere(1.f);
-
-	//CollisionRigidBody* rb = new CollisionRigidBody(1.f, Vector3(30.f, 310.f, 0.f), Vector3(0.f));
-	//rb->SetAwake(true);
-	//rb->SetSleepable(false);
-
-	//csph->AttachToRigidBody(rb);
-
-	//m_spheres.push_back(csph);
-
-	//m_wraparound_sphere->m_primitives.push_back(csph);
-
-	//// a box
-	//m_wraparound_box = new WrapAround(Vector3(50.f, 300.f, -10.f), Vector3(70.f, 320.f, 10.f),
-	//	Vector3(55.f, 305.f, -5.f), Vector3(65.f, 305.f, -5.f),
-	//	Vector3(55.f, 305.f, 5.f), Vector3(65.f, 305.f, 5.f),
-	//	Vector3(55.f, 315.f, -5.f), Vector3(65.f, 315.f, -5.f),
-	//	Vector3(55.f, 315.f, 5.f), Vector3(65.f, 315.f, 5.f));
-
-	//CollisionBox* box_0 = new CollisionBox(Vector3(.5f));
-
-	//rb = new CollisionRigidBody(1.f, Vector3(60.f, 310.f, 0.f), Vector3::ZERO);
-	//rb->SetAwake(true);
-	//rb->SetSleepable(false);
-
-	//box_0->AttachToRigidBody(rb);
-
-	//m_boxes.push_back(box_0);
-
-	//m_wraparound_box->m_primitives.push_back(box_0);
-
 	// a plane
 	m_wraparound_plane = new WrapAround(Vector3(20.f, 340.f, -10.f), Vector3(130.f, 360.f, 100.f),
 		Vector3(25.f, 345.f, -5.f), Vector3(35.f, 345.f, -5.f),
@@ -131,43 +101,6 @@ Physics3State::Physics3State()
 
 	// stack
 	//SpawnStack(Vector3(75.f, 342.5f, 45.f), 5, 5);
-
-	// convexity problem
-	//m_wraparound_convex = new WrapAround(Vector3(80.f, 300.f, -10.f), Vector3(100.f, 320.f, 10.f),
-	//	Vector3(85.f, 305.f, -5.f), Vector3(95.f, 305.f, -5.f),
-	//	Vector3(85.f, 305.f, 5.f), Vector3(95.f, 305.f, 5.f),
-	//	Vector3(85.f, 315.f, -5.f), Vector3(95.f, 315.f, -5.f),
-	//	Vector3(85.f, 315.f, 5.f), Vector3(95.f, 315.f, 5.f));
-	//const Vector3& wrap_center = m_wraparound_convex->m_bounds.GetCenter();
-
-	//Plane p1 = Plane(Vector3(.1f, 0.f, .9f), 1.f);
-	//Plane p2 = Plane(Vector3(.1f, 0.f, -.9f), 1.f);
-	//Plane p3 = Plane(Vector3(-.9f, 0.f, -.1f), 1.f);
-	//Plane p4 = Plane(Vector3(.9f, 0.f, -.1f), 1.f);
-	//Plane p5 = Plane(Vector3(-.1f, .9f, -.1f), 1.f);
-	//Plane p6 = Plane(Vector3(-.05f, -.9f, .1f), 1.f);
-	//std::vector<Plane> hull_planes;
-	//hull_planes.push_back(p1);
-	//hull_planes.push_back(p2);
-	//hull_planes.push_back(p3);
-	//hull_planes.push_back(p4);
-	//hull_planes.push_back(p5);
-	//hull_planes.push_back(p6);
-	//ConvexHull* cHull = new ConvexHull(hull_planes);
-
-	//CollisionConvexObject* cObj = new CollisionConvexObject(*cHull);
-
-	//const float& mass = cObj->GetInitialMass();
-	//const Vector3& true_center = wrap_center;			 // com + (wrap_center - com); based on ORIGIN
-	//rb = new CollisionRigidBody(mass, true_center, Vector3::ZERO);
-	//rb->SetAwake(true);
-	//rb->SetSleepable(false);
-
-	//cObj->AttachToRigidBody(rb);
-	//m_convex_objs.push_back(cObj);
-	//m_focus = cObj;
-
-	//m_wraparound_convex->m_primitives.push_back(cObj);
 
 	// UI
 	// local tensor is fixed
@@ -199,6 +132,9 @@ Physics3State::Physics3State()
 	m_tensor_ui.push_back(t_mesh);
 	titleMin -= Vector2(0.f, txtHeight);
 
+	InitPhysxScene(true);
+	//CreatePhysxStack();
+
 	// debug
 	DebugRenderSet3DCamera(m_camera);
 	DebugRenderSet2DCamera(m_UICamera);
@@ -206,36 +142,28 @@ Physics3State::Physics3State()
 
 Physics3State::~Physics3State()
 {
-	/*
-	delete m_wraparound_sphere;
-	m_wraparound_sphere = nullptr;
-
-	delete m_wraparound_box;
-	m_wraparound_box = nullptr;
-
-	delete m_wraparound_convex;
-	m_wraparound_convex = nullptr;
-	*/
-
 	delete m_wraparound_plane;
 	m_wraparound_plane = nullptr;
+
+	PhysxShutdown(true);
 }
 
 void Physics3State::PostConstruct()
 {
-	//m_wraparound_sphere->m_physState = this;
-	//m_wraparound_box->m_physState = this;
-	//m_wraparound_convex->m_physState = this;
 	m_wraparound_plane->m_physState = this;
 }
 
 void Physics3State::Update(float deltaTime)
 {
+	// my API
 	UpdateInput(deltaTime);				// update input
 	UpdateGameobjects(deltaTime);		// update gameobjects
 	UpdateContacts(deltaTime);
 	UpdateDebug(deltaTime);			
 	UpdateUI();
+
+	// physx API
+	//PhysxUpdate(true, deltaTime);
 }
 
 void Physics3State::UpdateMouse(float deltaTime)
@@ -321,17 +249,6 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		DebugRenderPlaneGrid(lifetime, gridBL, gridTL, gridTR, gridBR, 10.f, 10.f, 2.5f, mode);
 	}
 
-	/*
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_5))
-		WrapAroundTestBox(m_wraparound_sphere, false, false, true, Vector3(31.2f, 315.f, 0.f), Vector3::ZERO, Vector3::ONE);
-
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_6))
-		WrapAroundTestSphere(m_wraparound_sphere, false, false, true, Vector3(31.8f, 315.f, 0.f), Vector3::ZERO, Vector3::ONE);
-
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_7))
-		WrapAroundTestBox(m_wraparound_box, false, false, true, Vector3(60.8f, 315.f, 0.f), Vector3::ZERO, Vector3::ONE);
-		*/
-
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_8))
 		SpawnRandomSphere(m_wraparound_plane, 10, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 360.f, 100.f));
 		
@@ -350,87 +267,14 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	// slow
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_0))
 	{
-		/*
-		for (CollisionPrimitive* primitive : m_wraparound_sphere->m_primitives)
-			primitive->GetRigidBody()->SetSlow(.01f);
-
-		for (CollisionPrimitive* primitive : m_wraparound_box->m_primitives)
-			primitive->GetRigidBody()->SetSlow(.01f);
-
-		for (CollisionPrimitive* primitive : m_wraparound_convex->m_primitives)
-			primitive->GetRigidBody()->SetSlow(.01f);
-			*/
-
 		for (CollisionPrimitive* primitive : m_wraparound_plane->m_primitives)
 			primitive->GetRigidBody()->SetSlow(.01f);
 	}
 	else
 	{
-		/*
-		for (CollisionPrimitive* primitive : m_wraparound_sphere->m_primitives)
-			primitive->GetRigidBody()->SetSlow(1.f);
-
-		for (CollisionPrimitive* primitive : m_wraparound_box->m_primitives)
-			primitive->GetRigidBody()->SetSlow(1.f);
-
-		for (CollisionPrimitive* primitive : m_wraparound_convex->m_primitives)
-			primitive->GetRigidBody()->SetSlow(1.f);
-			*/
-
 		for (CollisionPrimitive* primitive : m_wraparound_plane->m_primitives)
 			primitive->GetRigidBody()->SetSlow(1.f);
 	}
-
-	//CollisionRigidBody* rb = m_handle_0->GetRigidBody();
-
-	//if (g_input->IsKeyDown(InputSystem::KEYBOARD_UP_ARROW))
-	//	rb->SetAngularVelocity(Vector3(5.f, 0.f, 0.f));
-	//else if (g_input->IsKeyDown(InputSystem::KEYBOARD_DOWN_ARROW))
-	//	rb->SetAngularVelocity(Vector3(-5.f, 0.f, 0.f));
-	//else if (g_input->IsKeyDown(InputSystem::KEYBOARD_LEFT_ARROW))
-	//	rb->SetAngularVelocity(Vector3(0.f, 5.f, 0.f));
-	//else if (g_input->IsKeyDown(InputSystem::KEYBOARD_RIGHT_ARROW))
-	//	rb->SetAngularVelocity(Vector3(0.f, -5.f, 0.f));
-	//else if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEUP))
-	//	rb->SetAngularVelocity(Vector3(0.f, 0.f, 5.f));
-	//else if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEDOWN))
-	//	rb->SetAngularVelocity(Vector3(0.f, 0.f, -5.f));
-	//else
-	//	rb->SetAngularVelocity(Vector3::ZERO);
-
-	/*
-	CollisionRigidBody* rb = m_focus->GetRigidBody();
-
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_UP_ARROW))
-		rb->SetAngularVelocity(Vector3(5.f, 0.f, 0.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_DOWN_ARROW))
-		rb->SetAngularVelocity(Vector3(-5.f, 0.f, 0.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_LEFT_ARROW))
-		rb->SetAngularVelocity(Vector3(0.f, 5.f, 0.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_RIGHT_ARROW))
-		rb->SetAngularVelocity(Vector3(0.f, -5.f, 0.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEUP))
-		rb->SetAngularVelocity(Vector3(0.f, 0.f, 5.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEDOWN))
-		rb->SetAngularVelocity(Vector3(0.f, 0.f, -5.f));
-	else
-		rb->SetAngularVelocity(Vector3::ZERO);
-
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_I))
-		rb->SetLinearVelocity(Vector3(0.f, 0.f, 5.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_K))
-		rb->SetLinearVelocity(Vector3(0.f, 0.f, -5.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_J))
-		rb->SetLinearVelocity(Vector3(-5.f, 0.f, 0.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_L))
-		rb->SetLinearVelocity(Vector3(5.f, 0.f, 0.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_U))
-		rb->SetLinearVelocity(Vector3(0.f, 5.f, 0.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_O))
-		rb->SetLinearVelocity(Vector3(0.f, -5.f, 0.f));
-	else
-		rb->SetLinearVelocity(Vector3::ZERO);
-		*/
 
 	// camera update from input
 	Vector3 camForward = m_camera->GetLocalForward(); 
@@ -472,9 +316,6 @@ void Physics3State::UpdateDebugDraw(float deltaTime)
 
 void Physics3State::UpdateWrapArounds()
 {
-	//m_wraparound_sphere->Update();
-	//m_wraparound_box->Update();
-	//m_wraparound_convex->Update();
 	m_wraparound_plane->Update();
 }
 
@@ -689,6 +530,8 @@ void Physics3State::Render(Renderer* renderer)
 	RenderForwardPath(renderer);
 
 	RenderWrapArounds(renderer);
+
+	//PhysxRender(renderer);
 }
 
 void Physics3State::RenderGameobjects(Renderer* renderer)
@@ -708,9 +551,6 @@ void Physics3State::RenderGameobjects(Renderer* renderer)
 
 void Physics3State::RenderWrapArounds(Renderer* renderer)
 {
-	//m_wraparound_sphere->Render(renderer);
-	//m_wraparound_box->Render(renderer);
-	//m_wraparound_convex->Render(renderer);
 	m_wraparound_plane->Render(renderer);
 }
 
@@ -919,4 +759,208 @@ void Physics3State::ShootBox(WrapAround* wpa)
 {
 	CollisionBox* bx = WrapAroundTestBox(wpa, true, false, true, m_camera->GetWorldPosition(), Vector3::ZERO, Vector3::ONE);
 	bx->GetRigidBody()->SetLinearVelocity(m_camera->GetWorldForward().GetNormalized() * 100.f);		// give it a speed boost
+}
+
+////////////////////////////////////////////////////////////////////////// PhysX config //////////////////////////////////////////////////////////////////////////
+
+PxFilterFlags contactReportFilterShader(PxFilterObjectAttributes attributes0, PxFilterData filterData0, 
+	PxFilterObjectAttributes attributes1, PxFilterData filterData1,
+	PxPairFlags& pairFlags, const void* constantBlock, PxU32 constantBlockSize)
+{
+	PX_UNUSED(attributes0);
+	PX_UNUSED(attributes1);
+	PX_UNUSED(filterData0);
+	PX_UNUSED(filterData1);
+	PX_UNUSED(constantBlockSize);
+	PX_UNUSED(constantBlock);
+
+	// all initial and persisting reports for everything, with per-point data
+	pairFlags = PxPairFlag::eSOLVE_CONTACT | PxPairFlag::eDETECT_DISCRETE_CONTACT
+		|	PxPairFlag::eNOTIFY_TOUCH_FOUND 
+		| PxPairFlag::eNOTIFY_TOUCH_PERSISTS
+		| PxPairFlag::eNOTIFY_CONTACT_POINTS;
+	return PxFilterFlag::eDEFAULT;
+}
+
+std::vector<PxVec3> gContactPositions;
+std::vector<PxVec3> gContactImpulses;
+
+class ContactReportCallback: public PxSimulationEventCallback
+{
+	void onConstraintBreak(PxConstraintInfo* constraints, PxU32 count)	{ PX_UNUSED(constraints); PX_UNUSED(count); }
+	void onWake(PxActor** actors, PxU32 count)							{ PX_UNUSED(actors); PX_UNUSED(count); }
+	void onSleep(PxActor** actors, PxU32 count)							{ PX_UNUSED(actors); PX_UNUSED(count); }
+	void onTrigger(PxTriggerPair* pairs, PxU32 count)					{ PX_UNUSED(pairs); PX_UNUSED(count); }
+	void onAdvance(const PxRigidBody*const*, const PxTransform*, const PxU32) {}
+	void onContact(const PxContactPairHeader& pairHeader, const PxContactPair* pairs, PxU32 nbPairs) 
+	{
+		PX_UNUSED((pairHeader));
+		std::vector<PxContactPairPoint> contactPoints;
+
+		for(PxU32 i=0;i<nbPairs;i++)
+		{
+			PxU32 contactCount = pairs[i].contactCount;
+			if(contactCount)
+			{
+				contactPoints.resize(contactCount);
+				pairs[i].extractContacts(&contactPoints[0], contactCount);
+
+				for(PxU32 j=0;j<contactCount;j++)
+				{
+					gContactPositions.push_back(contactPoints[j].position);
+					gContactImpulses.push_back(contactPoints[j].impulse);
+				}
+			}
+		}
+	}
+};
+
+ContactReportCallback gContactReportCallback;
+
+void Physics3State::InitPhysxScene(bool interactive)
+{
+	PX_UNUSED(interactive);
+
+	// dispatcher
+	PxU32 num_cores = Ps::Thread::getNbPhysicalCores();
+	m_physx_dispatcher = PxDefaultCpuDispatcherCreate(num_cores == 0 ? 0 : num_cores - 1);
+
+	// scene desc
+	Vector3 half_gravity = (Vector3::GRAVITY / 2.f);
+	PxSceneDesc scene_desc(m_physics->getTolerancesScale());
+	scene_desc.cpuDispatcher = m_physx_dispatcher;
+	scene_desc.gravity = PxVec3(half_gravity.x, half_gravity.y, half_gravity.z);
+	scene_desc.filterShader = contactReportFilterShader;
+	scene_desc.simulationEventCallback = &gContactReportCallback;
+	m_physx_scene = m_physics->createScene(scene_desc);
+
+	// with scene, config pvd client
+	PxPvdSceneClient* pvd_client = m_physx_scene->getScenePvdClient();
+	if (pvd_client)
+		pvd_client->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS, true);
+
+	// material
+	m_physx_mat = m_physics->createMaterial(.5f, .5f, .6f);
+}
+
+void Physics3State::CreatePhysxStack()
+{
+	// plane
+	PxRigidStatic* pl = PxCreatePlane(*m_physics, PxPlane(0, 1, 0, 0), *m_physx_mat);
+	m_physx_scene->addActor(*pl);
+
+	/*
+	// interface with my API
+	PhysXObject* pl_obj = new PhysXObject(pl);
+	m_physx_objs.push_back(pl_obj);
+	*/
+
+	// stack
+	PxTransform pxt = PxTransform(PxVec3(0.f, 3.f, 10.f));
+	PxU32 size = 5;
+	PxReal half_ext = 2.f;
+	PxShape* shape = m_physics->createShape(PxBoxGeometry(half_ext, half_ext, half_ext), *m_physx_mat);
+	for (PxU32 i = 0; i < size; ++i)
+	{
+		for (PxU32 j = 0; j < size - i; ++j)
+		{
+			PxTransform local_t(PxVec3(PxReal(j*2) - PxReal(size-i), PxReal(i*2+1), 0) * half_ext);
+			PxRigidDynamic* body = m_physics->createRigidDynamic(pxt.transform(local_t));
+			body->attachShape(*shape);
+			PxRigidBodyExt::updateMassAndInertia(*body, 10.f);
+			m_physx_scene->addActor(*body);
+
+			/*
+			PhysXObject* phys_obj = new PhysXObject(body);
+			m_physx_objs.push_back(phys_obj);
+			*/
+		}
+	}
+	shape->release();
+}
+
+void Physics3State::PhysxRender(Renderer* renderer)
+{
+	// ...by this time, model matrix, mesh, shader and texture SHOULD be ready/updated
+	/*
+	for (int i = 0; i < m_physx_objs.size(); ++i)
+		m_physx_objs[i]->Render(renderer);
+		*/
+
+	PxU32 nb_actors = m_physx_scene->getNbActors(PxActorTypeFlag::eRIGID_DYNAMIC | PxActorTypeFlag::eRIGID_STATIC);
+	if (nb_actors)
+	{
+		std::vector<PxRigidActor*> actors(nb_actors);
+		m_physx_scene->getActors(PxActorTypeFlag::eRIGID_DYNAMIC | PxActorTypeFlag::eRIGID_STATIC, 
+			reinterpret_cast<PxActor**>(&actors[0]), nb_actors);
+		renderer->RenderPhysxActors(&actors[0], static_cast<PxU32>(actors.size()), false);
+	}
+}
+
+void Physics3State::PhysxUpdate(bool interactive, float deltaTime)
+{
+	PX_UNUSED(interactive);
+	gContactPositions.clear();
+	gContactImpulses.clear();
+
+	// in sample code, this is forced to be 60 fps...
+	m_physx_scene->simulate(deltaTime);
+	m_physx_scene->fetchResults(true);
+	DebuggerPrintf("%d contact reports\n", PxU32(gContactPositions.size()));
+
+	/*
+	// model matrix of actor is updated, need to reflect that in MY interface
+	for (int i = 0; i < m_physx_objs.size(); ++i)
+		m_physx_objs[i]->CacheData();
+		*/
+}
+
+void Physics3State::PhysxStartup()
+{
+	static PhysErrorCallback gErrorCB;
+	static PhysAllocator gAllocator;
+
+	// create physx foundation
+	m_foundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCB);
+	if (!m_foundation)
+		ASSERT_OR_DIE(false, "PxCreateFoundation failed!");
+
+	// create top-level physx object
+	bool recordMemoryAllocations = true;
+
+	// optional pvd instance, need a HOST
+	m_pvd = PxCreatePvd(*m_foundation);
+	PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 10);
+	m_pvd->connect(*transport, PxPvdInstrumentationFlag::eALL);
+
+	m_physics = PxCreatePhysics(PX_PHYSICS_VERSION, *m_foundation, PxTolerancesScale(), recordMemoryAllocations, m_pvd);
+	if (!m_physics)
+		ASSERT_OR_DIE(false, "PxCreatePhysics failed!");
+
+	TODO("optional startups: cooking, extensions, articulations, height fields");
+
+	// extension
+	if (!PxInitExtensions(*m_physics, m_pvd))
+		ASSERT_OR_DIE(false, "PxInitExtensions failed!");
+}
+
+void Physics3State::PhysxShutdown(bool interactive)
+{
+	PX_UNUSED(interactive);
+	m_physx_scene->release();
+	m_physx_dispatcher->release();
+	PxCloseExtensions();
+
+	// release PxPhysics object
+	m_physics->release();
+
+	// release pvd
+	PxPvdTransport* transport = m_pvd->getTransport();
+	m_pvd->release();
+	transport->release();
+
+	// release foundation
+	m_foundation->release();
+
+	DebuggerPrintf("Physx unregistered.\n");
 }

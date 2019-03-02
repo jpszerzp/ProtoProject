@@ -6,13 +6,15 @@
 #include "Engine/Audio/AudioSystem.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/Net/Socket.hpp"
-#include "Engine/Physics/3D/PHYSX/PhysAllocator.hpp"
-#include "Engine/Physics/3D/PHYSX/PhysErrorCallback.hpp"
-
-#pragma comment(lib, "PhysX_64.lib")
-#pragma comment(lib, "PhysXCommon_64.lib")
-#pragma comment(lib, "PhysXCooking_64.lib")
-#pragma comment(lib, "PhysXFoundation_64.lib")
+//#include "Engine/Physics/3D/PHYSX/PhysAllocator.hpp"
+//#include "Engine/Physics/3D/PHYSX/PhysErrorCallback.hpp"
+//
+//#pragma comment(lib, "PhysX_64.lib")
+//#pragma comment(lib, "PhysXCommon_64.lib")
+//#pragma comment(lib, "PhysXCooking_64.lib")
+//#pragma comment(lib, "PhysXFoundation_64.lib")
+//#pragma comment(lib, "PhysXExtensions_static_64.lib")
+//#pragma comment(lib, "PhysXPvdSDK_static_64.lib")
 
 class TheApp
 {
@@ -25,10 +27,12 @@ class TheApp
 	int m_frames;
 	
 public:
+	/*
 	// physx
 	PxFoundation* m_foundation = nullptr;
 	PxPvd* m_pvd = nullptr;
 	PxPhysics* m_physics = nullptr;
+	*/
 
 public:
 	TheApp();
@@ -68,8 +72,8 @@ public:
 	void BlackboardStartup();
 
 	// Physx
-	void PhysxStartup();
-	void PhysxShutdown();
+	//void PhysxStartup();
+	//void PhysxShutdown();
 };
 
 extern TheApp* g_theApp;

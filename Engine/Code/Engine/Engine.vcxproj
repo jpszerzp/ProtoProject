@@ -154,11 +154,12 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)../../Engine/Code/;$(SolutionDir)Code/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\PhysX-4.0\pxshared\include\;C:\PhysX-4.0\physx\include;$(SolutionDir)../../Engine/Code/;$(SolutionDir)Code/;C:\PhysX-4.0\physx\source\foundation\include;C:\PhysX-4.0\physx\source\common\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -196,11 +197,12 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)../../Engine/Code/;$(SolutionDir)Code/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\PhysX-4.0\pxshared\include\;C:\PhysX-4.0\physx\include;$(SolutionDir)../../Engine/Code/;$(SolutionDir)Code/;C:\PhysX-4.0\physx\source\foundation\include;C:\PhysX-4.0\physx\source\common\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -367,6 +369,8 @@
     <ClCompile Include="Physics\3D\GJK3Simplex.cpp" />
     <ClCompile Include="Physics\3D\PHYSX\PhysAllocator.cpp" />
     <ClCompile Include="Physics\3D\PHYSX\PhysErrorCallback.cpp" />
+    <ClCompile Include="Physics\3D\PHYSX\PhysXObject.cpp" />
+    <ClCompile Include="Physics\3D\PHYSX\PhysXShapeRender.cpp" />
     <ClCompile Include="Physics\3D\PointEntity3.cpp" />
     <ClCompile Include="Physics\3D\PointRB3.cpp" />
     <ClCompile Include="Physics\3D\QuadEntity3.cpp" />
@@ -549,6 +553,8 @@
     <ClInclude Include="Physics\3D\GJK3Simplex.hpp" />
     <ClInclude Include="Physics\3D\PHYSX\PhysAllocator.hpp" />
     <ClInclude Include="Physics\3D\PHYSX\PhysErrorCallback.hpp" />
+    <ClInclude Include="Physics\3D\PHYSX\PhysXObject.hpp" />
+    <ClInclude Include="Physics\3D\PHYSX\PhysXShapeRender.hpp" />
     <ClInclude Include="Physics\3D\PointEntity3.hpp" />
     <ClInclude Include="Physics\3D\PointRB3.hpp" />
     <ClInclude Include="Physics\3D\QuadEntity3.hpp" />

@@ -176,17 +176,18 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\PhysX-4.0\pxshared\include\;$(SolutionDir)../../Engine/Code/;$(SolutionDir)Code/;C:\PhysX-4.0\physx\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\PhysX-4.0\physx\source\common\src;C:\PhysX-4.0\pxshared\include\;$(SolutionDir)../../Engine/Code/;$(SolutionDir)Code/;C:\PhysX-4.0\physx\source\foundation\include;C:\PhysX-4.0\physx\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\PhysX-4.0\physx\bin\win.x86_64.vc141.mt\debug;$(SolutionDir)../../Engine/Code/;$(SolutionDir)Code/;$(SolutionDir)../../Engine/Code/assimp;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>PhysX_64.lib;PhysXCommon_64.lib;PhysXCooking_64.lib;PhysXFoundation_64.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>PhysX_64.lib;PhysXCommon_64.lib;PhysXCooking_64.lib;PhysXFoundation_64.lib;assimp-vc140-mt.lib;PhysXPvdSDK_static_64.lib;PhysXExtensions_static_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y /F /I "$(TargetPath)" "$(SolutionDir)Run_Win32"</Command>
@@ -228,17 +229,18 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\PhysX-4.0\pxshared\include\;$(SolutionDir)../../Engine/Code/;$(SolutionDir)Code/;C:\PhysX-4.0\physx\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\PhysX-4.0\physx\source\common\src;C:\PhysX-4.0\pxshared\include\;$(SolutionDir)../../Engine/Code/;$(SolutionDir)Code/;C:\PhysX-4.0\physx\source\foundation\include;C:\PhysX-4.0\physx\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\PhysX-4.0\physx\bin\win.x86_64.vc141.mt\debug;$(SolutionDir)../../Engine/Code/;$(SolutionDir)Code/;$(SolutionDir)../../Engine/Code/assimp;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>PhysX_64.lib;PhysXCommon_64.lib;PhysXCooking_64.lib;PhysXFoundation_64.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>PhysX_64.lib;PhysXCommon_64.lib;PhysXCooking_64.lib;PhysXFoundation_64.lib;assimp-vc140-mt.lib;PhysXPvdSDK_static_64.lib;PhysXExtensions_static_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y /F /I "$(TargetPath)" "$(SolutionDir)Run_Win32"</Command>
@@ -329,6 +331,7 @@
     <ClCompile Include="ProtoState.cpp" />
     <ClCompile Include="Ship.cpp" />
     <ClCompile Include="Skybox.cpp" />
+    <ClCompile Include="SpecialState3.cpp" />
     <ClCompile Include="Spring.cpp" />
     <ClCompile Include="StateMachine.cpp" />
     <ClCompile Include="TheApp.cpp" />
@@ -360,6 +363,7 @@
     <ClInclude Include="ProtoState.hpp" />
     <ClInclude Include="Ship.hpp" />
     <ClInclude Include="Skybox.hpp" />
+    <ClInclude Include="SpecialState3.hpp" />
     <ClInclude Include="Spring.hpp" />
     <ClInclude Include="StateMachine.hpp" />
     <ClInclude Include="TheApp.hpp" />

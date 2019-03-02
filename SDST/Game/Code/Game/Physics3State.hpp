@@ -9,6 +9,9 @@
 #include "Engine/Physics/3D/RF/CollisionPrimitive.hpp"
 #include "Engine/Physics/3D/RF/CollisionKeep.hpp"
 #include "Engine/Physics/3D/RF/CollisionSolver.hpp"
+#include "Engine/Physics/3D/PHYSX/PhysAllocator.hpp"
+#include "Engine/Physics/3D/PHYSX/PhysErrorCallback.hpp"
+#include "Engine/Physics/3D/PHYSX/PhysXObject.hpp"
 #include "Engine/Core/Primitive/Sphere.hpp"
 #include "Engine/Core/Primitive/Cube.hpp"
 #include "Engine/Core/Primitive/Quad.hpp"
@@ -20,6 +23,13 @@
 #include "Game/Spring.hpp"
 #include "Game/Links.hpp"
 #include "Game/WrapAround3.hpp"
+
+#pragma comment(lib, "PhysX_64.lib")
+#pragma comment(lib, "PhysXCommon_64.lib")
+#pragma comment(lib, "PhysXCooking_64.lib")
+#pragma comment(lib, "PhysXFoundation_64.lib")
+#pragma comment(lib, "PhysXExtensions_static_64.lib")
+#pragma comment(lib, "PhysXPvdSDK_static_64.lib")
 
 #include <set>
 #include <list>
@@ -84,6 +94,14 @@ public:
 	void ShootSphere(WrapAround* wpa);
 	void ShootBox(WrapAround* wpa);
 
+	// Physx
+	void PhysxStartup();
+	void PhysxShutdown(bool interactive);
+	void PhysxUpdate(bool interactive, float deltaTime);
+	void InitPhysxScene(bool interactive);
+	void CreatePhysxStack();
+	void PhysxRender(Renderer* renderer);
+
 public:
 	const static uint MAX_CONTACT_NUM = 256;
 
@@ -113,4 +131,13 @@ public:
 	//WrapAround* m_wraparound_box;
 	//WrapAround* m_wraparound_convex;
 	WrapAround* m_wraparound_plane;
+
+	// physx
+	PxFoundation* m_foundation = nullptr;
+	PxPvd* m_pvd = nullptr;
+	PxPhysics* m_physics = nullptr;
+	PxDefaultCpuDispatcher* m_physx_dispatcher = NULL;
+	PxScene* m_physx_scene = NULL;
+	PxMaterial* m_physx_mat = NULL;
+	//std::vector<PhysXObject*> m_physx_objs;
 };

@@ -14,10 +14,11 @@
 #include "Engine/Core/Console/Command.hpp"
 #include "Engine/Core/Console/DevConsole.hpp"
 #include "Engine/Core/Profiler/ProfileSystem.hpp"
-#include "Engine/Core/ErrorWarningAssert.hpp"
 #include "Engine/Net/Net.hpp"
 #include "Engine/Net/NetAddress.hpp"
 #include "Engine/Physics/3D/RF/PhysTime.hpp"
+
+//#define PVD_HOST "127.0.0.1"
 
 TheApp::TheApp()
 {
@@ -26,11 +27,11 @@ TheApp::TheApp()
 	InputSystemStartup();
 	AudioSystemStartup();
 	NetStartup();
+	//PhysxStartup();
 	StateStartup();
 	ProfilerStartup();
 	ConsoleStartup();
 	BlackboardStartup();
-	PhysxStartup();
 }
 
 TheApp::~TheApp()
@@ -58,7 +59,7 @@ TheApp::~TheApp()
 	delete g_masterClock;
 	g_masterClock = nullptr;
 
-	PhysxShutdown();
+	//PhysxShutdown();
 }
 
 
@@ -305,7 +306,7 @@ void TheApp::BlackboardStartup()
 	g_gameConfigBlackboard->PopulateFromXmlElementAttributes(*(gameConfigDoc.FirstChildElement()));
 }
 
-
+/*
 void TheApp::PhysxStartup()
 {
 	static PhysErrorCallback gErrorCB;
@@ -319,18 +320,20 @@ void TheApp::PhysxStartup()
 	// create top-level physx object
 	bool recordMemoryAllocations = true;
 
-	/*
 	// optional pvd instance, need a HOST
 	m_pvd = PxCreatePvd(*m_foundation);
 	PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 10);
 	m_pvd->connect(*transport, PxPvdInstrumentationFlag::eALL);
-	*/
 
 	m_physics = PxCreatePhysics(PX_PHYSICS_VERSION, *m_foundation, PxTolerancesScale(), recordMemoryAllocations, m_pvd);
 	if (!m_physics)
 		ASSERT_OR_DIE(false, "PxCreatePhysics failed!");
 
 	TODO("optional startups: cooking, extensions, articulations, height fields");
+
+	// extension
+	if (!PxInitExtensions(*m_physics, m_pvd))
+		ASSERT_OR_DIE(false, "PxInitExtensions failed!");
 }
 
 void TheApp::PhysxShutdown()
@@ -341,3 +344,4 @@ void TheApp::PhysxShutdown()
 	// release foundation
 	m_foundation->release();
 }
+*/
