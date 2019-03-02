@@ -139,5 +139,5 @@ public:
 	PxDefaultCpuDispatcher* m_physx_dispatcher = NULL;
 	PxScene* m_physx_scene = NULL;
 	PxMaterial* m_physx_mat = NULL;
-	//std::vector<PhysXObject*> m_physx_objs;
+	std::vector<PhysXObject*> m_physx_objs;
 };

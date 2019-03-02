@@ -18,15 +18,6 @@
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Core/Rgba.hpp"
 #include "Engine/Core/Vertex.hpp"
-//#include "Engine/Physics/3D/PHYSX/PhysAllocator.hpp"
-//#include "Engine/Physics/3D/PHYSX/PhysErrorCallback.hpp"
-//
-//#pragma comment(lib, "PhysX_64.lib")
-//#pragma comment(lib, "PhysXCommon_64.lib")
-//#pragma comment(lib, "PhysXCooking_64.lib")
-//#pragma comment(lib, "PhysXFoundation_64.lib")
-//#pragma comment(lib, "PhysXExtensions_static_64.lib")
-//#pragma comment(lib, "PhysXPvdSDK_static_64.lib")
 
 #include "PxPhysicsAPI.h"
 using namespace physx;
@@ -335,8 +326,7 @@ public:
 	void SetStencilMask(GLuint mask);
 
 	// physx
-	void RenderPhysxActors(PxRigidActor** actors, const PxU32 num_actors, bool shadows, const PxVec3& color = PxVec3(0.0f, 0.75f, 0.0f));
-	void RenderPhysxGeometry(const PxGeometryHolder& holder, bool sleeping, bool is_trigger);
+	void RenderPhysxGeometry(const std::string& mn, const std::string sn, const std::string tn, const PxMat44& mm);
 
 public:
 	const static int DIFFUSE_MAP_BIND_IDX = 0;

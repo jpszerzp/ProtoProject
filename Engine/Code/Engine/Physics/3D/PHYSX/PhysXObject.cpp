@@ -1,4 +1,3 @@
-/*
 #include "Engine/Physics/3D/PHYSX/PhysXObject.hpp"
 
 #define MAX_NUM_ACTOR_SHAPES_OBJ 128
@@ -6,30 +5,7 @@
 PhysXObject::PhysXObject(PxRigidActor* ra)
 	: m_ra(ra)
 {
-	PX_ASSERT(m_ra != nullptr);
 
-	// get shape data
-	PxShape* shapes[MAX_NUM_ACTOR_SHAPES_OBJ];
-	CONST PxU32 nb_shapes = m_ra->getNbShapes();
-	PX_ASSERT(nb_shapes <= MAX_NUM_ACTOR_SHAPES_OBJ);
-	m_ra->getShapes(shapes, nb_shapes);
-
-	// store the geometry
-	for (int i = 0; i < nb_shapes; ++i)
-	{
-		PxShape* shp = shapes[i];
-
-		// get shape's model matrix
-		const PxMat44 shape_pose(PxShapeExt::getGlobalPose(*shp, *m_ra));
-		
-		// get shape's geometry
-		const PxGeometryHolder& h = shp->getGeometry();
-
-		// create shape render class, store it
-		PhysXShapeRender shp_rdr = PhysXShapeRender(h, shape_pose);
-		m_shape_renders.push_back(shp_rdr);
-	}
-	// each shape render will handle its own mesh, shader and texture
 }
 
 PhysXObject::~PhysXObject()
@@ -40,18 +16,39 @@ PhysXObject::~PhysXObject()
 
 void PhysXObject::RenderActor(Renderer* rdr)
 {
+	PxShape* shapes[MAX_NUM_ACTOR_SHAPES_OBJ];
 
+	const PxU32 nb_shapes = m_ra->getNbShapes();
+	PX_ASSERT(nb_shapes <= MAX_NUM_ACTOR_SHAPES_OBJ);
+	m_ra->getShapes(shapes, nb_shapes);
+	bool is_sleeping = m_ra->is<PxRigidDynamic>() ? m_ra->is<PxRigidDynamic>()->isSleeping() : false; 
+
+	for (PxU32 i = 0; i < nb_shapes; ++i)
+	{
+		const PxMat44 shape_pose(PxShapeExt::getGlobalPose(*shapes[i], *m_ra));
+		PxGeometryHolder h = shapes[i]->getGeometry();
+
+		std::string shader_name = "default";
+		const std::string tex_name = "Data/Images/white.png";
+		const std::string mesh_name = ChooseMesh(h);
+
+		bool is_trigger = false;
+		if (shapes[i]->getFlags() & PxShapeFlag::eTRIGGER_SHAPE)
+			is_trigger = true;
+
+		// get potentially different shader based on sleep and trigger state
+		ChooseShader(is_sleeping, is_trigger, shader_name);
+
+		rdr->RenderPhysxGeometry(mesh_name, shader_name, tex_name, shape_pose);
+	}
 }
 
-void PhysXObject::Render(Renderer* rdr)
+std::string PhysXObject::ChooseMesh(const PxGeometryHolder& h)
 {
-	for (int i = 0; i < m_shape_renders.size(); ++i)
-		m_shape_renders[i].Render(rdr);
+	return "";
 }
 
-void PhysXObject::CacheData()
+void PhysXObject::ChooseShader(const bool& is_sleep, const bool& is_trigger, std::string& sn)
 {
-	//for (int i = 0; i < m_shape_renders.size(); ++i)
 
 }
-*/

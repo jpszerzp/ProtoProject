@@ -17,7 +17,6 @@
 #include "Engine/Math/MathUtils.hpp"
 
 //#define STB_IMAGE_IMPLEMENTATION    
-#define MAX_NUM_ACTOR_SHAPES 128
 
 #include <string>
 #include <vector>
@@ -2371,73 +2370,7 @@ void Renderer::ResetLightDataFlag()
 	}
 }
 
-void Renderer::RenderPhysxActors(PxRigidActor** actors, const PxU32 num_actors, bool shadows, const PxVec3& color)
+void Renderer::RenderPhysxGeometry(const std::string& mn, const std::string sn, const std::string tn, const PxMat44& mm)
 {
-	PxShape* shapes[MAX_NUM_ACTOR_SHAPES];
 
-	for (PxU32 i = 0; i < num_actors; ++i)
-	{
-		const PxU32 nb_shapes = actors[i]->getNbShapes();
-		PX_ASSERT(nb_shapes <= MAX_NUM_ACTOR_SHAPES);
-		actors[i]->getShapes(shapes, nb_shapes);
-		bool is_sleeping = actors[i]->is<PxRigidDynamic>() ? actors[i]->is<PxRigidDynamic>()->isSleeping() : false; 
-
-		for (PxU32 j = 0; j < nb_shapes; ++j)
-		{
-			const PxMat44 shapePose(PxShapeExt::getGlobalPose(*shapes[j], *actors[i]));
-			PxGeometryHolder h = shapes[j]->getGeometry();
-
-			bool is_trigger = false;
-			if (shapes[j]->getFlags() & PxShapeFlag::eTRIGGER_SHAPE)
-				is_trigger = true;
-
-			// render object
-			RenderPhysxGeometry(h, is_sleeping, is_trigger);
-		}
-	}
-}
-
-void Renderer::RenderPhysxGeometry(const PxGeometryHolder& holder, bool sleeping, bool is_trigger)
-{
-	switch (holder.getType())
-	{
-	case PxGeometryType::eBOX:
-	{
-		// a box...
-		// ... directly use the mesh, shader, texture that have ALREADY been created
-
-	}
-		break;
-	case PxGeometryType::eSPHERE:		
-	{
-
-	}
-		break;
-	case PxGeometryType::eCAPSULE:
-	{
-
-	}
-		break;
-	case PxGeometryType::eCONVEXMESH:
-	{
-
-	}
-		break;
-	case PxGeometryType::eTRIANGLEMESH:
-	{
-
-	}
-		break;
-	case PxGeometryType::eINVALID:
-	case PxGeometryType::eHEIGHTFIELD:
-	case PxGeometryType::eGEOMETRY_COUNT:	
-	case PxGeometryType::ePLANE:
-	{
-		// a plane...
-
-	}
-		break;
-	default:
-		break;
-	}
 }

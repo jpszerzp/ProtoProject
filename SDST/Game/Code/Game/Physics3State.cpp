@@ -163,7 +163,7 @@ void Physics3State::Update(float deltaTime)
 	UpdateUI();
 
 	// physx API
-	//PhysxUpdate(true, deltaTime);
+	PhysxUpdate(true, deltaTime);
 }
 
 void Physics3State::UpdateMouse(float deltaTime)
@@ -849,11 +849,9 @@ void Physics3State::CreatePhysxStack()
 	PxRigidStatic* pl = PxCreatePlane(*m_physics, PxPlane(0, 1, 0, 0), *m_physx_mat);
 	m_physx_scene->addActor(*pl);
 
-	/*
 	// interface with my API
 	PhysXObject* pl_obj = new PhysXObject(pl);
 	m_physx_objs.push_back(pl_obj);
-	*/
 
 	// stack
 	PxTransform pxt = PxTransform(PxVec3(0.f, 3.f, 10.f));
@@ -870,10 +868,8 @@ void Physics3State::CreatePhysxStack()
 			PxRigidBodyExt::updateMassAndInertia(*body, 10.f);
 			m_physx_scene->addActor(*body);
 
-			/*
 			PhysXObject* phys_obj = new PhysXObject(body);
 			m_physx_objs.push_back(phys_obj);
-			*/
 		}
 	}
 	shape->release();
@@ -881,20 +877,8 @@ void Physics3State::CreatePhysxStack()
 
 void Physics3State::PhysxRender(Renderer* renderer)
 {
-	// ...by this time, model matrix, mesh, shader and texture SHOULD be ready/updated
-	/*
 	for (int i = 0; i < m_physx_objs.size(); ++i)
-		m_physx_objs[i]->Render(renderer);
-		*/
-
-	PxU32 nb_actors = m_physx_scene->getNbActors(PxActorTypeFlag::eRIGID_DYNAMIC | PxActorTypeFlag::eRIGID_STATIC);
-	if (nb_actors)
-	{
-		std::vector<PxRigidActor*> actors(nb_actors);
-		m_physx_scene->getActors(PxActorTypeFlag::eRIGID_DYNAMIC | PxActorTypeFlag::eRIGID_STATIC, 
-			reinterpret_cast<PxActor**>(&actors[0]), nb_actors);
-		renderer->RenderPhysxActors(&actors[0], static_cast<PxU32>(actors.size()), false);
-	}
+		m_physx_objs[i]->RenderActor(renderer);
 }
 
 void Physics3State::PhysxUpdate(bool interactive, float deltaTime)
@@ -904,15 +888,10 @@ void Physics3State::PhysxUpdate(bool interactive, float deltaTime)
 	gContactImpulses.clear();
 
 	// in sample code, this is forced to be 60 fps...
+	//deltaTime = 1.f / 60.f;
 	m_physx_scene->simulate(deltaTime);
 	m_physx_scene->fetchResults(true);
 	DebuggerPrintf("%d contact reports\n", PxU32(gContactPositions.size()));
-
-	/*
-	// model matrix of actor is updated, need to reflect that in MY interface
-	for (int i = 0; i < m_physx_objs.size(); ++i)
-		m_physx_objs[i]->CacheData();
-		*/
 }
 
 void Physics3State::PhysxStartup()
