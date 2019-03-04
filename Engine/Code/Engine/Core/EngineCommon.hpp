@@ -14,11 +14,13 @@ class Blackboard;
 class Clock;
 class RCS;
 class QuickHull;
+class CollisionKeep;
 
 extern Blackboard*		g_gameConfigBlackboard;
 extern Clock*			g_masterClock;
 extern RCS*				g_rcs;
 extern bool				g_broadphase;
 extern QuickHull*		g_hull;
+extern CollisionKeep*	g_col_keep;
 
 typedef unsigned int uint;

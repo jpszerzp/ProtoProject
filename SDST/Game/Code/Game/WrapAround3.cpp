@@ -16,7 +16,8 @@ WrapAround::WrapAround(const Vector3& min, const Vector3& max,
 	float bound_height = m_bounds.GetDimensions().y;
 	float bound_thickness = m_bounds.GetDimensions().z;
 
-	m_mesh = Mesh::CreateCube(VERT_PCU);
+	//m_mesh = Mesh::CreateCube(VERT_PCU);
+	m_mesh = Mesh::CreateUnitQuadInLine(VERT_PCU, Rgba::WHITE);
 
 	Vector3 pos = m_bounds.GetCenter();
 	Vector3 rot = Vector3::ZERO;

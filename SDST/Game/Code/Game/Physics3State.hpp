@@ -102,6 +102,8 @@ public:
 	void CreatePhysxStack();
 	void PhysxRender(Renderer* renderer);
 
+	void ResetCollisionCornerCase(const Vector3& pos1, const Vector3& pos2, const Vector3& rot1, const Vector3& rot2);
+
 public:
 	const static uint MAX_CONTACT_NUM = 256;
 
@@ -111,6 +113,16 @@ public:
 	Mesh* m_vel_ui;
 	Mesh* m_mass_ui;
 	std::vector<Mesh*> m_tensor_ui;
+	Mesh* m_pos_ui;
+	Mesh* m_orient_ui;
+	Mesh* m_base_acc_ui;
+	Mesh* m_net_acc_ui;
+	Mesh* m_net_force_ui;
+	Mesh* m_net_torque_ui;
+	Mesh* m_lin_damp_ui;
+	Mesh* m_ang_damp_ui;
+	Mesh* m_slow_ui;
+	std::vector<Mesh*> m_world_inv_tensor_ui;
 
 	// refactor
 	std::vector<CollisionSphere*> m_spheres;
@@ -131,6 +143,56 @@ public:
 	//WrapAround* m_wraparound_box;
 	//WrapAround* m_wraparound_convex;
 	WrapAround* m_wraparound_plane;
+	WrapAround* m_wraparound_demo_0;
+
+	CollisionBox* m_corner_case_1;
+	CollisionBox* m_corner_case_2;
+
+	bool m_ff_test = true;
+	bool m_fp_test = false;
+	bool m_pp_test = false;
+	bool m_ee_test = false;
+	bool m_pe_test = false;
+	bool m_fe_test = false;
+
+	const Vector3 CORNER_CASE_POS_FF_1 = Vector3(25.f, 305.f, 0.f);
+	const Vector3 CORNER_CASE_POS_FP_1 = Vector3(25.f, 305.f, 0.f);
+	const Vector3 CORNER_CASE_POS_PP_1 = Vector3(25.f, 305.f, -5.f);
+	const Vector3 CORNER_CASE_POS_EE_1 = Vector3(25.f, 305.f, 0.f);
+	const Vector3 CORNER_CASE_POS_PE_1 = Vector3(25.f, 305.f, 0.f);
+	const Vector3 CORNER_CASE_POS_FE_1 = Vector3(25.f, 305.f, 0.f);
+	const Vector3 CORNER_CASE_POS_FF_2 = Vector3(35.f, 305.f, 0.f);
+	const Vector3 CORNER_CASE_POS_FP_2 = Vector3(35.f, 305.f, 0.f);
+	const Vector3 CORNER_CASE_POS_PP_2 = Vector3(35.f, 315.f, 5.f);
+	const Vector3 CORNER_CASE_POS_EE_2 = Vector3(35.f, 305.f, 0.f);
+	const Vector3 CORNER_CASE_POS_PE_2 = Vector3(35.f, 305.9625f, 0.f);
+	const Vector3 CORNER_CASE_POS_FE_2 = Vector3(35.f, 305.f, 0.f);
+
+	const Vector3 CORNER_CASE_ORIENT_FF_1 = Vector3::ZERO;
+	const Vector3 CORNER_CASE_ORIENT_FP_1 = Vector3(45.f, 45.f, 0.f);
+	const Vector3 CORNER_CASE_ORIENT_PP_1 = Vector3::ZERO;
+	const Vector3 CORNER_CASE_ORIENT_EE_1 = Vector3(45.f, 90.f, 0.f);
+	const Vector3 CORNER_CASE_ORIENT_PE_1 = Vector3(0.f, 45.f, 0.f);
+	const Vector3 CORNER_CASE_ORIENT_FE_1 = Vector3(0.f, 45.f, 0.f);
+	const Vector3 CORNER_CASE_ORIENT_FF_2 = Vector3::ZERO;
+	const Vector3 CORNER_CASE_ORIENT_FP_2 = Vector3::ZERO;
+	const Vector3 CORNER_CASE_ORIENT_PP_2 = Vector3::ZERO;
+	const Vector3 CORNER_CASE_ORIENT_EE_2 = Vector3(0.f, 45.f, 0.f);
+	const Vector3 CORNER_CASE_ORIENT_PE_2 = Vector3(0.f);
+	const Vector3 CORNER_CASE_ORIENT_FE_2 = Vector3(0.f);
+
+	const Vector3 CORNER_CASE_LIN_VEL_FF_1 = Vector3(3.f, 0.f, 0.f);
+	const Vector3 CORNER_CASE_LIN_VEL_FP_1 = Vector3(3.f, 0.f, 0.f);
+	const Vector3 CORNER_CASE_LIN_VEL_PP_1 = Vector3(1.f);
+	const Vector3 CORNER_CASE_LIN_VEL_EE_1 = Vector3(3.f, 0.f, 0.f);
+	const Vector3 CORNER_CASE_LIN_VEL_PE_1 = Vector3(3.f, 0.f, 0.f);
+	const Vector3 CORNER_CASE_LIN_VEL_FE_1 = Vector3(3.f, 0.f, 0.f);
+	const Vector3 CORNER_CASE_LIN_VEL_FF_2 = Vector3(-3.f, 0.f, 0.f);
+	const Vector3 CORNER_CASE_LIN_VEL_FP_2 = Vector3(-3.f, 0.f, 0.f);
+	const Vector3 CORNER_CASE_LIN_VEL_PP_2 = Vector3(-1.f);
+	const Vector3 CORNER_CASE_LIN_VEL_EE_2 = Vector3(-3.f, 0.f, 0.f);
+	const Vector3 CORNER_CASE_LIN_VEL_PE_2 = Vector3(-3.f, 0.f, 0.f);
+	const Vector3 CORNER_CASE_LIN_VEL_FE_2 = Vector3(-3.f, 0.f, 0.f);
 
 	// physx
 	PxFoundation* m_foundation = nullptr;

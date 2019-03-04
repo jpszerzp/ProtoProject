@@ -55,10 +55,15 @@ public:
 	Vector3 GetCenter() const { return m_center; }
 	float GetMass() const { return m_mass; }
 	float GetInvMass() const { return m_inv_mass; }
+	float GetLinDamp() const { return m_lin_damp; }
+	float GetAngDamp() const { return m_ang_damp; }
+	float GetSlowFactor() const { return m_slow; }
 	Vector3 GetLinearVelocity() const { return m_lin_vel; }
+	Vector3 GetBaseLinearAcc() const { return m_lin_acc; }
 	Vector3 GetLastFrameLinearAcc() const { return m_last_lin_acc; }
 	bool IsAwake() const { return m_awake; }
 	bool IsSleepable() const { return m_sleepable; }
+	Vector3 GetNetForce() const { return m_net_force; }
 	virtual Vector3 GetAngularVelocity() const { ASSERT_OR_DIE(false, "general entity does not have angular velocity"); }
 	virtual float GetRealTimeMotion() const;
 	virtual Matrix33 GetTensor() const { ASSERT_OR_DIE(false, "general entity does not have tensor"); }
@@ -108,9 +113,11 @@ public:
 
 	Quaternion GetOrientation() const { return m_orientation; }
 	void GetIITWorld(Matrix33* iitw) const;
+	Matrix33 GetIITWorldCopy() const { return m_inv_tensor_world; }
 	Vector3 GetAngularVelocity() const override { return m_ang_vel; }
 	float GetRealTimeMotion() const override;
 	Matrix33 GetTensor() const override { return m_tensor; }
+	Vector3 GetNetTorque() const { return m_net_torque; }
 
 	void AddAngularVelocity(const Vector3& v);
 };

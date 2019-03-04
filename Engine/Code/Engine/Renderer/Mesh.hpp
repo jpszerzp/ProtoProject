@@ -23,6 +23,11 @@ public:
 	// 3D
 	static Mesh* CreatePoint(eVertexType type);
 	static Mesh* CreateLineImmediate(eVertexType type, const Vector3& startPos, const Vector3& endPos, const Rgba& color);
+	static Mesh* CreateQuadImmediateInLine(eVertexType type, const Vector3& v1,
+		const Vector3& v2, const Vector3& v3, const Vector3& v4,
+		const Vector3& v5, const Vector3& v6, const Vector3& v7, const Vector3& v8,
+		const Rgba& color);
+	static Mesh* CreateUnitQuadInLine(eVertexType type, const Rgba& color);
 	static Mesh* CreatePointImmediate(eVertexType type, const Vector3& pos, const Rgba& color);
 	static Mesh* CreateQuad(eVertexType type);
 	static Mesh* CreateQuad20(eVertexType type);

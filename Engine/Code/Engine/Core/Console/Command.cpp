@@ -11,6 +11,7 @@
 #include "Engine/Net/RemoteCommandService.hpp"
 #include "Engine/Net/Socket.hpp"
 #include "Engine/Math/QuickHull.hpp"
+#include "Engine/Physics/3D/RF/CollisionKeep.hpp"
 
 #include <limits.h>
 #include <stdexcept>      // std::invalid_argument
@@ -788,7 +789,6 @@ void UDPSendCommand(Command& cmd)
 void BroadPhaseCommand(Command& cmd)
 {
 	std::string subStr = cmd.GetNextString();
-	Rgba outputColor;
 
 	if (subStr == "true")
 	{
@@ -802,6 +802,17 @@ void BroadPhaseCommand(Command& cmd)
 	}
 	else
 		ConsolePrintfUnit(Rgba::RED, "Unknown arg!");
+}
+
+void RestitutionCommand(Command& cmd)
+{
+	std::string subStr = cmd.GetNextString();
+
+	float r = std::stof(subStr);
+
+	g_col_keep->m_global_restitution = r;
+
+	ConsolePrintfUnit(Rgba::GREEN, "Restitution set to %f", r);
 }
 
 /*
@@ -960,6 +971,7 @@ void CommandStartup()
 	// physics
 	CommandRegister("broadphase", BroadPhaseCommand, "{bool}", "Turn on/off broadphase");
 	//CommandRegister("qh_draw_normal", QHNormalDrawCommand, "{true}", "Draw face normal of a convex hull");
+	CommandRegister("set_rst", RestitutionCommand, "{float}", "Set global restitution to specified value");
 }
 
 

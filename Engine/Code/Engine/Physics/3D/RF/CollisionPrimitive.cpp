@@ -287,7 +287,7 @@ CollisionPlane::CollisionPlane(const Vector2& bound, const Vector3& normal, cons
 	SetTint(tintV4);
 }
 
-CollisionPlane::CollisionPlane(const Vector2& bound, const std::string& mn, const Vector3& normal, const float& offset, const std::string& fp /*= "default"*/, const std::string& tx /*= "Data/Images/perspective_test.png"*/)
+CollisionPlane::CollisionPlane(const Vector2& bound, const std::string& mn, const Vector3& normal, const float& offset, const std::string& fp, const std::string& tx)
 	: m_bound(bound), m_normal(normal), m_offset(offset)
 {
 	Renderer* renderer = Renderer::GetInstance();
