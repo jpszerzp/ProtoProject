@@ -382,6 +382,7 @@
     <ClCompile Include="Physics\3D\RF\CollisionSolver.cpp" />
     <ClCompile Include="Physics\3D\RF\ConvexHull.cpp" />
     <ClCompile Include="Physics\3D\RF\ConvexPolyhedron.cpp" />
+    <ClCompile Include="Physics\3D\RF\PhysCommon.cpp" />
     <ClCompile Include="Physics\3D\RF\PhysTime.cpp" />
     <ClCompile Include="Physics\3D\RF\TheCollision.cpp" />
     <ClCompile Include="Physics\3D\Rigidbody3.cpp" />
@@ -567,6 +568,7 @@
     <ClInclude Include="Physics\3D\RF\CollisionSolver.hpp" />
     <ClInclude Include="Physics\3D\RF\ConvexHull.hpp" />
     <ClInclude Include="Physics\3D\RF\ConvexPolyhedron.hpp" />
+    <ClInclude Include="Physics\3D\RF\PhysCommon.hpp" />
     <ClInclude Include="Physics\3D\RF\PhysTime.hpp" />
     <ClInclude Include="Physics\3D\RF\TheCollision.hpp" />
     <ClInclude Include="Physics\3D\Rigidbody3.hpp" />

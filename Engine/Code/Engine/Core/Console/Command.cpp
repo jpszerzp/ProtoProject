@@ -12,6 +12,7 @@
 #include "Engine/Net/Socket.hpp"
 #include "Engine/Math/QuickHull.hpp"
 #include "Engine/Physics/3D/RF/CollisionKeep.hpp"
+#include "Engine/Physics/3D/RF/PhysCommon.hpp"
 
 #include <limits.h>
 #include <stdexcept>      // std::invalid_argument
@@ -815,6 +816,17 @@ void RestitutionCommand(Command& cmd)
 	ConsolePrintfUnit(Rgba::GREEN, "Restitution set to %f", r);
 }
 
+void SleepThresholdCommand(Command& cmd)
+{
+	std::string subStr = cmd.GetNextString();
+
+	float s = std::stof(subStr);
+
+	g_sleep_threshold = s;
+
+	ConsolePrintfUnit(Rgba::GREEN, "Sleep threshold set to %f", s);
+}
+
 /*
 void QHNormalDrawCommand(Command& cmd)
 {
@@ -972,6 +984,7 @@ void CommandStartup()
 	CommandRegister("broadphase", BroadPhaseCommand, "{bool}", "Turn on/off broadphase");
 	//CommandRegister("qh_draw_normal", QHNormalDrawCommand, "{true}", "Draw face normal of a convex hull");
 	CommandRegister("set_rst", RestitutionCommand, "{float}", "Set global restitution to specified value");
+	CommandRegister("set_slp", SleepThresholdCommand, "{float}", "Set global sleep threshold to specified value");
 }
 
 

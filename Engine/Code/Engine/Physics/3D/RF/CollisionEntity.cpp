@@ -1,7 +1,8 @@
 #include "Engine/Physics/3D/RF/CollisionEntity.hpp"
+#include "Engine/Physics/3D/RF/PhysCommon.hpp"
 #include "Engine/Math/MathUtils.hpp"
 
-#define SLEEP_THRESHOLD .3f
+//#define SLEEP_THRESHOLD .3f
 
 void CollisionEntity::Integrate(float)
 {
@@ -65,13 +66,13 @@ void CollisionRigidBody::Integrate(float deltaTime)
 	{
 		float currentMotion = GetRealTimeMotion();
 
-		float bias = powf(0.5, deltaTime);
-		m_motion = bias * m_motion + (1 - bias) * currentMotion;
+		float lerp = powf(0.5, deltaTime);
+		m_motion = lerp * m_motion + (1 - lerp) * currentMotion;	// lerp to real time motion
 
-		if (m_motion < SLEEP_THRESHOLD) 
+		if (m_motion < g_sleep_threshold) 
 			SetAwake(false);
-		else if (m_motion > 10 * SLEEP_THRESHOLD) 
-			m_motion = 10 * SLEEP_THRESHOLD;
+		else if (m_motion > 10 * g_sleep_threshold) 
+			m_motion = 10 * g_sleep_threshold;
 	}
 }
 
@@ -149,7 +150,7 @@ void CollisionRigidBody::SetAwake(bool awake)
 		m_awake = true;
 
 		// Add a bit of motion to avoid it falling asleep immediately.
-		m_motion = SLEEP_THRESHOLD*2.f;
+		m_motion = g_sleep_threshold * 1.05f;
 	} 
 	else 
 	{

@@ -583,6 +583,9 @@
     <ClCompile Include="Physics\3D\PHYSX\PhysXShapeRender.cpp">
       <Filter>General</Filter>
     </ClCompile>
+    <ClCompile Include="Physics\3D\RF\PhysCommon.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -992,5 +995,6 @@
     <ClInclude Include="Physics\3D\RF\ConvexPolyhedron.hpp" />
     <ClInclude Include="Physics\3D\PHYSX\PhysXObject.hpp" />
     <ClInclude Include="Physics\3D\PHYSX\PhysXShapeRender.hpp" />
+    <ClInclude Include="Physics\3D\RF\PhysCommon.hpp" />
   </ItemGroup>
 </Project>

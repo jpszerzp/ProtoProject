@@ -188,7 +188,7 @@ void TheApp::ProcessInput()
 		}
 	}
 
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_7) && !DevConsoleIsOpen())
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_5) && !DevConsoleIsOpen())
 	{
 #if defined(PROFILE_ENABLED) 
 		Profiler* profiler = Profiler::GetInstance();

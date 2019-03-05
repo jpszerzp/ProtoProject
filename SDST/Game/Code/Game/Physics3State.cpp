@@ -82,7 +82,7 @@ Physics3State::Physics3State()
 	m_solver = CollisionSolver(MAX_CONTACT_NUM * 8, .01f, .01f);
 
 	// a plane
-	m_wraparound_plane = new WrapAround(Vector3(20.f, 340.f, -10.f), Vector3(130.f, 360.f, 100.f));
+	m_wraparound_plane = new WrapAround(Vector3(20.f, 340.f, -10.f), Vector3(130.f, 400.f, 100.f));
 
 	CollisionPlane* plane = new CollisionPlane(Vector2(110.f), Vector3(0.f, 1.f, 0.f), 342.f);
 	CollisionRigidBody* rb = new CollisionRigidBody(1.f, Vector3(75.f, 342.f, 45.f), Vector3(90.f, 0.f, 0.f));
@@ -273,14 +273,14 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		DebugRenderPlaneGrid(lifetime, gridBL, gridTL, gridTR, gridBR, 10.f, 10.f, 2.5f, mode);
 	}
 
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_7))
+		SpawnRandomConvex(m_wraparound_plane, 10, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 380.f, 100.f));
+
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_8))
-		SpawnRandomSphere(m_wraparound_plane, 10, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 360.f, 100.f));
+		SpawnRandomSphere(m_wraparound_plane, 10, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 380.f, 100.f));
 		
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_9))
-		SpawnRandomBox(m_wraparound_plane, 10, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 360.f, 100.f));
-
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_7))
-		SpawnRandomConvex(m_wraparound_plane, 1, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 360.f, 100.f));
+		SpawnRandomBox(m_wraparound_plane, 10, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 380.f, 100.f));
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_SPACE))
 		// cam better be in the correct wrapbox
@@ -380,7 +380,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	}
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_MINUS))
-		SpawnPhysxStack(Vector3(100.f, 345.f, 45.f), 5, 5);
+		SpawnPhysxStack(Vector3(100.f, 342.5f, 45.f), 5, 5);
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_PLUS))
 	{
@@ -389,6 +389,9 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 
 		m_physx_stack.clear();
 	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_2))
+		m_debug_ui = !m_debug_ui;
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_4))
 		SpawnStack(Vector3(75.f, 342.5f, 45.f), 5, 5);
@@ -401,6 +404,15 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		m_my_stack.clear();
 	}
 
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_Y))
+	{
+		// delete all in wpa plane (or the most general wpa)
+		for (int i = 0; i < m_wraparound_plane->m_primitives.size(); ++i)
+			m_wraparound_plane->m_primitives[i]->SetShouldDelete(true);
+
+		m_wraparound_plane->m_primitives.clear();
+	}
+
 	// camera update from input
 	Vector3 camForward = m_camera->GetLocalForward(); 
 	Vector3 camUp = m_camera->GetLocalUp(); 
@@ -411,7 +423,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		+ camForward * forwardBack * deltaTime;
 
 	// Apply world offset
-	m_camera->GetTransform().TranslateLocal(worldOffset); 
+	m_camera->GetTransform().TranslateLocal(worldOffset);
 }
 
 void Physics3State::UpdateInput(float deltaTime)
@@ -448,140 +460,143 @@ void Physics3State::UpdateWrapArounds()
 
 void Physics3State::UpdateUI()
 {
-	// motion
-	Renderer* theRenderer = Renderer::GetInstance();
-	Window* window = Window::GetInstance();
-	float window_height = window->GetWindowHeight();
-	float window_width = window->GetWindowWidth();
-	BitmapFont* font = theRenderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
-	float txtHeight = window_height / 50.f;
-	Vector2 titleMin = Vector2(-window_width / 2.f, window_height / 2.f - txtHeight);
+	if (m_debug_ui)
+	{
+		// motion
+		Renderer* theRenderer = Renderer::GetInstance();
+		Window* window = Window::GetInstance();
+		float window_height = window->GetWindowHeight();
+		float window_width = window->GetWindowWidth();
+		BitmapFont* font = theRenderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
+		float txtHeight = window_height / 50.f;
+		Vector2 titleMin = Vector2(-window_width / 2.f, window_height / 2.f - txtHeight);
 
-	delete m_motion_ui;
-	m_motion_ui = nullptr;
+		delete m_motion_ui;
+		m_motion_ui = nullptr;
 
-	std::string motion_ui = Stringf("Motion of focused: %.3f", m_focus->GetRigidBody()->GetRealTimeMotion());
-	m_motion_ui = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, motion_ui, VERT_PCU);
-	titleMin -= Vector2(0.f, txtHeight);
-
-	// mass
-	delete m_mass_ui;
-	m_mass_ui = nullptr;
-
-	std::string mass_ui = Stringf("Mass: %.3f", m_focus->GetRigidBody()->GetMass());
-	m_mass_ui = Mesh::CreateTextImmediate(Rgba::RED, titleMin, font, txtHeight, .5f, mass_ui, VERT_PCU);
-	titleMin -= Vector2(0.f, txtHeight);
-
-	// considering tensor takes 4 lines
-	for (int i = 0; i < 4; ++i)
+		std::string motion_ui = Stringf("Motion of focused: %.3f", m_focus->GetRigidBody()->GetRealTimeMotion());
+		m_motion_ui = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, motion_ui, VERT_PCU);
 		titleMin -= Vector2(0.f, txtHeight);
 
-	// world inv tensor
-	DeleteVector(m_world_inv_tensor_ui);
+		// mass
+		delete m_mass_ui;
+		m_mass_ui = nullptr;
 
-	std::string inv_tensor_ui = Stringf("World Inverse Tensor:");
-	Mesh* t_mesh = Mesh::CreateTextImmediate(Rgba::MEGENTA, titleMin, font, txtHeight, .5f, inv_tensor_ui, VERT_PCU);
-	m_world_inv_tensor_ui.push_back(t_mesh);
-	titleMin -= Vector2(0.f, txtHeight);
+		std::string mass_ui = Stringf("Mass: %.3f", m_focus->GetRigidBody()->GetMass());
+		m_mass_ui = Mesh::CreateTextImmediate(Rgba::RED, titleMin, font, txtHeight, .5f, mass_ui, VERT_PCU);
+		titleMin -= Vector2(0.f, txtHeight);
 
-	const Matrix33& inv_tensor_mat = m_focus->GetRigidBody()->GetIITWorldCopy();
-	inv_tensor_ui = Stringf("%.3f, %.3f, %.3f", inv_tensor_mat.GetI().x, inv_tensor_mat.GetJ().x, inv_tensor_mat.GetK().x);
-	t_mesh = Mesh::CreateTextImmediate(Rgba::MEGENTA, titleMin, font, txtHeight, .5f, inv_tensor_ui, VERT_PCU);
-	m_world_inv_tensor_ui.push_back(t_mesh);
-	titleMin -= Vector2(0.f, txtHeight);
+		// considering tensor takes 4 lines
+		for (int i = 0; i < 4; ++i)
+			titleMin -= Vector2(0.f, txtHeight);
 
-	inv_tensor_ui = Stringf("%.3f, %.3f, %.3f", inv_tensor_mat.GetI().y, inv_tensor_mat.GetJ().y, inv_tensor_mat.GetK().y);
-	t_mesh = Mesh::CreateTextImmediate(Rgba::MEGENTA, titleMin, font, txtHeight, .5f, inv_tensor_ui, VERT_PCU);
-	m_world_inv_tensor_ui.push_back(t_mesh);
-	titleMin -= Vector2(0.f, txtHeight);
+		// world inv tensor
+		DeleteVector(m_world_inv_tensor_ui);
 
-	inv_tensor_ui = Stringf("%.3f, %.3f, %.3f", inv_tensor_mat.GetI().z, inv_tensor_mat.GetJ().z, inv_tensor_mat.GetK().z);
-	t_mesh = Mesh::CreateTextImmediate(Rgba::MEGENTA, titleMin, font, txtHeight, .5f, inv_tensor_ui, VERT_PCU);
-	m_world_inv_tensor_ui.push_back(t_mesh);
-	titleMin -= Vector2(0.f, txtHeight);
+		std::string inv_tensor_ui = Stringf("World Inverse Tensor:");
+		Mesh* t_mesh = Mesh::CreateTextImmediate(Rgba::MEGENTA, titleMin, font, txtHeight, .5f, inv_tensor_ui, VERT_PCU);
+		m_world_inv_tensor_ui.push_back(t_mesh);
+		titleMin -= Vector2(0.f, txtHeight);
 
-	// velocity
-	delete m_vel_ui;
-	m_vel_ui = nullptr;
+		const Matrix33& inv_tensor_mat = m_focus->GetRigidBody()->GetIITWorldCopy();
+		inv_tensor_ui = Stringf("%.3f, %.3f, %.3f", inv_tensor_mat.GetI().x, inv_tensor_mat.GetJ().x, inv_tensor_mat.GetK().x);
+		t_mesh = Mesh::CreateTextImmediate(Rgba::MEGENTA, titleMin, font, txtHeight, .5f, inv_tensor_ui, VERT_PCU);
+		m_world_inv_tensor_ui.push_back(t_mesh);
+		titleMin -= Vector2(0.f, txtHeight);
 
-	const Vector3& lin_vel = m_focus->GetRigidBody()->GetLinearVelocity();
-	const Vector3& ang_vel = m_focus->GetRigidBody()->GetAngularVelocity();
-	std::string vel_ui = Stringf("Linear and angular velocity of the focused: (%.3f, %.3f, %.3f), (%.3f, %.3f, %.3f)", 
-		lin_vel.x, lin_vel.y, lin_vel.z, ang_vel.x, ang_vel.y, ang_vel.z);
-	m_vel_ui = Mesh::CreateTextImmediate(Rgba::GREEN, titleMin, font, txtHeight, .5f, vel_ui, VERT_PCU);
-	titleMin -= Vector2(0.f, txtHeight);
+		inv_tensor_ui = Stringf("%.3f, %.3f, %.3f", inv_tensor_mat.GetI().y, inv_tensor_mat.GetJ().y, inv_tensor_mat.GetK().y);
+		t_mesh = Mesh::CreateTextImmediate(Rgba::MEGENTA, titleMin, font, txtHeight, .5f, inv_tensor_ui, VERT_PCU);
+		m_world_inv_tensor_ui.push_back(t_mesh);
+		titleMin -= Vector2(0.f, txtHeight);
 
-	// first order
-	delete m_pos_ui;
-	m_pos_ui = nullptr;
+		inv_tensor_ui = Stringf("%.3f, %.3f, %.3f", inv_tensor_mat.GetI().z, inv_tensor_mat.GetJ().z, inv_tensor_mat.GetK().z);
+		t_mesh = Mesh::CreateTextImmediate(Rgba::MEGENTA, titleMin, font, txtHeight, .5f, inv_tensor_ui, VERT_PCU);
+		m_world_inv_tensor_ui.push_back(t_mesh);
+		titleMin -= Vector2(0.f, txtHeight);
 
-	delete m_orient_ui;
-	m_orient_ui = nullptr;
+		// velocity
+		delete m_vel_ui;
+		m_vel_ui = nullptr;
 
-	const Vector3& center = m_focus->GetRigidBody()->GetCenter();
-	const Quaternion& orient = m_focus->GetRigidBody()->GetOrientation();
+		const Vector3& lin_vel = m_focus->GetRigidBody()->GetLinearVelocity();
+		const Vector3& ang_vel = m_focus->GetRigidBody()->GetAngularVelocity();
+		std::string vel_ui = Stringf("Linear and angular velocity of the focused: (%.3f, %.3f, %.3f), (%.3f, %.3f, %.3f)", 
+			lin_vel.x, lin_vel.y, lin_vel.z, ang_vel.x, ang_vel.y, ang_vel.z);
+		m_vel_ui = Mesh::CreateTextImmediate(Rgba::GREEN, titleMin, font, txtHeight, .5f, vel_ui, VERT_PCU);
+		titleMin -= Vector2(0.f, txtHeight);
 
-	std::string pos_ui = Stringf("Center: (%.3f, %.3f, %.3f)", center.x, center.y, center.z);
-	std::string orient_ui = Stringf("Orientation: (%.3f, %.3f, %.3f, %.3f)", 
-		orient.m_imaginary.x, orient.m_imaginary.y, orient.m_imaginary.z, orient.m_real);
+		// first order
+		delete m_pos_ui;
+		m_pos_ui = nullptr;
 
-	m_pos_ui = Mesh::CreateTextImmediate(Rgba::CYAN, titleMin, font, txtHeight, .5f, pos_ui, VERT_PCU);
-	titleMin -= Vector2(0.f, txtHeight);
+		delete m_orient_ui;
+		m_orient_ui = nullptr;
 
-	m_orient_ui = Mesh::CreateTextImmediate(Rgba::CYAN, titleMin, font, txtHeight, .5f, orient_ui, VERT_PCU);
-	titleMin -= Vector2(0.f, txtHeight);
+		const Vector3& center = m_focus->GetRigidBody()->GetCenter();
+		const Quaternion& orient = m_focus->GetRigidBody()->GetOrientation();
 
-	// second order
-	delete m_base_acc_ui;
-	m_base_acc_ui = nullptr;
-	const Vector3& base_acc = m_focus->GetRigidBody()->GetBaseLinearAcc();
-	std::string base_acc_ui = Stringf("Base Linear Acc: %.3f, %.3f, %.3f",
-		base_acc.x, base_acc.y, base_acc.z);
-	m_base_acc_ui = Mesh::CreateTextImmediate(Rgba::PURPLE, titleMin, font, txtHeight, .5f, base_acc_ui, VERT_PCU);
-	titleMin -= Vector2(0.f, txtHeight);
+		std::string pos_ui = Stringf("Center: (%.3f, %.3f, %.3f)", center.x, center.y, center.z);
+		std::string orient_ui = Stringf("Orientation: (%.3f, %.3f, %.3f, %.3f)", 
+			orient.m_imaginary.x, orient.m_imaginary.y, orient.m_imaginary.z, orient.m_real);
 
-	delete m_net_acc_ui;
-	m_net_acc_ui = nullptr;
-	const Vector3& net_acc = m_focus->GetRigidBody()->GetLastFrameLinearAcc();
-	std::string net_acc_ui = Stringf("Net Linear Acc: %.3f, %.3f, %.3f",
-		net_acc.x, net_acc.y, net_acc.z);
-	m_net_acc_ui = Mesh::CreateTextImmediate(Rgba::PURPLE, titleMin, font, txtHeight, .5f, net_acc_ui, VERT_PCU);
-	titleMin -= Vector2(0.f, txtHeight);
+		m_pos_ui = Mesh::CreateTextImmediate(Rgba::CYAN, titleMin, font, txtHeight, .5f, pos_ui, VERT_PCU);
+		titleMin -= Vector2(0.f, txtHeight);
 
-	delete m_net_force_ui;
-	m_net_force_ui = nullptr;
-	const Vector3& force = m_focus->GetRigidBody()->GetNetForce();
-	std::string force_ui = Stringf("Net Force: %.3f, %.3f, %.3f", force.x, force.y, force.z);
-	m_net_force_ui = Mesh::CreateTextImmediate(Rgba::PURPLE, titleMin, font, txtHeight, .5f, force_ui, VERT_PCU);
-	titleMin -= Vector2(0.f, txtHeight);
+		m_orient_ui = Mesh::CreateTextImmediate(Rgba::CYAN, titleMin, font, txtHeight, .5f, orient_ui, VERT_PCU);
+		titleMin -= Vector2(0.f, txtHeight);
 
-	delete m_net_torque_ui;
-	m_net_torque_ui = nullptr;
-	const Vector3& torque = m_focus->GetRigidBody()->GetNetTorque();
-	std::string torque_ui = Stringf("Net Torque: %.3f, %.3f, %.3f", torque.x, torque.y, torque.z);
-	m_net_torque_ui = Mesh::CreateTextImmediate(Rgba::PURPLE, titleMin, font, txtHeight, .5f, torque_ui, VERT_PCU);
-	titleMin -= Vector2(0.f, txtHeight);
+		// second order
+		delete m_base_acc_ui;
+		m_base_acc_ui = nullptr;
+		const Vector3& base_acc = m_focus->GetRigidBody()->GetBaseLinearAcc();
+		std::string base_acc_ui = Stringf("Base Linear Acc: %.3f, %.3f, %.3f",
+			base_acc.x, base_acc.y, base_acc.z);
+		m_base_acc_ui = Mesh::CreateTextImmediate(Rgba::PURPLE, titleMin, font, txtHeight, .5f, base_acc_ui, VERT_PCU);
+		titleMin -= Vector2(0.f, txtHeight);
 
-	delete m_lin_damp_ui;
-	m_lin_damp_ui = nullptr;
-	const float& lin_damp = m_focus->GetRigidBody()->GetLinDamp();
-	std::string lin_damp_ui = Stringf("Linear Damp: %.3f", lin_damp);
-	m_lin_damp_ui = Mesh::CreateTextImmediate(Rgba::PINK, titleMin, font, txtHeight, .5f, lin_damp_ui, VERT_PCU);
-	titleMin -= Vector2(0.f, txtHeight);
+		delete m_net_acc_ui;
+		m_net_acc_ui = nullptr;
+		const Vector3& net_acc = m_focus->GetRigidBody()->GetLastFrameLinearAcc();
+		std::string net_acc_ui = Stringf("Net Linear Acc: %.3f, %.3f, %.3f",
+			net_acc.x, net_acc.y, net_acc.z);
+		m_net_acc_ui = Mesh::CreateTextImmediate(Rgba::PURPLE, titleMin, font, txtHeight, .5f, net_acc_ui, VERT_PCU);
+		titleMin -= Vector2(0.f, txtHeight);
 
-	delete m_ang_damp_ui;
-	m_ang_damp_ui = nullptr;
-	const float& ang_damp = m_focus->GetRigidBody()->GetAngDamp();
-	std::string ang_damp_ui = Stringf("Angular Damp: %.3f", ang_damp);
-	m_ang_damp_ui = Mesh::CreateTextImmediate(Rgba::PINK, titleMin, font, txtHeight, .5f, ang_damp_ui, VERT_PCU);
-	titleMin -= Vector2(0.f, txtHeight);
+		delete m_net_force_ui;
+		m_net_force_ui = nullptr;
+		const Vector3& force = m_focus->GetRigidBody()->GetNetForce();
+		std::string force_ui = Stringf("Net Force: %.3f, %.3f, %.3f", force.x, force.y, force.z);
+		m_net_force_ui = Mesh::CreateTextImmediate(Rgba::PURPLE, titleMin, font, txtHeight, .5f, force_ui, VERT_PCU);
+		titleMin -= Vector2(0.f, txtHeight);
 
-	delete m_slow_ui;
-	m_slow_ui = nullptr;
-	const float& slow_factor = m_focus->GetRigidBody()->GetSlowFactor();
-	std::string slow_factor_ui = Stringf("Slow Factor: %.3f", slow_factor);
-	m_slow_ui = Mesh::CreateTextImmediate(Rgba::PINK, titleMin, font, txtHeight, .5f, slow_factor_ui, VERT_PCU);
-	titleMin -= Vector2(0.f, txtHeight);
+		delete m_net_torque_ui;
+		m_net_torque_ui = nullptr;
+		const Vector3& torque = m_focus->GetRigidBody()->GetNetTorque();
+		std::string torque_ui = Stringf("Net Torque: %.3f, %.3f, %.3f", torque.x, torque.y, torque.z);
+		m_net_torque_ui = Mesh::CreateTextImmediate(Rgba::PURPLE, titleMin, font, txtHeight, .5f, torque_ui, VERT_PCU);
+		titleMin -= Vector2(0.f, txtHeight);
+
+		delete m_lin_damp_ui;
+		m_lin_damp_ui = nullptr;
+		const float& lin_damp = m_focus->GetRigidBody()->GetLinDamp();
+		std::string lin_damp_ui = Stringf("Linear Damp: %.3f", lin_damp);
+		m_lin_damp_ui = Mesh::CreateTextImmediate(Rgba::PINK, titleMin, font, txtHeight, .5f, lin_damp_ui, VERT_PCU);
+		titleMin -= Vector2(0.f, txtHeight);
+
+		delete m_ang_damp_ui;
+		m_ang_damp_ui = nullptr;
+		const float& ang_damp = m_focus->GetRigidBody()->GetAngDamp();
+		std::string ang_damp_ui = Stringf("Angular Damp: %.3f", ang_damp);
+		m_ang_damp_ui = Mesh::CreateTextImmediate(Rgba::PINK, titleMin, font, txtHeight, .5f, ang_damp_ui, VERT_PCU);
+		titleMin -= Vector2(0.f, txtHeight);
+
+		delete m_slow_ui;
+		m_slow_ui = nullptr;
+		const float& slow_factor = m_focus->GetRigidBody()->GetSlowFactor();
+		std::string slow_factor_ui = Stringf("Slow Factor: %.3f", slow_factor);
+		m_slow_ui = Mesh::CreateTextImmediate(Rgba::PINK, titleMin, font, txtHeight, .5f, slow_factor_ui, VERT_PCU);
+		titleMin -= Vector2(0.f, txtHeight);
+	}
 }
 
 void Physics3State::UpdateDeletePhysx()
@@ -632,7 +647,41 @@ void Physics3State::UpdateDelete()
 		}
 	}
 
-	// others...
+	// spheres
+	for (int i = 0; i < m_spheres.size(); ++i)
+	{
+		CollisionSphere* sph = m_spheres[i];
+		if (sph->ShouldDelete())
+		{
+			// obj vector
+			std::vector<CollisionSphere*>::iterator it = m_spheres.begin() + i;
+			m_spheres.erase(it);
+
+			// check each wrap arounds
+			m_wraparound_plane->RemovePrimitive(sph);
+			m_wraparound_demo_0->RemovePrimitive(sph);
+
+			delete sph;
+			i = i - 1;
+		}
+	}
+
+	// convex
+	for (int i = 0; i < m_convex_objs.size(); ++i)
+	{
+		CollisionConvexObject* cobj = m_convex_objs[i];
+		if (cobj->ShouldDelete())
+		{
+			std::vector<CollisionConvexObject*>::iterator it = m_convex_objs.begin() + i;
+			m_convex_objs.erase(it);
+
+			m_wraparound_plane->RemovePrimitive(cobj);
+			m_wraparound_demo_0->RemovePrimitive(cobj);
+
+			delete cobj;
+			i = i - 1;
+		}
+	}
 }
 
 void Physics3State::UpdateGameobjectsCore(float deltaTime)
@@ -833,28 +882,31 @@ void Physics3State::RenderForwardPath(Renderer*)
 
 void Physics3State::RenderUI(Renderer*)
 {
-	DrawTextCut(m_motion_ui);
-	DrawTextCut(m_mass_ui);
+	if (m_debug_ui)
+	{
+		DrawTextCut(m_motion_ui);
+		DrawTextCut(m_mass_ui);
 
-	for (int i = 0; i < m_tensor_ui.size(); ++i)
-		DrawTextCut(m_tensor_ui[i]);
+		for (int i = 0; i < m_tensor_ui.size(); ++i)
+			DrawTextCut(m_tensor_ui[i]);
 
-	for (int i = 0; i < m_world_inv_tensor_ui.size(); ++i)
-		DrawTextCut(m_world_inv_tensor_ui[i]);
+		for (int i = 0; i < m_world_inv_tensor_ui.size(); ++i)
+			DrawTextCut(m_world_inv_tensor_ui[i]);
 
-	DrawTextCut(m_vel_ui);
+		DrawTextCut(m_vel_ui);
 
-	DrawTextCut(m_pos_ui);
-	DrawTextCut(m_orient_ui);
+		DrawTextCut(m_pos_ui);
+		DrawTextCut(m_orient_ui);
 
-	DrawTextCut(m_base_acc_ui);
-	DrawTextCut(m_net_acc_ui);
-	DrawTextCut(m_net_force_ui);
-	DrawTextCut(m_net_torque_ui);
+		DrawTextCut(m_base_acc_ui);
+		DrawTextCut(m_net_acc_ui);
+		DrawTextCut(m_net_force_ui);
+		DrawTextCut(m_net_torque_ui);
 
-	DrawTextCut(m_lin_damp_ui);
-	DrawTextCut(m_ang_damp_ui);
-	DrawTextCut(m_slow_ui);
+		DrawTextCut(m_lin_damp_ui);
+		DrawTextCut(m_ang_damp_ui);
+		DrawTextCut(m_slow_ui);
+	}
 }
 
 CollisionSphere* Physics3State::WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, const Vector3& rot, const Vector3&)
@@ -994,7 +1046,7 @@ void Physics3State::SpawnStack(const Vector3& origin , uint sideLength, uint sta
 
 				Vector3 stack_pos = Vector3(stack_x, stack_pos_origin.y, stack_z);
 
-				CollisionBox* box = WrapAroundTestBox(m_wraparound_plane, false, false, true, stack_pos, Vector3::ZERO, Vector3::ONE, false, true);
+				CollisionBox* box = WrapAroundTestBox(m_wraparound_plane, false, false, true, stack_pos, Vector3::ZERO, Vector3::ONE, true, true);
 				m_my_stack.push_back(box);
 			}
 		}
@@ -1041,7 +1093,7 @@ void Physics3State::ShootSphere(WrapAround* wpa)
 {
 	// handle_0 is a sphere rb
 	CollisionSphere* sph = WrapAroundTestSphere(wpa, true, false, true, m_camera->GetWorldPosition(), Vector3::ZERO, Vector3::ONE);
-	sph->GetRigidBody()->SetLinearVelocity(m_camera->GetWorldForward().GetNormalized() * 10.f);
+	sph->GetRigidBody()->SetLinearVelocity(m_camera->GetWorldForward().GetNormalized() * 100.f);
 }
 
 void Physics3State::ShootBox(WrapAround* wpa)

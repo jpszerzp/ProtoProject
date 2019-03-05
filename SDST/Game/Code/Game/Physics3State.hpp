@@ -110,6 +110,7 @@ public:
 	const static uint MAX_CONTACT_NUM = 256;
 
 	// ui
+	bool m_debug_ui = false;
 	Mesh* m_time_ui;
 	Mesh* m_motion_ui;
 	Mesh* m_vel_ui;
