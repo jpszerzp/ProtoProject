@@ -2,6 +2,12 @@
 #include "Engine/Renderer/DebugRenderer.hpp"
 #include "Engine/Math/MathUtils.hpp"
 
+CollisionPrimitive::~CollisionPrimitive()
+{
+	delete m_rigid_body;
+	m_rigid_body = nullptr;
+}
+
 void CollisionPrimitive::BuildCommon(const std::string& shader, const std::string& tx)
 {
 	Renderer* rdr = Renderer::GetInstance();

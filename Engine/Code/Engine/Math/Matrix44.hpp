@@ -4,6 +4,11 @@
 #include "Engine/Math/Vector4.hpp"
 #include "Engine/Math/Matrix33.hpp"
 
+#include "PxPhysicsAPI.h"
+using namespace physx;
+
+//class PxMat44;
+
 class Matrix44
 {
 public:
@@ -80,6 +85,7 @@ public:
 	Matrix44 operator*(const Matrix44& rhs) const;
 	Vector4 operator*(const Vector4& rhs) const;
 	Vector3 operator*(const Vector3& rhs) const;
+	void operator=(const PxMat44& rhs);
 
 	Vector3 GetForward() const;
 	Vector3 GetUp() const;

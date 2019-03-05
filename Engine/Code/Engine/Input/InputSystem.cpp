@@ -96,6 +96,8 @@ const unsigned char InputSystem::KEYBOARD_OEM_5 = VK_OEM_5;
 const unsigned char InputSystem::KEYBOARD_OEM_6 = VK_OEM_6;
 const unsigned char InputSystem::KEYBOARD_OEM_7 = VK_OEM_7;
 const unsigned char InputSystem::KEYBOARD_OEM_8 = VK_OEM_8;
+const unsigned char InputSystem::KEYBOARD_OEM_PLUS = VK_OEM_PLUS;
+const unsigned char InputSystem::KEYBOARD_OEM_MINUS = VK_OEM_MINUS;
 
 const unsigned char InputSystem::MOUSE_LBUTTON = VK_LBUTTON;
 const unsigned char InputSystem::MOUSE_RBUTTON = VK_RBUTTON;

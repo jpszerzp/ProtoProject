@@ -28,6 +28,7 @@
 #define PVD_HOST "127.0.0.1"
 
 // this is the physics state for thesis
+const Vector3 Physics3State::ORIGIN_CAMERA = Vector3(0.f, 0.f, -20.f);
 
 bool IsGameobjectDead(GameObject* go) { return go->m_dead; }
 
@@ -45,7 +46,6 @@ Physics3State::Physics3State()
 	float height = window->GetWindowHeight();
 	float aspect = width / height;
 
-	//m_cameraInitialPos = Vector3(0.f, 0.f, -20.f);
 	m_cameraInitialPos = Vector3(75.f, 350.f, 45.f);
 	m_cameraRotationSpd = 50.f;
 
@@ -93,6 +93,9 @@ Physics3State::Physics3State()
 	m_planes.push_back(plane);
 
 	// do not include plane in wraparound
+
+	// stack
+	//SpawnStack(Vector3(75.f, 342.5f, 45.f), 5, 5);
 	
 	// demo 0
 	m_wraparound_demo_0 = new WrapAround(Vector3(20.f, 300.f, -10.f), Vector3(40.f, 320.f, 10.f));
@@ -115,18 +118,6 @@ Physics3State::Physics3State()
 	m_corner_case_2->AttachToRigidBody(rb);
 	m_boxes.push_back(m_corner_case_2);
 	m_wraparound_demo_0->m_primitives.push_back(m_corner_case_2);
-
-	// support plane of demo
-	//plane = new CollisionPlane(Vector2(20.f), "quad_pcu_20", Vector3(0.f, 1.f, 0.f), 302.f);
-	//rb = new CollisionRigidBody(1.f, Vector3(30.f, 302.f, 0.f), Vector3(90.f, 0.f, 0.f));
-	//rb->SetAwake(true);
-	//rb->SetSleepable(false);
-
-	//plane->AttachToRigidBody(rb);
-	//m_planes.push_back(plane);
-
-	// stack
-	//SpawnStack(Vector3(75.f, 342.5f, 45.f), 5, 5);
 
 	// UI
 	// local tensor is fixed
@@ -159,7 +150,7 @@ Physics3State::Physics3State()
 	titleMin -= Vector2(0.f, txtHeight);
 
 	InitPhysxScene(true);
-	//CreatePhysxStack();
+	//SpawnPhysxStack(Vector3(100.f, 345.f, 45.f), 5, 5);
 
 	// debug
 	DebugRenderSet3DCamera(m_camera);
@@ -191,6 +182,7 @@ void Physics3State::Update(float deltaTime)
 	UpdateContacts(deltaTime);
 	UpdateDebug(deltaTime);			
 	UpdateUI();
+	UpdateDelete();
 
 	// physx API
 	PhysxUpdate(true, deltaTime);
@@ -228,29 +220,23 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	float upDown = 0.f; 
 
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_A))
-	{
 		leftRight = -50.f;
-	}
+
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_D))
-	{
 		leftRight = 50.f;
-	}
+
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_W))
-	{
 		forwardBack = 50.f;
-	}
+
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_S))
-	{
 		forwardBack = -50.f;
-	}
+
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_Q))
-	{
 		upDown = 50.f;
-	}
+
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_E))
-	{
 		upDown = -50.f;
-	}
+
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_Z))
 	{
 		// Reset camera position, euler and scale 
@@ -258,10 +244,18 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		m_camera->GetTransform().SetLocalRotation(Vector3::ZERO);
 		m_camera->GetTransform().SetLocalScale(Vector3::ONE);
 	}
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_F))
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_V))
 	{
-		DebugRenderTasksFlush();
+		// Reset camera position, euler and scale 
+		m_camera->GetTransform().SetLocalPosition(ORIGIN_CAMERA);
+		m_camera->GetTransform().SetLocalRotation(Vector3::ZERO);
+		m_camera->GetTransform().SetLocalScale(Vector3::ONE);
 	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_F))
+		DebugRenderTasksFlush();
+
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_X) && DebugRenderOn())
 	{
 		eDebugDrawMode mode = DEBUG_RENDER_USE_DEPTH;
@@ -383,6 +377,28 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 			m_corner_case_1->GetRigidBody()->SetLinearVelocity(CORNER_CASE_LIN_VEL_FE_1);
 			m_corner_case_2->GetRigidBody()->SetLinearVelocity(CORNER_CASE_LIN_VEL_FE_2);
 		}
+	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_MINUS))
+		SpawnPhysxStack(Vector3(100.f, 345.f, 45.f), 5, 5);
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_PLUS))
+	{
+		for (int i = 0; i < m_physx_stack.size(); ++i)
+			m_physx_stack[i]->SetShouldDelete(true);
+
+		m_physx_stack.clear();
+	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_4))
+		SpawnStack(Vector3(75.f, 342.5f, 45.f), 5, 5);
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_6))
+	{
+		for (int i = 0; i < m_my_stack.size(); ++i)
+			m_my_stack[i]->SetShouldDelete(true);
+
+		m_my_stack.clear();
 	}
 
 	// camera update from input
@@ -568,6 +584,57 @@ void Physics3State::UpdateUI()
 	titleMin -= Vector2(0.f, txtHeight);
 }
 
+void Physics3State::UpdateDeletePhysx()
+{
+	// stack vector has already been emptied, objs are already marked as deleted
+
+	// delete those obj prescence in general vector
+	// remove those actors in physx scene
+	for (int i = 0; i < m_physx_objs.size(); ++i)
+	{
+		PhysXObject* phys_obj = m_physx_objs[i];
+		if (phys_obj->ShouldDelete())
+		{
+			// obj vector
+			std::vector<PhysXObject*>::iterator it = m_physx_objs.begin() + i;
+			m_physx_objs.erase(it);
+
+			// scene actor
+			PxRigidActor* ra = phys_obj->GetRigidActor();
+			//PxActor* ra = phys_obj->GetRigidActor();
+			m_physx_scene->removeActor(*ra);
+			ra->release();
+
+			delete phys_obj;
+			i = i - 1;
+		}
+	}
+}
+
+void Physics3State::UpdateDelete()
+{
+	// box
+	for (int i = 0; i < m_boxes.size(); ++i)
+	{
+		CollisionBox* box = m_boxes[i];
+		if (box->ShouldDelete())
+		{
+			// obj vector
+			std::vector<CollisionBox*>::iterator it = m_boxes.begin() + i;
+			m_boxes.erase(it);
+
+			// check each wrap arounds
+			m_wraparound_plane->RemovePrimitive(box);
+			m_wraparound_demo_0->RemovePrimitive(box);
+
+			delete box;
+			i = i - 1;
+		}
+	}
+
+	// others...
+}
+
 void Physics3State::UpdateGameobjectsCore(float deltaTime)
 {
 	UpdateGameobjectsDynamics(deltaTime);
@@ -735,7 +802,7 @@ void Physics3State::Render(Renderer* renderer)
 
 	RenderWrapArounds(renderer);
 
-	//PhysxRender(renderer);
+	PhysxRender(renderer);
 }
 
 void Physics3State::RenderGameobjects(Renderer* renderer)
@@ -835,6 +902,7 @@ CollisionBox* Physics3State::WrapAroundTestBox(WrapAround* wpa, bool give_ang_ve
 
 	box->AttachToRigidBody(rb);
 
+	// add to general box vector
 	m_boxes.push_back(box);
 
 	if(register_g)
@@ -854,6 +922,7 @@ CollisionBox* Physics3State::WrapAroundTestBox(WrapAround* wpa, bool give_ang_ve
 		rb->SetAngularVelocity(Vector3(ang_v_x, ang_v_y, ang_v_z));
 	}
 
+	// add to primitive vector in wpa
 	wpa->m_primitives.push_back(box);
 
 	return box;
@@ -925,7 +994,8 @@ void Physics3State::SpawnStack(const Vector3& origin , uint sideLength, uint sta
 
 				Vector3 stack_pos = Vector3(stack_x, stack_pos_origin.y, stack_z);
 
-				WrapAroundTestBox(m_wraparound_plane, false, false, true, stack_pos, Vector3::ZERO, Vector3::ONE, false, true);
+				CollisionBox* box = WrapAroundTestBox(m_wraparound_plane, false, false, true, stack_pos, Vector3::ZERO, Vector3::ONE, false, true);
+				m_my_stack.push_back(box);
 			}
 		}
 
@@ -1062,34 +1132,49 @@ void Physics3State::InitPhysxScene(bool interactive)
 	m_physx_mat = m_physics->createMaterial(.5f, .5f, .6f);
 }
 
-void Physics3State::CreatePhysxStack()
+void Physics3State::SpawnPhysxStack(const Vector3& origin, uint sideLength, uint stackHeight)
 {
 	// plane
-	PxRigidStatic* pl = PxCreatePlane(*m_physics, PxPlane(0, 1, 0, 0), *m_physx_mat);
+	PxRigidStatic* pl = PxCreatePlane(*m_physics, PxPlane(0, 1, 0, -342), *m_physx_mat);
 	m_physx_scene->addActor(*pl);
 
 	// interface with my API
 	PhysXObject* pl_obj = new PhysXObject(pl);
 	m_physx_objs.push_back(pl_obj);
+	m_physx_stack.push_back(pl_obj);
 
-	// stack
-	PxTransform pxt = PxTransform(PxVec3(0.f, 3.f, 10.f));
-	PxU32 size = 5;
-	PxReal half_ext = 2.f;
+	PxVec3 stack_offset = PxVec3(0.f);
+	PxVec3 stack_origin = PxVec3(origin.x, origin.y, origin.z);
+	PxTransform pxt = PxTransform(stack_origin);
+	PxReal half_ext = .5f;
 	PxShape* shape = m_physics->createShape(PxBoxGeometry(half_ext, half_ext, half_ext), *m_physx_mat);
-	for (PxU32 i = 0; i < size; ++i)
+	for (PxU32 k = 0; k < stackHeight; ++k)
 	{
-		for (PxU32 j = 0; j < size - i; ++j)
+		for (PxU32 i = 0; i < sideLength; ++i)
 		{
-			PxTransform local_t(PxVec3(PxReal(j*2) - PxReal(size-i), PxReal(i*2+1), 0) * half_ext);
-			PxRigidDynamic* body = m_physics->createRigidDynamic(pxt.transform(local_t));
-			body->attachShape(*shape);
-			PxRigidBodyExt::updateMassAndInertia(*body, 10.f);
-			m_physx_scene->addActor(*body);
+			PxReal stack_x = stack_offset.x + i * 2.f; 
 
-			PhysXObject* phys_obj = new PhysXObject(body);
-			m_physx_objs.push_back(phys_obj);
+			for (uint j = 0; j < sideLength; ++j)
+			{
+				PxReal stack_z = stack_offset.z + j * 2.f;
+
+				PxVec3 offset = PxVec3(stack_x, stack_offset.y, stack_z);
+
+				PxTransform local_t(offset * half_ext);
+				PxRigidDynamic* body = m_physics->createRigidDynamic(pxt.transform(local_t));
+				body->attachShape(*shape);
+				PxRigidBodyExt::updateMassAndInertia(*body, 10.f);
+				m_physx_scene->addActor(*body);
+
+				PhysXObject* phys_obj = new PhysXObject(body);
+				m_physx_objs.push_back(phys_obj);
+				m_physx_stack.push_back(phys_obj);
+			}
 		}
+
+		sideLength--;
+		stack_origin = PxVec3(stack_origin.x + .5f, stack_origin.y + 1.f, stack_origin.z + .5f);
+		pxt = PxTransform(stack_origin);
 	}
 	shape->release();
 }
@@ -1133,6 +1218,8 @@ void Physics3State::PhysxUpdate(bool interactive, float deltaTime)
 	m_physx_scene->simulate(deltaTime);
 	m_physx_scene->fetchResults(true);
 	DebuggerPrintf("%d contact reports\n", PxU32(gContactPositions.size()));
+
+	UpdateDeletePhysx();
 }
 
 void Physics3State::PhysxStartup()

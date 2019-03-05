@@ -66,6 +66,8 @@ public:
 	void UpdateDebugDraw(float deltaTime);
 	void UpdateWrapArounds();
 	void UpdateUI();
+	void UpdateDeletePhysx();
+	void UpdateDelete();
 
 	// update of GO
 	void UpdateGameobjectsCore(float deltaTime);
@@ -99,7 +101,7 @@ public:
 	void PhysxShutdown(bool interactive);
 	void PhysxUpdate(bool interactive, float deltaTime);
 	void InitPhysxScene(bool interactive);
-	void CreatePhysxStack();
+	void SpawnPhysxStack(const Vector3& origin, uint sideLength, uint stackHeight);
 	void PhysxRender(Renderer* renderer);
 
 	void ResetCollisionCornerCase(const Vector3& pos1, const Vector3& pos2, const Vector3& rot1, const Vector3& rot2);
@@ -194,6 +196,8 @@ public:
 	const Vector3 CORNER_CASE_LIN_VEL_PE_2 = Vector3(-3.f, 0.f, 0.f);
 	const Vector3 CORNER_CASE_LIN_VEL_FE_2 = Vector3(-3.f, 0.f, 0.f);
 
+	const static Vector3 ORIGIN_CAMERA;
+
 	// physx
 	PxFoundation* m_foundation = nullptr;
 	PxPvd* m_pvd = nullptr;
@@ -202,4 +206,8 @@ public:
 	PxScene* m_physx_scene = NULL;
 	PxMaterial* m_physx_mat = NULL;
 	std::vector<PhysXObject*> m_physx_objs;
+
+	// stacks 
+	std::vector<PhysXObject*> m_physx_stack;
+	std::vector<CollisionBox*> m_my_stack;
 };

@@ -16,7 +16,6 @@ class WrapAround
 {
 public:
 	AABB3 m_bounds;
-	//std::vector<GameObject*> m_gos;
 	std::vector<CollisionPrimitive*> m_primitives;
 	Mesh* m_mesh = nullptr;
 	Transform m_transform;
@@ -50,4 +49,6 @@ public:
 	void RenderWraparounds(Renderer* renderer);
 
 	void ClearBVHRecords();
+
+	void RemovePrimitive(CollisionPrimitive* prim);
 };

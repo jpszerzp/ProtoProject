@@ -2372,5 +2372,35 @@ void Renderer::ResetLightDataFlag()
 
 void Renderer::RenderPhysxGeometry(const std::string& mn, const std::string sn, const std::string tn, const PxMat44& mm)
 {
+	Mesh* mesh = CreateOrGetMesh(mn);
+	Shader* shader = CreateOrGetShader(sn);
+	Texture* tex = CreateOrGetTexture(tn);
 
+	if (mesh)
+	{
+		UseShader(shader);
+		SetTexture2D(0, tex);
+		SetSampler2D(0, tex->GetSampler());
+	}
+
+	// color
+	Vector4 tintV4;
+	Rgba tint = Rgba::WHITE;
+	tint.GetAsFloats(tintV4.x, tintV4.y, tintV4.z, tintV4.w);
+	m_colorData.rgba = tintV4;
+
+	// matrix
+	//Matrix44 physx_mat;
+	//physx_mat = mm;
+	//Vector4 flip_i = Vector4(0.f, 0.f, 1.f, 0.f);
+	//Vector4 flip_j = Vector4(-1.f, 0.f, 0.f, 0.f);
+	//Vector4 flip_k = Vector4(0.f, 1.f, 0.f, 0.f);
+	//Vector4 flip_t = Vector4(0.f, 0.f, 0.f, 1.f);
+	//Matrix44 physx_to_my = Matrix44(flip_i, flip_j, flip_k, flip_t);
+	//Matrix44 transformed = physx_to_my * physx_mat;
+	//m_objectData.model = transformed;
+	m_objectData.model = mm;
+
+	// draw
+	DrawMesh(mesh);
 }

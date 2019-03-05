@@ -123,6 +123,20 @@ void WrapAround::RenderWraparounds(Renderer* renderer)
 		renderer->DrawMesh(m_mesh, false);
 }
 
+// remove this prim from storage; do not delete it as that is handled somewhere else
+void WrapAround::RemovePrimitive(CollisionPrimitive* prim)
+{
+	for (int i = 0; i < m_primitives.size(); ++i)
+	{
+		if (m_primitives[i] == prim)
+		{
+			std::vector<CollisionPrimitive*>::iterator it = m_primitives.begin() + i;
+
+			m_primitives.erase(it);
+			i--;
+		}
+	}
+}
 
 void WrapAround::Render(Renderer* renderer)
 {

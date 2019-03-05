@@ -37,7 +37,11 @@ class CollisionPrimitive
 	Texture* m_texture = nullptr;
 	Vector4 m_tint;
 
+	bool m_should_delete = false;
+
 public:
+	virtual ~CollisionPrimitive();
+
 	void BuildCommon(const std::string& shader = "default", const std::string& tx = "Data/Images/perspective_test.png");
 
 	virtual void AttachToRigidBody(CollisionRigidBody* rb);
@@ -49,6 +53,7 @@ public:
 	void SetTexture(Texture* texture) { m_texture = texture; }
 	void SetTint(const Vector4& tint) { m_tint = tint; }
 	void SetRigidBodyPosition(const Vector3& pos);
+	void SetShouldDelete(const bool& value) { m_should_delete = value; }
 
 	virtual void Update(float deltaTime);
 
@@ -63,6 +68,7 @@ public:
 	Texture* GetTexture() const { return m_texture; }
 	Vector4 GetTint() const { return m_tint; }
 	Vector3 GetCenter() const { return m_rigid_body->GetCenter(); }
+	bool ShouldDelete() const { return m_should_delete; }
 
 	Vector3 GetPrimitiveRight() const;
 	Vector3 GetPrimitiveUp() const;
@@ -88,6 +94,7 @@ class CollisionBox : public CollisionPrimitive
 
 public:
 	CollisionBox(const Vector3& half, const std::string& fp = "default", const std::string& tx = "Data/Images/perspective_test.png");
+	~CollisionBox(){}
 
 	void Update(float deltaTime) override;
 	void CacheWorldVerts();
