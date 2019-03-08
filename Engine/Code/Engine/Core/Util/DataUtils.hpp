@@ -1,16 +1,7 @@
 #pragma once
 
 #include <vector>
-
-//struct Node 
-//{
-//	int				   m_index;
-//	Node*			   m_parent;
-//	std::vector<Node*> m_childNodes;
-//
-//	Node(int idx, Node* parent)
-//		: m_index(idx), m_parent(parent){}
-//};
+#include <set>
 
 template<typename T>
 void DeleteVector(std::vector<T*>& vector)

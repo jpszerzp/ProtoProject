@@ -1,5 +1,7 @@
 #include "Engine/Core/Profiler/ProfileSystem.hpp"
 #include "Engine/Core/Util/StringUtils.hpp"
+#include "Engine/Core/Util/DataUtils.hpp"
+#include "Engine/Core/Util/RenderUtil.hpp"
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Core/Blackboard.hpp"
 #include "Engine/Core/Time/TheTime.hpp"
@@ -14,10 +16,12 @@ uint64_t g_start_frame_hpc = 0U;
 uint64_t g_end_frame_hpc = 0U;
 uint64_t g_last_frame_hpc = 0U;
 uint64_t g_total_hpc = 0U; 
-//uint64_t g_max_hpc = 0LLU;	// sets to max uint64_t
+uint64_t g_max_hpc = 0LLU;	// sets to max uint64_t
 //uint64_t g_min_hpc = ~0LLU; 
 
 Profiler* Profiler::m_profilerInstance = nullptr;
+
+const Vector2 Profiler::VERT_DISP = Vector2(0.f, Profiler::TEXT_HEIGHT);
 
 bool TotalTimeSort(ProfilerNode* n1, ProfilerNode* n2)
 {
@@ -66,14 +70,43 @@ bool IsProfilerPaused()
 
 Profiler::Profiler()
 {
-	ConfigureSections();
-	ConfigureMeshes();
-	ConfigureTextMap();
+	//ConfigureSections();
+	//ConfigureMeshes();
+	//ConfigureTextMap();
 
+	// section box
 	Renderer* renderer = Renderer::GetInstance();
+	Window* window = Window::GetInstance();
+	float width = window->GetWindowWidth();
+	float height = window->GetWindowHeight();
+	PROFILER_WIDTH = width;
+	PROFILER_HEIGHT = height;
+	Vector2 min = Vector2(-width / 2.f, -height / 2.f);
+	Vector2 max = Vector2(width / 2.f, height / 2.f);
+	m_profilerBox = AABB2(min, max);
 
-	float width = m_profilerBox.GetDimensions().x;
-	float height = m_profilerBox.GetDimensions().y;
+	Vector2 frameGraphMin = Vector2(-width / 2.f, height / 2.f  - 
+		FRAME_TEXT_LINE * TEXT_HEIGHT - TEXT_HEIGHT - 
+		FRAME_GRAPH_LINE * TEXT_HEIGHT);
+	Vector2 frameGraphMax = frameGraphMin + Vector2(width, FRAME_GRAPH_LINE * TEXT_HEIGHT);
+	m_frameGraphBox = AABB2(frameGraphMin, frameGraphMax);
+
+	// mesh
+	Vector3 bl = m_profilerBox.mins.ToVector3(0.f);
+	Vector3 br = bl + Vector3(m_profilerBox.GetDimensions().x, 0.f, 0.f);
+	Vector3 tl = bl + Vector3(0.f, m_profilerBox.GetDimensions().y, 0.f);
+	Vector3 tr = m_profilerBox.maxs.ToVector3(0.f);
+	Rgba tint = Rgba::BLUE_HALF_OPACITY;
+	m_backgroundMesh = Mesh::CreateQuadImmediate(VERT_PCU, bl, br, tl, tr, tint);
+
+	Vector3 frameGraphBL = m_frameGraphBox.mins.ToVector3(0.f);
+	Vector3 frameGraphBR = frameGraphBL + Vector3(width, 0.f, 0.f);
+	Vector3 frameGraphTL = frameGraphBL + Vector3(0.f, FRAME_GRAPH_LINE * TEXT_HEIGHT, 0.f);
+	Vector3 frameGraphTR = m_frameGraphBox.maxs.ToVector3(0.f);
+	Rgba frameGraphTint = Rgba::WHITE_HALF_OPACITY;
+	m_frameGraphMesh = Mesh::CreateQuadImmediate(VERT_PCU, frameGraphBL, frameGraphBR,
+		frameGraphTL, frameGraphTR, frameGraphTint);
+
 	float aspect = width / height;
 
 	if (m_profilerCamera == nullptr)
@@ -86,6 +119,8 @@ Profiler::Profiler()
 		// ortho projection
 		m_profilerCamera->SetProjectionOrtho(width, height, 0.f, 100.f);
 	}
+
+	m_frame_text_tl = Vector2(-width / 2.f, height / 2.f);
 }
 
 Profiler::~Profiler()
@@ -159,7 +194,7 @@ void Profiler::ConfigureSections()
 
 	Vector2 frameTextMin = Vector2(-width / 2.f, height / 4.f) + Vector2(32.f, -128.f);
 	Vector2 frameTextMax = frameTextMin + Vector2(FRAME_TEXT_WIDTH, FRAME_TEXT_HEIGHT);
-	m_frameTextBox = AABB2(frameTextMin, frameTextMax);
+	//m_frameTextBox = AABB2(frameTextMin, frameTextMax);
 
 	Vector2 treeMin = Vector2(-width / 2.f, -height / 2.f) + Vector2(32.f, 32.f);
 	Vector2 treeMax = Vector2(width / 2.f, height / 4.f) + Vector2(-32.f, -32.f);
@@ -192,9 +227,9 @@ void Profiler::ConfigureMeshes()
 
 void Profiler::ConfigureTextMap()
 {
-	m_frameTextMeshes.emplace("frame_time", nullptr);
+	//m_frameTextMeshes.emplace("frame_time", nullptr);
 	//m_frameTextMeshes.emplace("sample", nullptr);
-	m_frameTextMeshes.emplace("fps", nullptr);
+	//m_frameTextMeshes.emplace("fps", nullptr);
 }
 
 void Profiler::Update()
@@ -202,6 +237,7 @@ void Profiler::Update()
 	if (m_on)
 	{
 		UpdateInput();
+
 		if (!m_paused)
 		{
 			UpdateFrameText();
@@ -214,20 +250,6 @@ void Profiler::Update()
 void Profiler::UpdateInput()
 {
 	InputSystem* input = InputSystem::GetInstance();
-
-	/*
-	// process input
-	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_V))
-	{
-		m_treeView = !m_treeView;
-	}
-
-	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_L))
-	{
-		// toggle sort mode
-		m_totalSort = !m_totalSort;
-	}
-	*/
 
 	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_U))
 	{
@@ -262,6 +284,7 @@ void Profiler::UpdateInput()
 
 void Profiler::UpdateFrameText()
 {
+	/*
 	int count = 0;
 	for (std::map<std::string, Mesh*>::iterator it = m_frameTextMeshes.begin();
 		it != m_frameTextMeshes.end(); ++it)
@@ -280,7 +303,6 @@ void Profiler::UpdateFrameText()
 			Vector2 frameTextBL = m_frameTextBox.mins + Vector2(0.f, 20.f * count);
 
 			std::string text;
-			//float lastFrameTime = g_gameConfigBlackboard->m_lastFrameTime;
 			if (g_last_frame_hpc == -INFINITY)
 			{
 				// first frame has not finished, print N/A
@@ -292,19 +314,6 @@ void Profiler::UpdateFrameText()
 
 			m_frameTextMeshes[purpose] = MakeTextMesh(16.f, text, frameTextBL);
 		}
-
-		//else if (purpose == "sample")
-		//{
-		//	if (mesh != nullptr)
-		//	{
-		//		delete mesh;
-		//		mesh = nullptr;
-		//	}
-
-		//	Vector2 frameTextBL = m_frameTextBox.mins + Vector2(0.f, 20.f * count);
-		//	std::string text = Stringf("Samples Number: %i", 0);
-		//	m_frameTextMeshes[purpose] = MakeTextMesh(16.f, text, frameTextBL);
-		//}
 
 		else if (purpose == "fps")
 		{
@@ -325,6 +334,18 @@ void Profiler::UpdateFrameText()
 
 		count++;
 	}
+	*/
+
+	DeleteVector(m_frame_text_mesh);
+
+	// data you wish to update
+	double last_frame_seconds = PerformanceCountToSeconds(g_last_frame_hpc);
+	float fps = 1.f / last_frame_seconds;
+
+	std::string text = Stringf("Last Frame Time (ms): %f\nFPS: %.4f", 
+		last_frame_seconds * 1000.f, fps);
+	
+	m_frame_text_mesh = MakeTextMeshLines(16.f, text, m_frame_text_tl);
 }
 
 void Profiler::UpdateTreeText()
@@ -431,10 +452,10 @@ void Profiler::UpdateFramePoints()
 	{
 		g_gameConfigBlackboard->m_largestTime = g_gameConfigBlackboard->m_lastFrameTime;
 	}
+	
+	float pointSpeed = PROFILER_WIDTH / 255.f;
 
-	float pointSpeed = FRAME_GRAPH_WIDTH / 127.f;			// 128 frame points at most
-
-															// every frame add a new point
+	// every frame add a new point
 	if (g_gameConfigBlackboard->m_lastFrameTime != -INFINITY)
 	{
 		//m_testPoint = true;
@@ -465,6 +486,7 @@ void Profiler::UpdateFramePoints()
 	*/
 }
 
+// single line 
 Mesh* Profiler::MakeTextMesh(float textHeight, std::string text, Vector2 drawmin)
 {
 	Rgba frameTextTint = Rgba::WHITE;
@@ -476,6 +498,31 @@ Mesh* Profiler::MakeTextMesh(float textHeight, std::string text, Vector2 drawmin
 	return mesh;
 }
 
+// multiple lines
+std::vector<Mesh*> Profiler::MakeTextMeshLines(float textHeight, std::string text, Vector2 draw_tl)
+{
+	std::vector<Mesh*> res;
+	Vector2 bl = draw_tl - VERT_DISP;
+
+	Renderer* rdr = Renderer::GetInstance();
+	BitmapFont* font = rdr->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
+
+	while (!text.empty())
+	{
+		std::string prev;
+		std::string latter;
+		StringSplitTwo(text, "\n", prev, latter);
+		text = latter;
+	
+		Mesh* mesh = Mesh::CreateTextImmediate(Rgba::WHITE, bl, font, TEXT_HEIGHT, .7f, prev, VERT_PCU);
+		res.push_back(mesh);
+
+		bl -= VERT_DISP;
+	}
+
+	return res;
+}
+
 void Profiler::Render(Renderer* renderer)
 {
 	if (m_on)
@@ -484,22 +531,17 @@ void Profiler::Render(Renderer* renderer)
 
 		RenderFrameText(renderer);
 		//RenderTreeText(renderer);
-		//RenderFramePoints(renderer);
+		RenderFramePoints(renderer);
 
 		//DrawCutoutText(renderer, m_framePropertyMesh);
-		//DrawGraphAlpha(renderer, m_frameGraphMesh);
+		DrawGraphAlpha(renderer, m_frameGraphMesh);
 		DrawGraphAlpha(renderer, m_backgroundMesh);
 	}
 }
 
 void Profiler::RenderFrameText(Renderer* renderer)
 {
-	for (std::map<std::string, Mesh*>::iterator it = m_frameTextMeshes.begin();
-		it != m_frameTextMeshes.end(); ++it)
-	{
-		Mesh* mesh = it->second;
-		DrawCutoutText(renderer, mesh);
-	}
+	DrawTexts(m_frame_text_mesh);
 }
 
 void Profiler::RenderTreeText(Renderer* renderer)

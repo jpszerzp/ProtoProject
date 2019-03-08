@@ -17,4 +17,4 @@ bool FindSubStringInString(const char* targetStr, const char* subjectStr);
 bool IsStringInComment(const char* targetStr, const char* subjectStr);
 bool IsStringInString(const char* targetStr, const char* subjectStr);
 int  StringGetSize(const char* charArr);
-void StringSplitTwo(std::string splitted, const char* delimiter, std::string& prev, std::string& latter);
+bool StringSplitTwo(std::string splitted, const char* delimiter, std::string& prev, std::string& latter);

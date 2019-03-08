@@ -34,6 +34,7 @@ public:
 	void UpdateFramePoints();
 
 	Mesh* MakeTextMesh(float textHeight, std::string text, Vector2 drawmin);
+	std::vector<Mesh*> MakeTextMeshLines(float textHeight, std::string text, Vector2 draw_tl);
 
 	void Render (Renderer* renderer);
 	void RenderFrameText(Renderer* renderer);
@@ -61,7 +62,7 @@ public:
 	AABB2 m_profilerBox;			// overall profiler bound
 	AABB2 m_memoryTextBox;			// bound for memory text
 	AABB2 m_memoryGraphBox;			// bound for memory graph
-	AABB2 m_frameTextBox;			// bound for frame text
+	//AABB2 m_frameTextBox;			// bound for frame text
 	AABB2 m_frameGraphBox;			// bound for frame graph
 	AABB2 m_frameTreeBox;			// bound for frame tree
 	AABB2 m_framePropertyBox;		// bound for frame property titles
@@ -75,7 +76,7 @@ public:
 
 	// vector of text mesh...
 	std::map<ProfilerNode*, Mesh*> m_treeMeshes;
-	std::map<std::string, Mesh*> m_frameTextMeshes;
+	//std::map<std::string, Mesh*> m_frameTextMeshes;
 	//std::vector<Mesh*> m_memoryTextMeshes;
 
 	// points of last 128 frames
@@ -86,4 +87,16 @@ public:
 	bool m_paused = false;
 	bool m_treeView = true;
 	bool m_totalSort = true;
+
+	// refactor
+	constexpr static float TEXT_HEIGHT = 20.f;
+	const static Vector2 VERT_DISP;
+
+	Vector2 m_frame_text_tl;
+	std::vector<Mesh*> m_frame_text_mesh;
+
+	static const int FRAME_TEXT_LINE = 2;
+	static const int FRAME_GRAPH_LINE = 5;
+	float PROFILER_HEIGHT;
+	float PROFILER_WIDTH;
 };

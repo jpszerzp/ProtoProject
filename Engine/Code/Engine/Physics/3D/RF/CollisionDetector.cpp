@@ -577,7 +577,6 @@ uint CollisionSensor::ConvexVsBox(const CollisionConvexObject& convex, const Col
 	// axis is cross product
 	else
 	{
-		/*
 		int ee_idx = best - (convex_idx_milestone + 1);
 		unsigned idx1 = ee_idx / convex.GetPolyNum();	 // box edge
 		unsigned idx2 = ee_idx % convex.GetPolyNum();	 // convex edge
@@ -601,9 +600,6 @@ uint CollisionSensor::ConvexVsBox(const CollisionConvexObject& convex, const Col
 
 		c_data->NotifyAddedCollisions(1);
 		return 1;
-		*/
-
-		return 0;
 	}
 
 	return 0;

@@ -112,16 +112,24 @@ int StringGetSize(const char* charArr)
 	return (int)str.size();
 }
 
-void StringSplitTwo(std::string splitted, const char* delimiter, std::string& prev, std::string& latter)
+bool StringSplitTwo(std::string splitted, const char* delimiter, std::string& prev, std::string& latter)
 {
 	std::string delimiterStr(delimiter);
 	size_t delimiterLength = delimiterStr.length();
 
-	size_t delimiterIdx = splitted.find(delimiter);		// index of delimiter
+	size_t delimiterIdx = splitted.find(delimiter);		    // index of delimiter
+	if (delimiterIdx == std::string::npos)
+	{
+		prev = splitted;
+		latter = "";
+		return false;
+	}
+
 	size_t stringSize = splitted.length();					// size of splitted string
 	int prevLength = (int)delimiterIdx;						// size of string before delimiter
 
 	// fill prev and latter holder
 	prev = splitted.substr(0, delimiterIdx);
 	latter = splitted.substr(delimiterIdx + delimiterLength, stringSize - (delimiterLength + prevLength));
+	return true;
 }

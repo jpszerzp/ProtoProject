@@ -813,7 +813,7 @@ void Physics3State::UpdateContactGeneration()
 			CollisionSensor::ConvexVsBox(*c_obj_0, *bx, &m_keep);
 		}
 		*/
-		
+
 		/*
 		// ...vs sphere
 		for (std::vector<CollisionSphere*>::size_type idx1 = 0; idx1 < m_spheres.size(); ++idx1)

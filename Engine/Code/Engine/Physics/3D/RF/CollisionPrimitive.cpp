@@ -376,10 +376,6 @@ CollisionConvexObject::CollisionConvexObject(const ConvexHull& hull, const std::
 
 	// wish to keep a set of unit verts around origin
 	BuildUnitVerts();
-
-	// ...because GO update is before contact update, no need to compute world verts here	
-	// do that in update of GO and we will be fine...
-	//BuildWorldVerts();
 }
 
 void CollisionConvexObject::AttachToRigidBody(CollisionRigidBody* rb)
