@@ -138,21 +138,6 @@ Profiler::~Profiler()
 void Profiler::ProfileMarkFrame()
 {
 	g_start_frame_hpc = GetPerformanceCounter();
-	//uint64_t this_hpc = GetPerformanceCounter();
-	//uint64_t last_hpc = this_hpc - g_total_hpc;
-	//g_last_frame_time = (float)PerformanceCountToSeconds(last_hpc) * 1000.f;	// in ms
-	//g_total_hpc += last_hpc;
-
-	//g_gameConfigBlackboard->MarkEndFrame();
-
-	//// clear map
-	//g_gameConfigBlackboard->ClearMap();
-
-	//// set blackboard indices
-	//g_gameConfigBlackboard->ClearIndex();
-
-	//// unregister tree (or an array)
-	//g_gameConfigBlackboard->ClearTreeArray();
 }
 
 void Profiler::ProfileMarkEndFrame()
@@ -242,7 +227,7 @@ void Profiler::Update()
 		{
 			UpdateFrameText();
 			//UpdateTreeText();
-			//UpdateFramePoints();
+			UpdateFramePoints();
 		}
 	}
 }
@@ -284,58 +269,6 @@ void Profiler::UpdateInput()
 
 void Profiler::UpdateFrameText()
 {
-	/*
-	int count = 0;
-	for (std::map<std::string, Mesh*>::iterator it = m_frameTextMeshes.begin();
-		it != m_frameTextMeshes.end(); ++it)
-	{
-		std::string purpose = it->first;
-		Mesh* mesh = it->second;
-
-		if (purpose == "frame_time")
-		{
-			if (mesh != nullptr)
-			{
-				delete mesh;
-				mesh = nullptr;
-			}
-
-			Vector2 frameTextBL = m_frameTextBox.mins + Vector2(0.f, 20.f * count);
-
-			std::string text;
-			if (g_last_frame_hpc == -INFINITY)
-			{
-				// first frame has not finished, print N/A
-				text = "Last Frame Time: N/A";
-			}
-
-			double seconds = PerformanceCountToSeconds(g_last_frame_hpc);
-			text = Stringf("Last Frame Time (ms): %f", seconds * 1000.f);
-
-			m_frameTextMeshes[purpose] = MakeTextMesh(16.f, text, frameTextBL);
-		}
-
-		else if (purpose == "fps")
-		{
-			if (mesh != nullptr)
-			{
-				delete mesh;
-				mesh = nullptr;
-			}
-			
-			Vector2 frameTextBL = m_frameTextBox.mins + Vector2(0.f, 20.f * count);
-			//float lastFrameTime = g_gameConfigBlackboard->m_lastFrameTime * 0.001f;			// in s
-			//float lastFrameTime = g_last_frame_hpc * 0.001f;			// in s
-			double seconds = PerformanceCountToSeconds(g_last_frame_hpc);
-			float fps = 1.f / seconds;
-			std::string text = Stringf("FPS: %.4f", fps);
-			m_frameTextMeshes[purpose] = MakeTextMesh(16.f, text, frameTextBL);
-		}
-
-		count++;
-	}
-	*/
-
 	DeleteVector(m_frame_text_mesh);
 
 	// data you wish to update
@@ -446,30 +379,29 @@ void Profiler::UpdateTreeText()
 
 void Profiler::UpdateFramePoints()
 {
-	/*
-	// store largest frame time so far
-	if (g_gameConfigBlackboard->m_lastFrameTime > g_gameConfigBlackboard->m_largestTime)
-	{
-		g_gameConfigBlackboard->m_largestTime = g_gameConfigBlackboard->m_lastFrameTime;
-	}
+	// update largest
+	if (g_last_frame_hpc > g_max_hpc)
+		g_max_hpc = g_last_frame_hpc;
+
+	float max_ms = PerformanceCountToMilliseconds(g_max_hpc);
+	float last_frame_ms = PerformanceCountToMilliseconds(g_last_frame_hpc);
 	
+	// there are 255 segments 
 	float pointSpeed = PROFILER_WIDTH / 255.f;
 
-	// every frame add a new point
-	if (g_gameConfigBlackboard->m_lastFrameTime != -INFINITY)
+	// if last frame is valid, show it
+	if (last_frame_ms > 0.f)
 	{
-		//m_testPoint = true;
-
-		float value = g_gameConfigBlackboard->m_lastFrameTime;
-		float percentage = value / g_gameConfigBlackboard->m_largestTime;
+		float percentage = last_frame_ms / max_ms;
 
 		float baseHeight = m_frameGraphBox.mins.y;
-		float pointHeight = baseHeight + percentage * FRAME_GRAPH_HEIGHT;
+		float pointHeight = baseHeight + percentage * FRAME_GRAPH_LINE * TEXT_HEIGHT;
 		float pointX = m_frameGraphBox.maxs.x + pointSpeed;
 		Vector2 pointPos = Vector2(pointX, pointHeight);
 
+		// if reaching max num of points, pop from front
 		m_framePoints.push_back(pointPos);
-		if (m_framePoints.size() == 128U + 1U)
+		if (m_framePoints.size() == 256U + 1U)
 		{
 			m_framePoints.pop_front();
 		}
@@ -483,7 +415,6 @@ void Profiler::UpdateFramePoints()
 		x -= pointSpeed;
 		it->x = x;
 	}
-	*/
 }
 
 // single line 
