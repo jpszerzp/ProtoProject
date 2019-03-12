@@ -3,7 +3,7 @@
 #include "Engine/Core/Thread/Thread.hpp"
 #include "Engine/Core/Thread/ThreadSafeQueue.hpp"
 #include "Engine/Core/Thread/ThreadSafeSet.hpp"
-#include "Engine/Core/Thread/SpinLock.hpp"
+#include "Engine/Core/Thread/NaiveLock.hpp"
 
 #define DEFAULT_LOG_NAME "Data/Logs/log.txt"
 #define DEFAULT_DUP_DIR "Data/Logs/log_"
@@ -68,7 +68,7 @@ public:
 	tThreadHandle				 m_thread;
 	bool						 m_running;
 	ThreadSafeQueue<sLog*>		 m_logQueue;
-	SpinLock					 m_hookLock;
+	NaiveLock					 m_hookLock;
 	std::vector<sLogHook*>		 m_hooks;
 	ThreadSafeSet<std::string>	 m_filters;
 	bool						 m_whitelist = false;	// blacklist by default

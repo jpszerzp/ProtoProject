@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Core/Thread/SpinLock.hpp"
+#include "Engine/Core/Thread/NaiveLock.hpp"
 
 #include <set>
 
@@ -9,7 +9,7 @@ class ThreadSafeSet
 {
 public:
 	std::set<T> m_data;
-	SpinLock	m_lock;
+	NaiveLock m_lock;
 
 public:
 	void Add(const T& data);

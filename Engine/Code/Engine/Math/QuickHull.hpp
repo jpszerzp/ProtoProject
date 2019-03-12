@@ -4,6 +4,7 @@
 #include "Engine/Math/Vector3.hpp"
 #include "Engine/Math/HalfEdge.hpp"
 #include "Engine/Renderer/Renderer.hpp"
+#include "Engine/Input/InputSystem.hpp"
 
 #include <stack> 
 #include <deque>
@@ -116,7 +117,6 @@ public:
 public:
 	QHFace(){ ConstructFeatureID(); }
 	QHFace(const Vector3& v1, const Vector3& v2, const Vector3& v3);
-	//QHFace(HalfEdge* onHorizon, HalfEdge* horizon_next, HalfEdge* horizon_prev);
 	QHFace(int num, Vector3* sample);
 	QHFace(HalfEdge* he, const Vector3& head, const Vector3& eyePos);
 	~QHFace();
@@ -203,14 +203,6 @@ public:
 
 	bool m_once_gen = false;
 	bool m_conflict_finished = false;
-	//bool m_eye_finished = false;
-	//bool m_horizon_start_finished = false;
-	//bool m_horizon_process_finished = false;
-	//bool m_old_face_finished = false;
-	//bool m_new_face_finished = false;
-	//bool m_orphan_finished = false;
-	//bool m_topo_error_finished = false;
-	//bool m_reset_finished = false;
 
 	// centroid as reference point
 	//Transform m_transform;
@@ -285,8 +277,6 @@ public:
 	void RenderHorizon(Renderer* renderer);
 	void RenderCentroid(Renderer* renderer);
 	void RenderBasis(Renderer* renderer);
-	//void RenderAnchor(Renderer* renderer);
-	//void RenderCurrentHalfEdge(Renderer* renderer);
 
 	void CreateAllNormalMeshes();
 	void FlushNormalMeshes();
@@ -295,3 +285,5 @@ public:
 
 	static QuickHull* GenerateMinkowskiHull(QuickHull* hull0, QuickHull* hull1);
 };
+
+extern void ManualGenQH(QuickHull* qh);

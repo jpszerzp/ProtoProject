@@ -2,7 +2,7 @@
 
 #include <mutex>
 
-class SpinLock
+class NaiveLock
 {
 public:
 	std::mutex	m_lock;

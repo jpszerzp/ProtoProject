@@ -83,40 +83,10 @@ QHFace::QHFace(HalfEdge* he, const Vector3& head, const Vector3& eyePos)
 	he_prev->CreateArrowMeshesOffset(0.2f, centroid);
 }
 
-/*
-QHFace::QHFace(HalfEdge* onHorizon, HalfEdge* horizon_next, HalfEdge* horizon_prev)
-{
-	vert_num = 3;
-
-	// record vertices
-	verts.push_back(onHorizon->m_tail);
-	verts.push_back(horizon_next->m_tail);
-	verts.push_back(horizon_prev->m_tail);
-
-	// set as "face"
-	ConstructFeatureID();
-	
-	// set up prev and next relations
-	onHorizon->m_prev = horizon_prev;	onHorizon->m_next = horizon_next;
-	horizon_next->m_prev = onHorizon;	horizon_next->m_next =horizon_prev;
-	horizon_prev->m_prev = horizon_next;	horizon_prev->m_next = onHorizon;
-	m_entry = onHorizon;
-}
-*/
-
-
 QHFace::~QHFace()
 {
 	conflicts.clear();
 	m_entry = nullptr;
-
-	//// flush halfmesh accordingly
-	//delete m_entry->m_next->m_next;
-	//m_entry->m_next->m_next = nullptr;
-	//delete m_entry->m_next;
-	//m_entry->m_next = nullptr;
-	//delete m_entry;
-	//m_entry = nullptr;
 
 	// delete face normal mesh
 	FlushFaceNormalMesh();
@@ -1366,31 +1336,7 @@ bool QuickHull::AddConflictPointGeneral(QHVert* vert, std::vector<QHFace*>& face
 		candidate->AddConflictPoint(vert, this);
 		return false;
 	}
-
-	/*
-	Vector3 closest = Vector3::INVALID;
-
-	QHFeature* closest_feature = FindClosestFeatureGeneral(globalPt, dist, closest, faces);
-
-	// after this operation, the point is either deleted because it will sit INSIDE the hull
-	// or, set as the conflict point of one of the new faces and is kept in the m_verts of hull
-	// Note that either way we do not bother altering content of orphan, because each vert in m_orphans,
-	// if survives, will find its reference and will not cause leaks.
-	// Therefore we can always clear the m_orphans when we are done with operations.
-	bool pointRemoved = AddToFinalizedFaceGeneral(closest_feature, closest, vert, faces);
-	return pointRemoved;
-	*/
 }
-
-/*
-void QuickHull::AddHorizonMesh(HalfEdge* horizon)
-{
-	Vector3 start = horizon->m_tail;
-	Vector3 end = horizon->m_next->m_tail;
-	Mesh* mesh = Mesh::CreateLineImmediate(VERT_PCU, start, end, Rgba::CYAN);
-	m_horizon_mesh.push_back(mesh);
-}
-*/
 
 /*
  * Add point to a face based on closest feature info
@@ -1945,30 +1891,6 @@ bool QuickHull::PointOutBoundFace(const Vector3& pt, const QHFace& face)
 
 	return outbound;
 }
-
-/*
-void QuickHull::RenderCurrentHalfEdge(Renderer* renderer)
-{
-	if (m_current_he_mesh != nullptr)
-	{
-		Shader* shader = renderer->CreateOrGetShader("wireframe_color");
-		renderer->UseShader(shader);
-
-		Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
-		renderer->SetTexture2D(0, texture);
-		renderer->SetSampler2D(0, texture->GetSampler());
-		glLineWidth(10.f);
-
-		renderer->m_objectData.model = Matrix44::IDENTITY;
-
-		renderer->m_currentShader->m_state.m_depthCompare = COMPARE_LESS;
-		renderer->m_currentShader->m_state.m_cullMode = CULLMODE_BACK;
-		renderer->m_currentShader->m_state.m_windOrder = WIND_COUNTER_CLOCKWISE;
-
-		renderer->DrawMesh(m_current_he_mesh);
-	}
-}
-*/
 
 void QuickHull::CreateAllNormalMeshes()
 {
@@ -2533,30 +2455,6 @@ void QuickHull::RenderBasis(Renderer* renderer)
 	}
 }
 
-/*
-void QuickHull::RenderAnchor(Renderer* renderer)
-{
-	if (m_anchor_mesh != nullptr)
-	{
-		Shader* shader = renderer->CreateOrGetShader("wireframe_color");
-		renderer->UseShader(shader);
-
-		Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
-		renderer->SetTexture2D(0, texture);
-		renderer->SetSampler2D(0, texture->GetSampler());
-		glPointSize(10.f);
-
-		renderer->m_objectData.model = Matrix44::IDENTITY;
-
-		renderer->m_currentShader->m_state.m_depthCompare = COMPARE_LESS;
-		renderer->m_currentShader->m_state.m_cullMode = CULLMODE_BACK;
-		renderer->m_currentShader->m_state.m_windOrder = WIND_COUNTER_CLOCKWISE;
-
-		renderer->DrawMesh(m_anchor_mesh);
-	}
-}
-*/
-
 void QuickHull::CreateFaceMesh(QHFace& face, Rgba color)
 {
 	if (face.vert_num == 3)
@@ -2702,5 +2600,390 @@ void QHVert::DrawVert(Renderer* renderer) const
 		renderer->m_currentShader->m_state.m_windOrder = WIND_COUNTER_CLOCKWISE;
 
 		renderer->DrawMesh(vertMesh);
+	}
+}
+
+void ManualGenQH(QuickHull* qh)
+{
+	switch (qh->m_gen_step)
+	{
+	case CONFLICT:
+	{
+		static int vert_count = 0;
+		QHVert* vert = g_hull->GetVert(vert_count);
+		bool removed = g_hull->AddConflictPointInitial(vert);
+
+		// if there is nothing removed, we increment the index to go to next point
+		// so that next time 0 is pressed, correct point is used
+		if (!removed)
+			vert_count++;
+		// if there is something removed, the index will just match
+
+		// if we have gone thru every point in global candidate list,
+		// we are done with adding conflict points, so we should not come to this spot anymore
+		if (vert_count == g_hull->GetVertNum())
+		{
+			//SwapHullStatusMesh("Forming eye");
+			qh->m_gen_step = EYE;
+		}
+	}
+	break;
+	case EYE:
+	{
+		// get the farthest conflict point
+		g_hull->m_eyePair = g_hull->GetFarthestConflictPair();
+		QHFace* conflict_face = std::get<0>(g_hull->m_eyePair);
+		QHVert* conflict_pt = std::get<1>(g_hull->m_eyePair);
+
+		// initialization of the horizon generation step: we need to push the chosen conflict face as a start
+		if (conflict_face != nullptr && conflict_pt != nullptr)
+		{
+			// i also want to change the color of eye point
+			conflict_pt->ChangeColor(Rgba::PURPLE);
+
+			// before iterating on horizon generation, initialize face and HE info here
+			g_hull->m_start_he = conflict_face->m_entry;
+			g_hull->m_current_he = g_hull->m_start_he;
+			g_hull->m_otherFace = g_hull->m_current_he->m_twin->m_parentFace;
+
+			g_hull->m_visitedFaces.push_back(conflict_face);
+			g_hull->m_exploredFaces.push_back(conflict_face);
+
+			g_hull->ChangeCurrentHalfEdgeMesh();
+
+			//SwapHullStatusMesh("Horizon start and process");
+			qh->m_gen_step = HORIZON_START;
+		}
+	}
+	break;
+	case HORIZON_START:
+	{
+		QHFace* conflict_face = std::get<0>(g_hull->m_eyePair);
+		QHVert* conflict_pt = std::get<1>(g_hull->m_eyePair);
+
+		// to start with, we can assume the we have never visited any other faces
+		bool visible = g_hull->PointOutBoundFace(conflict_pt->vert, *g_hull->m_otherFace);
+		if (visible)
+		{
+			// step on a new face
+			g_hull->m_exploredFaces.push_back(g_hull->m_otherFace);
+			g_hull->m_visitedFaces.push_back(g_hull->m_otherFace);
+
+			HalfEdge* expiring = g_hull->m_current_he;
+
+			g_hull->ChangeCurrentHalfEdgeNewFace();
+			g_hull->ChangeCurrentHalfEdgeMesh();			// verifies if the new HE has twin
+
+			bool exp_has_twin = expiring->HasTwin();
+			expiring->SwapMeshTwinGeneral(exp_has_twin);	// verifies if the outdated HE has twin
+
+			g_hull->ChangeOtherFace();
+		}
+		else
+		{
+			// invisible
+			HalfEdge* horizon = g_hull->m_current_he;
+
+			g_hull->ChangeCurrentHalfEdgeOldFace();
+			g_hull->ChangeCurrentHalfEdgeMesh();			// verifies if the new HE has twin
+
+															// still want to verify expiring HE twin validity, 
+															// but do not want to draw cyan/megenta in this case
+															// Note that horizon IS expiring HE
+			horizon->VerifyHorizonTwin();
+			horizon->SwapMeshTwinHorizon();		// i got thru last line, i HAVE twin
+			g_hull->AddHorizonInfo(horizon);
+
+			g_hull->ChangeOtherFace();
+		}
+
+		qh->m_gen_step = HORIZON_PROCESS;
+	}
+	break;
+	case HORIZON_PROCESS:
+	{
+		QHFace* conflict_face = std::get<0>(g_hull->m_eyePair);
+		QHVert* conflict_pt = std::get<1>(g_hull->m_eyePair);
+
+		if (!g_hull->ReachStartHalfEdge())
+		{
+			bool visible = g_hull->PointOutBoundFace(conflict_pt->vert, *g_hull->m_otherFace);
+			if (visible)
+			{
+				// if the face we have visited
+				bool visited = g_hull->HasVisitedFace(g_hull->m_otherFace);
+				if (visited)
+				{
+					// if it is the last face visited
+					bool last_visited = g_hull->IsLastVisitedFace(g_hull->m_otherFace);
+					if (last_visited)
+					{
+						g_hull->m_exploredFaces.pop_back();
+
+						HalfEdge* expiring = g_hull->m_current_he;
+
+						g_hull->ChangeCurrentHalfEdgeNewFace();
+						g_hull->ChangeCurrentHalfEdgeMesh();		
+
+						bool exp_has_twin = expiring->HasTwin();
+						expiring->SwapMeshTwinGeneral(exp_has_twin);
+
+						g_hull->ChangeOtherFace();
+					}
+					else
+					{
+						// this is not the face we came from, it is just a normal face we previously visited; skip it
+						HalfEdge* expiring = g_hull->m_current_he;
+
+						g_hull->ChangeCurrentHalfEdgeOldFace();
+						g_hull->ChangeCurrentHalfEdgeMesh();			// verifies if the new HE has twin
+
+						g_hull->ChangeOtherFace();
+					}
+				}
+				else
+				{
+					// this is a new face to visit
+					g_hull->m_exploredFaces.push_back(g_hull->m_otherFace);
+					g_hull->m_visitedFaces.push_back(g_hull->m_otherFace);
+
+					HalfEdge* expiring = g_hull->m_current_he;
+
+					g_hull->ChangeCurrentHalfEdgeNewFace();
+					g_hull->ChangeCurrentHalfEdgeMesh();		
+
+					bool exp_has_twin = expiring->HasTwin();
+					expiring->SwapMeshTwinGeneral(exp_has_twin);
+
+					g_hull->ChangeOtherFace();
+				}
+			}
+			else 
+			{
+				// invisible
+				HalfEdge* horizon = g_hull->m_current_he;
+
+				g_hull->ChangeCurrentHalfEdgeOldFace();
+				g_hull->ChangeCurrentHalfEdgeMesh();			// verifies if the new HE has twin
+
+																// still want to verify expiring HE twin validity, 
+																// but do not want to draw cyan/megenta in this case
+																// Note that horizon IS expiring HE
+				horizon->VerifyHorizonTwin();
+				horizon->SwapMeshTwinHorizon();		// i got thru last line, i HAVE twin
+				g_hull->AddHorizonInfo(horizon);
+
+				g_hull->ChangeOtherFace();
+			}
+		}
+		else
+		{
+			// go to next state
+			// in this case we always know where current HE is (cyan or megenta)
+			//SwapHullStatusMesh("Delete old faces");
+			qh->m_gen_step = OLD_FACE;
+		}
+	}
+	break;
+	case OLD_FACE:
+	{
+		if (!g_hull->m_visitedFaces.empty())
+		{
+			QHVert* eye = std::get<1>(g_hull->m_eyePair);
+
+			// remove from visited 
+			QHFace* visited_frontier = g_hull->PeekVisitedFrontier();
+			g_hull->RemoveVisitedFrontier();
+
+			// remove from list of all faces
+			std::vector<QHFace*>::iterator it = std::find(g_hull->m_faces.begin(), g_hull->m_faces.end(), visited_frontier);
+			bool inList = (it != g_hull->m_faces.end());
+			g_hull->m_faces.erase(it);
+
+			// delete this face
+			// before releasing memory of faces, we need to get orphanage of this face
+			for (QHVert* v : visited_frontier->conflicts)
+			{
+				if (v != eye)
+				{
+					// if the vert is NOT eye, just add it as orphan
+					g_hull->m_orphans.push_back(v);
+				}
+				// this face not necessarily has eye as conflicts (imagine the feature is an edge, 
+				// point will only be put as conflict point of one of the two faces that share that edge),
+				// but if it has, we DO NOT want to put it as conflict point of any face any more,
+				// instead, it is just going to be the point added to hull's peripheral, so we keep it in m_eyePair for later reference
+			}
+
+			// delete HEs, if we can find it in horizon, we do not delete it
+			HalfEdge* it_he = visited_frontier->m_entry;
+			HalfEdge* prev = it_he->m_prev;
+			HalfEdge* next = it_he->m_next;
+			if (std::find(g_hull->m_horizon.begin(), g_hull->m_horizon.end(), it_he) == g_hull->m_horizon.end())
+				// in other words, delete the entry if we cannot find it as part of horizon
+				delete it_he;
+			if (std::find(g_hull->m_horizon.begin(), g_hull->m_horizon.end(), prev) == g_hull->m_horizon.end())
+				delete prev;
+			if (std::find(g_hull->m_horizon.begin(), g_hull->m_horizon.end(), next) == g_hull->m_horizon.end())
+				delete next;
+
+			// only set anchor when deleting the first time
+			if (g_hull->m_anchor == Vector3::INVALID)
+			{
+				// a good candidate is the centroid of the face
+				Vector3 interior = visited_frontier->GetFaceCentroid();
+				g_hull->m_anchor = interior;
+			}
+
+			delete visited_frontier;
+		}
+		else
+		{
+			// we have deleted some stuff, we want to verify HE relations
+			for (QHFace* face : g_hull->m_faces)
+			{
+				face->VerifyHalfEdgeNext();
+				face->VerifyHalfEdgeParent();
+				face->VerifyHalfEdgeTwin();
+			}
+
+			g_hull->m_render_horizon = true;
+
+			// conflict face is already deleted
+			std::get<0>(g_hull->m_eyePair) = nullptr;	
+
+			//SwapHullStatusMesh("Form new faces");
+			qh->m_gen_step = NEW_FACE;
+		}
+	}
+	break;
+	case NEW_FACE:
+	{
+		if (!g_hull->m_horizon.empty())
+		{
+			QHVert* eye = std::get<1>(g_hull->m_eyePair);
+
+			HalfEdge* he_restore = g_hull->PeekHorizonFrontier();
+			g_hull->RemoveHorizonFrontier();
+
+			std::tuple<Vector3, Vector3, HalfEdge*> he_data = g_hull->m_horizon_infos.front();
+			g_hull->m_horizon_infos.pop_front();
+
+			// build new face and verify it 
+			const Vector3& eyePos = eye->vert;
+			QHFace* new_face = new QHFace(he_restore, std::get<1>(he_data), eye->vert);
+			g_hull->CreateFaceMesh(*new_face);			// face mesh
+			g_hull->GenerateOutboundNorm(g_hull->m_anchor, *new_face);		// normal
+			g_hull->CreateFaceNormalMesh(*new_face);		// normal mesh and color
+			new_face->SetParentHalfEdge();
+
+			new_face->VerifyHalfEdgeNext();
+			new_face->VerifyHalfEdgeParent();
+
+			g_hull->AddFace(new_face);
+			g_hull->AddNewFace(new_face);
+		}
+		else
+		{
+			// build twin relation
+			for (std::vector<QHFace*>::size_type i1 = 0; i1 < g_hull->m_newFaces.size(); ++i1)
+			{
+				QHFace* subject = g_hull->m_newFaces[i1];
+
+				for (std::vector<QHFace*>::size_type i2 = 0; i2 <g_hull->m_newFaces.size(); ++i2)
+				{
+					QHFace* object = g_hull->m_newFaces[i2];
+					if (subject != object)
+					{
+						// for each new face, there is a possibility that it shares an edge with another new face
+						// once we find that shared edge, the half edge corresponding to it in that other face is just the twin
+						// of the half edge corresponding to this shared edge in this current face we are inspecting
+						subject->UpdateSharedEdge(object);		// set twins along the way
+					}
+				}
+			}
+
+			// verifications
+			for (QHFace* face : g_hull->m_faces)
+			{
+				face->VerifyHalfEdgeNext();
+				face->VerifyHalfEdgeParent();
+				face->VerifyHalfEdgeTwin();
+			}
+
+			//SwapHullStatusMesh("Assign orphans");
+			qh->m_gen_step = ORPHAN;
+		}
+	}
+	break;
+	case ORPHAN:
+	{
+		if (!g_hull->m_orphans.empty())
+		{
+			QHVert* orphan = g_hull->m_orphans.front();
+			g_hull->m_orphans.pop_front();
+
+			g_hull->AddConflictPointGeneral(orphan, g_hull->m_newFaces);
+		}
+		else
+		{
+			g_hull->m_newFaces.clear();
+
+			//SwapHullStatusMesh("Correct Topo errors");
+			qh->m_gen_step = TOPO_ERROR;
+		}
+	}
+	break;
+	case TOPO_ERROR:
+	{
+		// verify and adjust for topological errors
+		//SwapHullStatusMesh("Finish up and reset");
+		qh->m_gen_step = RESET;
+	}
+	break;
+	case RESET:
+	{
+		QHVert* eye = std::get<1>(g_hull->m_eyePair);
+		g_hull->RemovePointGlobal(eye->vert);
+
+		if (!g_hull->m_exploredFaces.empty())
+			g_hull->m_exploredFaces.clear();
+
+		g_hull->m_start_he = nullptr;
+		g_hull->m_current_he = nullptr;
+		g_hull->m_otherFace = nullptr;
+
+		g_hull->m_anchor = Vector3::INVALID;
+
+		g_hull->m_render_horizon = false;
+
+		// verify again
+		for (QHFace* face : g_hull->m_faces)
+		{
+			face->VerifyHalfEdgeNext();
+			face->VerifyHalfEdgeParent();
+			face->VerifyHalfEdgeTwin();
+		}
+
+		if (!g_hull->m_conflict_verts.empty())
+		{
+			// conflict list should be adjusted correctly already; back to the step where we generate eye
+			//SwapHullStatusMesh("Forming eye");
+			qh->m_gen_step = EYE;
+		}
+		else
+		{
+			//SwapHullStatusMesh("Hull complete");
+			qh->m_gen_step = COMPLETE;
+		}
+	}
+	break;
+	case COMPLETE:
+	{
+		// hull complete, do nothing
+	}
+	break;
+	default:
+		break;
 	}
 }

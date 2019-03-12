@@ -21,7 +21,6 @@ public:
 	void UpdateMouse(float deltaTime) override;
 	void UpdateKeyboard(float deltaTime) override; 
 	void UpdateDebugDraw(float deltaTime);
-	//void UpdateObjects(float deltaTime);
 	void UpdatePair(float deltaTime);
 	void UpdateContacts(float deltaTime);
 	void UpdateUI(float deltaTime);
@@ -47,4 +46,6 @@ private:
 	Collision m_storage[MAX_CONTACT_NUM];
 
 	Mesh* m_title_ui;
+
+	QuickHull* m_qh = nullptr;
 };

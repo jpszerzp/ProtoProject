@@ -98,6 +98,11 @@ ControlState3::ControlState3()
 	m_title_ui = t_mesh;
 	titleMin -= Vector2(0.f, txtHeight);
 
+	// qh
+	Vector3 qh_min = Vector3(-300.f, 0.f, 0.f);
+	Vector3 qh_max = Vector3(-200.f, 100.f, 100.f);
+	m_qh = new QuickHull(20, qh_min, qh_max);
+
 	// debug
 	DebugRenderSet3DCamera(m_camera);
 	DebugRenderSet2DCamera(m_UICamera);
@@ -263,6 +268,11 @@ void ControlState3::UpdateKeyboard(float deltaTime)
 		}
 	}
 
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_0))
+	{
+		ManualGenQH(m_qh);
+	}
+
 	// camera update from input
 	Vector3 camForward = m_camera->GetLocalForward(); 
 	Vector3 camUp = m_camera->GetLocalUp(); 
@@ -294,17 +304,6 @@ void ControlState3::UpdateDebugDraw(float deltaTime)
 		current = m_keep.m_collision_head + count;
 	}
 }
-
-/*
-void ControlState3::UpdateObjects(float deltaTime)
-{
-	for (int i = 0; i < m_convex_objs.size(); ++i)
-		m_convex_objs[i]->Update(deltaTime);
-
-	for (int i = 0; i < m_planes.size(); ++i)
-		m_planes[i]->Update(deltaTime);
-}
-*/
 
 void ControlState3::UpdatePair(float deltaTime)
 {

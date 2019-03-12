@@ -382,9 +382,6 @@
     <ClCompile Include="Core\Log\FileUtils.cpp">
       <Filter>Core\Log</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Thread\SpinLock.cpp">
-      <Filter>Core\Thread</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Thread\ThreadSafeSet.cpp">
       <Filter>General</Filter>
     </ClCompile>
@@ -585,6 +582,9 @@
     </ClCompile>
     <ClCompile Include="Physics\3D\RF\PhysCommon.cpp">
       <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Thread\NaiveLock.cpp">
+      <Filter>Core\Thread</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -915,9 +915,6 @@
     <ClInclude Include="Core\Log\FileUtils.hpp">
       <Filter>Core\Log</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Thread\SpinLock.hpp">
-      <Filter>Core\Thread</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Thread\ThreadSafeSet.hpp" />
     <ClInclude Include="Physics\MassData.hpp" />
     <ClInclude Include="Physics\PhysicsMaterial.hpp" />
@@ -996,5 +993,8 @@
     <ClInclude Include="Physics\3D\PHYSX\PhysXObject.hpp" />
     <ClInclude Include="Physics\3D\PHYSX\PhysXShapeRender.hpp" />
     <ClInclude Include="Physics\3D\RF\PhysCommon.hpp" />
+    <ClInclude Include="Core\Thread\NaiveLock.hpp">
+      <Filter>Core\Thread</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Core/Thread/SpinLock.hpp"
+#include "Engine/Core/Thread/NaiveLock.hpp"
 
 #include <deque>
 #include <mutex>
@@ -10,8 +10,7 @@ class ThreadSafeQueue
 {
 public:
 	std::deque<T> m_data;
-	SpinLock	  m_lock;
-	//std::mutex    m_lock;
+	NaiveLock	  m_lock;
 
 public:
 	void Enqueue(const T& data);

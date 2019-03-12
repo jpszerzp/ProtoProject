@@ -280,7 +280,7 @@
     <ClCompile Include="Core\Ray3.cpp" />
     <ClCompile Include="Core\SurfacePatch.cpp" />
     <ClCompile Include="Core\TerrainMap.cpp" />
-    <ClCompile Include="Core\Thread\SpinLock.cpp" />
+    <ClCompile Include="Core\Thread\NaiveLock.cpp" />
     <ClCompile Include="Core\Thread\Thread.cpp" />
     <ClCompile Include="Core\Thread\ThreadSafeQueue.cpp" />
     <ClCompile Include="Core\Thread\ThreadSafeSet.cpp" />
@@ -462,7 +462,7 @@
     <ClInclude Include="Core\Ray3.hpp" />
     <ClInclude Include="Core\SurfacePatch.hpp" />
     <ClInclude Include="Core\TerrainMap.hpp" />
-    <ClInclude Include="Core\Thread\SpinLock.hpp" />
+    <ClInclude Include="Core\Thread\NaiveLock.hpp" />
     <ClInclude Include="Core\Thread\Thread.hpp" />
     <ClInclude Include="Core\Thread\ThreadSafeQueue.hpp" />
     <ClInclude Include="Core\Thread\ThreadSafeSet.hpp" />
