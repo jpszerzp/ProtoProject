@@ -68,6 +68,7 @@ public:
 	void UpdateUI();
 	void UpdateDeletePhysx();
 	void UpdateDelete();
+	void MyPhysicsUpdate(float deltaTime);
 
 	// update of GO
 	void UpdateGameobjectsCore(float deltaTime);

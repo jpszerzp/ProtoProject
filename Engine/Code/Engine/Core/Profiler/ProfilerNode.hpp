@@ -1,6 +1,5 @@
 #pragma once
 
-//#include "Engine/Core/Util/DataUtils.hpp"
 #include "Engine/Math/IntVector2.hpp"
 
 #include <string>
@@ -10,30 +9,25 @@
 class ProfilerNode
 {
 public:
-	int m_idx;
-	int m_layer = 0;
 	std::string m_tag;
 	ProfilerNode* m_parent;
 	std::vector<ProfilerNode*> m_childNodes;
 
+	uint64_t m_start;
+	uint64_t m_end;
+
 public:
 	ProfilerNode(){}
-	ProfilerNode(int idx, std::string tag, ProfilerNode* parent)
-		: m_idx(idx), m_tag(tag), m_parent(parent) {}
-	~ProfilerNode(){}
-};
+	ProfilerNode(std::string tag, ProfilerNode* parent, uint64_t start)
+		: m_tag(tag), m_parent(parent), m_start(start) {}
+	~ProfilerNode();
 
-class ProfilerHistory
-{
-public:
-	std::map<ProfilerNode*, UInt64Vector2>		m_nodeHistory;
+	void AddChild(ProfilerNode* node);
+	void DeleteChildren();
+	void ProduceText(std::string& res, uint64_t total);
 
-public:
-	ProfilerHistory(std::map<ProfilerNode*, UInt64Vector2> nodeHistory)
-		: m_nodeHistory(nodeHistory){}
+	ProfilerNode* GetParent() const { return m_parent; }
 
-	void Clear();
-
-	Vector2 InspectNodeTime(ProfilerNode* node);
-	void GetTimeInChildren(float& time, ProfilerNode* node);
+	void SetParent(ProfilerNode* node) { m_parent = node; }
+	void SetEnd(const uint64_t& end) { m_end = end; }
 };

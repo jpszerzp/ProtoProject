@@ -25,7 +25,6 @@ TheApp::TheApp()
 	InputSystemStartup();
 	AudioSystemStartup();
 	NetStartup();
-	//PhysxStartup();
 	StateStartup();
 	ProfilerStartup();
 	ConsoleStartup();
@@ -267,12 +266,10 @@ void TheApp::StateStartup()
 {
 	Physics3State* phys3 = new Physics3State();
 	ControlState3* control = new ControlState3();
-	//Collision3State* collision = new Collision3State();
 	StateMachine* states = new StateMachine();
 	phys3->PostConstruct();
 	states->AppendState(phys3);
 	states->AppendState(control);
-	//states->AppendState(collision);
 	g_theGame = new TheGame();
 	g_theGame->SetStateMachine(states);
 	g_theGame->UseDefaultState();			// set default state as state at index 0 

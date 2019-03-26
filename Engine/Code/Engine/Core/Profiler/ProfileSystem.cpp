@@ -12,6 +12,8 @@
 
 #include <algorithm>
 
+// These are data subject to the one and only "Profiler".
+// These are not for profiler tree...
 uint64_t g_start_frame_hpc = 0U;
 uint64_t g_end_frame_hpc = 0U;
 uint64_t g_last_frame_hpc = 0U;
@@ -19,41 +21,21 @@ uint64_t g_total_hpc = 0U;
 uint64_t g_max_hpc = 0LLU;	// sets to max uint64_t
 //uint64_t g_min_hpc = ~0LLU; 
 
+uint64_t g_my_start_hpc = 0U;
+uint64_t g_my_end_hpc = 0U;
+uint64_t g_my_last_hpc = 0U;
+uint64_t g_my_total_hpc = 0U;
+uint64_t g_my_max_hpc = 0LLU;
+
+uint64_t g_physx_start_hpc = 0U;
+uint64_t g_physx_end_hpc = 0U;
+uint64_t g_physx_last_hpc = 0U;
+uint64_t g_physx_total_hpc = 0U;
+uint64_t g_physx_max_hpc = 0LLU;
+
 Profiler* Profiler::m_profilerInstance = nullptr;
 
 const Vector2 Profiler::VERT_DISP = Vector2(0.f, Profiler::TEXT_HEIGHT);
-
-bool TotalTimeSort(ProfilerNode* n1, ProfilerNode* n2)
-{
-	/*
-	ProfilerHistory& history = Profiler::ProfileGetPreviousFrame(0);
-	Vector2 t1 = history.InspectNodeTime(n1);
-	Vector2 t2 = history.InspectNodeTime(n2);
-	//Vector2 t1 = g_gameConfigBlackboard->m_history.InspectNodeTime(n1);
-	//Vector2 t2 = g_gameConfigBlackboard->m_history.InspectNodeTime(n2);
-
-	float total1 = t1.x;
-	float total2 = t2.x;
-
-	return total1 > total2;
-	*/
-	return false;
-}
-
-bool SelfTimeSort(ProfilerNode* n1, ProfilerNode* n2)
-{
-	/*
-	ProfilerHistory& history = Profiler::ProfileGetPreviousFrame(0);
-	Vector2 t1 = history.InspectNodeTime(n1);
-	Vector2 t2 = history.InspectNodeTime(n2);
-
-	float self1 = t1.y;
-	float self2 = t2.y;
-
-	return self1 > self2;
-	*/
-	return false;
-}
 
 bool IsProfilerOn()
 {
@@ -67,29 +49,33 @@ bool IsProfilerPaused()
 	return profiler->m_paused;
 }
 
-
 Profiler::Profiler()
 {
-	//ConfigureSections();
-	//ConfigureMeshes();
-	//ConfigureTextMap();
-
 	// section box
 	Renderer* renderer = Renderer::GetInstance();
 	Window* window = Window::GetInstance();
 	float width = window->GetWindowWidth();
 	float height = window->GetWindowHeight();
-	PROFILER_WIDTH = width;
+	PROFILER_WIDTH = width - 2 * FRAME_GRAPH_MARGIN;
 	PROFILER_HEIGHT = height;
 	Vector2 min = Vector2(-width / 2.f, -height / 2.f);
 	Vector2 max = Vector2(width / 2.f, height / 2.f);
 	m_profilerBox = AABB2(min, max);
 
-	Vector2 frameGraphMin = Vector2(-width / 2.f, height / 2.f  - 
+	Vector2 frameGraphMin = Vector2(-width / 2.f + FRAME_GRAPH_MARGIN, height / 2.f  - 
 		FRAME_TEXT_LINE * TEXT_HEIGHT - TEXT_HEIGHT - 
 		FRAME_GRAPH_LINE * TEXT_HEIGHT);
-	Vector2 frameGraphMax = frameGraphMin + Vector2(width, FRAME_GRAPH_LINE * TEXT_HEIGHT);
+	Vector2 frameGraphMax = frameGraphMin + Vector2(width - 2 * FRAME_GRAPH_MARGIN, FRAME_GRAPH_LINE * TEXT_HEIGHT);
 	m_frameGraphBox = AABB2(frameGraphMin, frameGraphMax);
+
+	SUB_PROFILER_WIDTH = width / 2.f - 2 * FRAME_GRAPH_MARGIN;
+	Vector2 my_frameGraphMin = frameGraphMin - Vector2(0.f, TEXT_HEIGHT + FRAME_GRAPH_LINE * TEXT_HEIGHT);
+	Vector2 my_frameGraphMax = my_frameGraphMin + Vector2(SUB_PROFILER_WIDTH, FRAME_GRAPH_LINE * TEXT_HEIGHT);
+	m_my_frame_box = AABB2(my_frameGraphMin, my_frameGraphMax);
+
+	Vector2 physx_frameGraphMin = my_frameGraphMin + Vector2(width / 2.f, 0.f);
+	Vector2 physx_frameGraphMax = physx_frameGraphMin + Vector2(SUB_PROFILER_WIDTH, FRAME_GRAPH_LINE * TEXT_HEIGHT);
+	m_physx_frame_box = AABB2(physx_frameGraphMin, physx_frameGraphMax);
 
 	// mesh
 	Vector3 bl = m_profilerBox.mins.ToVector3(0.f);
@@ -100,12 +86,35 @@ Profiler::Profiler()
 	m_backgroundMesh = Mesh::CreateQuadImmediate(VERT_PCU, bl, br, tl, tr, tint);
 
 	Vector3 frameGraphBL = m_frameGraphBox.mins.ToVector3(0.f);
-	Vector3 frameGraphBR = frameGraphBL + Vector3(width, 0.f, 0.f);
+	Vector3 frameGraphBR = frameGraphBL + Vector3(width - 2 * FRAME_GRAPH_MARGIN, 0.f, 0.f);
 	Vector3 frameGraphTL = frameGraphBL + Vector3(0.f, FRAME_GRAPH_LINE * TEXT_HEIGHT, 0.f);
 	Vector3 frameGraphTR = m_frameGraphBox.maxs.ToVector3(0.f);
 	Rgba frameGraphTint = Rgba::WHITE_HALF_OPACITY;
 	m_frameGraphMesh = Mesh::CreateQuadImmediate(VERT_PCU, frameGraphBL, frameGraphBR,
 		frameGraphTL, frameGraphTR, frameGraphTint);
+
+	frameGraphBL = m_my_frame_box.mins.ToVector3(0.f);
+	frameGraphBR = frameGraphBL + Vector3(m_my_frame_box.GetDimensions().x, 0.f, 0.f);
+	frameGraphTL = frameGraphBL + Vector3(0.f, m_my_frame_box.GetDimensions().y, 0.f);
+	frameGraphTR = m_my_frame_box.maxs.ToVector3(0.f);
+	m_my_frame_mesh = Mesh::CreateQuadImmediate(VERT_PCU, frameGraphBL, frameGraphBR,
+		frameGraphTL, frameGraphTR, frameGraphTint);
+
+	frameGraphBL = m_physx_frame_box.mins.ToVector3(0.f);
+	frameGraphBR = frameGraphBL + Vector3(m_physx_frame_box.GetDimensions().x, 0.f, 0.f);
+	frameGraphTL = frameGraphBL + Vector3(0.f, m_physx_frame_box.GetDimensions().y, 0.f);
+	frameGraphTR = m_physx_frame_box.maxs.ToVector3(0.f);
+	m_physx_frame_mesh = Mesh::CreateQuadImmediate(VERT_PCU, frameGraphBL, frameGraphBR,
+		frameGraphTL, frameGraphTR, frameGraphTint);
+
+	std::string my_title = Stringf("Inc(%%)");
+	my_title.insert(my_title.begin(), 45 - my_title.size(), ' ');
+	my_title = "Name" + my_title;
+	Vector2 my_title_min = my_frameGraphMin - Vector2(0.f, 2 * TEXT_HEIGHT);
+	m_my_title = MakeTextMesh(TEXT_HEIGHT, my_title, my_title_min);
+
+	Vector2 physx_title_min = physx_frameGraphMin - Vector2(0.f, 2 * TEXT_HEIGHT);
+	m_physx_title = MakeTextMesh(TEXT_HEIGHT, my_title, physx_title_min);
 
 	float aspect = width / height;
 
@@ -121,6 +130,11 @@ Profiler::Profiler()
 	}
 
 	m_frame_text_tl = Vector2(-width / 2.f, height / 2.f);
+	m_profiled_text_tl = my_title_min;
+	m_profiled_text_tl_physx = physx_title_min;
+
+	g_my_tree = new ProfilerTree();
+	g_phys_tree = new ProfilerTree();
 }
 
 Profiler::~Profiler()
@@ -133,6 +147,24 @@ Profiler::~Profiler()
 
 	delete m_frameGraphMesh;
 	m_frameGraphMesh = nullptr;
+
+	delete m_my_frame_mesh;
+	m_my_frame_mesh = nullptr;
+
+	delete m_physx_frame_mesh;
+	m_physx_frame_mesh = nullptr;
+
+	delete m_my_title;
+	m_my_title = nullptr;
+
+	delete m_physx_title;
+	m_physx_title = nullptr;
+
+	delete g_my_tree;
+	g_my_tree = nullptr;
+
+	delete g_phys_tree;
+	g_phys_tree = nullptr;
 }
 
 void Profiler::ProfileMarkFrame()
@@ -142,6 +174,10 @@ void Profiler::ProfileMarkFrame()
 
 void Profiler::ProfileMarkEndFrame()
 {
+	// at frame end, all trees should only have root
+	g_my_tree->Trim();
+	g_phys_tree->Trim();
+
 	g_end_frame_hpc = GetPerformanceCounter();
 	g_last_frame_hpc = g_end_frame_hpc - g_start_frame_hpc;
 	g_total_hpc += g_last_frame_hpc;
@@ -157,64 +193,28 @@ void Profiler::ProfileResume()
 	m_paused = false;
 }
 
-/*
-ProfilerHistory& Profiler::ProfileGetPreviousFrame(uint skipCount)
+void Profiler::ProfileMyMarkFrame()
 {
-	//return g_gameConfigBlackboard->m_history[skipCount];
-}
-*/
-
-void Profiler::ConfigureSections()
-{
-	Window* window = Window::GetInstance();
-	float width = window->GetWindowWidth();
-	float height = window->GetWindowHeight();
-	Vector2 min = Vector2(-width / 2.f, -height / 2.f);
-	Vector2 max = Vector2(width / 2.f, height / 2.f);
-	m_profilerBox = AABB2(min, max);
-
-	Vector2 frameGraphMin = Vector2(-width / 4.f, height / 4.f) + Vector2(128.f, -128.f);
-	Vector2 frameGraphMax = frameGraphMin + Vector2(FRAME_GRAPH_WIDTH, FRAME_GRAPH_HEIGHT);
-	m_frameGraphBox = AABB2(frameGraphMin, frameGraphMax);
-
-	Vector2 frameTextMin = Vector2(-width / 2.f, height / 4.f) + Vector2(32.f, -128.f);
-	Vector2 frameTextMax = frameTextMin + Vector2(FRAME_TEXT_WIDTH, FRAME_TEXT_HEIGHT);
-	//m_frameTextBox = AABB2(frameTextMin, frameTextMax);
-
-	Vector2 treeMin = Vector2(-width / 2.f, -height / 2.f) + Vector2(32.f, 32.f);
-	Vector2 treeMax = Vector2(width / 2.f, height / 4.f) + Vector2(-32.f, -32.f);
-	m_frameTreeBox = AABB2(treeMin, treeMax);
-
-	Vector2 propertyMin = Vector2(-width / 4.f, height / 4.f) + Vector2(128.f, -160.f);
-	Vector2 propertyMax = propertyMin + Vector2(FRAME_PROPERTY_WIDTH, FRAME_PROPERTY_HEIGHT);
-	m_framePropertyBox = AABB2(propertyMin, propertyMax);
+	g_my_start_hpc = GetPerformanceCounter();
 }
 
-void Profiler::ConfigureMeshes()
+void Profiler::ProfileMyMarkEndFrame()
 {
-	Vector3 bl = m_profilerBox.mins.ToVector3(0.f);
-	Vector3 br = bl + Vector3(m_profilerBox.GetDimensions().x, 0.f, 0.f);
-	Vector3 tl = bl + Vector3(0.f, m_profilerBox.GetDimensions().y, 0.f);
-	Vector3 tr = m_profilerBox.maxs.ToVector3(0.f);
-	Rgba tint = Rgba::BLUE_HALF_OPACITY;
-	m_backgroundMesh = Mesh::CreateQuadImmediate(VERT_PCU, bl, br, tl, tr, tint);
-
-	Vector3 frameGraphBL = m_frameGraphBox.mins.ToVector3(0.f);
-	Vector3 frameGraphBR = frameGraphBL + Vector3(FRAME_GRAPH_WIDTH, 0.f, 0.f);
-	Vector3 frameGraphTL = frameGraphBL + Vector3(0.f, FRAME_GRAPH_HEIGHT, 0.f);
-	Vector3 frameGraphTR = m_frameGraphBox.maxs.ToVector3(0.f);
-	Rgba frameGraphTint = Rgba::WHITE_HALF_OPACITY;
-	m_frameGraphMesh = Mesh::CreateQuadImmediate(VERT_PCU, frameGraphBL, frameGraphBR,
-		frameGraphTL, frameGraphTR, frameGraphTint);
-
-	m_framePropertyMesh = MakeTextMesh(16.f, "______Calls______%Total______(Time)______%Self______(Time)", m_framePropertyBox.mins);
+	g_my_end_hpc = GetPerformanceCounter();
+	g_my_last_hpc = g_my_end_hpc - g_my_start_hpc;
+	g_my_total_hpc += g_my_last_hpc;
 }
 
-void Profiler::ConfigureTextMap()
+void Profiler::ProfilePhysXMarkFrame()
 {
-	//m_frameTextMeshes.emplace("frame_time", nullptr);
-	//m_frameTextMeshes.emplace("sample", nullptr);
-	//m_frameTextMeshes.emplace("fps", nullptr);
+	g_physx_start_hpc = GetPerformanceCounter();
+}
+
+void Profiler::ProfilePhysXMarkEndFrame()
+{
+	g_physx_end_hpc = GetPerformanceCounter();
+	g_physx_last_hpc = g_physx_end_hpc - g_physx_start_hpc;
+	g_physx_total_hpc += g_physx_last_hpc;
 }
 
 void Profiler::Update()
@@ -226,7 +226,6 @@ void Profiler::Update()
 		if (!m_paused)
 		{
 			UpdateFrameText();
-			//UpdateTreeText();
 			UpdateFramePoints();
 		}
 	}
@@ -270,6 +269,8 @@ void Profiler::UpdateInput()
 void Profiler::UpdateFrameText()
 {
 	DeleteVector(m_frame_text_mesh);
+	DeleteVector(m_profiled_mesh);
+	DeleteVector(m_profiled_mesh_physx);
 
 	// data you wish to update
 	double last_frame_seconds = PerformanceCountToSeconds(g_last_frame_hpc);
@@ -278,103 +279,13 @@ void Profiler::UpdateFrameText()
 	std::string text = Stringf("Last Frame Time (ms): %f\nFPS: %.4f", 
 		last_frame_seconds * 1000.f, fps);
 	
-	m_frame_text_mesh = MakeTextMeshLines(16.f, text, m_frame_text_tl);
-}
+	m_frame_text_mesh = MakeTextMeshLines(TEXT_HEIGHT, text, m_frame_text_tl);
 
-void Profiler::UpdateTreeText()
-{
-	/*
-	std::stack<ProfilerNode*> traversal;
-	traversal.push(g_gameConfigBlackboard->m_profiledFunctionTree[0]);
+	text = g_my_tree->ProduceText();
+	m_profiled_mesh = MakeTextMeshLines(.7f * TEXT_HEIGHT, text, m_profiled_text_tl);
 
-	ProfilerNode* currentNode;
-	int nodeProcessed = 0;
-	while (!traversal.empty())
-	{
-		currentNode = traversal.top();
-		traversal.pop();
-		nodeProcessed += 1;
-
-		bool makeText = true;
-		for (std::map<ProfilerNode*, Mesh*>::iterator it = m_treeMeshes.begin(); 
-			it != m_treeMeshes.end(); ++it)
-		{
-			ProfilerNode* node = it->first;
-			if (node->m_tag == currentNode->m_tag)
-			{
-				if (node->m_parent == currentNode->m_parent)
-				{
-					nodeProcessed -= 1;
-					makeText = false;
-					break;
-				}
-			}
-		}
-
-		if (makeText)
-		{
-			int callCount = 0;
-			// in the map, count all nodes with same tag and parent
-			for (std::map<ProfilerNode*, UInt64Vector2>::iterator it =
-				g_gameConfigBlackboard->m_functionHpcInfoPairs.begin(); 
-				it != g_gameConfigBlackboard->m_functionHpcInfoPairs.end(); ++it)
-			{
-				ProfilerNode* node = it->first;
-
-				if (currentNode != node)
-				{
-					if (node->m_tag == currentNode->m_tag
-						&& node->m_parent == currentNode->m_parent)
-					{
-						callCount++;
-					}
-				}
-				else
-				{
-					callCount++;
-				}
-			}
-			ProfilerHistory& history = ProfileGetPreviousFrame(0);
-			Vector2 theTime = history.InspectNodeTime(currentNode);
-			//Vector2 theTime = g_gameConfigBlackboard->m_history.InspectNodeTime(currentNode);
-			float totalTime = theTime.x;
-			float selfTime = theTime.y;
-			float tpercentage = (totalTime / g_gameConfigBlackboard->m_lastFrameTime) * 100.f;
-			float spercentage = (selfTime / g_gameConfigBlackboard->m_lastFrameTime) * 100.f;
-
-			std::string tag = currentNode->m_tag;
-			std::string callFormat = Stringf("______%i", callCount);
-			std::string totalPercentage = Stringf("______%f", tpercentage);
-			std::string total = Stringf("______%f", totalTime);
-			std::string selfPercentage = Stringf("______%f", spercentage);
-			std::string self = Stringf("______%f", selfTime);
-			std::string text = tag + callFormat + totalPercentage + total + selfPercentage + self;				// all info in one text
-
-			Vector2 textBL;
-			if (m_treeView)
-			{
-				textBL = m_frameTreeBox.mins + Vector2(32.f * currentNode->m_layer, 20.f * (nodeProcessed - 1));
-			}
-			else
-			{
-				textBL = m_frameTreeBox.mins + Vector2(0.f, 20.f * (nodeProcessed - 1));
-			}
-			Mesh* mesh = MakeTextMesh(16.f, text, textBL);
-			m_treeMeshes.emplace(currentNode, mesh);
-		}
-
-		for (int childIdx = (int)(currentNode->m_childNodes.size() - 1U); childIdx >= 0; --childIdx)
-		{
-			ProfilerNode* childNode = currentNode->m_childNodes[childIdx];
-			childNode->m_layer = currentNode->m_layer + 1;					// dfs layer
-
-			if (childNode != nullptr)
-			{
-				traversal.push(childNode);
-			}
-		}
-	}
-	*/
+	text = g_phys_tree->ProduceText();
+	m_profiled_mesh_physx = MakeTextMeshLines(.7f * TEXT_HEIGHT, text, m_profiled_text_tl_physx);
 }
 
 void Profiler::UpdateFramePoints()
@@ -415,6 +326,70 @@ void Profiler::UpdateFramePoints()
 		x -= pointSpeed;
 		it->x = x;
 	}
+
+	// my api
+	if (g_my_last_hpc > g_my_max_hpc)
+		g_my_max_hpc = g_my_last_hpc;
+
+	max_ms = PerformanceCountToMilliseconds(g_my_max_hpc);
+	last_frame_ms = PerformanceCountToMilliseconds(g_my_last_hpc);
+
+	pointSpeed = SUB_PROFILER_WIDTH / 127.f;
+
+	if (last_frame_ms > 0.f)
+	{
+		float percentage = last_frame_ms / max_ms;
+
+		float baseHeight = m_my_frame_box.mins.y;
+		float pointHeight = baseHeight + percentage * FRAME_GRAPH_LINE * TEXT_HEIGHT;
+		float pointX = m_my_frame_box.maxs.x + pointSpeed;
+		Vector2 pointPos = Vector2(pointX, pointHeight);
+
+		m_my_frame_pts.push_back(pointPos);
+		if (m_my_frame_pts.size() == 128U + 1U)
+		{
+			m_my_frame_pts.pop_front();
+		}
+	}
+
+	for (std::deque<Vector2>::iterator it = m_my_frame_pts.begin();
+		it != m_my_frame_pts.end(); ++it)
+	{
+		float x = it->x;
+		x -= pointSpeed;
+		it->x = x;
+	}
+
+	// physx api
+	if (g_physx_last_hpc > g_physx_max_hpc)
+		g_physx_max_hpc = g_physx_last_hpc;
+
+	max_ms = PerformanceCountToMilliseconds(g_physx_max_hpc);
+	last_frame_ms = PerformanceCountToMilliseconds(g_physx_last_hpc);
+
+	if (last_frame_ms > 0.f)
+	{
+		float percentage = last_frame_ms / max_ms;
+
+		float baseHeight = m_physx_frame_box.mins.y;
+		float pointHeight = baseHeight + percentage * FRAME_GRAPH_LINE * TEXT_HEIGHT;
+		float pointX = m_physx_frame_box.maxs.x + pointSpeed;
+		Vector2 pointPos = Vector2(pointX, pointHeight);
+
+		m_physx_frame_pts.push_back(pointPos);
+		if (m_physx_frame_pts.size() == 128U + 1U)
+		{
+			m_physx_frame_pts.pop_front();
+		}
+	}
+
+	for (std::deque<Vector2>::iterator it = m_physx_frame_pts.begin();
+		it != m_physx_frame_pts.end(); ++it)
+	{
+		float x = it->x;
+		x -= pointSpeed;
+		it->x = x;
+	}
 }
 
 // single line 
@@ -445,7 +420,7 @@ std::vector<Mesh*> Profiler::MakeTextMeshLines(float textHeight, std::string tex
 		StringSplitTwo(text, "\n", prev, latter);
 		text = latter;
 	
-		Mesh* mesh = Mesh::CreateTextImmediate(Rgba::WHITE, bl, font, TEXT_HEIGHT, .7f, prev, VERT_PCU);
+		Mesh* mesh = Mesh::CreateTextImmediate(Rgba::WHITE, bl, font, textHeight, .7f, prev, VERT_PCU);
 		res.push_back(mesh);
 
 		bl -= VERT_DISP;
@@ -461,11 +436,12 @@ void Profiler::Render(Renderer* renderer)
 		renderer->SetCamera(m_profilerCamera);
 
 		RenderFrameText(renderer);
-		//RenderTreeText(renderer);
 		RenderFramePoints(renderer);
 
-		//DrawCutoutText(renderer, m_framePropertyMesh);
+		// bgs
 		DrawGraphAlpha(renderer, m_frameGraphMesh);
+		DrawGraphAlpha(renderer, m_my_frame_mesh);
+		DrawGraphAlpha(renderer, m_physx_frame_mesh);
 		DrawGraphAlpha(renderer, m_backgroundMesh);
 	}
 }
@@ -473,95 +449,10 @@ void Profiler::Render(Renderer* renderer)
 void Profiler::RenderFrameText(Renderer* renderer)
 {
 	DrawTexts(m_frame_text_mesh);
-}
-
-void Profiler::RenderTreeText(Renderer* renderer)
-{
-	for (std::map<ProfilerNode*, Mesh*>::iterator it = m_treeMeshes.begin();
-		it != m_treeMeshes.end(); ++it)
-	{
-		Mesh* mesh = it->second;
-		DrawCutoutText(renderer, mesh);
-	}
-	ClearTreeMesh();
-
-	/*
-	if (m_treeView)
-	{
-		for (std::map<ProfilerNode*, Mesh*>::iterator it = m_treeMeshes.begin();
-			it != m_treeMeshes.end(); ++it)
-		{
-			Mesh* mesh = it->second;
-			DrawCutoutText(renderer, mesh);
-		}
-		ClearTreeMesh();
-	}
-	else
-	{
-		if (m_totalSort)
-		{
-			std::vector<ProfilerNode*> appendum;
-			std::map<ProfilerNode*, Mesh*> sortedMeshes;
-
-			for (std::map<ProfilerNode*, Mesh*>::iterator it = m_treeMeshes.begin();
-				it != m_treeMeshes.end(); ++it)
-			{
-				ProfilerNode* node = it->first;
-				appendum.push_back(node);
-			}
-
-			std::sort(appendum.begin(), appendum.end(), TotalTimeSort);
-
-			for each (ProfilerNode* node in appendum)
-			{
-				Mesh* mesh = m_treeMeshes.at(node);
-				sortedMeshes.emplace(node, mesh);			// from large to small total time
-			}
-
-			for (std::map<ProfilerNode*, Mesh*>::iterator it = sortedMeshes.begin();
-				it != sortedMeshes.end(); ++it)
-			{
-				Mesh* mesh = it->second;
-				DrawCutoutText(renderer, mesh);
-			}
-
-			ClearTreeMesh();
-			appendum.clear();
-			sortedMeshes.clear();
-		}
-		else
-		{
-			std::vector<ProfilerNode*> appendum;
-			std::map<ProfilerNode*, Mesh*> sortedMeshes;
-
-			for (std::map<ProfilerNode*, Mesh*>::iterator it = m_treeMeshes.begin();
-				it != m_treeMeshes.end(); ++it)
-			{
-				ProfilerNode* node = it->first;
-				appendum.push_back(node);
-			}
-
-			std::sort(appendum.begin(), appendum.end(), SelfTimeSort);
-
-			for each (ProfilerNode* node in appendum)
-			{
-				Mesh* mesh = m_treeMeshes.at(node);
-				sortedMeshes.emplace(node, mesh);			// from large to small total time
-			}
-
-			for (std::map<ProfilerNode*, Mesh*>::iterator it = sortedMeshes.begin();
-				it != sortedMeshes.end(); ++it)
-			{
-				Mesh* mesh = it->second;
-				DrawCutoutText(renderer, mesh);
-			}
-
-			ClearTreeMesh();
-			appendum.clear();
-			sortedMeshes.clear();
-		}
-	}
-	*/
+	DrawTexts(m_profiled_mesh);
+	DrawTexts(m_profiled_mesh_physx);
+	DrawTextCut(m_my_title);
+	DrawTextCut(m_physx_title);
 }
 
 void Profiler::RenderFramePoints(Renderer* renderer)
@@ -578,6 +469,36 @@ void Profiler::RenderFramePoints(Renderer* renderer)
 			Vector2 tr = Vector2(nextIt->x, nextIt->y);
 
 			renderer->DrawPolygon2D(bl, br, tl, tr, Rgba::YELLOW, VERT_PCU);
+		}
+	}
+
+	for (std::deque<Vector2>::iterator it = m_my_frame_pts.begin();
+		it != m_my_frame_pts.end(); ++it)
+	{
+		std::deque<Vector2>::iterator nextIt = std::next(it, 1);
+		if (nextIt != m_my_frame_pts.end())
+		{
+			Vector2 bl = Vector2(it->x, m_my_frame_box.mins.y);
+			Vector2 br = Vector2(nextIt->x, m_my_frame_box.mins.y);
+			Vector2 tl = Vector2(it->x, it->y);
+			Vector2 tr = Vector2(nextIt->x, nextIt->y);
+
+			renderer->DrawPolygon2D(bl, br, tl, tr, Rgba::GREEN, VERT_PCU);
+		}
+	}
+
+	for (std::deque<Vector2>::iterator it = m_physx_frame_pts.begin();
+		it != m_physx_frame_pts.end(); ++it)
+	{
+		std::deque<Vector2>::iterator nextIt = std::next(it, 1);
+		if (nextIt != m_physx_frame_pts.end())
+		{
+			Vector2 bl = Vector2(it->x, m_physx_frame_box.mins.y);
+			Vector2 br = Vector2(nextIt->x, m_physx_frame_box.mins.y);
+			Vector2 tl = Vector2(it->x, it->y);
+			Vector2 tr = Vector2(nextIt->x, nextIt->y);
+
+			renderer->DrawPolygon2D(bl, br, tl, tr, Rgba::RED, VERT_PCU);
 		}
 	}
 }
@@ -624,18 +545,48 @@ void Profiler::DestroyInstance()
 	m_profilerInstance = nullptr;
 }
 
-void Profiler::ClearTreeMesh()
+void ProfilerTree::Initialize()
 {
-	for (std::map<ProfilerNode*, Mesh*>::iterator it = m_treeMeshes.begin();
-		it != m_treeMeshes.end(); ++it)
-	{
-		ProfilerNode* treeNode = it->first;
-		treeNode = nullptr;
+	m_root = new ProfilerNode("root", nullptr, 0.f);
+	m_current = m_root;
+}
 
-		Mesh* nodeMesh = it->second;
-		delete nodeMesh;
-		nodeMesh = nullptr;
-	}
+void ProfilerTree::Destroy()
+{
+	delete m_root;
+	m_root = nullptr;
+}
 
-	m_treeMeshes.clear();
+void ProfilerTree::AddNode(ProfilerNode* n)
+{
+	// adding node means to add it as child of current node of tree
+	m_current->AddChild(n);
+}
+
+void ProfilerTree::Trim()
+{
+	// trim all nodes except for root
+	m_root->DeleteChildren();
+	
+	// reset current node
+	m_current = m_root;
+}
+
+std::string ProfilerTree::ProduceText()
+{
+	// produce profiled data in string...
+	// in format of: name | inc percentage
+	std::string res;
+	m_root->ProduceText(res, g_last_frame_hpc);		// make sure this tree is also from last frame
+	return res;
+}
+
+ProfilerTree::ProfilerTree()
+{
+	Initialize();
+}
+
+ProfilerTree::~ProfilerTree()
+{
+	Destroy();
 }

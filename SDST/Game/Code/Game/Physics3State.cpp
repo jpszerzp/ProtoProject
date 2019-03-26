@@ -176,16 +176,17 @@ void Physics3State::PostConstruct()
 
 void Physics3State::Update(float deltaTime)
 {
+	Profiler* profiler = Profiler::GetInstance();
+
 	// my API
-	UpdateInput(deltaTime);				// update input
-	UpdateGameobjects(deltaTime);		// update gameobjects
-	UpdateContacts(deltaTime);
-	UpdateDebug(deltaTime);			
-	UpdateUI();
-	UpdateDelete();
+	profiler->ProfileMyMarkFrame();
+	MyPhysicsUpdate(deltaTime);
+	profiler->ProfileMyMarkEndFrame();
 
 	// physx API
+	profiler->ProfilePhysXMarkFrame();
 	PhysxUpdate(true, deltaTime);
+	profiler->ProfilePhysXMarkEndFrame();
 }
 
 void Physics3State::UpdateMouse(float deltaTime)
@@ -682,6 +683,18 @@ void Physics3State::UpdateDelete()
 			i = i - 1;
 		}
 	}
+}
+
+void Physics3State::MyPhysicsUpdate(float deltaTime)
+{
+	//PROFILE_LOG_SCOPED("My physics path");
+	ProfileLogScoped my_api("Physics3State::MyPhysicsUpdate", true);
+	UpdateInput(deltaTime);				// update input
+	UpdateGameobjects(deltaTime);		// update gameobjects
+	UpdateContacts(deltaTime);
+	UpdateDebug(deltaTime);			
+	UpdateUI();
+	UpdateDelete();
 }
 
 void Physics3State::UpdateGameobjectsCore(float deltaTime)
@@ -1261,6 +1274,8 @@ void Physics3State::ResetCollisionCornerCase(const Vector3& pos1, const Vector3&
 
 void Physics3State::PhysxUpdate(bool interactive, float deltaTime)
 {
+	//PROFILE_LOG_SCOPED("PhysX 4.0 path");
+	ProfileLogScoped physx_api("Physics3State::PhysxUpdate", false);
 	PX_UNUSED(interactive);
 	gContactPositions.clear();
 	gContactImpulses.clear();

@@ -5,19 +5,19 @@
 #include "Engine/Core/Profiler/ProfileSystem.hpp"
 #include "Engine/Core/Profiler/ProfilerNode.hpp"
 
-ProfileLogScoped::ProfileLogScoped(const char* tag)
+ProfileLogScoped::ProfileLogScoped(const char* tag, bool my_physics)
 {
 	m_tag = tag;
+
+	m_my_physics = my_physics;
 
 	// initialize start hpc
 	m_hpcStart = GetPerformanceCounter();
 
-	PROFILE_LOG_SCOPED_PUSH();
-}
-
-ProfileLogScoped::ProfileLogScoped()
-{
-
+	if (m_my_physics)
+		PROFILE_LOG_SCOPED_PUSH();		
+	else
+		PROFILE_LOG_SCOPED_PUSH_PHYSX();
 }
 
 ProfileLogScoped::~ProfileLogScoped()
@@ -25,46 +25,54 @@ ProfileLogScoped::~ProfileLogScoped()
 	// get end hpc
 	m_hpcEnd = GetPerformanceCounter();
 
-	PROFILE_LOG_SCOPED_POP();
+	if (m_my_physics)
+		PROFILE_LOG_SCOPED_POP();		
+	else
+		PROFILE_LOG_SCOPED_POP_PHYSX();
 }
 
 void ProfileLogScoped::ProfilePush()
 {
-	/*
-	// form tree represented by an array
-	int idx = g_gameConfigBlackboard->m_profiledFunctionIdx;
-	if (g_gameConfigBlackboard->m_functionHpcInfoPairs.empty())
-	{
-		// stack starts empty
-		m_node = new ProfilerNode(idx, m_tag, nullptr);
-	}
-	else
-	{
-		int scopeIdx = g_gameConfigBlackboard->m_scopeIdx;
-		ProfilerNode* parentNode = g_gameConfigBlackboard->m_profiledFunctionTree[scopeIdx];
+	// push to normal tree
+	// ...
 
-		m_node = new ProfilerNode(idx, m_tag, parentNode);
-		parentNode->m_childNodes.push_back(m_node);
-		g_gameConfigBlackboard->m_scopeIdx += 1;
-	}
-	g_gameConfigBlackboard->m_profiledFunctionTree[idx] = m_node;
-	g_gameConfigBlackboard->m_profiledFunctionIdx += 1;			// note: 1 larger than the meaningful idx is supposed to be
-
-	// update of map
-	UInt64Vector2 startOnly = UInt64Vector2(m_hpcStart, 0);
-	g_gameConfigBlackboard->m_functionHpcInfoPairs.emplace(m_node, startOnly);
-	*/
+	// this scope has hpc start set
+	ProfilerNode* n = new ProfilerNode(m_tag, g_my_tree->GetCurrent(), m_hpcStart);
+	g_my_tree->AddNode(n);
+	g_my_tree->SetCurrent(n);
 }
 
 void ProfileLogScoped::ProfilePop()
 {
-	/*
-	std::map<ProfilerNode*, UInt64Vector2>::iterator it =
-		g_gameConfigBlackboard->m_functionHpcInfoPairs.find(m_node);
-	it->second.uy = m_hpcEnd;
+	// pop from normal tree
+	// ...
 
-	// return the scope control to parent
-	g_gameConfigBlackboard->m_scopeIdx -= 1;			
-	// when poping root, this effectively set scope idx to -1, so need to reset every frame
-	*/
+	// by pop we really mean to record end hpc
+	ProfilerNode* current = g_my_tree->GetCurrent();
+	current->SetEnd(m_hpcEnd);
+	
+	// move current to parent
+	g_my_tree->SetCurrent(current->GetParent());
+}
+
+void ProfileLogScoped::ProfilePushPhysX()
+{
+	// push to physx tree
+	// ...
+
+	ProfilerNode* n = new ProfilerNode(m_tag, g_phys_tree->GetCurrent(), m_hpcStart);
+	g_phys_tree->AddNode(n);
+	g_phys_tree->SetCurrent(n);
+}
+
+void ProfileLogScoped::ProfilePopPhysX()
+{
+	// pop to physx tree
+	// ...
+
+	ProfilerNode* current = g_phys_tree->GetCurrent();
+	current->SetEnd(m_hpcEnd);
+
+	// move current to parent
+	g_phys_tree->SetCurrent(current->GetParent());
 }
