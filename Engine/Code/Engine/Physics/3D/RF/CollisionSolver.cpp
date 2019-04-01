@@ -179,7 +179,7 @@ void CollisionSolver::SolvePositions(Collision* collisions, uint collision_num, 
 							// and negative otherwise (because we're
 							// subtracting the resolution)..
 							collisions[i].m_penetration += DotProduct(
-								deltaPosition, collisions[i].m_normal) * (b?1:-1);
+								deltaPosition, collisions[i].m_normal) * (b ? 1 : -1);
 						}
 					}
 				}

@@ -814,31 +814,7 @@ void Physics3State::UpdateContactGeneration()
 			CollisionSensor::ConvexVsHalfPlane(*c_obj_0, *pl, &m_keep);
 		}
 
-		/*
-		// ...vs box
-		for (std::vector<CollisionBox*>::size_type idx1 = 0; idx1 < m_boxes.size(); ++idx1)
-		{
-			if (!m_keep.AllowMoreCollision())
-				return;
-
-			CollisionBox* bx = m_boxes[idx1];
-
-			CollisionSensor::ConvexVsBox(*c_obj_0, *bx, &m_keep);
-		}
-		*/
-
-		/*
-		// ...vs sphere
-		for (std::vector<CollisionSphere*>::size_type idx1 = 0; idx1 < m_spheres.size(); ++idx1)
-		{
-			if (!m_keep.AllowMoreCollision())
-				return;
-
-			CollisionSphere* sph = m_spheres[idx1];
-
-			CollisionSensor::ConvexVsSphere(*c_obj_0, *sph, &m_keep);
-		}
-		*/
+		// convex vs box and shpere need debug...
 	}
 }
 

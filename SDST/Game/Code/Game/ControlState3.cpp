@@ -66,27 +66,82 @@ ControlState3::ControlState3()
 	hull_planes.push_back(p6);
 	ConvexHull* cHull = new ConvexHull(hull_planes);
 
-	CollisionConvexObject* cObj = new CollisionConvexObject(*cHull, "wireframe", "Data/Images/white.png");
+	m_convex_0 = new CollisionConvexObject(*cHull, "wireframe", "Data/Images/white.png");
+	m_convex_1 = new CollisionConvexObject(*cHull, "wireframe", "Data/Images/white.png");
 
-	const float& mass = cObj->GetInitialMass();
-	const Vector3& true_center = Vector3(0.f, 3.f, 0.f);			 // com + (wrap_center - com); based on ORIGIN
-	CollisionRigidBody* rb = new CollisionRigidBody(mass, true_center, Vector3::ZERO);
-	rb->SetAwake(true);
-	rb->SetSleepable(false);
+	const float& mass_0 = m_convex_0->GetInitialMass();
+	const Vector3& true_center_0 = Vector3::ZERO;			 // com + (wrap_center - com); based on ORIGIN
+	CollisionRigidBody* convex_rb_0 = new CollisionRigidBody(mass_0, true_center_0, Vector3::ZERO);
+	convex_rb_0->SetAwake(true);
+	convex_rb_0->SetSleepable(false);
+	m_convex_0->AttachToRigidBody(convex_rb_0);
 
-	cObj->AttachToRigidBody(rb);
-	m_convex_objs.push_back(cObj);
-	m_controlled_0 = cObj;
+	const float& mass_1 = m_convex_1->GetInitialMass();
+	const Vector3& true_center_1 = Vector3(0.f, 10.f, 0.f);
+	CollisionRigidBody* convex_rb_1 = new CollisionRigidBody(mass_1, true_center_1, Vector3::ZERO);
+	convex_rb_1->SetAwake(true);
+	convex_rb_1->SetSleepable(false);
+	m_convex_1->AttachToRigidBody(convex_rb_1);
 
-	CollisionPlane* plane_0 = new CollisionPlane(Vector2(20.f), "quad_pcu_20", Vector3(0.f, 1.f, 0.f), 0.f, "wireframe", "Data/Images/white.png");
+	// planes
+	m_plane_0 = new CollisionPlane(Vector2(20.f), "quad_pcu_20", Vector3(0.f, 1.f, 0.f), 0.f, "wireframe", "Data/Images/white.png");
+	m_plane_1 = new CollisionPlane(Vector2(20.f), "quad_pcu_20", Vector3(0.f, 1.f, 0.f), 10.f, "wireframe", "Data/Images/white.png");
 
-	rb = new CollisionRigidBody(1.f, Vector3::ZERO, Vector3(90.f, 0.f, 0.f));
-	rb->SetAwake(true);
-	rb->SetSleepable(false);
+	CollisionRigidBody* plane_rb_0 = new CollisionRigidBody(1.f, Vector3::ZERO, Vector3(90.f, 0.f, 0.f));
+	plane_rb_0->SetAwake(true);
+	plane_rb_0->SetSleepable(false);
+	m_plane_0->AttachToRigidBody(plane_rb_0);
+	//m_planes.push_back(plane_0);
+	m_controlled_0 = m_plane_0;
 
-	plane_0->AttachToRigidBody(rb);
-	m_planes.push_back(plane_0);
-	m_controlled_1 = plane_0;
+	CollisionRigidBody* plane_rb_1 = new CollisionRigidBody(1.f, Vector3(0.f, 10.f, 0.f), Vector3(90.f, 0.f, 0.f));
+	plane_rb_1->SetAwake(true);
+	plane_rb_1->SetSleepable(false);
+	m_plane_1->AttachToRigidBody(plane_rb_1);
+	//m_planes.push_back(plane_1);
+	m_controlled_1 = m_plane_1;
+
+	// spheres
+	m_sphere_0 = new CollisionSphere(1.f, "wireframe", "Data/Images/white.png");
+	m_sphere_1 = new CollisionSphere(1.f, "wireframe", "Data/Images/white.png");
+
+	CollisionRigidBody* sphere_rb_0 = new CollisionRigidBody(1.f, Vector3::ZERO, Vector3::ZERO);
+	sphere_rb_0->SetAwake(true);
+	sphere_rb_0->SetSleepable(false);
+	m_sphere_0->AttachToRigidBody(sphere_rb_0);
+
+	CollisionRigidBody* sphere_rb_1 = new CollisionRigidBody(1.f, Vector3(0.f, 10.f, 0.f), Vector3::ZERO);
+	sphere_rb_1->SetAwake(true);
+	sphere_rb_1->SetSleepable(false);
+	m_sphere_1->AttachToRigidBody(sphere_rb_1);
+
+	// boxes
+	m_box_0 = new CollisionBox(Vector3(.5f), "wireframe", "Data/Images/white.png");
+	m_box_1 = new CollisionBox(Vector3(.5f), "wireframe", "Data/Images/white.png");
+
+	CollisionRigidBody* box_rb_0 = new CollisionRigidBody(1.f, Vector3::ZERO, Vector3::ZERO);
+	box_rb_0->SetAwake(true);
+	box_rb_0->SetSleepable(false);
+	m_box_0->AttachToRigidBody(box_rb_0);
+
+	CollisionRigidBody* box_rb_1 = new CollisionRigidBody(1.f, Vector3(0.f, 10.f, 0.f), Vector3::ZERO);
+	box_rb_1->SetAwake(true);
+	box_rb_1->SetSleepable(false);
+	m_box_1->AttachToRigidBody(box_rb_1);
+
+	// aabb
+	m_aabb_0 = new CollisionBox(Vector3(.5f), "wireframe", "Data/Images/white.png");
+	m_aabb_1 = new CollisionBox(Vector3(.5f), "wireframe", "Data/Images/white.png");
+
+	CollisionRigidBody* aabb_rb_0 = new CollisionRigidBody(1.f, Vector3::ZERO, Vector3::ZERO);
+	aabb_rb_0->SetAwake(true);
+	aabb_rb_0->SetSleepable(false);
+	m_aabb_0->AttachToRigidBody(aabb_rb_0);
+
+	CollisionRigidBody* aabb_rb_1 = new CollisionRigidBody(1.f, Vector3(0.f, 10.f, 0.f), Vector3::ZERO);
+	aabb_rb_1->SetAwake(true);
+	aabb_rb_1->SetSleepable(false);
+	m_aabb_1->AttachToRigidBody(aabb_rb_1);
 
 	// ui
 	BitmapFont* font = renderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
@@ -192,76 +247,69 @@ void ControlState3::UpdateKeyboard(float deltaTime)
 	else
 		m_controlled_0->GetRigidBody()->SetLinearVelocity(Vector3::ZERO);
 
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_2))
+	if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_2) && m_cid_0 != CID_AABB)
 		m_controlled_0->GetRigidBody()->SetAngularVelocity(Vector3(30.f, 0.f, 0.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_5))
+	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_5) && m_cid_0 != CID_AABB)
 		m_controlled_0->GetRigidBody()->SetAngularVelocity(Vector3(0.f, 30.f, 0.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_8))
+	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_8) && m_cid_0 != CID_AABB)
 		m_controlled_0->GetRigidBody()->SetAngularVelocity(Vector3(0.f, 0.f, 30.f));
 	else 
 		m_controlled_0->GetRigidBody()->SetAngularVelocity(Vector3::ZERO);
 
+	// control 0
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_TAB))
 	{
-		switch (m_cid)
+		switch (m_cid_0)
 		{
 		case CID_PLANE:
-			if (!m_boxes.empty())
-				m_controlled_1 = m_boxes[0];
-			else
-			{
-				CollisionBox* cbox = new CollisionBox(Vector3(.5f), "wireframe", "Data/Images/white.png");
-
-				CollisionRigidBody* rb = new CollisionRigidBody(1.f, Vector3::ZERO, Vector3::ZERO);
-				rb->SetAwake(true);
-				rb->SetSleepable(false);
-
-				cbox->AttachToRigidBody(rb);
-
-				m_boxes.push_back(cbox);
-
-				m_controlled_1 = cbox;
-			}
-
-			m_cid = CID_BOX;
+			m_controlled_0 = m_sphere_0;
+			m_cid_0 = CID_SPHERE;
 			break;
 		case CID_BOX:
-			if (!m_spheres.empty())
-				m_controlled_1 = m_spheres[0];
-			else
-			{
-				CollisionSphere* csph = new CollisionSphere(1.f, "wireframe", "Data/Images/white.png");
-
-				CollisionRigidBody* rb = new CollisionRigidBody(1.f, Vector3::ZERO, Vector3::ZERO);
-				rb->SetAwake(true);
-				rb->SetSleepable(false);
-
-				csph->AttachToRigidBody(rb);
-
-				m_spheres.push_back(csph);
-
-				m_controlled_1 = csph;
-			}
-
-			m_cid = CID_SPHERE;
+			m_controlled_0 = m_plane_0;
+			m_cid_0 = CID_PLANE;
 			break;
 		case CID_SPHERE:
-			if (!m_planes.empty())
-				m_controlled_1 = m_planes[0];
-			else
-			{
-				CollisionPlane* plane_0 = new CollisionPlane(Vector2(20.f), "quad_pcu_20", Vector3(0.f, 1.f, 0.f), 0.f, "wireframe", "Data/Images/white.png");
+			m_controlled_0 = m_convex_0;
+			m_cid_0 = CID_CONVEX;
+			break;
+		case CID_CONVEX:
+			m_controlled_0 = m_aabb_0;
+			m_cid_0 = CID_AABB;
+			break;
+		case CID_AABB:
+			m_controlled_0 = m_box_0;
+			m_cid_0 = CID_BOX;
+			break;
+		default:
+			break;
+		}
+	}
 
-				CollisionRigidBody* rb = new CollisionRigidBody(1.f, Vector3::ZERO, Vector3(90.f, 0.f, 0.f));
-				rb->SetAwake(true);
-				rb->SetSleepable(false);
-
-				plane_0->AttachToRigidBody(rb);
-				m_planes.push_back(plane_0);
-				m_controlled_1 = plane_0;
-			}
-
-			m_cid = CID_PLANE;
+	// control 1 
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_SHIFT))
+	{
+		switch (m_cid_1)
+		{
+		case CID_PLANE:
+			m_controlled_1 = m_sphere_1;
+			m_cid_1 = CID_SPHERE;
+			break;
+		case CID_BOX:
+			m_controlled_1 = m_plane_1;
+			m_cid_1 = CID_PLANE;
+			break;
+		case CID_SPHERE:
+			m_controlled_1 = m_convex_1;
+			m_cid_1 = CID_CONVEX;
+			break;
+		case CID_CONVEX:
+			m_controlled_1 = m_aabb_1;
+			m_cid_1 = CID_AABB;
+			break;
+		case CID_AABB:
+			m_controlled_1 = m_box_1;
+			m_cid_1 = CID_BOX;
 			break;
 		default:
 			break;
@@ -318,51 +366,88 @@ void ControlState3::UpdateContacts(float deltaTime)
 	m_keep.m_global_restitution = .1f;
 	m_keep.m_tolerance = .1f;
 
-	for (std::vector<CollisionConvexObject*>::size_type idx0 = 0; idx0 < m_convex_objs.size(); ++idx0)
+	if (!m_keep.AllowMoreCollision())
+		return;
+
+	if (m_cid_0 == CID_PLANE && m_cid_1 == CID_PLANE)
 	{
-		CollisionConvexObject* c_obj_0 = m_convex_objs[idx0];
-
-		if (m_cid == CID_PLANE)
-		{
-			// convex vs plane
-			for (std::vector<CollisionPlane*>::size_type idx1 = 0; idx1 < m_planes.size(); ++idx1)
-			{
-				if (!m_keep.AllowMoreCollision())
-					return;
-
-				CollisionPlane* pl = m_planes[idx1];
-
-				CollisionSensor::ConvexVsHalfPlane(*c_obj_0, *pl, &m_keep);
-			}
-		}
-
-		// ...vs box
-		if (m_cid == CID_BOX)
-		{
-			for (std::vector<CollisionBox*>::size_type idx1 = 0; idx1 < m_boxes.size(); ++idx1)
-			{
-				if (!m_keep.AllowMoreCollision())
-					return;
-
-				CollisionBox* bx = m_boxes[idx1];
-
-				CollisionSensor::ConvexVsBox(*c_obj_0, *bx, &m_keep);
-			}
-		}
-
-		if (m_cid == CID_SPHERE)
-		{
-			// ... vs sphere
-			for (std::vector<CollisionSphere*>::size_type idx1 = 0; idx1 < m_spheres.size(); ++idx1)
-			{
-				if (!m_keep.AllowMoreCollision())
-					return;
-
-				CollisionSphere* sph = m_spheres[idx1];
-
-				CollisionSensor::ConvexVsSphere(*c_obj_0, *sph, &m_keep);
-			}
-		}
+		// do nothing...
+	}
+	else if (m_cid_0 == CID_PLANE && m_cid_1 == CID_BOX)
+		CollisionSensor::BoxVsHalfPlane(*m_box_1, *m_plane_0, &m_keep);
+	else if (m_cid_0 == CID_PLANE && m_cid_1 == CID_SPHERE)
+		CollisionSensor::SphereVsPlane(*m_sphere_1, *m_plane_0, &m_keep);
+	else if (m_cid_0 == CID_PLANE && m_cid_1 == CID_CONVEX)
+		CollisionSensor::ConvexVsHalfPlane(*m_convex_1, *m_plane_0, &m_keep);
+	else if (m_cid_0 == CID_PLANE && m_cid_1 == CID_AABB)
+	{
+		// nothing yet...
+	}
+	else if (m_cid_0 == CID_BOX && m_cid_1 == CID_PLANE)
+		CollisionSensor::BoxVsHalfPlane(*m_box_0, *m_plane_1, &m_keep);
+	else if (m_cid_0 == CID_BOX && m_cid_1 == CID_SPHERE)
+		CollisionSensor::BoxVsSphere(*m_box_0, *m_sphere_1, &m_keep);
+	else if (m_cid_0 == CID_BOX && m_cid_1 == CID_BOX)
+		CollisionSensor::BoxVsBox(*m_box_0, *m_box_1, &m_keep);
+	else if (m_cid_0 == CID_BOX && m_cid_1 == CID_CONVEX)
+	{
+		// do nothing...
+	}
+	else if (m_cid_0 == CID_BOX && m_cid_1 == CID_AABB)
+	{
+		// do nothing...
+	}
+	else if (m_cid_0 == CID_SPHERE && m_cid_1 == CID_PLANE)
+		CollisionSensor::SphereVsPlane(*m_sphere_0, *m_plane_1, &m_keep);
+	else if (m_cid_0 == CID_SPHERE && m_cid_1 == CID_SPHERE)
+		CollisionSensor::SphereVsSphere(*m_sphere_0, *m_sphere_1, &m_keep);
+	else if (m_cid_0 == CID_SPHERE && m_cid_1 == CID_BOX)
+		CollisionSensor::BoxVsSphere(*m_box_1, *m_sphere_0, &m_keep);
+	else if (m_cid_0 == CID_SPHERE && m_cid_1 == CID_CONVEX)
+	{
+		// do nothing...
+	}
+	else if (m_cid_0 == CID_SPHERE && m_cid_1 == CID_AABB)
+	{
+		// do nothing...
+	}
+	else if (m_cid_0 == CID_CONVEX && m_cid_1 == CID_PLANE)
+		CollisionSensor::ConvexVsHalfPlane(*m_convex_0, *m_plane_1, &m_keep);
+	else if (m_cid_0 == CID_CONVEX && m_cid_1 == CID_BOX)
+	{
+		// do nothing...
+	}
+	else if (m_cid_0 == CID_CONVEX && m_cid_1 == CID_SPHERE)
+	{
+		// do nothing...
+	}
+	else if (m_cid_0 == CID_CONVEX && m_cid_1 == CID_CONVEX)
+	{
+		// do nothing...
+	}
+	else if (m_cid_0 == CID_CONVEX && m_cid_1 == CID_AABB)
+	{
+		// nothing yet...
+	}
+	else if (m_cid_0 == CID_AABB && m_cid_1 == CID_AABB)
+	{
+		// nothing yet...
+	}
+	else if (m_cid_0 == CID_AABB && m_cid_1 == CID_BOX)
+	{
+		// nothing yet...
+	}
+	else if (m_cid_0 == CID_AABB && m_cid_1 == CID_CONVEX)
+	{
+		// nothing yet...
+	}
+	else if (m_cid_0 == CID_AABB && m_cid_1 == CID_SPHERE)
+	{
+		// nothing yet..
+	}
+	else if (m_cid_0 == CID_AABB && m_cid_1 == CID_PLANE)
+	{
+		// nothing yet...
 	}
 }
 

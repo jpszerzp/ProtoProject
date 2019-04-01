@@ -139,7 +139,7 @@ void CollisionSphere::AttachToRigidBody(CollisionRigidBody* rb)
 	SetPrimitiveTransformMat4(rb->GetTransformMat4());
 }
 
-CollisionBox::CollisionBox(const Vector3& half, const std::string& fp, const std::string& tx)
+CollisionBox::CollisionBox(const Vector3& half, const std::string& fp, const std::string& tx/*, const bool aabb*/)
 	: m_half_size(half)
 {
 	Renderer* renderer = Renderer::GetInstance();
@@ -152,8 +152,11 @@ CollisionBox::CollisionBox(const Vector3& half, const std::string& fp, const std
 	Rgba tint = Rgba::WHITE;
 	tint.GetAsFloats(tintV4.x, tintV4.y, tintV4.z, tintV4.w);
 	SetTint(tintV4);
+
+	//m_aabb = aabb;
 }
 
+/*
 void CollisionBox::Update(float deltaTime)
 {
 	// take rigid body and integrate
@@ -163,8 +166,9 @@ void CollisionBox::Update(float deltaTime)
 	SetPrimitiveTransformMat4(GetRigidBody()->GetTransformMat4());
 
 	// cache verts in world space
-	CacheWorldVerts();
+	//CacheWorldVerts();
 }
+*/
 
 void CollisionBox::CacheWorldVerts()
 {
@@ -189,14 +193,22 @@ void CollisionBox::CacheWorldVerts()
 	Vector3 v6 = centre + xdir * m_half_size.x - ydir * m_half_size.y - zdir * m_half_size.z;
 	Vector3 v7 = centre - xdir * m_half_size.x + ydir * m_half_size.y - zdir * m_half_size.z;
 	Vector3 v8 = centre - xdir * m_half_size.x - ydir * m_half_size.y - zdir * m_half_size.z;
-	m_world_verts.push_back(v1);
-	m_world_verts.push_back(v2);
-	m_world_verts.push_back(v3);
-	m_world_verts.push_back(v4);
-	m_world_verts.push_back(v5);
-	m_world_verts.push_back(v6);
-	m_world_verts.push_back(v7);
-	m_world_verts.push_back(v8);
+	//m_world_verts.push_back(v1);
+	//m_world_verts.push_back(v2);
+	//m_world_verts.push_back(v3);
+	//m_world_verts.push_back(v4);
+	//m_world_verts.push_back(v5);
+	//m_world_verts.push_back(v6);
+	//m_world_verts.push_back(v7);
+	//m_world_verts.push_back(v8);
+	m_world_verts[0] = v1;
+	m_world_verts[1] = v2;
+	m_world_verts[2] = v3;
+	m_world_verts[3] = v4;
+	m_world_verts[4] = v5;
+	m_world_verts[5] = v6;
+	m_world_verts[6] = v7;
+	m_world_verts[7] = v8;
 }
 
 void CollisionBox::AttachToRigidBody(CollisionRigidBody* rb)

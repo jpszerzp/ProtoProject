@@ -22,14 +22,12 @@ TheGame::TheGame()
 	InitializeTextures();
 
 	DebugRenderStartup();
-	//ProfilerSystemInitialize();
 }
 
 
 TheGame::~TheGame()
 {
 	DebugRenderShutdown();
-	//ProfilerSystemShutDown();
 
 	delete m_states;
 	m_states = nullptr;

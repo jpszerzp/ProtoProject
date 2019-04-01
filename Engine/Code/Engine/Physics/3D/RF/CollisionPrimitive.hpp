@@ -91,12 +91,13 @@ class CollisionBox : public CollisionPrimitive
 {
 	Vector3 m_half_size;
 	std::vector<Vector3> m_world_verts;
+	//bool m_aabb;
 
 public:
-	CollisionBox(const Vector3& half, const std::string& fp = "default", const std::string& tx = "Data/Images/perspective_test.png");
+	CollisionBox(const Vector3& half, const std::string& fp = "default", const std::string& tx = "Data/Images/perspective_test.png"/*, const bool aabb = false*/);
 	~CollisionBox(){}
 
-	void Update(float deltaTime) override;
+	//void Update(float deltaTime) override;
 	void CacheWorldVerts();
 
 	void AttachToRigidBody(CollisionRigidBody* rb) override;
