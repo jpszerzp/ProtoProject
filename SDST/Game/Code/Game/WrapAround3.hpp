@@ -28,7 +28,6 @@ public:
 	// storage
 	std::vector<CollisionPrimitive*> m_primitives;
 	std::vector<PhysXObject*> m_phys_obj;
-	std::vector<Point*> m_particles;
 
 	// state reference
 	Physics3State* m_physState = nullptr;

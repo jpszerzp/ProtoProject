@@ -4,6 +4,13 @@
 #include "Engine/Core/Quaternion.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
 
+enum eParticleVerlet
+{
+	VERLET_VEL_P,
+	VERLET_BASIC_P,
+	VERLET_P_NUM,
+};
+
 class CollisionEntity
 {
 protected:
@@ -75,6 +82,12 @@ public:
 class CollisionRigidBody : public CollisionEntity
 {
 protected:
+	// if this body is for particle...
+	// if yes, rigid body works effectively like an entity...
+	bool m_particle = false;
+	bool m_verlet = false;
+	eParticleVerlet m_verlet_p = VERLET_P_NUM;
+
 	Quaternion m_orientation;
 
 	Vector3 m_ang_vel = Vector3::ZERO;
@@ -100,10 +113,12 @@ public:
 	void SetTensor(const Matrix33& tensor) override { m_tensor = tensor; }
 	void SetInvTensor(const Matrix33& inv_tensor) override { m_inv_tensor = inv_tensor; }
 	void SetInvTensorWorld(const Matrix33& inv_tensor_world) override { m_inv_tensor_world = inv_tensor_world; }
-	void SetAngularVelocity(const Vector3& ang_vel) override { m_ang_vel = ang_vel; }
+	void SetAngularVelocity(const Vector3& ang_vel) override;
 	void SetAwake(bool awake) override;
-
 	void SetOrientation(const Quaternion& q) { m_orientation = q; }
+	void SetParticle(bool particle) { m_particle = particle; }
+	void SetVerlet(bool val) { m_verlet = val; }
+	void SetVerletScheme(eParticleVerlet val) { m_verlet_p = val; }
 
 	Quaternion GetOrientation() const { return m_orientation; }
 	void GetIITWorld(Matrix33* iitw) const;

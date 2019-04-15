@@ -53,10 +53,11 @@ public:
 	void SetTexture(Texture* texture) { m_texture = texture; }
 	void SetTint(const Vector4& tint) { m_tint = tint; }
 	void SetShouldDelete(const bool& value) { m_should_delete = value; }
+	virtual void SetRigidBodyPosition(const Vector3&){}		// ...need to consider scale in general case when this is implemented 
 
 	virtual void Update(float deltaTime);
 
-	void Render(Renderer* renderer);
+	virtual void Render(Renderer* renderer);
 
 	CollisionRigidBody* GetRigidBody() const { return m_rigid_body; }
 	float GetBodyMass() const { return m_rigid_body->GetMass(); }
@@ -68,6 +69,27 @@ public:
 	Vector4 GetTint() const { return m_tint; }
 	Vector3 GetCenter() const { return m_rigid_body->GetCenter(); }
 	bool ShouldDelete() const { return m_should_delete; }
+};
+
+class CollisionPoint : public CollisionPrimitive
+{
+	float m_size;
+
+public:
+	CollisionPoint(const float& size, const std::string& fp = "default", const std::string& tx = "Data/Images/white.png");
+
+	// tensor for a singular point is not meaningful, different from other primitives
+	void AttachToRigidBody(CollisionRigidBody* rb) override;
+
+	// set point body position, affecting position of primitive...
+	// may be turned to not virtual later...
+	void SetRigidBodyPosition(const Vector3& pos) override;
+
+	void Update(float dt) override;
+
+	void Render(Renderer* renderer) override;
+
+	float GetSize() const { return m_size; }
 };
 
 class CollisionSphere : public CollisionPrimitive

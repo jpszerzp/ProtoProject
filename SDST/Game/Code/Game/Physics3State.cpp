@@ -145,12 +145,11 @@ Physics3State::Physics3State()
 	// verlet
 	m_wraparound_verlet = new WrapAround(Vector3(-10.f, 200.f, -10.f), Vector3(0.f, 250.f, 0.f));
 	m_wraparound_verlet->m_particle = true;
-	Ballistics* free_ballistics = SetupBallistics(FREEFALL, Vector3(-7.f, 240.f, -5.f), true, Rgba::CYAN);
-	Ballistics* verlet_vel_ballistics = SetupBallistics(FREEFALL, Vector3(-3.f, 240.f, -5.f), true, Rgba::PINK);
-	verlet_vel_ballistics->m_physEntity->SetVerlet(true);
-	verlet_vel_ballistics->m_physEntity->SetVerletScheme(VELOCITY_VERLET);
-	m_wraparound_verlet->m_particles.push_back(free_ballistics);
-	m_wraparound_verlet->m_particles.push_back(verlet_vel_ballistics);
+	CollisionPoint* free = WrapAroundTestPoint(m_wraparound_verlet, false, false, true, Vector3(-7.f, 240.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
+	CollisionPoint* verlet_vel = WrapAroundTestPoint(m_wraparound_verlet, false, false, true, Vector3(-3.f, 240.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
+	free->GetRigidBody()->SetVerlet(false);		// no verlet scheme for it as it is not verlet particle
+	verlet_vel->GetRigidBody()->SetVerlet(true);
+	verlet_vel->GetRigidBody()->SetVerletScheme(VERLET_VEL_P);
 
 	// inspection
 	m_inspection.push_back(m_cameraInitialPos);
@@ -789,9 +788,8 @@ void Physics3State::UpdateGameobjectsDynamics(float deltaTime)
 	for (std::vector<CollisionConvexObject*>::size_type idx = 0; idx < m_convex_objs.size(); ++idx)
 		m_convex_objs[idx]->Update(deltaTime);
 
-	// particles
-	for (std::vector<Point*>::size_type idx = 0; idx < m_pps.size(); ++idx)
-		m_pps[idx]->Update(deltaTime);
+	for (std::vector<CollisionPoint*>::size_type idx = 0; idx < m_points.size(); ++idx)
+		m_points[idx]->Update(deltaTime);
 }
 
 void Physics3State::UpdateContacts(float deltaTime)
@@ -930,9 +928,8 @@ void Physics3State::RenderGameobjects(Renderer* renderer)
 	for (std::vector<CollisionConvexObject*>::size_type idx = 0; idx < m_convex_objs.size(); ++idx)
 		m_convex_objs[idx]->Render(renderer);
 
-	// particles
-	for (std::vector<Point*>::size_type idx = 0; idx < m_pps.size(); ++idx)
-		m_pps[idx]->Render(renderer);
+	for (std::vector<CollisionPoint*>::size_type idx = 0; idx < m_points.size(); ++idx)
+		m_points[idx]->Render(renderer);
 }
 
 void Physics3State::RenderWrapArounds(Renderer* renderer)
@@ -1009,6 +1006,44 @@ CollisionSphere* Physics3State::WrapAroundTestSphere(WrapAround* wpa, bool give_
 	wpa->m_primitives.push_back(sph);
 
 	return sph;
+}
+
+CollisionPoint* Physics3State::WrapAroundTestPoint(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, 
+	bool register_g, const Vector3& position, const Vector3& rot, const Vector3& scale, const bool& awake, const bool& sleepable)
+{
+	// pt scale should be uniform
+	CollisionPoint* pt = new CollisionPoint(scale.x);
+
+	CollisionRigidBody* rb = new CollisionRigidBody(1.f, position, rot);
+	rb->SetParticle(true);			// particle 
+	rb->SetAwake(awake);
+	rb->SetSleepable(sleepable);
+
+	pt->AttachToRigidBody(rb);
+
+	m_points.push_back(pt);
+
+	if(register_g)
+	{
+		Vector3 gravity = (Vector3::GRAVITY / 2.f);
+		rb->SetBaseLinearAcceleration(gravity);
+	}
+
+	if (give_lin_vel)
+		rb->SetLinearVelocity(GetRandomVector3() * 5.f);
+
+	if (give_ang_vel)
+	{
+		float ang_v_x = GetRandomFloatInRange(-5.f, 5.f);
+		float ang_v_y = GetRandomFloatInRange(-5.f, 5.f);
+		float ang_v_z = GetRandomFloatInRange(-5.f, 5.f);
+		rb->SetAngularVelocity(Vector3(ang_v_x, ang_v_y, ang_v_z));
+	}
+
+	// add to primitive vector in wpa
+	wpa->m_primitives.push_back(pt);
+
+	return pt;
 }
 
 CollisionBox* Physics3State::WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, 
@@ -1399,21 +1434,6 @@ std::pair<PhysXObject*, PhysXObject*> Physics3State::ResetCollisionCornerCasePhy
 	}
 
 	return m_pair;
-}
-
-Ballistics* Physics3State::SetupBallistics(eBallisticsType type, Vector3 pos, bool frozen, Rgba color)
-{
-	// note: ballistics is point by nature, so non-rigid
-	Ballistics* b = new Ballistics(type, pos, frozen, color);
-	b->m_physDriven = true;
-	m_gameObjects.push_back(b);
-	m_pps.push_back(b);
-
-	b->m_physEntity->SetGameobject(b);
-	b->m_physEntity->SetNetForcePersistent(true);			// do NOT clear force every frame
-	b->m_physEntity->m_body_shape = SHAPE_POINT;
-
-	return b;
 }
 
 void Physics3State::PhysxUpdate(bool interactive, float deltaTime)

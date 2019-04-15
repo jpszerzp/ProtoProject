@@ -95,73 +95,62 @@ void WrapAround::UpdateWraparound()
 	}
 	else
 	{
-		for (Point* pp : m_particles)
+		for (CollisionPrimitive* primitive : m_primitives)
 		{
-			if (pp->GetEntity()->GetEntityCenter().x < m_bounds.m_min.x)
+			// surpassing xmin
+			if (primitive->GetBasisAndPosition(3).x < m_bounds.m_min.x)
 			{
 				float pos_x = m_bounds.m_max.x;
-				float pos_y = pp->GetEntity()->GetEntityCenter().y;
-				float pos_z = pp->GetEntity()->GetEntityCenter().z;
+				float pos_y = primitive->GetBasisAndPosition(3).y;
+				float pos_z = primitive->GetBasisAndPosition(3).z;
 
-				pp->GetEntity()->SetEntityCenter(Vector3(pos_x, pos_y, pos_z));
+				primitive->SetRigidBodyPosition(Vector3(pos_x, pos_y, pos_z));
 			}
 
-			if (pp->GetEntity()->GetEntityCenter().x > m_bounds.m_max.x)
+			if (primitive->GetBasisAndPosition(3).x > m_bounds.m_max.x)
 			{
 				float pos_x = m_bounds.m_min.x;
-				float pos_y = pp->GetEntity()->GetEntityCenter().y;
-				float pos_z = pp->GetEntity()->GetEntityCenter().z;
+				float pos_y = primitive->GetBasisAndPosition(3).y;
+				float pos_z = primitive->GetBasisAndPosition(3).z;
 
-				pp->GetEntity()->SetEntityCenter(Vector3(pos_x, pos_y, pos_z));
+				primitive->SetRigidBodyPosition(Vector3(pos_x, pos_y, pos_z));
 			}
 
-			if (pp->GetEntity()->GetEntityCenter().y < m_bounds.m_min.y)
+			if (primitive->GetBasisAndPosition(3).y < m_bounds.m_min.y)
 			{
-				float pos_x = pp->GetEntity()->GetEntityCenter().x;
+				float pos_x = primitive->GetBasisAndPosition(3).x;
 				float pos_y = m_bounds.m_max.y;
-				float pos_z = pp->GetEntity()->GetEntityCenter().z;
+				float pos_z = primitive->GetBasisAndPosition(3).z;
 
-				pp->GetEntity()->SetEntityCenter(Vector3(pos_x, pos_y, pos_z));
+				primitive->SetRigidBodyPosition(Vector3(pos_x, pos_y, pos_z));
 			}
 
-			if (pp->GetEntity()->GetEntityCenter().y > m_bounds.m_max.y)
+			if (primitive->GetBasisAndPosition(3).y > m_bounds.m_max.y)
 			{
-				float pos_x = pp->GetEntity()->GetEntityCenter().x;
+				float pos_x = primitive->GetBasisAndPosition(3).x;
 				float pos_y = m_bounds.m_min.y;
-				float pos_z = pp->GetEntity()->GetEntityCenter().z;
+				float pos_z = primitive->GetBasisAndPosition(3).z;
 
-				pp->GetEntity()->SetEntityCenter(Vector3(pos_x, pos_y, pos_z));
+				primitive->SetRigidBodyPosition(Vector3(pos_x, pos_y, pos_z));
 			}
 
-			if (pp->GetEntity()->GetEntityCenter().z < m_bounds.m_min.z)
+			if (primitive->GetBasisAndPosition(3).z < m_bounds.m_min.z)
 			{
-				float pos_x = pp->GetEntity()->GetEntityCenter().x;
-				float pos_y = pp->GetEntity()->GetEntityCenter().y;
+				float pos_x = primitive->GetBasisAndPosition(3).x;
+				float pos_y = primitive->GetBasisAndPosition(3).y;
 				float pos_z = m_bounds.m_max.z;
 
-				pp->GetEntity()->SetEntityCenter(Vector3(pos_x, pos_y, pos_z));
+				primitive->SetRigidBodyPosition(Vector3(pos_x, pos_y, pos_z));
 			}
 
-			if (pp->GetEntity()->GetEntityCenter().z > m_bounds.m_max.z)
+			if (primitive->GetBasisAndPosition(3).z > m_bounds.m_max.z)
 			{
-				float pos_x = pp->GetEntity()->GetEntityCenter().x;
-				float pos_y = pp->GetEntity()->GetEntityCenter().y;
+				float pos_x = primitive->GetBasisAndPosition(3).x;
+				float pos_y = primitive->GetBasisAndPosition(3).y;
 				float pos_z = m_bounds.m_min.z;
 
-				pp->GetEntity()->SetEntityCenter(Vector3(pos_x, pos_y, pos_z));
+				primitive->SetRigidBodyPosition(Vector3(pos_x, pos_y, pos_z));
 			}
-
-			pp->GetEntity()->m_entityTransform.SetLocalPosition(pp->GetEntity()->GetEntityCenter());
-			pp->GetEntity()->m_boundSphere.m_transform.SetLocalPosition(pp->GetEntity()->GetEntityCenter());
-			pp->GetEntity()->m_boxBoundTransform.SetLocalPosition(pp->GetEntity()->GetEntityCenter());
-
-			// for point this is empty
-			pp->GetEntity()->UpdatePrimitives();
-
-			// render
-			pp->m_renderable->m_transform = pp->GetEntity()->GetEntityTransform();
-
-			pp->UpdateBasis();
 		}
 	}
 }

@@ -26,6 +26,16 @@ void CollisionPrimitive::AttachToRigidBody(CollisionRigidBody*)
 
 }
 
+//void CollisionPrimitive::SetRigidBodyPosition(const Vector3& pos)
+//{
+//	m_rigid_body->SetCenter(pos);
+//	
+//	// cache
+//	m_rigid_body->CacheData();
+//
+//	// transform
+//	m_transform_mat = m_rigid_body->GetTransformMat4();
+//}
 
 void CollisionPrimitive::Update(float deltaTime)
 {
@@ -53,6 +63,7 @@ void CollisionPrimitive::Render(Renderer* renderer)
 	renderer->m_objectData.model = m_transform_mat;
 
 	// draw
+	renderer->SetPointSize(1.f);
 	renderer->DrawMesh(m_mesh);
 }
 
@@ -82,6 +93,66 @@ Vector3 CollisionPrimitive::GetBasisAndPosition(uint index) const
 		ASSERT_OR_DIE(false, "Invalid index for axis");
 
 	return res;
+}
+
+
+CollisionPoint::CollisionPoint(const float& size, const std::string& fp, const std::string& tx)
+	: m_size(size)
+{
+	Renderer* renderer = Renderer::GetInstance();
+
+	// render data
+	SetMesh(renderer->CreateOrGetMesh("point_pcu"));
+	SetShader(renderer->CreateOrGetShader(fp));
+	SetTexture(renderer->CreateOrGetTexture(tx));
+
+	Vector4 tintV4;
+	Rgba tint = Rgba::WHITE;
+	tint.GetAsFloats(tintV4.x, tintV4.y, tintV4.z, tintV4.w);
+	SetTint(tintV4);
+}
+
+void CollisionPoint::AttachToRigidBody(CollisionRigidBody* rb)
+{
+	SetRigidBody(rb);
+
+	// tensor not needed for point...
+
+	// so that transform mat and inv tensor world are set 
+	rb->CacheData();
+
+	// use same transform mat for primitive...
+	// point is not in collision pipeline, hence scale may be not used...
+	// instead, scale can be directly applied when building mesh...
+	SetPrimitiveTransformMat4(rb->GetTransformMat4());
+}
+
+void CollisionPoint::SetRigidBodyPosition(const Vector3& pos)
+{
+
+}
+
+void CollisionPoint::Update(float dt)
+{
+
+}
+
+void CollisionPoint::Render(Renderer* renderer)
+{
+	if (GetMesh())
+	{
+		renderer->UseShader(GetShader());
+		renderer->SetTexture2D(0, GetTexture());
+		renderer->SetSampler2D(0, GetTexture()->GetSampler());
+	}
+
+	// ubo
+	renderer->m_colorData.rgba = GetTint();
+	renderer->m_objectData.model = GetTransformMat4();
+
+	// draw
+	renderer->SetPointSize(m_size);
+	renderer->DrawMesh(GetMesh());
 }
 
 CollisionSphere::CollisionSphere(const float& radius, const std::string& fp, const std::string& tx)

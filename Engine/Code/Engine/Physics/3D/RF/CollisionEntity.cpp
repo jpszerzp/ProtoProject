@@ -95,11 +95,19 @@ CollisionRigidBody::CollisionRigidBody(const float& mass, const Vector3& center,
 
 void CollisionRigidBody::CacheData()
 {
-	m_orientation.Normalize();
+	if (!m_particle)
+	{
+		m_orientation.Normalize();
 
-	CacheTransformMat(m_transform_mat, m_center, m_orientation);
+		CacheTransformMat(m_transform_mat, m_center, m_orientation);
 
-	CacheIITWorld(m_inv_tensor_world, m_inv_tensor, m_transform_mat);
+		CacheIITWorld(m_inv_tensor_world, m_inv_tensor, m_transform_mat);
+	}
+	else
+	{
+		Quaternion zero = Quaternion::FromEuler(Vector3::ZERO);
+		CacheTransformMat(m_transform_mat, m_center, zero);
+	}
 }
 
 void CollisionRigidBody::CacheTransformMat(Matrix44& transform, const Vector3& position, const Quaternion& orientation)
@@ -141,6 +149,12 @@ void CollisionRigidBody::CacheIITWorld(Matrix33& iitw, const Matrix33& iit, cons
 	iitw.Iz = t52 * transfrom_mat.Ix + t57 * transfrom_mat.Jx + t62 * transfrom_mat.Kx;
 	iitw.Jz = t52 * transfrom_mat.Iy + t57 * transfrom_mat.Jy + t62 * transfrom_mat.Ky;
 	iitw.Kz = t52 * transfrom_mat.Iz + t57 * transfrom_mat.Jz + t62 * transfrom_mat.Kz;
+}
+
+void CollisionRigidBody::SetAngularVelocity(const Vector3& ang_vel)
+{
+	if (!m_particle)
+		m_ang_vel = ang_vel;
 }
 
 void CollisionRigidBody::SetAwake(bool awake)

@@ -206,6 +206,7 @@ public:
 	void ScaleX(float xScale);
 	void ScaleY(float yScale);
 	void ScaleXY(float xScale, float yScale);
+	void SetPointSize(float size);
 
 	void DrawAABB2D( const AABB2& bounds, const Rgba& color, eVertexType type );
 	void DrawText2D( const Vector2& drawMins, const std::string& asciiText, float cellHeight,

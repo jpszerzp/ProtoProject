@@ -543,6 +543,10 @@ void Renderer::ScaleXY(float, float)
 	//glScalef(xScale, yScale, 1.f);
 }
 
+void Renderer::SetPointSize(float size)
+{
+	glPointSize(size);
+}
 
 Texture* Renderer::CreateOrGetTexture(std::string fp, bool mipmap)
 {
