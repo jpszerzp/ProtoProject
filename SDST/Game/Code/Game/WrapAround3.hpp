@@ -2,32 +2,35 @@
 
 #include "Engine/Math/AABB3.hpp"
 #include "Engine/Core/GameObject.hpp"
+#include "Engine/Core/Primitive/Point.hpp"
 #include "Engine/Physics/3D/Rigidbody3.hpp"
 #include "Engine/Physics/3D/BVH3.hpp"
 #include "Engine/Physics/3D/RF/CollisionPrimitive.hpp"
+#include "Engine/Physics/3D/PHYSX/PhysXObject.hpp"
 
 #include <vector>
-
-#define BVH_CONTACT_LIMIT 1000
 
 class Physics3State;
 
 class WrapAround
 {
 public:
+	// toggle, if this wraparound is for particles
+	bool m_particle = false;
+
+	// render
 	AABB3 m_bounds;
-	std::vector<CollisionPrimitive*> m_primitives;
 	Mesh* m_mesh = nullptr;
 	Transform m_transform;
 	Vector3 m_positions[8];
 	int m_pos_idx = 0;
 
-	//bvh
-	int m_bvh_node_count = 0;
-	bool m_bvh_based = false;
-	BVHNode<BoundingSphere>* m_bvh = nullptr;
-	std::vector<BVHContact> m_bvh_contacts;
+	// storage
+	std::vector<CollisionPrimitive*> m_primitives;
+	std::vector<PhysXObject*> m_phys_obj;
+	std::vector<Point*> m_particles;
 
+	// state reference
 	Physics3State* m_physState = nullptr;
 	
 public:
@@ -39,16 +42,11 @@ public:
 	~WrapAround();
 
 	void Update();
-	void UpdateInput();
-	void UpdateBVH();
-	void UpdateBVHContactGeneration();			// used in phyics state
 	void UpdateWraparound();
 
 	void Render(Renderer* renderer);
-	void RenderBVH(Renderer* renderer);
 	void RenderWraparounds(Renderer* renderer);
 
-	void ClearBVHRecords();
-
 	void RemovePrimitive(CollisionPrimitive* prim);
+	void RemovePhysXObj(PhysXObject* px);
 };

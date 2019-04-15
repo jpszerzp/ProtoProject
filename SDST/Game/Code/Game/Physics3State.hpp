@@ -34,19 +34,16 @@
 #include <set>
 #include <list>
 
-//enum eHullGenerationStep
-//{
-//	HULL_GEN_FORM_CONFLICTS,
-//	HULL_GEN_FORM_EYE,
-//	HULL_GEN_FORM_HORIZON_START,
-//	HULL_GEN_FORM_HORIZON_PROECSS,
-//	HULL_GEN_DELETE_OLD_FACES,
-//	HULL_GEN_FORM_NEW_FACES,
-//	HULL_GEN_ASSIGN_ORPHANS,
-//	HULL_GEN_TOPO_ERRORS,
-//	HULL_GEN_FINISH_RESET,
-//	HULL_GEN_COMPLETE
-//};
+enum eFeatureCornerCase
+{
+	FCC_FF,
+	FCC_FP,
+	FCC_PP,
+	FCC_EE,
+	FCC_PE,
+	FCC_FE,
+	FCC_NUM,
+};
 
 class Physics3State : public GameState
 {
@@ -104,8 +101,13 @@ public:
 	void InitPhysxScene(bool interactive);
 	void SpawnPhysxStack(const Vector3& origin, uint sideLength, uint stackHeight);
 	void PhysxRender(Renderer* renderer);
+	PhysXObject* SpawnPhysxBox(const Vector3& pos);
 
 	void ResetCollisionCornerCase(const Vector3& pos1, const Vector3& pos2, const Vector3& rot1, const Vector3& rot2);
+	std::pair<PhysXObject*, PhysXObject*> ResetCollisionCornerCasePhysX(const Vector3& pos1, const Vector3& pos2, const Vector3& rot1, const Vector3& rot2);
+
+	// particles
+	Ballistics* SetupBallistics(eBallisticsType type, Vector3 pos, bool frozen, Rgba color);
 
 public:
 	const static uint MAX_CONTACT_NUM = 256;
@@ -128,11 +130,18 @@ public:
 	Mesh* m_slow_ui;
 	std::vector<Mesh*> m_world_inv_tensor_ui;
 
-	// refactor
+	// storages
 	std::vector<CollisionSphere*> m_spheres;
 	std::vector<CollisionBox*> m_boxes;
 	std::vector<CollisionPlane*> m_planes;
 	std::vector<CollisionConvexObject*> m_convex_objs;
+
+	// force
+	ParticleForceRegistry* m_particleRegistry = nullptr;
+	RigidForceRegistry* m_rigidRegistry = nullptr;
+
+	// particles
+	std::vector<Point*> m_pps;
 
 	// debug
 	CollisionPrimitive* m_focus;
@@ -143,14 +152,15 @@ public:
 
 	CollisionSolver m_solver;
 
-	//WrapAround* m_wraparound_sphere;
-	//WrapAround* m_wraparound_box;
-	//WrapAround* m_wraparound_convex;
 	WrapAround* m_wraparound_plane;
 	WrapAround* m_wraparound_demo_0;
+	WrapAround* m_wraparound_demo_1;
+	WrapAround* m_wraparound_verlet;
 
-	CollisionBox* m_corner_case_1;
-	CollisionBox* m_corner_case_2;
+	CollisionBox* m_corner_case_1 = nullptr;
+	CollisionBox* m_corner_case_2 = nullptr;
+	PhysXObject* m_corner_case_3 = nullptr;
+	PhysXObject* m_corner_case_4 = nullptr;
 
 	bool m_ff_test = true;
 	bool m_fp_test = false;
@@ -158,6 +168,7 @@ public:
 	bool m_ee_test = false;
 	bool m_pe_test = false;
 	bool m_fe_test = false;
+	eFeatureCornerCase m_phys_corner_case = FCC_NUM;
 
 	const Vector3 CORNER_CASE_POS_FF_1 = Vector3(25.f, 305.f, 0.f);
 	const Vector3 CORNER_CASE_POS_FP_1 = Vector3(25.f, 305.f, 0.f);
@@ -171,6 +182,8 @@ public:
 	const Vector3 CORNER_CASE_POS_EE_2 = Vector3(35.f, 305.f, 0.f);
 	const Vector3 CORNER_CASE_POS_PE_2 = Vector3(35.f, 305.9625f, 0.f);
 	const Vector3 CORNER_CASE_POS_FE_2 = Vector3(35.f, 305.f, 0.f);
+	const Vector3 CORNER_CASE_POS_FF_3 = Vector3(65.f, 305.f, 0.f);
+	const Vector3 CORNER_CASE_POS_FF_4 = Vector3(75.f, 305.f, 0.f);
 
 	const Vector3 CORNER_CASE_ORIENT_FF_1 = Vector3::ZERO;
 	const Vector3 CORNER_CASE_ORIENT_FP_1 = Vector3(45.f, 45.f, 0.f);
@@ -184,6 +197,8 @@ public:
 	const Vector3 CORNER_CASE_ORIENT_EE_2 = Vector3(0.f, 45.f, 0.f);
 	const Vector3 CORNER_CASE_ORIENT_PE_2 = Vector3(0.f);
 	const Vector3 CORNER_CASE_ORIENT_FE_2 = Vector3(0.f);
+	const Vector3 CORNER_CASE_ORIENT_FF_3 = Vector3::ZERO;
+	const Vector3 CORNER_CASE_ORIENT_FF_4 = Vector3::ZERO;
 
 	const Vector3 CORNER_CASE_LIN_VEL_FF_1 = Vector3(3.f, 0.f, 0.f);
 	const Vector3 CORNER_CASE_LIN_VEL_FP_1 = Vector3(3.f, 0.f, 0.f);
@@ -197,6 +212,8 @@ public:
 	const Vector3 CORNER_CASE_LIN_VEL_EE_2 = Vector3(-3.f, 0.f, 0.f);
 	const Vector3 CORNER_CASE_LIN_VEL_PE_2 = Vector3(-3.f, 0.f, 0.f);
 	const Vector3 CORNER_CASE_LIN_VEL_FE_2 = Vector3(-3.f, 0.f, 0.f);
+	const Vector3 CORNER_CASE_LIN_VEL_FF_3 = Vector3(3.f, 0.f, 0.f);
+	const Vector3 CORNER_CASE_LIN_VEL_FF_4 = Vector3(-3.f, 0.f, 0.f);
 
 	const static Vector3 ORIGIN_CAMERA;
 
@@ -212,4 +229,8 @@ public:
 	// stacks 
 	std::vector<PhysXObject*> m_physx_stack;
 	std::vector<CollisionBox*> m_my_stack;
+
+	// utility
+	std::vector<Vector3> m_inspection;
+	int m_insepction_count = 0;
 };

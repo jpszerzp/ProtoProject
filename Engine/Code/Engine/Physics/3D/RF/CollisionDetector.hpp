@@ -22,4 +22,6 @@ public:
 	static uint ConvexVsBox(const CollisionConvexObject& convex, const CollisionBox& box, CollisionKeep* c_data);
 
 	static uint ConvexVsSphere(const CollisionConvexObject& convex, const CollisionSphere& sph, CollisionKeep* c_data);
+
+	static uint LineVsAABB(const CollisionLine& line, const CollisionBox& aabb, CollisionKeep* c_data);
 };

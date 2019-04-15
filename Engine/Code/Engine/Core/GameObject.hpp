@@ -10,7 +10,7 @@
 class GameObject
 {
 public:
-	//bool		m_physDriven = false;
+	bool		m_physDriven = false;
 	bool		m_dead = false;
 
 	bool		m_transparent = false;
@@ -34,8 +34,6 @@ public:
 	Texture* m_direct_tex;
 
 	Entity3* m_physEntity = nullptr;
-
-	//CollisionEntity* m_ent = nullptr;
 
 public:
 	virtual void Update(float){}

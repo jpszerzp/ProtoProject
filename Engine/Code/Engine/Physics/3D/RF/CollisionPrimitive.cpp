@@ -29,11 +29,14 @@ void CollisionPrimitive::AttachToRigidBody(CollisionRigidBody*)
 
 void CollisionPrimitive::Update(float deltaTime)
 {
-	// take rigid body and integrate
-	m_rigid_body->Integrate(deltaTime);
+	if (m_rigid_body != nullptr)
+	{
+		// take rigid body and integrate
+		m_rigid_body->Integrate(deltaTime);
 
-	// calculate internal
-	m_transform_mat = m_rigid_body->GetTransformMat4();
+		// calculate internal
+		m_transform_mat = m_rigid_body->GetTransformMat4();
+	}
 }
 
 void CollisionPrimitive::Render(Renderer* renderer)
@@ -59,47 +62,26 @@ Vector3 CollisionPrimitive::GetBasisAndPosition(uint index) const
 	Vector3 res;
 
 	if (index == 0)
+	{
 		res = m_transform_mat.GetRight();
-
+		res.Normalize();
+	}
 	else if (index == 1)
+	{
 		res = m_transform_mat.GetUp();
-
+		res.Normalize();
+	}
 	else if (index == 2)
+	{
 		res = m_transform_mat.GetForward();
-
+		res.Normalize();
+	}
 	else if (index == 3)
 		res = m_transform_mat.GetTranslation();
-
 	else 
 		ASSERT_OR_DIE(false, "Invalid index for axis");
 
 	return res;
-}
-
-Vector3 CollisionPrimitive::GetPrimitiveRight() const
-{
-	return m_transform_mat.GetRight();
-}
-
-Vector3 CollisionPrimitive::GetPrimitiveUp() const
-{
-	return m_transform_mat.GetUp();
-}
-
-Vector3 CollisionPrimitive::GetPrimitiveForward() const
-{
-	return m_transform_mat.GetForward();
-}
-
-void CollisionPrimitive::SetRigidBodyPosition(const Vector3& pos)
-{
-	m_rigid_body->SetCenter(pos);
-
-	// position changed, update cache
-	m_rigid_body->CacheData();
-
-	// update primitive transform at last
-	m_transform_mat = m_rigid_body->GetTransformMat4();
 }
 
 CollisionSphere::CollisionSphere(const float& radius, const std::string& fp, const std::string& tx)
@@ -139,7 +121,7 @@ void CollisionSphere::AttachToRigidBody(CollisionRigidBody* rb)
 	SetPrimitiveTransformMat4(rb->GetTransformMat4());
 }
 
-CollisionBox::CollisionBox(const Vector3& half, const std::string& fp, const std::string& tx/*, const bool aabb*/)
+CollisionBox::CollisionBox(const Vector3& half, const std::string& fp, const std::string& tx)
 	: m_half_size(half)
 {
 	Renderer* renderer = Renderer::GetInstance();
@@ -152,24 +134,25 @@ CollisionBox::CollisionBox(const Vector3& half, const std::string& fp, const std
 	Rgba tint = Rgba::WHITE;
 	tint.GetAsFloats(tintV4.x, tintV4.y, tintV4.z, tintV4.w);
 	SetTint(tintV4);
+}
 
-	//m_aabb = aabb;
+void CollisionBox::Update(float deltaTime)
+{
+	if (GetRigidBody() != nullptr)
+	{
+		// take rigid body and integrate
+		GetRigidBody()->Integrate(deltaTime);
+
+		// calculate internal
+		float ext_x = m_half_size.x * 2.f;
+		float ext_y = m_half_size.y * 2.f;
+		float ext_z = m_half_size.z * 2.f;
+		Matrix44 transform_mat = GetRigidBody()->GetTransformMat4() * Matrix44::MakeScale3D(ext_x, ext_y, ext_z);
+		SetPrimitiveTransformMat4(transform_mat);
+	}
 }
 
 /*
-void CollisionBox::Update(float deltaTime)
-{
-	// take rigid body and integrate
-	GetRigidBody()->Integrate(deltaTime);
-
-	// calculate internal
-	SetPrimitiveTransformMat4(GetRigidBody()->GetTransformMat4());
-
-	// cache verts in world space
-	//CacheWorldVerts();
-}
-*/
-
 void CollisionBox::CacheWorldVerts()
 {
 	const Vector3& centre = GetRigidBody()->GetCenter();
@@ -193,14 +176,6 @@ void CollisionBox::CacheWorldVerts()
 	Vector3 v6 = centre + xdir * m_half_size.x - ydir * m_half_size.y - zdir * m_half_size.z;
 	Vector3 v7 = centre - xdir * m_half_size.x + ydir * m_half_size.y - zdir * m_half_size.z;
 	Vector3 v8 = centre - xdir * m_half_size.x - ydir * m_half_size.y - zdir * m_half_size.z;
-	//m_world_verts.push_back(v1);
-	//m_world_verts.push_back(v2);
-	//m_world_verts.push_back(v3);
-	//m_world_verts.push_back(v4);
-	//m_world_verts.push_back(v5);
-	//m_world_verts.push_back(v6);
-	//m_world_verts.push_back(v7);
-	//m_world_verts.push_back(v8);
 	m_world_verts[0] = v1;
 	m_world_verts[1] = v2;
 	m_world_verts[2] = v3;
@@ -210,6 +185,7 @@ void CollisionBox::CacheWorldVerts()
 	m_world_verts[6] = v7;
 	m_world_verts[7] = v8;
 }
+*/
 
 void CollisionBox::AttachToRigidBody(CollisionRigidBody* rb)
 {
@@ -233,7 +209,9 @@ void CollisionBox::AttachToRigidBody(CollisionRigidBody* rb)
 
 	rb->CacheData();
 
-	SetPrimitiveTransformMat4(rb->GetTransformMat4());
+	Matrix44 transform_mat = rb->GetTransformMat4() * Matrix44::MakeScale3D(ext_x, ext_y, ext_z);
+
+	SetPrimitiveTransformMat4(transform_mat);
 }
 
 float CollisionBox::ProjectVertToAxis(const Vector3& axis, const int& idx) const
@@ -857,4 +835,19 @@ Matrix33 TetrahedronBody::TranslateTetrahedronWithOffsetToGetCovariance(const Ve
 	float dot3 = DotProduct(offset, offset);
 
 	return (m_covariance + m_mass * (dot1 + dot2 + dot3));
+}
+
+CollisionLine::CollisionLine(const Vector3& start, const Vector3& end, const std::string& fp, const std::string& tx)
+	: m_start(start), m_end(end)
+{
+	Renderer* renderer = Renderer::GetInstance();
+
+	Vector4 tintV4;
+	Rgba tint = Rgba::WHITE;
+	tint.GetAsFloats(tintV4.x, tintV4.y, tintV4.z, tintV4.w);
+	SetTint(tintV4);
+
+	SetMesh(Mesh::CreateLineImmediate(VERT_PCU, m_start, m_end, tint));
+	SetShader(renderer->CreateOrGetShader(fp));
+	SetTexture(renderer->CreateOrGetTexture(tx));
 }

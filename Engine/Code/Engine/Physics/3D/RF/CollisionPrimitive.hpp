@@ -52,7 +52,6 @@ public:
 	void SetShader(Shader* shader) { m_shader = shader; }
 	void SetTexture(Texture* texture) { m_texture = texture; }
 	void SetTint(const Vector4& tint) { m_tint = tint; }
-	void SetRigidBodyPosition(const Vector3& pos);
 	void SetShouldDelete(const bool& value) { m_should_delete = value; }
 
 	virtual void Update(float deltaTime);
@@ -69,10 +68,6 @@ public:
 	Vector4 GetTint() const { return m_tint; }
 	Vector3 GetCenter() const { return m_rigid_body->GetCenter(); }
 	bool ShouldDelete() const { return m_should_delete; }
-
-	Vector3 GetPrimitiveRight() const;
-	Vector3 GetPrimitiveUp() const;
-	Vector3 GetPrimitiveForward() const;
 };
 
 class CollisionSphere : public CollisionPrimitive
@@ -91,14 +86,13 @@ class CollisionBox : public CollisionPrimitive
 {
 	Vector3 m_half_size;
 	std::vector<Vector3> m_world_verts;
-	//bool m_aabb;
 
 public:
-	CollisionBox(const Vector3& half, const std::string& fp = "default", const std::string& tx = "Data/Images/perspective_test.png"/*, const bool aabb = false*/);
+	CollisionBox(const Vector3& half, const std::string& fp = "default", const std::string& tx = "Data/Images/perspective_test.png");
 	~CollisionBox(){}
 
-	//void Update(float deltaTime) override;
-	void CacheWorldVerts();
+	void Update(float deltaTime) override;
+	//void CacheWorldVerts();
 
 	void AttachToRigidBody(CollisionRigidBody* rb) override;
 
@@ -126,6 +120,19 @@ public:
 
 	Vector3 GetNormal() const { return m_normal; }
 	float GetOffset() const { return m_offset; }
+};
+
+class CollisionLine : public CollisionPrimitive
+{
+	Vector3 m_start;
+	Vector3 m_end;
+
+public:
+	CollisionLine(const Vector3& start, const Vector3& end, const std::string& fp = "default", const std::string& tx = "Data/Images/perspective_test.png");
+	~CollisionLine(){}
+
+	Vector3 GetStart() const { return m_start; }
+	Vector3 GetEnd() const { return m_end; }
 };
 
 class CollisionConvexObject : public CollisionPrimitive

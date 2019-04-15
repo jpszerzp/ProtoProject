@@ -83,6 +83,7 @@ void FillPointFaceBoxBox(const CollisionBox& b1, const CollisionBox& b2,
 	Collision* collision = c_data->m_collision;
 
 	Vector3 normal = b1.GetBasisAndPosition(best);
+	//if (DotProduct(b1.GetBasisAndPosition(best), disp) < 0.f)
 	if (DotProduct(b1.GetBasisAndPosition(best), disp) > 0.f)
 		normal *= -1.f;
 
@@ -97,7 +98,8 @@ void FillPointFaceBoxBox(const CollisionBox& b1, const CollisionBox& b2,
 	// collision data
 	collision->m_normal = normal;
 	collision->m_penetration = pen;
-	collision->m_pos = b2.GetTransformMat4() * vert;
+	collision->m_pos = b2.GetRigidBody()->GetTransformMat4() * vert;	// rigid body transform used as it is not affected by scale
+	//collision->m_pos = b2.GetTransformMat4() * vert;	// rigid body transform used as it is not affected by scale
 	collision->SetBodies(b1.GetRigidBody(), b2.GetRigidBody());
 	collision->SetFriction(c_data->m_global_friction);
 	collision->SetRestitution(c_data->m_global_restitution);
@@ -109,7 +111,8 @@ void FillPointFaceBoxConvex(const CollisionBox& b, const CollisionConvexObject& 
 {
 	Collision* collision = c_data->m_collision;
 
-	const Vector3& n = b.GetBasisAndPosition(best).GetNormalized();
+	//const Vector3& n = b.GetBasisAndPosition(best).GetNormalized();
+	const Vector3& n = b.GetBasisAndPosition(best);
 
 	collision->m_normal = n;
 	collision->m_penetration = pen;
@@ -226,8 +229,10 @@ uint CollisionSensor::BoxVsBox(const CollisionBox& b1, const CollisionBox& b2, C
 		Vector3 axis2 = b2.GetBasisAndPosition(index2);
 		Vector3 axis = axis1.Cross(axis2);
 		axis.Normalize();
+		//ASSERT_OR_DIE(AreFloatsCloseEnough(axis.GetLengthSquared(), 1.f), "basis should be unit vector");
 
 		if (DotProduct(axis, disp) > 0.f)
+		//if (DotProduct(axis, disp) < 0.f)
 			axis *= -1.f;
 
 		Vector3 pt1 = b1.GetHalfSize();
@@ -245,8 +250,11 @@ uint CollisionSensor::BoxVsBox(const CollisionBox& b1, const CollisionBox& b2, C
 				pt2[i] = -pt2[i];
 		}
 
-		pt1 = b1.GetTransformMat4() * pt1;
-		pt2 = b2.GetTransformMat4() * pt2;
+		// rigid body transform used as they are not scaled
+		pt1 = b1.GetRigidBody()->GetTransformMat4() * pt1;
+		pt2 = b2.GetRigidBody()->GetTransformMat4() * pt2;
+		//pt1 = b1.GetTransformMat4() * pt1;
+		//pt2 = b2.GetTransformMat4() * pt2;
 
 		Vector3 close_vert = GenerateContactPoint(pt1, axis1, b1.GetHalfSize()[index1],
 			pt2, axis2, b2.GetHalfSize()[index2], best_major_axis > 2);
@@ -267,7 +275,6 @@ uint CollisionSensor::BoxVsBox(const CollisionBox& b1, const CollisionBox& b2, C
 
 	return 0;
 }
-
 
 uint CollisionSensor::SphereVsPlane(const CollisionSphere& sphere, const CollisionPlane& plane, CollisionKeep* c_data)
 {
@@ -315,24 +322,31 @@ uint CollisionSensor::BoxVsHalfPlane(const CollisionBox& box, const CollisionPla
 	if (c_data->m_collision_left <= 0) 
 		return 0;
 
-	static float components[8][3] = {{1,1,1},{-1,1,1},{1,-1,1},{-1,-1,1},
-	{1,1,-1},{-1,1,-1},{1,-1,-1},{-1,-1,-1}};
+	static float units[8][3] = 
+	{
+	{1,1,1},
+	{-1,1,1},
+	{1,-1,1},
+	{-1,-1,1},
+	{1,1,-1},
+	{-1,1,-1},
+	{1,-1,-1},
+	{-1,-1,-1}
+	};
 
 	Collision* collision = c_data->m_collision;
 	uint contactsUsed = 0;
 	for (uint i = 0; i < 8; i++) 
 	{
-		Vector3 vertexPos = Vector3(components[i][0], components[i][1], components[i][2]);
+		Vector3 vertexPos = Vector3(units[i][0], units[i][1], units[i][2]);
 		vertexPos = vertexPos * box.GetHalfSize();
-		vertexPos = box.GetTransformMat4() * vertexPos;
+		vertexPos = box.GetRigidBody()->GetTransformMat4() * vertexPos;
+		// rigid body transform is used here as it is not affected by scale
 
 		float vertexDistance = DotProduct(vertexPos, plane.GetNormal());
 
 		if (vertexDistance <= plane.GetOffset())
 		{
-			//collision->m_pos = plane.GetNormal();
-			//collision->m_pos *= (vertexDistance - plane.GetOffset());
-			//collision->m_pos += vertexPos;
 			collision->m_pos = vertexPos;
 			collision->m_normal = plane.GetNormal();
 			collision->m_penetration = plane.GetOffset() - vertexDistance;
@@ -665,5 +679,10 @@ uint CollisionSensor::ConvexVsSphere(const CollisionConvexObject& convex, const 
 	// limit sph vs convex case to 1 contact at a time
 	c_data->NotifyAddedCollisions(1);
 
+	return 1;
+}
+
+uint CollisionSensor::LineVsAABB(const CollisionLine& line, const CollisionBox& aabb, CollisionKeep* c_data)
+{
 	return 1;
 }

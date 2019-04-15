@@ -79,7 +79,7 @@ Physics3State::Physics3State()
 	g_col_keep = &m_keep;
 
 	// solver
-	m_solver = CollisionSolver(MAX_CONTACT_NUM * 8, .01f, .01f);
+	m_solver = CollisionSolver(3, .01f, .01f);
 
 	// a plane
 	m_wraparound_plane = new WrapAround(Vector3(20.f, 340.f, -10.f), Vector3(130.f, 400.f, 100.f));
@@ -94,30 +94,8 @@ Physics3State::Physics3State()
 
 	// do not include plane in wraparound
 
-	// stack
-	//SpawnStack(Vector3(75.f, 342.5f, 45.f), 5, 5);
-	
-	// demo 0
+	// demo 0, my api
 	m_wraparound_demo_0 = new WrapAround(Vector3(20.f, 300.f, -10.f), Vector3(40.f, 320.f, 10.f));
-
-	m_corner_case_1 = new CollisionBox(Vector3(.5f));
-	rb = new CollisionRigidBody(1.f, CORNER_CASE_POS_FF_1, CORNER_CASE_ORIENT_FF_1);
-	rb->SetAwake(true);
-	rb->SetSleepable(false);
-
-	m_corner_case_1->AttachToRigidBody(rb);
-	m_boxes.push_back(m_corner_case_1);
-	m_wraparound_demo_0->m_primitives.push_back(m_corner_case_1);
-	m_focus = m_corner_case_1;
-
-	m_corner_case_2 = new CollisionBox(Vector3(.5f));
-	rb = new CollisionRigidBody(1.f, CORNER_CASE_POS_FF_2, CORNER_CASE_ORIENT_FF_2);
-	rb->SetAwake(true);
-	rb->SetSleepable(false);
-
-	m_corner_case_2->AttachToRigidBody(rb);
-	m_boxes.push_back(m_corner_case_2);
-	m_wraparound_demo_0->m_primitives.push_back(m_corner_case_2);
 
 	// UI
 	// local tensor is fixed
@@ -133,7 +111,9 @@ Physics3State::Physics3State()
 	m_tensor_ui.push_back(t_mesh);
 	titleMin -= Vector2(0.f, txtHeight);
 
-	const Matrix33& tensor_mat = m_focus->GetRigidBody()->GetTensor();
+	Matrix33 tensor_mat;
+	if (m_focus != nullptr)
+		tensor_mat = m_focus->GetRigidBody()->GetTensor();
 	tensor_ui = Stringf("%.3f, %.3f, %.3f", tensor_mat.GetI().x, tensor_mat.GetJ().x, tensor_mat.GetK().x);
 	t_mesh = Mesh::CreateTextImmediate(Rgba::LIGHT_BLUE, titleMin, font, txtHeight, .5f, tensor_ui, VERT_PCU);
 	m_tensor_ui.push_back(t_mesh);
@@ -150,11 +130,31 @@ Physics3State::Physics3State()
 	titleMin -= Vector2(0.f, txtHeight);
 
 	InitPhysxScene(true);
-	//SpawnPhysxStack(Vector3(100.f, 345.f, 45.f), 5, 5);
+
+	// demo 1, physx api
+	m_wraparound_demo_1 = new WrapAround(Vector3(60.f, 300.f, -10.f), Vector3(80.f, 320.f, 10.f));
+
+	// force registry 
+	m_particleRegistry = new ParticleForceRegistry();
+	m_rigidRegistry = new RigidForceRegistry();
 
 	// debug
 	DebugRenderSet3DCamera(m_camera);
 	DebugRenderSet2DCamera(m_UICamera);
+
+	// verlet
+	m_wraparound_verlet = new WrapAround(Vector3(-10.f, 200.f, -10.f), Vector3(0.f, 250.f, 0.f));
+	m_wraparound_verlet->m_particle = true;
+	Ballistics* free_ballistics = SetupBallistics(FREEFALL, Vector3(-7.f, 240.f, -5.f), true, Rgba::CYAN);
+	Ballistics* verlet_vel_ballistics = SetupBallistics(FREEFALL, Vector3(-3.f, 240.f, -5.f), true, Rgba::PINK);
+	verlet_vel_ballistics->m_physEntity->SetVerlet(true);
+	verlet_vel_ballistics->m_physEntity->SetVerletScheme(VELOCITY_VERLET);
+	m_wraparound_verlet->m_particles.push_back(free_ballistics);
+	m_wraparound_verlet->m_particles.push_back(verlet_vel_ballistics);
+
+	// inspection
+	m_inspection.push_back(m_cameraInitialPos);
+	m_inspection.push_back(Vector3(-5.f, 220.f, -20.f));
 }
 
 Physics3State::~Physics3State()
@@ -165,6 +165,12 @@ Physics3State::~Physics3State()
 	delete m_wraparound_demo_0;
 	m_wraparound_demo_0 = nullptr;
 
+	delete m_wraparound_demo_1;
+	m_wraparound_demo_1 = nullptr;
+
+	delete m_wraparound_verlet;
+	m_wraparound_verlet = nullptr;
+
 	PhysxShutdown(true);
 }
 
@@ -172,6 +178,8 @@ void Physics3State::PostConstruct()
 {
 	m_wraparound_plane->m_physState = this;
 	m_wraparound_demo_0->m_physState = this;
+	m_wraparound_demo_1->m_physState = this;
+	m_wraparound_verlet->m_physState = this;
 }
 
 void Physics3State::Update(float deltaTime)
@@ -275,13 +283,13 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	}
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_7))
-		SpawnRandomConvex(m_wraparound_plane, 10, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 380.f, 100.f));
+		SpawnRandomConvex(m_wraparound_plane, 1, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 380.f, 100.f));
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_8))
-		SpawnRandomSphere(m_wraparound_plane, 10, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 380.f, 100.f));
+		SpawnRandomSphere(m_wraparound_plane, 1, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 380.f, 100.f));
 		
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_9))
-		SpawnRandomBox(m_wraparound_plane, 10, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 380.f, 100.f));
+		SpawnRandomBox(m_wraparound_plane, 1, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 380.f, 100.f));
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_SPACE))
 		// cam better be in the correct wrapbox
@@ -313,6 +321,17 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	{
 		m_ff_test = true; m_fp_test = false; m_pp_test = false; m_ee_test = false; m_pe_test = false; m_fe_test = false;
 		ResetCollisionCornerCase(CORNER_CASE_POS_FF_1, CORNER_CASE_POS_FF_2, CORNER_CASE_ORIENT_FF_1, CORNER_CASE_ORIENT_FF_2);
+	}
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_1))
+	{
+		m_phys_corner_case = FCC_FF;
+		std::pair<PhysXObject*, PhysXObject*> obj_pair = ResetCollisionCornerCasePhysX(CORNER_CASE_POS_FF_3, CORNER_CASE_POS_FF_4, CORNER_CASE_ORIENT_FF_3, CORNER_CASE_ORIENT_FF_4);
+
+		if (obj_pair.first != nullptr)
+			m_wraparound_demo_1->m_phys_obj.push_back(obj_pair.first);
+
+		if (obj_pair.second != nullptr)
+			m_wraparound_demo_1->m_phys_obj.push_back(obj_pair.second);
 	}
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_2))
@@ -380,6 +399,15 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		}
 	}
 
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_I))
+	{
+		if (m_phys_corner_case == FCC_FF)
+		{
+			m_corner_case_3->SetLinearVel(CORNER_CASE_LIN_VEL_FF_3);
+			m_corner_case_4->SetLinearVel(CORNER_CASE_LIN_VEL_FF_4);
+		}
+	}
+
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_MINUS))
 		SpawnPhysxStack(Vector3(100.f, 342.5f, 45.f), 5, 5);
 
@@ -412,6 +440,22 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 			m_wraparound_plane->m_primitives[i]->SetShouldDelete(true);
 
 		m_wraparound_plane->m_primitives.clear();
+	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_TAB))
+	{
+		if (!m_inspection.empty())
+		{
+			Vector3 pos = m_inspection[m_insepction_count];
+
+			// set camera pos to this inspection position
+			m_camera->GetTransform().SetLocalPosition(pos);
+			m_camera->GetTransform().SetLocalRotation(Vector3::ZERO);
+
+			int size = m_inspection.size();
+			++m_insepction_count;
+			m_insepction_count = (m_insepction_count % size);
+		}
 	}
 
 	// camera update from input
@@ -451,13 +495,13 @@ void Physics3State::UpdateDebugDraw(float deltaTime)
 	DebugRenderUpdate(deltaTime);
 }
 
-
 void Physics3State::UpdateWrapArounds()
 {
 	m_wraparound_plane->Update();
 	m_wraparound_demo_0->Update();
+	m_wraparound_demo_1->Update();
+	m_wraparound_verlet->Update();
 }
-
 
 void Physics3State::UpdateUI()
 {
@@ -615,12 +659,37 @@ void Physics3State::UpdateDeletePhysx()
 			std::vector<PhysXObject*>::iterator it = m_physx_objs.begin() + i;
 			m_physx_objs.erase(it);
 
+			// we do not know which vector of physx obj is affected, so we check all
+			// still check those in stacks just to be safe
+			for (int j = 0; j < m_physx_stack.size(); ++j)
+			{
+				if (m_physx_stack[j] == phys_obj)
+				{
+					std::vector<PhysXObject*>::iterator it_del = m_physx_stack.begin() + j;
+
+					m_physx_stack.erase(it_del);
+					j--;
+				}
+			}
+
+			// check those in wraparounds
+			m_wraparound_demo_0->RemovePhysXObj(phys_obj);
+			m_wraparound_demo_1->RemovePhysXObj(phys_obj);
+
+			// todo: check those in plane wraparound after they are actually added to it...
+			//m_wraparound_plane...
+
+			// check corner case place holder
+			if (m_corner_case_3 == phys_obj)
+				m_corner_case_3 = nullptr;
+			else if (m_corner_case_4 == phys_obj)
+				m_corner_case_4 = nullptr;
+
 			// scene actor
 			PxRigidActor* ra = phys_obj->GetRigidActor();
-			//PxActor* ra = phys_obj->GetRigidActor();
 			m_physx_scene->removeActor(*ra);
 			ra->release();
-
+			
 			delete phys_obj;
 			i = i - 1;
 		}
@@ -639,9 +708,10 @@ void Physics3State::UpdateDelete()
 			std::vector<CollisionBox*>::iterator it = m_boxes.begin() + i;
 			m_boxes.erase(it);
 
-			// check each wrap arounds
+			// check each wrap arounds, since we do not know which wraparound this obj is in (could be any)
 			m_wraparound_plane->RemovePrimitive(box);
 			m_wraparound_demo_0->RemovePrimitive(box);
+			m_wraparound_demo_1->RemovePrimitive(box);
 
 			delete box;
 			i = i - 1;
@@ -658,9 +728,9 @@ void Physics3State::UpdateDelete()
 			std::vector<CollisionSphere*>::iterator it = m_spheres.begin() + i;
 			m_spheres.erase(it);
 
-			// check each wrap arounds
 			m_wraparound_plane->RemovePrimitive(sph);
 			m_wraparound_demo_0->RemovePrimitive(sph);
+			m_wraparound_demo_1->RemovePrimitive(sph);
 
 			delete sph;
 			i = i - 1;
@@ -678,6 +748,7 @@ void Physics3State::UpdateDelete()
 
 			m_wraparound_plane->RemovePrimitive(cobj);
 			m_wraparound_demo_0->RemovePrimitive(cobj);
+			m_wraparound_demo_1->RemovePrimitive(cobj);
 
 			delete cobj;
 			i = i - 1;
@@ -717,6 +788,10 @@ void Physics3State::UpdateGameobjectsDynamics(float deltaTime)
 
 	for (std::vector<CollisionConvexObject*>::size_type idx = 0; idx < m_convex_objs.size(); ++idx)
 		m_convex_objs[idx]->Update(deltaTime);
+
+	// particles
+	for (std::vector<Point*>::size_type idx = 0; idx < m_pps.size(); ++idx)
+		m_pps[idx]->Update(deltaTime);
 }
 
 void Physics3State::UpdateContacts(float deltaTime)
@@ -818,12 +893,10 @@ void Physics3State::UpdateContactGeneration()
 	}
 }
 
-
 void Physics3State::UpdateContactResolution(float deltaTime)
 {
 	m_solver.SolveCollision(m_keep.m_collision_head, m_keep.m_collision_count, deltaTime);
 }
-
 
 void Physics3State::Render(Renderer* renderer)
 {
@@ -856,12 +929,18 @@ void Physics3State::RenderGameobjects(Renderer* renderer)
 
 	for (std::vector<CollisionConvexObject*>::size_type idx = 0; idx < m_convex_objs.size(); ++idx)
 		m_convex_objs[idx]->Render(renderer);
+
+	// particles
+	for (std::vector<Point*>::size_type idx = 0; idx < m_pps.size(); ++idx)
+		m_pps[idx]->Render(renderer);
 }
 
 void Physics3State::RenderWrapArounds(Renderer* renderer)
 {
 	m_wraparound_plane->Render(renderer);
 	m_wraparound_demo_0->Render(renderer);
+	m_wraparound_demo_1->Render(renderer);
+	m_wraparound_verlet->Render(renderer);
 }
 
 void Physics3State::RenderForwardPath(Renderer*)
@@ -933,9 +1012,9 @@ CollisionSphere* Physics3State::WrapAroundTestSphere(WrapAround* wpa, bool give_
 }
 
 CollisionBox* Physics3State::WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, 
-	bool register_g, const Vector3& position, const Vector3& rot, const Vector3&, const bool& awake, const bool& sleepable)
+	bool register_g, const Vector3& position, const Vector3& rot, const Vector3& scale, const bool& awake, const bool& sleepable)
 {
-	CollisionBox* box = new CollisionBox(Vector3(.5f));
+	CollisionBox* box = new CollisionBox(scale / 2.f);
 
 	CollisionRigidBody* rb = new CollisionRigidBody(1.f, position, rot);
 	rb->SetAwake(awake);
@@ -1051,8 +1130,14 @@ void Physics3State::SpawnRandomBox(WrapAround* wpa, uint num, const Vector3& min
 
 	for (uint i = 0; i < num; ++i)
 	{
+		// get box with random scales
+		const float& scale_x = GetRandomFloatInRange(1.f, 5.f);
+		const float& scale_y = GetRandomFloatInRange(1.f, 5.f);
+		const float& scale_z = GetRandomFloatInRange(1.f, 5.f);
+		Vector3 rand_scale = Vector3(scale_x, scale_y, scale_z);
+
 		const Vector3& rand_pos = GetRandomLocationWithin(bound);
-		WrapAroundTestBox(wpa, true, false, true, rand_pos, Vector3::ZERO, Vector3::ONE);
+		WrapAroundTestBox(wpa, true, false, true, rand_pos, Vector3::ZERO, rand_scale);
 	}
 }
 
@@ -1193,7 +1278,8 @@ void Physics3State::SpawnPhysxStack(const Vector3& origin, uint sideLength, uint
 	{
 		for (PxU32 i = 0; i < sideLength; ++i)
 		{
-			PxReal stack_x = stack_offset.x + i * 2.f; 
+			// * 2.f is why we use half_ext when setting up local transform
+			PxReal stack_x = stack_offset.x + i * 2.f;			
 
 			for (uint j = 0; j < sideLength; ++j)
 			{
@@ -1218,6 +1304,33 @@ void Physics3State::SpawnPhysxStack(const Vector3& origin, uint sideLength, uint
 		pxt = PxTransform(stack_origin);
 	}
 	shape->release();
+}
+
+PhysXObject* Physics3State::SpawnPhysxBox(const Vector3& pos)
+{
+	PxVec3 pxp = PxVec3(pos.x, pos.y, pos.z);
+	PxTransform pxt = PxTransform(pxp);
+	PxReal half_ext = .5f;
+	PxShape* shape = m_physics->createShape(PxBoxGeometry(half_ext, half_ext, half_ext), *m_physx_mat);
+
+	// offset
+	PxVec3 offset = PxVec3(0.f, 0.f, 0.f);
+	PxTransform local = PxTransform(offset);
+	
+	// dynamic rigidbody
+	PxRigidDynamic* body = m_physics->createRigidDynamic(pxt.transform(local));
+	body->attachShape(*shape);
+	PxRigidBodyExt::updateMassAndInertia(*body, 1.f);
+	m_physx_scene->addActor(*body);
+	
+	// encapsulation
+	PhysXObject* px_obj = new PhysXObject(body);
+	m_physx_objs.push_back(px_obj);
+
+	// shape release
+	shape->release();
+
+	return px_obj;
 }
 
 void Physics3State::PhysxRender(Renderer* renderer)
@@ -1246,6 +1359,61 @@ void Physics3State::ResetCollisionCornerCase(const Vector3& pos1, const Vector3&
 		m_corner_case_1->GetRigidBody()->SetBaseLinearAcceleration(Vector3::ZERO);
 		m_corner_case_2->GetRigidBody()->SetBaseLinearAcceleration(Vector3::ZERO);
 	}
+}
+
+std::pair<PhysXObject*, PhysXObject*> Physics3State::ResetCollisionCornerCasePhysX(const Vector3& pos1, const Vector3& pos2, const Vector3& rot1, const Vector3& rot2)
+{
+	std::pair<PhysXObject*, PhysXObject*> m_pair;
+
+	// see if cc3 is there yet
+	if (m_corner_case_3 != nullptr)
+	{
+		m_corner_case_3->SetPosAndOrient(pos1, Quaternion::FromEuler(rot1));
+		m_corner_case_3->SetLinearVel(Vector3::ZERO);
+		m_corner_case_3->SetAngularVel(Vector3::ZERO);
+
+		m_pair.first = nullptr;
+	}
+	else
+	{
+		m_corner_case_3 = SpawnPhysxBox(pos1);
+		m_corner_case_3->DisableGravity();
+
+		m_pair.first = m_corner_case_3;
+	}
+
+	if (m_corner_case_4 != nullptr)
+	{
+		m_corner_case_4->SetPosAndOrient(pos2, Quaternion::FromEuler(rot2));
+		m_corner_case_4->SetLinearVel(Vector3::ZERO);
+		m_corner_case_4->SetAngularVel(Vector3::ZERO);
+
+		m_pair.second = nullptr;
+	}
+	else
+	{
+		m_corner_case_4 = SpawnPhysxBox(pos2);
+		m_corner_case_4->DisableGravity();
+
+		m_pair.second = m_corner_case_4;
+	}
+
+	return m_pair;
+}
+
+Ballistics* Physics3State::SetupBallistics(eBallisticsType type, Vector3 pos, bool frozen, Rgba color)
+{
+	// note: ballistics is point by nature, so non-rigid
+	Ballistics* b = new Ballistics(type, pos, frozen, color);
+	b->m_physDriven = true;
+	m_gameObjects.push_back(b);
+	m_pps.push_back(b);
+
+	b->m_physEntity->SetGameobject(b);
+	b->m_physEntity->SetNetForcePersistent(true);			// do NOT clear force every frame
+	b->m_physEntity->m_body_shape = SHAPE_POINT;
+
+	return b;
 }
 
 void Physics3State::PhysxUpdate(bool interactive, float deltaTime)

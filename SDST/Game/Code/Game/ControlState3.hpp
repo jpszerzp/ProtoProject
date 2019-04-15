@@ -43,6 +43,7 @@ private:
 	CollisionBox* m_aabb_0;
 	CollisionSphere* m_sphere_0;
 	CollisionPlane* m_plane_0;
+	CollisionLine* m_line_0;
 	CollisionConvexObject* m_convex_0;
 	CollisionPrimitive* m_controlled_0;
 
@@ -51,6 +52,7 @@ private:
 	CollisionBox* m_aabb_1;
 	CollisionSphere* m_sphere_1;
 	CollisionPlane* m_plane_1;
+	CollisionLine* m_line_1;
 	CollisionConvexObject* m_convex_1;
 	CollisionPrimitive* m_controlled_1;
 

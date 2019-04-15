@@ -1612,6 +1612,8 @@ bool IsPointOutwardPlane(const Vector3& pt, const Plane& plane)
 
 bool SATTestBoxVsBox(const CollisionBox& b1, const CollisionBox& b2, Vector3 axis, const Vector3& disp, unsigned index, float& smallest_pen, unsigned& smallest_index)
 {
+	// if the axis is generated from basis of two boxes there may be parallel basis...
+	// parallel basis have 0 cross, hence axis may be 0 vector
 	if (axis.GetLengthSquared() < .0001f)
 		return true;
 

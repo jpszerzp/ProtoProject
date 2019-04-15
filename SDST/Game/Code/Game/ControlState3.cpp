@@ -143,6 +143,11 @@ ControlState3::ControlState3()
 	aabb_rb_1->SetSleepable(false);
 	m_aabb_1->AttachToRigidBody(aabb_rb_1);
 
+	// line
+	m_line_0 = new CollisionLine(Vector3(-5.f, 0.f, 0.f), Vector3(5.f, 0.f, 0.f), "wireframe", "Data/Images/white.png");
+	m_line_1 = new CollisionLine(Vector3(-5.f, 10.f, 0.f), Vector3(5.f, 10.f, 0.f), "wireframe", "Data/Images/white.png");
+	// what if there is no rigid bodies for lines?
+
 	// ui
 	BitmapFont* font = renderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
 	float txtHeight = height / 70.f;
@@ -232,28 +237,28 @@ void ControlState3::UpdateKeyboard(float deltaTime)
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_E))
 		upDown = -20.f;
 
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_I))
+	if (g_input->IsKeyDown(InputSystem::KEYBOARD_I) && m_cid_0 != CID_LINE)
 		m_controlled_0->GetRigidBody()->SetLinearVelocity(Vector3(0.f, 0.f, 5.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_K))
+	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_K) && m_cid_0 != CID_LINE)
 		m_controlled_0->GetRigidBody()->SetLinearVelocity(Vector3(0.f, 0.f, -5.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_J))
+	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_J) && m_cid_0 != CID_LINE)
 		m_controlled_0->GetRigidBody()->SetLinearVelocity(Vector3(-5.f, 0.f, 0.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_L))
+	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_L) && m_cid_0 != CID_LINE)
 		m_controlled_0->GetRigidBody()->SetLinearVelocity(Vector3(5.f, 0.f, 0.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_U))
+	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_U) && m_cid_0 != CID_LINE)
 		m_controlled_0->GetRigidBody()->SetLinearVelocity(Vector3(0.f, 5.f, 0.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_O))
+	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_O) && m_cid_0 != CID_LINE)
 		m_controlled_0->GetRigidBody()->SetLinearVelocity(Vector3(0.f, -5.f, 0.f));
-	else
+	else if (m_cid_0 != CID_LINE)
 		m_controlled_0->GetRigidBody()->SetLinearVelocity(Vector3::ZERO);
 
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_2) && m_cid_0 != CID_AABB)
+	if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_2) && m_cid_0 != CID_AABB && m_cid_0 != CID_LINE)
 		m_controlled_0->GetRigidBody()->SetAngularVelocity(Vector3(30.f, 0.f, 0.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_5) && m_cid_0 != CID_AABB)
+	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_5) && m_cid_0 != CID_AABB && m_cid_0 != CID_LINE)
 		m_controlled_0->GetRigidBody()->SetAngularVelocity(Vector3(0.f, 30.f, 0.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_8) && m_cid_0 != CID_AABB)
+	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_8) && m_cid_0 != CID_AABB && m_cid_0 != CID_LINE)
 		m_controlled_0->GetRigidBody()->SetAngularVelocity(Vector3(0.f, 0.f, 30.f));
-	else 
+	else if (m_cid_0 != CID_LINE)
 		m_controlled_0->GetRigidBody()->SetAngularVelocity(Vector3::ZERO);
 
 	// control 0
@@ -278,6 +283,10 @@ void ControlState3::UpdateKeyboard(float deltaTime)
 			m_cid_0 = CID_AABB;
 			break;
 		case CID_AABB:
+			m_controlled_0 = m_line_0;
+			m_cid_0 = CID_LINE;
+			break;
+		case CID_LINE:
 			m_controlled_0 = m_box_0;
 			m_cid_0 = CID_BOX;
 			break;
@@ -308,6 +317,10 @@ void ControlState3::UpdateKeyboard(float deltaTime)
 			m_cid_1 = CID_AABB;
 			break;
 		case CID_AABB:
+			m_controlled_1 = m_line_1;
+			m_cid_1 = CID_LINE;
+			break;
+		case CID_LINE:
 			m_controlled_1 = m_box_1;
 			m_cid_1 = CID_BOX;
 			break;
@@ -345,8 +358,10 @@ void ControlState3::UpdateDebugDraw(float deltaTime)
 		const Vector3& n = current->GetNormal();
 		const Vector3& pt = current->GetPos();
 		const float& pen = current->GetPenetration();
+		Vector3 pt_end = pt + n * pen;
 
-		DebugRenderLine(.1f, pt, pt + n * pen, 5.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
+		DebugRenderLine(.1f, pt, pt_end, 5.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
+		DebugRenderLine(.1f, pt_end, pt_end + n * pen, 5.f, Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
 
 		count++;
 		current = m_keep.m_collision_head + count;
@@ -383,12 +398,17 @@ void ControlState3::UpdateContacts(float deltaTime)
 	{
 		// nothing yet...
 	}
+	else if (m_cid_0 == CID_PLANE && m_cid_1 == CID_LINE)
+	{
+		// todo
+	}
 	else if (m_cid_0 == CID_BOX && m_cid_1 == CID_PLANE)
 		CollisionSensor::BoxVsHalfPlane(*m_box_0, *m_plane_1, &m_keep);
 	else if (m_cid_0 == CID_BOX && m_cid_1 == CID_SPHERE)
 		CollisionSensor::BoxVsSphere(*m_box_0, *m_sphere_1, &m_keep);
 	else if (m_cid_0 == CID_BOX && m_cid_1 == CID_BOX)
 		CollisionSensor::BoxVsBox(*m_box_0, *m_box_1, &m_keep);
+		//CollisionSensor::BoxVsBox(*m_box_1, *m_box_0, &m_keep);
 	else if (m_cid_0 == CID_BOX && m_cid_1 == CID_CONVEX)
 	{
 		// do nothing...
@@ -396,6 +416,10 @@ void ControlState3::UpdateContacts(float deltaTime)
 	else if (m_cid_0 == CID_BOX && m_cid_1 == CID_AABB)
 	{
 		// do nothing...
+	}
+	else if (m_cid_0 == CID_BOX && m_cid_1 == CID_LINE)
+	{
+		// todo
 	}
 	else if (m_cid_0 == CID_SPHERE && m_cid_1 == CID_PLANE)
 		CollisionSensor::SphereVsPlane(*m_sphere_0, *m_plane_1, &m_keep);
@@ -410,6 +434,10 @@ void ControlState3::UpdateContacts(float deltaTime)
 	else if (m_cid_0 == CID_SPHERE && m_cid_1 == CID_AABB)
 	{
 		// do nothing...
+	}
+	else if (m_cid_0 == CID_SPHERE && m_cid_1 == CID_LINE)
+	{
+		// todo
 	}
 	else if (m_cid_0 == CID_CONVEX && m_cid_1 == CID_PLANE)
 		CollisionSensor::ConvexVsHalfPlane(*m_convex_0, *m_plane_1, &m_keep);
@@ -428,6 +456,10 @@ void ControlState3::UpdateContacts(float deltaTime)
 	else if (m_cid_0 == CID_CONVEX && m_cid_1 == CID_AABB)
 	{
 		// nothing yet...
+	}
+	else if (m_cid_0 == CID_CONVEX && m_cid_1 == CID_LINE)
+	{
+		// todo
 	}
 	else if (m_cid_0 == CID_AABB && m_cid_1 == CID_AABB)
 	{
@@ -448,6 +480,30 @@ void ControlState3::UpdateContacts(float deltaTime)
 	else if (m_cid_0 == CID_AABB && m_cid_1 == CID_PLANE)
 	{
 		// nothing yet...
+	}
+	else if (m_cid_0 == CID_AABB && m_cid_1 == CID_LINE)
+		CollisionSensor::LineVsAABB(*m_line_1, *m_aabb_0, &m_keep);
+	else if (m_cid_0 == CID_LINE && m_cid_1 == CID_LINE)
+	{
+		// todo...
+	}
+	else if (m_cid_0 == CID_LINE && m_cid_1 == CID_SPHERE)
+	{
+		// todo...
+	}
+	else if (m_cid_0 == CID_LINE && m_cid_1 == CID_AABB)
+		CollisionSensor::LineVsAABB(*m_line_0, *m_aabb_1, &m_keep);
+	else if (m_cid_0 == CID_LINE && m_cid_1 == CID_BOX)
+	{
+		// todo...
+	}
+	else if (m_cid_0 == CID_LINE && m_cid_1 == CID_PLANE)
+	{
+		// todo...
+	}
+	else if (m_cid_0 == CID_LINE && m_cid_1 == CID_CONVEX)
+	{
+		// todo...
 	}
 }
 
