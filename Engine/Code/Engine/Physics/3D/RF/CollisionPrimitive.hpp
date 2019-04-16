@@ -163,6 +163,12 @@ public:
 
 	Vector3 GetStart() const { return m_start; }
 	Vector3 GetEnd() const { return m_end; }
+
+	void SetStart(const Vector3& v) { m_start = v; }
+	void SetEnd(const Vector3& v) { m_end = v; }
+
+	void Update(float deltaTime) override;
+	void Render(Renderer* renderer) override;
 };
 
 class CollisionConvexObject : public CollisionPrimitive

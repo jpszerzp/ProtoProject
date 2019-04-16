@@ -51,6 +51,7 @@ ControlState3::ControlState3()
 	// collision keep
 	m_keep.m_collision_head = m_storage;
 
+	// convex
 	Plane p1 = Plane(Vector3(.1f, 0.f, .9f), 1.f);
 	Plane p2 = Plane(Vector3(.1f, 0.f, -.9f), 1.f);
 	Plane p3 = Plane(Vector3(-.9f, 0.f, -.1f), 1.f);
@@ -91,14 +92,12 @@ ControlState3::ControlState3()
 	plane_rb_0->SetAwake(true);
 	plane_rb_0->SetSleepable(false);
 	m_plane_0->AttachToRigidBody(plane_rb_0);
-	//m_planes.push_back(plane_0);
 	m_controlled_0 = m_plane_0;
 
 	CollisionRigidBody* plane_rb_1 = new CollisionRigidBody(1.f, Vector3(0.f, 10.f, 0.f), Vector3(90.f, 0.f, 0.f));
 	plane_rb_1->SetAwake(true);
 	plane_rb_1->SetSleepable(false);
 	m_plane_1->AttachToRigidBody(plane_rb_1);
-	//m_planes.push_back(plane_1);
 	m_controlled_1 = m_plane_1;
 
 	// spheres
@@ -180,7 +179,7 @@ void ControlState3::Update(float deltaTime)
 	UpdatePair(deltaTime);
 	UpdateContacts(deltaTime);
 	UpdateDebugDraw(deltaTime);
-	UpdateUI(deltaTime);
+	//UpdateUI(deltaTime);
 }
 
 void ControlState3::UpdateMouse(float deltaTime)
@@ -237,18 +236,66 @@ void ControlState3::UpdateKeyboard(float deltaTime)
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_E))
 		upDown = -20.f;
 
-	if (g_input->IsKeyDown(InputSystem::KEYBOARD_I) && m_cid_0 != CID_LINE)
-		m_controlled_0->GetRigidBody()->SetLinearVelocity(Vector3(0.f, 0.f, 5.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_K) && m_cid_0 != CID_LINE)
-		m_controlled_0->GetRigidBody()->SetLinearVelocity(Vector3(0.f, 0.f, -5.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_J) && m_cid_0 != CID_LINE)
-		m_controlled_0->GetRigidBody()->SetLinearVelocity(Vector3(-5.f, 0.f, 0.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_L) && m_cid_0 != CID_LINE)
-		m_controlled_0->GetRigidBody()->SetLinearVelocity(Vector3(5.f, 0.f, 0.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_U) && m_cid_0 != CID_LINE)
-		m_controlled_0->GetRigidBody()->SetLinearVelocity(Vector3(0.f, 5.f, 0.f));
-	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_O) && m_cid_0 != CID_LINE)
-		m_controlled_0->GetRigidBody()->SetLinearVelocity(Vector3(0.f, -5.f, 0.f));
+	if (g_input->IsKeyDown(InputSystem::KEYBOARD_I))
+	{
+		if (m_cid_0 != CID_LINE)
+			m_controlled_0->GetRigidBody()->SetLinearVelocity(Vector3(0.f, 0.f, 5.f));
+		else
+		{
+			CollisionLine* line_0 = static_cast<CollisionLine*>(m_controlled_0);
+			line_0->SetStart(line_0->GetStart() + Vector3(0.f, 0.f, .1f));
+		}
+	}
+	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_K))
+	{
+		if (m_cid_0 != CID_LINE)
+			m_controlled_0->GetRigidBody()->SetLinearVelocity(Vector3(0.f, 0.f, -5.f));
+		else
+		{
+			CollisionLine* line_0 = static_cast<CollisionLine*>(m_controlled_0);
+			line_0->SetStart(line_0->GetStart() + Vector3(0.f, 0.f, -.1f));
+		}
+	}
+	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_J))
+	{
+		if (m_cid_0 != CID_LINE)
+			m_controlled_0->GetRigidBody()->SetLinearVelocity(Vector3(-5.f, 0.f, 0.f));
+		else
+		{
+			CollisionLine* line_0 = static_cast<CollisionLine*>(m_controlled_0);
+			line_0->SetStart(line_0->GetStart() + Vector3(-.1f, 0.f, 0.f));
+		}
+	}
+	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_L))
+	{
+		if (m_cid_0 != CID_LINE)
+			m_controlled_0->GetRigidBody()->SetLinearVelocity(Vector3(5.f, 0.f, 0.f));
+		else
+		{
+			CollisionLine* line_0 = static_cast<CollisionLine*>(m_controlled_0);
+			line_0->SetStart(line_0->GetStart() + Vector3(.1f, 0.f, 0.f));
+		}
+	}
+	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_U))
+	{
+		if (m_cid_0 != CID_LINE)
+			m_controlled_0->GetRigidBody()->SetLinearVelocity(Vector3(0.f, 5.f, 0.f));
+		else
+		{
+			CollisionLine* line_0 = static_cast<CollisionLine*>(m_controlled_0);
+			line_0->SetStart(line_0->GetStart() + Vector3(0.f, .1f, 0.f));
+		}
+	}
+	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_O))
+	{
+		if (m_cid_0 != CID_LINE)
+			m_controlled_0->GetRigidBody()->SetLinearVelocity(Vector3(0.f, -5.f, 0.f));
+		else
+		{
+			CollisionLine* line_0 = static_cast<CollisionLine*>(m_controlled_0);
+			line_0->SetStart(line_0->GetStart() + Vector3(0.f, -.1f, 0.f));
+		}
+	}
 	else if (m_cid_0 != CID_LINE)
 		m_controlled_0->GetRigidBody()->SetLinearVelocity(Vector3::ZERO);
 
@@ -408,7 +455,6 @@ void ControlState3::UpdateContacts(float deltaTime)
 		CollisionSensor::BoxVsSphere(*m_box_0, *m_sphere_1, &m_keep);
 	else if (m_cid_0 == CID_BOX && m_cid_1 == CID_BOX)
 		CollisionSensor::BoxVsBox(*m_box_0, *m_box_1, &m_keep);
-		//CollisionSensor::BoxVsBox(*m_box_1, *m_box_0, &m_keep);
 	else if (m_cid_0 == CID_BOX && m_cid_1 == CID_CONVEX)
 	{
 		// do nothing...
@@ -482,17 +528,30 @@ void ControlState3::UpdateContacts(float deltaTime)
 		// nothing yet...
 	}
 	else if (m_cid_0 == CID_AABB && m_cid_1 == CID_LINE)
-		CollisionSensor::LineVsAABB(*m_line_1, *m_aabb_0, &m_keep);
+	{
+		// nothing...
+	}
 	else if (m_cid_0 == CID_LINE && m_cid_1 == CID_LINE)
 	{
-		// todo...
+		CollisionLine* line_0 = static_cast<CollisionLine*>(m_controlled_0);
+		CollisionLine* line_1 = static_cast<CollisionLine*>(m_controlled_1);
+		
+		LineSegment3 seg_0 = LineSegment3(line_0->GetStart(), line_0->GetEnd());
+		LineSegment3 seg_1 = LineSegment3(line_1->GetStart(), line_1->GetEnd());
+
+		Vector3 close_0, close_1;
+		float t0, t1;
+		float close_sqr = LineSegment3::ClosestPointsSegments(seg_0, seg_1, t0, t1, close_0, close_1);
+		DebugRenderLine(.1f, close_0, close_1, 5.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
 	}
 	else if (m_cid_0 == CID_LINE && m_cid_1 == CID_SPHERE)
 	{
 		// todo...
 	}
 	else if (m_cid_0 == CID_LINE && m_cid_1 == CID_AABB)
-		CollisionSensor::LineVsAABB(*m_line_0, *m_aabb_1, &m_keep);
+	{
+		// nothing...
+    }
 	else if (m_cid_0 == CID_LINE && m_cid_1 == CID_BOX)
 	{
 		// todo...

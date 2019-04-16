@@ -93,10 +93,10 @@ uint16_t BufferSizeHardCode16(std::string str);
 float	SmoothStart2( float t ); // 2nd-degree smooth start (a.k.a. “quadratic ease in”)
 float	SmoothStart3( float t ); // 3rd-degree smooth start (a.k.a. “cubic ease in”)
 float	SmoothStart4( float t ); // 4th-degree smooth start (a.k.a. “quartic ease in”)
-float	SmoothStop2( float t ); // 2nd-degree smooth start (a.k.a. “quadratic ease out”)
-float	SmoothStop3( float t ); // 3rd-degree smooth start (a.k.a. “cubic ease out”)
-float	SmoothStop4( float t ); // 4th-degree smooth start (a.k.a. “quartic ease out”)
-float	SmoothStep3( float t ); // 3rd-degree smooth start/stop (a.k.a. “smoothstep”)
+float	SmoothStop2( float t );  // 2nd-degree smooth start (a.k.a. “quadratic ease out”)
+float	SmoothStop3( float t );  // 3rd-degree smooth start (a.k.a. “cubic ease out”)
+float	SmoothStop4( float t );  // 4th-degree smooth start (a.k.a. “quartic ease out”)
+float	SmoothStep3( float t );  // 3rd-degree smooth start/stop (a.k.a. “smoothstep”)
 
 // interpolation
 int			  Interpolate( int start, int end, float fractionTowardEnd );

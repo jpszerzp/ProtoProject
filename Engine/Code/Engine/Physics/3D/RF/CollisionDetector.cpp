@@ -684,5 +684,6 @@ uint CollisionSensor::ConvexVsSphere(const CollisionConvexObject& convex, const 
 
 uint CollisionSensor::LineVsAABB(const CollisionLine& line, const CollisionBox& aabb, CollisionKeep* c_data)
 {
+	ASSERT_OR_DIE(false, "Funtion unimplemented.");
 	return 1;
 }
