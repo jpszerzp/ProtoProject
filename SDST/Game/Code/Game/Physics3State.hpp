@@ -58,6 +58,7 @@ public:
 
 	// pipeline of update
 	void UpdateInput(float deltaTime);
+	void UpdateForceRegistries(float dt);
 	void UpdateGameobjects(float deltaTime);
 	void UpdateDebug(float deltaTime);
 	void UpdateDebugDraw(float deltaTime);
@@ -88,6 +89,7 @@ public:
 		const Vector3& rot, const Vector3& scale, const bool& awake = true, const bool& sleepable = false);
 	CollisionPoint* WrapAroundTestPoint(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position,
 		const Vector3& rot, const Vector3& scale, const bool& awake = true, const bool& sleepable = false);
+	Spring* SetupSpring(CollisionPoint* end1, CollisionPoint* end2, float coef, float rl);
 
 	void SpawnStack(const Vector3& origin, uint sideLength, uint stackHeight);
 	void SpawnRandomBox(WrapAround* wpa, uint num, const Vector3& min, const Vector3& max);
@@ -135,6 +137,9 @@ public:
 	std::vector<CollisionPlane*> m_planes;
 	std::vector<CollisionConvexObject*> m_convex_objs;
 	std::vector<CollisionPoint*> m_points;
+
+	// springs
+	Spring* m_spring;
 
 	// force
 	ParticleForceRegistry* m_particleRegistry = nullptr;

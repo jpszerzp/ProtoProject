@@ -26,17 +26,15 @@ void DragGenerator::UpdateForce(CollisionRigidBody* entity3D, float)
 	*/
 }
 
-void SpringGenerator::UpdateForce(CollisionRigidBody* entity3D, float)
+void SpringGenerator::UpdateForce(CollisionRigidBody* r, float)
 {
-	/*
-	Vector3 extension = entity3D->GetEntityCenter() - m_other->GetEntityCenter();
+	Vector3 extension = r->GetCenter() - m_other->GetCenter();
 	
 	float delta = extension.GetLength() - m_restLength;
 
 	Vector3 force = extension.GetNormalized() * (-delta * m_const);
 
-	entity3D->AddForce(force);
-	*/
+	r->AddForce(force);
 }
 
 void AnchorSpringGenerator::UpdateForce(CollisionRigidBody* entity3D, float)

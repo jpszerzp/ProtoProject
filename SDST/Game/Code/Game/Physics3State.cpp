@@ -154,21 +154,19 @@ Physics3State::Physics3State()
 	m_inspection.push_back(Vector3(-5.f, 220.f, -20.f));
 
 	// particle springs
-	//CollisionPoint* sp_point_0 = WrapAroundTestPoint(nullptr, false, false, false,
-	//	Vector3(10.f, 225.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
-	//CollisionPoint* sp_point_1 = WrapAroundTestPoint(nullptr, false, false, false,
-	//	Vector3(10.f, 235.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
+	CollisionPoint* sp_point_0 = WrapAroundTestPoint(nullptr, false, false, false,
+		Vector3(10.f, 225.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
+	CollisionPoint* sp_point_1 = WrapAroundTestPoint(nullptr, false, false, false,
+		Vector3(10.f, 235.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
 	//CollisionPoint* asp_point_0 = WrapAroundTestPoint(nullptr, false, false, false,
 	//	Vector3(15.f, 225.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
 	//CollisionPoint* asp_point_1 = WrapAroundTestPoint(nullptr, false, false, false,
 	//	Vector3(15.f, 235.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
-	//sp_point_0->GetRigidBody()->SetFrozen(true);
-	//sp_point_1->GetRigidBody()->SetFrozen(true);
 	//asp_point_0->GetRigidBody()->SetFrozen(true);
 	//asp_point_1->GetRigidBody()->SetFrozen(true);
-	//// setting up registrations in the registry
-	//// A. springs
-	//m_spring = SetupSpring(sp_point_0, sp_point_1, 2.f, 8.f);		
+	// setting up registrations in the registry
+	// A. springs
+	m_spring = SetupSpring(sp_point_0, sp_point_1, 2.f, 9.5f);		
 	//// two points initialized to be 5 units away, constraint by a spring system with rest length of 3
 	//// B. anchored spring
 	//m_anchorSpring = SetupAnchorSpring(asp_point_0, asp_point_1, 2.f, 8.f);
@@ -191,6 +189,15 @@ Physics3State::~Physics3State()
 
 	delete m_wraparound_verlet;
 	m_wraparound_verlet = nullptr;
+
+	delete m_spring;
+	m_spring = nullptr;
+
+	delete m_rigidRegistry;
+	m_rigidRegistry = nullptr;
+	
+	delete m_particleRegistry;
+	m_particleRegistry = nullptr;
 
 	PhysxShutdown(true);
 }
@@ -501,6 +508,14 @@ void Physics3State::UpdateInput(float deltaTime)
 	}
 }
 
+void Physics3State::UpdateForceRegistries(float dt)
+{
+	if (m_particleRegistry != nullptr)
+		m_particleRegistry->UpdateForces(dt);
+	//if (m_rigidRegistry != nullptr)
+	//	m_rigidRegistry->UpdateForces(dt);
+}
+
 void Physics3State::UpdateGameobjects(float deltaTime)
 {
 	UpdateGameobjectsCore(deltaTime);		// update GO core
@@ -782,6 +797,7 @@ void Physics3State::MyPhysicsUpdate(float deltaTime)
 	//PROFILE_LOG_SCOPED("My physics path");
 	ProfileLogScoped my_api("Physics3State::MyPhysicsUpdate", true);
 	UpdateInput(deltaTime);				// update input
+	UpdateForceRegistries(deltaTime);	// update force
 	UpdateGameobjects(deltaTime);		// update gameobjects
 	UpdateContacts(deltaTime);
 	UpdateDebug(deltaTime);			
@@ -1036,8 +1052,8 @@ CollisionPoint* Physics3State::WrapAroundTestPoint(WrapAround* wpa, bool give_an
 	// pt scale should be uniform
 	CollisionPoint* pt = new CollisionPoint(scale.x);
 
-	CollisionRigidBody* rb = new CollisionRigidBody(1.f, position, rot);
-	rb->SetParticle(true);									// particle 
+	CollisionRigidBody* rb = new CollisionRigidBody(5.f, position, rot);
+	rb->SetParticle(true);
 	rb->SetAwake(awake);
 	rb->SetSleepable(sleepable);
 
@@ -1067,6 +1083,32 @@ CollisionPoint* Physics3State::WrapAroundTestPoint(WrapAround* wpa, bool give_an
 		wpa->m_primitives.push_back(pt);
 
 	return pt;
+}
+
+Spring* Physics3State::SetupSpring(CollisionPoint* end1, CollisionPoint* end2, float coef, float rl)
+{
+	Spring* sp = new Spring(end1, end2, coef, rl);
+
+	// get the entities of points
+	CollisionRigidBody* e1 = end1->GetRigidBody();
+	CollisionRigidBody* e2 = end2->GetRigidBody();
+
+	// use euler
+	e1->SetVerlet(false);
+	e2->SetVerlet(false);
+
+	e1->SetFrozen(true);
+	e2->SetFrozen(true);
+
+	// initialize spring force generators
+	SpringGenerator* sg1 = new SpringGenerator(e2, coef, rl);
+	SpringGenerator* sg2 = new SpringGenerator(e1, coef, rl);
+
+	// register the generator with corresponding entity
+	m_particleRegistry->Register(e1, sg1);
+	m_particleRegistry->Register(e2, sg2);
+
+	return sp;
 }
 
 CollisionBox* Physics3State::WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, 

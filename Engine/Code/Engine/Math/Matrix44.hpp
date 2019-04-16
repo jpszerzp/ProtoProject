@@ -7,8 +7,6 @@
 #include "PxPhysicsAPI.h"
 using namespace physx;
 
-//class PxMat44;
-
 class Matrix44
 {
 public:
