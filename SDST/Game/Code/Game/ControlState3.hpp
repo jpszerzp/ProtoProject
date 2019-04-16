@@ -62,4 +62,7 @@ private:
 	Mesh* m_title_ui;
 
 	QuickHull* m_qh = nullptr;
+
+	std::vector<Vector3> m_inspection;
+	int m_insepction_count = 0;
 };

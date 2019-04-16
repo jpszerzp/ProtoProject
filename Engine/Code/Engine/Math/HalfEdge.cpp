@@ -206,7 +206,7 @@ void HalfEdge::SwapMeshTwin(bool twinSet)
 	CreateArrowMeshesOffset(percentage, centroid, usedColor);
 }
 
-void HalfEdge::SwapMeshTwinGeneral(bool twinSet)
+void HalfEdge::SwapMeshTwinGeneral(bool twinSet, QuickHull* hull)
 {
 	FlushMeshes();
 
@@ -215,7 +215,7 @@ void HalfEdge::SwapMeshTwinGeneral(bool twinSet)
 	Rgba usedColor;
 
 	TODO("Better work for ALL hulls");
-	if (g_hull->m_current_he == this)
+	if (hull->m_current_he == this)
 	{
 		if (twinSet)
 			usedColor = Rgba::CYAN;

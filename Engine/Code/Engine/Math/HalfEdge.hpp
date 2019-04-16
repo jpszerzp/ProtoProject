@@ -55,7 +55,7 @@ struct HalfEdge
 	void DebugUpdateTwin();
 	void SwapMesh(const Rgba& color);
 	void SwapMeshTwin(bool twinSet);		// we do not care if this is current_he of hull
-	void SwapMeshTwinGeneral(bool twinSet);		// we do care if this is current_he of hull, because it could have been intialized or changed
+	void SwapMeshTwinGeneral(bool twinSet, QuickHull* hull);		// we do care if this is current_he of hull, because it could have been intialized or changed
 	void SwapMeshTwinHorizon();
 
 	bool IsTwin(HalfEdge* value) { return (value->m_next->m_tail == m_tail && value->m_tail == m_next->m_tail); }

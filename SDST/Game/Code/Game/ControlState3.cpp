@@ -162,6 +162,9 @@ ControlState3::ControlState3()
 	Vector3 qh_max = Vector3(-200.f, 100.f, 100.f);
 	m_qh = new QuickHull(20, qh_min, qh_max);
 
+	m_inspection.push_back(m_cameraInitialPos);
+	m_inspection.push_back(Vector3(-250.f, 50.f, -50.f));
+
 	// debug
 	DebugRenderSet3DCamera(m_camera);
 	DebugRenderSet2DCamera(m_UICamera);
@@ -309,7 +312,7 @@ void ControlState3::UpdateKeyboard(float deltaTime)
 		m_controlled_0->GetRigidBody()->SetAngularVelocity(Vector3::ZERO);
 
 	// control 0
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_TAB))
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_SHIFT))
 	{
 		switch (m_cid_0)
 		{
@@ -343,7 +346,7 @@ void ControlState3::UpdateKeyboard(float deltaTime)
 	}
 
 	// control 1 
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_SHIFT))
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_CAPITAL))
 	{
 		switch (m_cid_1)
 		{
@@ -373,6 +376,22 @@ void ControlState3::UpdateKeyboard(float deltaTime)
 			break;
 		default:
 			break;
+		}
+	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_TAB))
+	{
+		if (!m_inspection.empty())
+		{
+			Vector3 pos = m_inspection[m_insepction_count];
+
+			// set camera pos to this inspection position
+			m_camera->GetTransform().SetLocalPosition(pos);
+			m_camera->GetTransform().SetLocalRotation(Vector3::ZERO);
+
+			int size = m_inspection.size();
+			++m_insepction_count;
+			m_insepction_count = (m_insepction_count % size);
 		}
 	}
 
@@ -581,6 +600,8 @@ void ControlState3::Render(Renderer* renderer)
 	// draw group contents
 	renderer->SetCamera(m_camera);
 	RenderPair(renderer);
+
+	m_qh->RenderHull(renderer);
 
 	m_forwardPath->RenderScene(m_sceneGraph);
 }
