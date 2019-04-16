@@ -71,30 +71,30 @@ ControlState3::ControlState3()
 	m_convex_1 = new CollisionConvexObject(*cHull, "wireframe", "Data/Images/white.png");
 
 	const float& mass_0 = m_convex_0->GetInitialMass();
-	const Vector3& true_center_0 = Vector3::ZERO;			 // com + (wrap_center - com); based on ORIGIN
+	const Vector3& true_center_0 = Vector3(0.f, 200.f, 0.f);			 // com + (wrap_center - com); based on ORIGIN
 	CollisionRigidBody* convex_rb_0 = new CollisionRigidBody(mass_0, true_center_0, Vector3::ZERO);
 	convex_rb_0->SetAwake(true);
 	convex_rb_0->SetSleepable(false);
 	m_convex_0->AttachToRigidBody(convex_rb_0);
 
 	const float& mass_1 = m_convex_1->GetInitialMass();
-	const Vector3& true_center_1 = Vector3(0.f, 10.f, 0.f);
+	const Vector3& true_center_1 = Vector3(0.f, 210.f, 0.f);
 	CollisionRigidBody* convex_rb_1 = new CollisionRigidBody(mass_1, true_center_1, Vector3::ZERO);
 	convex_rb_1->SetAwake(true);
 	convex_rb_1->SetSleepable(false);
 	m_convex_1->AttachToRigidBody(convex_rb_1);
 
 	// planes
-	m_plane_0 = new CollisionPlane(Vector2(20.f), "quad_pcu_20", Vector3(0.f, 1.f, 0.f), 0.f, "wireframe", "Data/Images/white.png");
-	m_plane_1 = new CollisionPlane(Vector2(20.f), "quad_pcu_20", Vector3(0.f, 1.f, 0.f), 10.f, "wireframe", "Data/Images/white.png");
+	m_plane_0 = new CollisionPlane(Vector2(20.f), "quad_pcu_20", Vector3(0.f, 1.f, 0.f), 200.f, "wireframe", "Data/Images/white.png");
+	m_plane_1 = new CollisionPlane(Vector2(20.f), "quad_pcu_20", Vector3(0.f, 1.f, 0.f), 210.f, "wireframe", "Data/Images/white.png");
 
-	CollisionRigidBody* plane_rb_0 = new CollisionRigidBody(1.f, Vector3::ZERO, Vector3(90.f, 0.f, 0.f));
+	CollisionRigidBody* plane_rb_0 = new CollisionRigidBody(1.f, Vector3(0.f, 200.f, 0.f), Vector3(90.f, 0.f, 0.f));
 	plane_rb_0->SetAwake(true);
 	plane_rb_0->SetSleepable(false);
 	m_plane_0->AttachToRigidBody(plane_rb_0);
 	m_controlled_0 = m_plane_0;
 
-	CollisionRigidBody* plane_rb_1 = new CollisionRigidBody(1.f, Vector3(0.f, 10.f, 0.f), Vector3(90.f, 0.f, 0.f));
+	CollisionRigidBody* plane_rb_1 = new CollisionRigidBody(1.f, Vector3(0.f, 210.f, 0.f), Vector3(90.f, 0.f, 0.f));
 	plane_rb_1->SetAwake(true);
 	plane_rb_1->SetSleepable(false);
 	m_plane_1->AttachToRigidBody(plane_rb_1);
@@ -104,12 +104,12 @@ ControlState3::ControlState3()
 	m_sphere_0 = new CollisionSphere(1.f, "wireframe", "Data/Images/white.png");
 	m_sphere_1 = new CollisionSphere(1.f, "wireframe", "Data/Images/white.png");
 
-	CollisionRigidBody* sphere_rb_0 = new CollisionRigidBody(1.f, Vector3::ZERO, Vector3::ZERO);
+	CollisionRigidBody* sphere_rb_0 = new CollisionRigidBody(1.f, Vector3(0.f, 200.f, 0.f), Vector3::ZERO);
 	sphere_rb_0->SetAwake(true);
 	sphere_rb_0->SetSleepable(false);
 	m_sphere_0->AttachToRigidBody(sphere_rb_0);
 
-	CollisionRigidBody* sphere_rb_1 = new CollisionRigidBody(1.f, Vector3(0.f, 10.f, 0.f), Vector3::ZERO);
+	CollisionRigidBody* sphere_rb_1 = new CollisionRigidBody(1.f, Vector3(0.f, 210.f, 0.f), Vector3::ZERO);
 	sphere_rb_1->SetAwake(true);
 	sphere_rb_1->SetSleepable(false);
 	m_sphere_1->AttachToRigidBody(sphere_rb_1);
@@ -118,12 +118,12 @@ ControlState3::ControlState3()
 	m_box_0 = new CollisionBox(Vector3(.5f), "wireframe", "Data/Images/white.png");
 	m_box_1 = new CollisionBox(Vector3(.5f), "wireframe", "Data/Images/white.png");
 
-	CollisionRigidBody* box_rb_0 = new CollisionRigidBody(1.f, Vector3::ZERO, Vector3::ZERO);
+	CollisionRigidBody* box_rb_0 = new CollisionRigidBody(1.f, Vector3(0.f, 200.f, 0.f), Vector3::ZERO);
 	box_rb_0->SetAwake(true);
 	box_rb_0->SetSleepable(false);
 	m_box_0->AttachToRigidBody(box_rb_0);
 
-	CollisionRigidBody* box_rb_1 = new CollisionRigidBody(1.f, Vector3(0.f, 10.f, 0.f), Vector3::ZERO);
+	CollisionRigidBody* box_rb_1 = new CollisionRigidBody(1.f, Vector3(0.f, 210.f, 0.f), Vector3::ZERO);
 	box_rb_1->SetAwake(true);
 	box_rb_1->SetSleepable(false);
 	m_box_1->AttachToRigidBody(box_rb_1);
@@ -132,19 +132,19 @@ ControlState3::ControlState3()
 	m_aabb_0 = new CollisionBox(Vector3(.5f), "wireframe", "Data/Images/white.png");
 	m_aabb_1 = new CollisionBox(Vector3(.5f), "wireframe", "Data/Images/white.png");
 
-	CollisionRigidBody* aabb_rb_0 = new CollisionRigidBody(1.f, Vector3::ZERO, Vector3::ZERO);
+	CollisionRigidBody* aabb_rb_0 = new CollisionRigidBody(1.f, Vector3(0.f, 200.f, 0.f), Vector3::ZERO);
 	aabb_rb_0->SetAwake(true);
 	aabb_rb_0->SetSleepable(false);
 	m_aabb_0->AttachToRigidBody(aabb_rb_0);
 
-	CollisionRigidBody* aabb_rb_1 = new CollisionRigidBody(1.f, Vector3(0.f, 10.f, 0.f), Vector3::ZERO);
+	CollisionRigidBody* aabb_rb_1 = new CollisionRigidBody(1.f, Vector3(0.f, 210.f, 0.f), Vector3::ZERO);
 	aabb_rb_1->SetAwake(true);
 	aabb_rb_1->SetSleepable(false);
 	m_aabb_1->AttachToRigidBody(aabb_rb_1);
 
 	// line
-	m_line_0 = new CollisionLine(Vector3(-5.f, 0.f, 0.f), Vector3(5.f, 0.f, 0.f), "wireframe", "Data/Images/white.png");
-	m_line_1 = new CollisionLine(Vector3(-5.f, 10.f, 0.f), Vector3(5.f, 10.f, 0.f), "wireframe", "Data/Images/white.png");
+	m_line_0 = new CollisionLine(Vector3(-5.f, 200.f, 0.f), Vector3(5.f, 200.f, 0.f), "wireframe", "Data/Images/white.png");
+	m_line_1 = new CollisionLine(Vector3(-5.f, 210.f, 0.f), Vector3(5.f, 210.f, 0.f), "wireframe", "Data/Images/white.png");
 	// what if there is no rigid bodies for lines?
 
 	// ui
@@ -162,7 +162,7 @@ ControlState3::ControlState3()
 	Vector3 qh_max = Vector3(-200.f, 100.f, 100.f);
 	m_qh = new QuickHull(20, qh_min, qh_max);
 
-	m_inspection.push_back(m_cameraInitialPos);
+	m_inspection.push_back(Vector3(0.f, 200.f, -20.f));
 	m_inspection.push_back(Vector3(-250.f, 50.f, -50.f));
 
 	// debug
@@ -303,11 +303,11 @@ void ControlState3::UpdateKeyboard(float deltaTime)
 		m_controlled_0->GetRigidBody()->SetLinearVelocity(Vector3::ZERO);
 
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_2) && m_cid_0 != CID_AABB && m_cid_0 != CID_LINE)
-		m_controlled_0->GetRigidBody()->SetAngularVelocity(Vector3(30.f, 0.f, 0.f));
+		m_controlled_0->GetRigidBody()->SetAngularVelocity(Vector3(5.f, 0.f, 0.f));
 	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_5) && m_cid_0 != CID_AABB && m_cid_0 != CID_LINE)
-		m_controlled_0->GetRigidBody()->SetAngularVelocity(Vector3(0.f, 30.f, 0.f));
+		m_controlled_0->GetRigidBody()->SetAngularVelocity(Vector3(0.f, 5.f, 0.f));
 	else if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_8) && m_cid_0 != CID_AABB && m_cid_0 != CID_LINE)
-		m_controlled_0->GetRigidBody()->SetAngularVelocity(Vector3(0.f, 0.f, 30.f));
+		m_controlled_0->GetRigidBody()->SetAngularVelocity(Vector3(0.f, 0.f, 5.f));
 	else if (m_cid_0 != CID_LINE)
 		m_controlled_0->GetRigidBody()->SetAngularVelocity(Vector3::ZERO);
 

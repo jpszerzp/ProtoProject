@@ -282,10 +282,11 @@ uint CollisionSensor::SphereVsPlane(const CollisionSphere& sphere, const Collisi
 		return 0;
 
 	Vector3 position = sphere.GetBasisAndPosition(3);
+	float rad = sphere.GetRadius();
 
 	float dist = DotProduct(plane.GetNormal(), position) - plane.GetOffset();
 
-	if (dist * dist > sphere.GetRadius() * sphere.GetRadius())
+	if (dist * dist > rad * rad)
 		return 0;
 
 	Vector3 normal = plane.GetNormal();
@@ -297,7 +298,7 @@ uint CollisionSensor::SphereVsPlane(const CollisionSphere& sphere, const Collisi
 		penetration *= -1.f;
 	}
 
-	penetration += sphere.GetRadius();
+	penetration += rad;
 
 	Collision* collision = c_data->m_collision;
 	collision->m_normal = normal;

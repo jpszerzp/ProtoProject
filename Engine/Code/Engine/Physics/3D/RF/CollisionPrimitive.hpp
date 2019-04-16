@@ -134,6 +134,8 @@ public:
 	void ProjectToAxisForInterval(const Vector3& axis, float& tmin, float& tmax, Vector3& vmin, Vector3& vmax) const;
 };
 
+TODO("Problem for plane: it uses primitive's virtual function, so it does not update offset or normal, if plane is static this is fine, but not if dynamic/kinematic");
+
 class CollisionPlane : public CollisionPrimitive
 {
 	Vector3 m_normal;
