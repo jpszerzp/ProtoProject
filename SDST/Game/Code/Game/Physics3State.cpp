@@ -138,22 +138,44 @@ Physics3State::Physics3State()
 	m_particleRegistry = new ParticleForceRegistry();
 	m_rigidRegistry = new RigidForceRegistry();
 
-	// debug
-	DebugRenderSet3DCamera(m_camera);
-	DebugRenderSet2DCamera(m_UICamera);
-
 	// verlet
 	m_wraparound_verlet = new WrapAround(Vector3(-10.f, 200.f, -10.f), Vector3(0.f, 250.f, 0.f));
 	m_wraparound_verlet->m_particle = true;
 	CollisionPoint* free = WrapAroundTestPoint(m_wraparound_verlet, false, false, true, Vector3(-7.f, 240.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
 	CollisionPoint* verlet_vel = WrapAroundTestPoint(m_wraparound_verlet, false, false, true, Vector3(-3.f, 240.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
 	free->GetRigidBody()->SetVerlet(false);		// no verlet scheme for it as it is not verlet particle
+	free->GetRigidBody()->SetFrozen(true);
 	verlet_vel->GetRigidBody()->SetVerlet(true);
 	verlet_vel->GetRigidBody()->SetVerletScheme(VERLET_VEL_P);
+	verlet_vel->GetRigidBody()->SetFrozen(true);
 
 	// inspection
 	m_inspection.push_back(m_cameraInitialPos);
 	m_inspection.push_back(Vector3(-5.f, 220.f, -20.f));
+
+	// particle springs
+	//CollisionPoint* sp_point_0 = WrapAroundTestPoint(nullptr, false, false, false,
+	//	Vector3(10.f, 225.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
+	//CollisionPoint* sp_point_1 = WrapAroundTestPoint(nullptr, false, false, false,
+	//	Vector3(10.f, 235.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
+	//CollisionPoint* asp_point_0 = WrapAroundTestPoint(nullptr, false, false, false,
+	//	Vector3(15.f, 225.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
+	//CollisionPoint* asp_point_1 = WrapAroundTestPoint(nullptr, false, false, false,
+	//	Vector3(15.f, 235.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
+	//sp_point_0->GetRigidBody()->SetFrozen(true);
+	//sp_point_1->GetRigidBody()->SetFrozen(true);
+	//asp_point_0->GetRigidBody()->SetFrozen(true);
+	//asp_point_1->GetRigidBody()->SetFrozen(true);
+	//// setting up registrations in the registry
+	//// A. springs
+	//m_spring = SetupSpring(sp_point_0, sp_point_1, 2.f, 8.f);		
+	//// two points initialized to be 5 units away, constraint by a spring system with rest length of 3
+	//// B. anchored spring
+	//m_anchorSpring = SetupAnchorSpring(asp_point_0, asp_point_1, 2.f, 8.f);
+
+	// debug render
+	DebugRenderSet3DCamera(m_camera);
+	DebugRenderSet2DCamera(m_UICamera);
 }
 
 Physics3State::~Physics3State()
@@ -1015,7 +1037,7 @@ CollisionPoint* Physics3State::WrapAroundTestPoint(WrapAround* wpa, bool give_an
 	CollisionPoint* pt = new CollisionPoint(scale.x);
 
 	CollisionRigidBody* rb = new CollisionRigidBody(1.f, position, rot);
-	rb->SetParticle(true);			// particle 
+	rb->SetParticle(true);									// particle 
 	rb->SetAwake(awake);
 	rb->SetSleepable(sleepable);
 
@@ -1041,7 +1063,8 @@ CollisionPoint* Physics3State::WrapAroundTestPoint(WrapAround* wpa, bool give_an
 	}
 
 	// add to primitive vector in wpa
-	wpa->m_primitives.push_back(pt);
+	if (wpa != nullptr)
+		wpa->m_primitives.push_back(pt);
 
 	return pt;
 }

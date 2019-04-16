@@ -76,6 +76,108 @@ void CollisionRigidBody::Integrate(float deltaTime)
 	}
 }
 
+void CollisionRigidBody::IntegrateEulerParticle(float dt)
+{
+	// make sure it is particle
+	if (m_particle)
+	{
+		if (!m_awake)
+			return;
+
+		dt *= m_slow;
+
+		// acc
+		m_last_lin_acc = m_lin_acc;						// base acc
+		m_last_lin_acc += (m_net_force * m_inv_mass);
+
+		// vel
+		m_lin_vel += (m_last_lin_acc * dt);
+		m_lin_vel *= powf(m_lin_damp, dt);
+
+		// pos 
+		m_center += (m_lin_vel * dt);
+
+		// cache
+		CacheData();
+		
+		ClearAcc();
+
+		if (m_sleepable)
+		{
+			float currentMotion = GetRealTimeMotion();
+
+			float lerp = powf(0.5, dt);
+			m_motion = lerp * m_motion + (1 - lerp) * currentMotion;	// lerp to real time motion
+
+			if (m_motion < g_sleep_threshold) 
+				SetAwake(false);
+			else if (m_motion > 10 * g_sleep_threshold) 
+				m_motion = 10 * g_sleep_threshold;
+		}
+	}
+	else
+		ASSERT_OR_DIE(false, "non-particles should not care if the integration is euler-based or verlet based");
+}
+
+void CollisionRigidBody::IntegrateVerletParticle(float dt)
+{
+	if (m_particle)
+	{
+		if (!m_awake)
+			return;
+
+		dt *= m_slow;
+
+		// basic verlet or vel verlet
+		if (m_verlet_p == VERLET_BASIC_P)
+		{
+			Vector3 p = m_center;
+
+			// acc
+			m_last_lin_acc = m_lin_acc;
+			m_last_lin_acc += (m_net_force * m_inv_mass);
+
+			// no vel
+
+			// pos
+			m_center += (m_center - m_last_center) + m_lin_acc * dt * dt;
+			m_last_center = p;
+		}
+		else if (m_verlet_p == VERLET_VEL_P)
+		{
+			// acc
+			m_last_lin_acc = m_lin_acc;		
+			m_last_lin_acc += (m_net_force * m_inv_mass);
+
+			// vel
+			m_half_step_vel = m_lin_vel + m_lin_acc * .5f * dt;
+			m_lin_vel = m_half_step_vel + m_lin_acc * .5f * dt;
+
+			m_center += m_half_step_vel * dt;
+		}
+
+		// cache
+		CacheData();
+
+		ClearAcc();
+
+		if (m_sleepable)
+		{
+			float currentMotion = GetRealTimeMotion();
+
+			float lerp = powf(0.5, dt);
+			m_motion = lerp * m_motion + (1 - lerp) * currentMotion;	// lerp to real time motion
+
+			if (m_motion < g_sleep_threshold) 
+				SetAwake(false);
+			else if (m_motion > 10 * g_sleep_threshold) 
+				m_motion = 10 * g_sleep_threshold;
+		}
+	}
+	else
+		ASSERT_OR_DIE(false, "non-particles should not care if the integration is euler-based or verlet based");
+}
+
 void CollisionRigidBody::ClearAcc()
 {
 	m_net_force.ToDefault();
@@ -105,8 +207,9 @@ void CollisionRigidBody::CacheData()
 	}
 	else
 	{
-		Quaternion zero = Quaternion::FromEuler(Vector3::ZERO);
-		CacheTransformMat(m_transform_mat, m_center, zero);
+		// m_orientation is zero quat, the pipeline never changes it.
+		// But that means it is user responsibility to initialize it zero...
+		CacheTransformMat(m_transform_mat, m_center, m_orientation);
 	}
 }
 

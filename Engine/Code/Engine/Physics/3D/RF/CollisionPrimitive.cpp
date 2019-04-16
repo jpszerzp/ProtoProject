@@ -1,6 +1,7 @@
 #include "Engine/Physics/3D/RF/CollisionPrimitive.hpp"
 #include "Engine/Renderer/DebugRenderer.hpp"
 #include "Engine/Math/MathUtils.hpp"
+#include "Engine/Input/InputSystem.hpp"
 
 CollisionPrimitive::~CollisionPrimitive()
 {
@@ -25,17 +26,6 @@ void CollisionPrimitive::AttachToRigidBody(CollisionRigidBody*)
 {
 
 }
-
-//void CollisionPrimitive::SetRigidBodyPosition(const Vector3& pos)
-//{
-//	m_rigid_body->SetCenter(pos);
-//	
-//	// cache
-//	m_rigid_body->CacheData();
-//
-//	// transform
-//	m_transform_mat = m_rigid_body->GetTransformMat4();
-//}
 
 void CollisionPrimitive::Update(float deltaTime)
 {
@@ -129,12 +119,46 @@ void CollisionPoint::AttachToRigidBody(CollisionRigidBody* rb)
 
 void CollisionPoint::SetRigidBodyPosition(const Vector3& pos)
 {
-
+	GetRigidBody()->SetCenter(pos);
+		
+	// cache
+	GetRigidBody()->CacheData();
+	
+	// transform
+	SetPrimitiveTransformMat4(GetRigidBody()->GetTransformMat4());
 }
 
 void CollisionPoint::Update(float dt)
 {
+	// get input
+	InputSystem* input = InputSystem::GetInstance();
 
+	// input detection
+	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_P))
+	{
+		SetFrozen(!IsFrozen());
+	}
+
+	// particle update
+	if (GetRigidBody() != nullptr && !IsFrozen())
+	{
+		if (!IsVerlet())
+		{
+			// euler
+			GetRigidBody()->IntegrateEulerParticle(dt);
+
+			// calculate internal
+			SetPrimitiveTransformMat4(GetRigidBody()->GetTransformMat4());
+		}
+		else
+		{
+			// verlet
+			GetRigidBody()->IntegrateVerletParticle(dt);
+
+			// internal
+			SetPrimitiveTransformMat4(GetRigidBody()->GetTransformMat4());
+		}
+	}
 }
 
 void CollisionPoint::Render(Renderer* renderer)
@@ -870,14 +894,17 @@ ConvexPolygon CollisionConvexObject::GetPoly(int idx) const
 
 void CollisionConvexObject::Update(float deltaTime)
 {
-	// take rigid body and integrate
-	GetRigidBody()->Integrate(deltaTime);
+	if (GetRigidBody() != nullptr)
+	{
+		// take rigid body and integrate
+		GetRigidBody()->Integrate(deltaTime);
 
-	// calculate internal
-	SetPrimitiveTransformMat4(GetRigidBody()->GetTransformMat4());
+		// calculate internal
+		SetPrimitiveTransformMat4(GetRigidBody()->GetTransformMat4());
 
-	// update world verts
-	BuildWorldVerts();
+		// update world verts
+		BuildWorldVerts();
+	}
 }
 
 // TETRAHEDRONBODY

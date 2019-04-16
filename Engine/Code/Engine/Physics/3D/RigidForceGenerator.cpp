@@ -6,8 +6,9 @@
  * May use torque generator to generate torque exclusively.
  */
 
-void GravityRigidForceGenerator::UpdateForce(Rigidbody3* body, float)
+void GravityRigidForceGenerator::UpdateForce(CollisionRigidBody* body, float)
 {
+	/*
 	if (body->IsConst())
 		return;
 
@@ -21,10 +22,12 @@ void GravityRigidForceGenerator::UpdateForce(Rigidbody3* body, float)
 	
 	Vector3 center = body->GetEntityCenter();
 	DebugRenderLine(.01f, center, center + force, 5.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
+	*/
 }	
 
-void AnchorSpringRigidForceGenerator::UpdateForce(Rigidbody3* body, float)
+void AnchorSpringRigidForceGenerator::UpdateForce(CollisionRigidBody* body, float)
 {
+	/*
 	Vector3 attach_world = body->GetPointInWorld(m_attachLocal);
 	Vector3 extension = m_anchorWorld - attach_world;
 	float delta = extension.GetLength() - m_restLength;
@@ -32,4 +35,5 @@ void AnchorSpringRigidForceGenerator::UpdateForce(Rigidbody3* body, float)
 	body->AddForcePointWorldCoord(force, attach_world);
 
 	DebugRenderLine(.01f, attach_world, attach_world + force, 5.f, Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	*/
 }

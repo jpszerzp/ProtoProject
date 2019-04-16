@@ -23,6 +23,10 @@ protected:
 
 	Vector3 m_net_force = Vector3::ZERO;
 
+	// verlet specific
+	Vector3 m_last_center = Vector3::ZERO;
+	Vector3 m_half_step_vel = Vector3::ZERO;
+
 	float m_mass;
 	float m_inv_mass;
 
@@ -37,6 +41,9 @@ protected:
 
 	float m_slow = 1.f;
 
+	// freeze has highest priority on pause
+	bool m_frozen = false;
+
 public:
 	virtual void Integrate(float deltaTime);
 	virtual void ClearAcc();
@@ -49,6 +56,7 @@ public:
 	void SetSleepable(bool sleepable);
 	void SetBaseLinearAcceleration(const Vector3& acc) { m_lin_acc = acc; }
 	void SetSlow(const float& slow) { m_slow = slow; }
+	void SetFrozen(bool val) { m_frozen = val; }
 
 	virtual void CacheData(){}
 
@@ -70,6 +78,7 @@ public:
 	Vector3 GetLastFrameLinearAcc() const { return m_last_lin_acc; }
 	bool IsAwake() const { return m_awake; }
 	bool IsSleepable() const { return m_sleepable; }
+	bool IsFrozen() const { return m_frozen; }
 	Vector3 GetNetForce() const { return m_net_force; }
 	virtual Vector3 GetAngularVelocity() const { ASSERT_OR_DIE(false, "general entity does not have angular velocity"); }
 	virtual float GetRealTimeMotion() const;
@@ -102,6 +111,9 @@ protected:
 
 public:
 	void Integrate(float deltaTime) override;
+	void IntegrateEulerParticle(float dt);
+	void IntegrateVerletParticle(float dt);
+
 	void ClearAcc() override;
 	CollisionRigidBody(const float& mass, const Vector3& center, const Vector3& euler);
 	~CollisionRigidBody(){}
@@ -127,6 +139,9 @@ public:
 	float GetRealTimeMotion() const override;
 	Matrix33 GetTensor() const override { return m_tensor; }
 	Vector3 GetNetTorque() const { return m_net_torque; }
+	bool IsVerlet() const { return m_verlet; }
+	bool IsParticle() const { return m_particle; }
+	eParticleVerlet GetParticleVerletScheme() const { return m_verlet_p; }
 
 	void AddAngularVelocity(const Vector3& v);
 };

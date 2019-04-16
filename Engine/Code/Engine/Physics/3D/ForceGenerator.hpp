@@ -1,12 +1,14 @@
 #pragma once
 
 #include "Engine/Physics/3D/Entity3.hpp"
+#include "Engine/Physics/3D/Rigidbody3.hpp"
+#include "Engine/Physics/3D/RF/CollisionEntity.hpp"
 #include "Engine/Math/Vector3.hpp"
 
 class ForceGenerator
 {
 public:
-	virtual void UpdateForce(Entity3* entity3D, float deltaTime) = 0;
+	virtual void UpdateForce(CollisionRigidBody* entity3D, float deltaTime) = 0;
 };
 
 class GravityGenerator : public ForceGenerator
@@ -19,7 +21,7 @@ public:
 	GravityGenerator(const Vector3& gravity)
 		: m_gravity(gravity){}
 
-	virtual void UpdateForce(Entity3* entity3D, float deltaTime);
+	virtual void UpdateForce(CollisionRigidBody* entity3D, float deltaTime);
 };
 
 class DragGenerator : public ForceGenerator
@@ -32,23 +34,22 @@ public:
 	DragGenerator(float d1, float d2)
 		: m_dragCoef1(d1), m_dragCoef2(d2){}
 
-	virtual void UpdateForce(Entity3* entity3D, float deltaTime);
+	virtual void UpdateForce(CollisionRigidBody* entity3D, float deltaTime);
 };
 
 class SpringGenerator : public ForceGenerator
 {
 public:
-	Entity3* m_other;
+	CollisionRigidBody* m_other;
 	float m_const;
 	float m_restLength;
 
 public:
-	SpringGenerator(Entity3* other, float const_coef, float restLength)
+	SpringGenerator(CollisionRigidBody* other, float const_coef, float restLength)
 		: m_other(other), m_const(const_coef), m_restLength(restLength){}
 
-	virtual void UpdateForce(Entity3* entity3D, float deltaTime);
+	virtual void UpdateForce(CollisionRigidBody* entity3D, float deltaTime);
 };
-
 
 class AnchorSpringGenerator : public ForceGenerator
 {
@@ -61,5 +62,5 @@ public:
 	AnchorSpringGenerator(Vector3 anchor, float coef, float rl)
 		: m_anchor(anchor), m_const(coef), m_restLength(rl) {}
 
-	virtual void UpdateForce(Entity3* entity3D, float deltaTime);
+	virtual void UpdateForce(CollisionRigidBody* entity3D, float deltaTime);
 };

@@ -84,8 +84,16 @@ public:
 	// set point body position, affecting position of primitive...
 	// may be turned to not virtual later...
 	void SetRigidBodyPosition(const Vector3& pos) override;
+	void SetFrozen(bool val) { GetRigidBody()->SetFrozen(val); }
 
 	void Update(float dt) override;
+	//void UpdateEuler(float dt);
+	//void UpdateVerlet(float dt);
+
+	bool IsFrozen() const { return GetRigidBody()->IsFrozen(); }
+	bool IsVerlet() const { return GetRigidBody()->IsVerlet(); }
+	bool IsParticle() const { return GetRigidBody()->IsParticle(); }
+	eParticleVerlet GetParticleVerletScheme() const { return GetRigidBody()->GetParticleVerletScheme(); }
 
 	void Render(Renderer* renderer) override;
 

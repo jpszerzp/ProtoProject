@@ -1,16 +1,19 @@
 #include "Engine/Physics/3D/ForceGenerator.hpp"
 
-void GravityGenerator::UpdateForce(Entity3* entity3D, float)
+void GravityGenerator::UpdateForce(CollisionRigidBody* entity3D, float)
 {
+	/*
 	// if entity is const (infinite mass), force does not apply
 	if (entity3D->IsConst())
 		return;
 
 	entity3D->AddForce(m_gravity * entity3D->GetMass3());
+	*/
 }
 
-void DragGenerator::UpdateForce(Entity3* entity3D, float)
+void DragGenerator::UpdateForce(CollisionRigidBody* entity3D, float)
 {
+	/*
 	Vector3 vel = entity3D->GetLinearVelocity();
 
 	float velAmount = vel.GetLength();
@@ -20,10 +23,12 @@ void DragGenerator::UpdateForce(Entity3* entity3D, float)
 	force *= -coef;
 
 	entity3D->AddForce(force);
+	*/
 }
 
-void SpringGenerator::UpdateForce(Entity3* entity3D, float)
+void SpringGenerator::UpdateForce(CollisionRigidBody* entity3D, float)
 {
+	/*
 	Vector3 extension = entity3D->GetEntityCenter() - m_other->GetEntityCenter();
 	
 	float delta = extension.GetLength() - m_restLength;
@@ -31,10 +36,12 @@ void SpringGenerator::UpdateForce(Entity3* entity3D, float)
 	Vector3 force = extension.GetNormalized() * (-delta * m_const);
 
 	entity3D->AddForce(force);
+	*/
 }
 
-void AnchorSpringGenerator::UpdateForce(Entity3* entity3D, float)
+void AnchorSpringGenerator::UpdateForce(CollisionRigidBody* entity3D, float)
 {
+	/*
 	Vector3 extension = entity3D->GetEntityCenter() - m_anchor;
 
 	float delta = extension.GetLength() - m_restLength;
@@ -42,4 +49,5 @@ void AnchorSpringGenerator::UpdateForce(Entity3* entity3D, float)
 	Vector3 force = extension.GetNormalized() * (-delta * m_const);
 
 	entity3D->AddForce(force);
+	*/
 }
