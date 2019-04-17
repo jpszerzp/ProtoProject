@@ -179,13 +179,14 @@ ControlState3::ControlState3()
 
 	// ui
 	BitmapFont* font = renderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
-	float txtHeight = height / 70.f;
-	Vector2 titleMin = Vector2(-width/ 2.f, height / 2.f - txtHeight);
+	m_text_height = height / 50.f;
+	Vector2 titleMin = Vector2(-width/ 2.f, height / 2.f - m_text_height);
 
 	std::string title_ui = Stringf("Welcome to control state");
-	Mesh* t_mesh = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, title_ui, VERT_PCU);
+	Mesh* t_mesh = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, m_text_height, .5f, title_ui, VERT_PCU);
 	m_title_ui = t_mesh;
-	titleMin -= Vector2(0.f, txtHeight);
+	titleMin -= Vector2(0.f, m_text_height);
+	m_start_min = titleMin;
 
 	// qh
 	Vector3 qh_min = Vector3(-300.f, 0.f, 0.f);
@@ -232,7 +233,7 @@ void ControlState3::Update(float deltaTime)
 	UpdatePair(deltaTime);
 	UpdateContacts(deltaTime);
 	UpdateDebugDraw(deltaTime);
-	//UpdateUI(deltaTime);
+	UpdateUI(deltaTime);
 }
 
 void ControlState3::UpdateMouse(float deltaTime)
@@ -864,7 +865,20 @@ void ControlState3::UpdateContacts(float deltaTime)
 
 void ControlState3::UpdateUI(float deltaTime)
 {
-	
+	Renderer* renderer = Renderer::GetInstance();
+	BitmapFont* font = renderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
+
+	DeleteVector(m_dynamic_ui);
+
+	Vector2 min = m_start_min;
+
+	if (gjk_stat == GJK_COMPLETE)
+	{
+		std::string dist_str = Stringf("Dist (-inf if point inside hull): %f", gjk_closest_dist);
+		Mesh* m = Mesh::CreateTextImmediate(Rgba::WHITE, min, font, m_text_height, .5f, dist_str, VERT_PCU);
+		m_dynamic_ui.push_back(m);
+		min -= Vector2(0.f, m_text_height);
+	}
 }
 
 void ControlState3::Render(Renderer* renderer)
@@ -872,7 +886,12 @@ void ControlState3::Render(Renderer* renderer)
 	// draw UI
 	renderer->SetCamera(m_UICamera);
 	renderer->ClearScreen(Rgba::BLACK);
+
+	// title
 	DrawTextCut(m_title_ui);
+
+	// dynamic ui
+	DrawTexts(m_dynamic_ui);
 
 	// draw group contents
 	renderer->SetCamera(m_camera);

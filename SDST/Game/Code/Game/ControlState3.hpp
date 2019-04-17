@@ -60,8 +60,6 @@ private:
 	CollisionKeep m_keep;
 	Collision m_storage[MAX_CONTACT_NUM];
 
-	Mesh* m_title_ui;
-
 	QuickHull* m_qh = nullptr;
 
 	HullObject* m_hobj_0;
@@ -72,4 +70,10 @@ private:
 
 	// origin
 	Mesh* m_origin;
+
+	// UI
+	Vector2 m_start_min;
+	float m_text_height;
+	Mesh* m_title_ui;
+	std::vector<Mesh*> m_dynamic_ui;
 };
