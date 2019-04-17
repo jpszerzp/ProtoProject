@@ -621,7 +621,8 @@ void ControlGroup::ProcessInput()
 				break;
 			case EPA_POST_COMPLETE:
 			{
-
+				const Vector3& n = epa_close_face->m_normal;
+				DebugRenderLine(.1f, epa_support_pt_pos, epa_support_pt_pos + n * epa_close_dist, 5.f, Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
 			}
 				break;
 			default:
