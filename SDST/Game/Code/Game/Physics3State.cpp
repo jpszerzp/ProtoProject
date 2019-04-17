@@ -362,10 +362,71 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		m_ff_test = true; m_fp_test = false; m_pp_test = false; m_ee_test = false; m_pe_test = false; m_fe_test = false;
 		ResetCollisionCornerCase(CORNER_CASE_POS_FF_1, CORNER_CASE_POS_FF_2, CORNER_CASE_ORIENT_FF_1, CORNER_CASE_ORIENT_FF_2);
 	}
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_1))
+
+	// physx corner case comparison group 
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_0))
 	{
 		m_phys_corner_case = FCC_FF;
 		std::pair<PhysXObject*, PhysXObject*> obj_pair = ResetCollisionCornerCasePhysX(CORNER_CASE_POS_FF_3, CORNER_CASE_POS_FF_4, CORNER_CASE_ORIENT_FF_3, CORNER_CASE_ORIENT_FF_4);
+
+		if (obj_pair.first != nullptr)
+			m_wraparound_demo_1->m_phys_obj.push_back(obj_pair.first);
+
+		if (obj_pair.second != nullptr)
+			m_wraparound_demo_1->m_phys_obj.push_back(obj_pair.second);
+	}
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_1))
+	{
+		m_phys_corner_case = FCC_FP;
+		std::pair<PhysXObject*, PhysXObject*> obj_pair = ResetCollisionCornerCasePhysX(CORNER_CASE_POS_FP_3, CORNER_CASE_POS_FP_4, CORNER_CASE_ORIENT_FP_3, CORNER_CASE_ORIENT_FP_4);
+
+		if (obj_pair.first != nullptr)
+			m_wraparound_demo_1->m_phys_obj.push_back(obj_pair.first);
+
+		if (obj_pair.second != nullptr)
+			m_wraparound_demo_1->m_phys_obj.push_back(obj_pair.second);
+	}
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_2))
+	{
+		m_phys_corner_case = FCC_FE;
+
+		std::pair<PhysXObject*, PhysXObject*> obj_pair = ResetCollisionCornerCasePhysX(CORNER_CASE_POS_FE_3, CORNER_CASE_POS_FE_4, CORNER_CASE_ORIENT_FE_3, CORNER_CASE_ORIENT_FE_4);
+
+		if (obj_pair.first != nullptr)
+			m_wraparound_demo_1->m_phys_obj.push_back(obj_pair.first);
+
+		if (obj_pair.second != nullptr)
+			m_wraparound_demo_1->m_phys_obj.push_back(obj_pair.second);
+	}
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_3))
+	{
+		m_phys_corner_case = FCC_PP;
+
+		std::pair<PhysXObject*, PhysXObject*> obj_pair = ResetCollisionCornerCasePhysX(CORNER_CASE_POS_PP_3, CORNER_CASE_POS_PP_4, CORNER_CASE_ORIENT_PP_3, CORNER_CASE_ORIENT_PP_4);
+
+		if (obj_pair.first != nullptr)
+			m_wraparound_demo_1->m_phys_obj.push_back(obj_pair.first);
+
+		if (obj_pair.second != nullptr)
+			m_wraparound_demo_1->m_phys_obj.push_back(obj_pair.second);
+	}
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_4))
+	{
+		m_phys_corner_case = FCC_EE;
+
+		std::pair<PhysXObject*, PhysXObject*> obj_pair = ResetCollisionCornerCasePhysX(CORNER_CASE_POS_EE_3, CORNER_CASE_POS_EE_4, CORNER_CASE_ORIENT_EE_3, CORNER_CASE_ORIENT_EE_4);
+
+		if (obj_pair.first != nullptr)
+			m_wraparound_demo_1->m_phys_obj.push_back(obj_pair.first);
+
+		if (obj_pair.second != nullptr)
+			m_wraparound_demo_1->m_phys_obj.push_back(obj_pair.second);
+	}
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_5))
+	{
+		m_phys_corner_case = FCC_PE;
+
+		std::pair<PhysXObject*, PhysXObject*> obj_pair = ResetCollisionCornerCasePhysX(CORNER_CASE_POS_PE_3, CORNER_CASE_POS_PE_4, CORNER_CASE_ORIENT_PE_3, CORNER_CASE_ORIENT_PE_4);
 
 		if (obj_pair.first != nullptr)
 			m_wraparound_demo_1->m_phys_obj.push_back(obj_pair.first);
@@ -445,6 +506,31 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		{
 			m_corner_case_3->SetLinearVel(CORNER_CASE_LIN_VEL_FF_3);
 			m_corner_case_4->SetLinearVel(CORNER_CASE_LIN_VEL_FF_4);
+		}
+		else if (m_phys_corner_case == FCC_FP)
+		{
+			m_corner_case_3->SetLinearVel(CORNER_CASE_LIN_VEL_FP_3);
+			m_corner_case_4->SetLinearVel(CORNER_CASE_LIN_VEL_FP_4);
+		}
+		else if (m_phys_corner_case == FCC_FE)
+		{
+			m_corner_case_3->SetLinearVel(CORNER_CASE_LIN_VEL_FE_3);
+			m_corner_case_4->SetLinearVel(CORNER_CASE_LIN_VEL_FE_4);
+		}
+		else if (m_phys_corner_case == FCC_PP)
+		{
+			m_corner_case_3->SetLinearVel(CORNER_CASE_LIN_VEL_PP_3);
+			m_corner_case_4->SetLinearVel(CORNER_CASE_LIN_VEL_PP_4);
+		}
+		else if (m_phys_corner_case == FCC_EE)
+		{
+			m_corner_case_3->SetLinearVel(CORNER_CASE_LIN_VEL_EE_3);
+			m_corner_case_4->SetLinearVel(CORNER_CASE_LIN_VEL_EE_4);
+		}
+		else if (m_phys_corner_case == FCC_PE)
+		{
+			m_corner_case_3->SetLinearVel(CORNER_CASE_LIN_VEL_PE_3);
+			m_corner_case_4->SetLinearVel(CORNER_CASE_LIN_VEL_PE_4);
 		}
 	}
 
