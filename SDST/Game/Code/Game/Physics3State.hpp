@@ -82,7 +82,9 @@ public:
 	void RenderUI(Renderer* renderer);
 
 	// scene tests
-	CollisionSphere* WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, const Vector3& rot, const Vector3& scale);
+	CollisionSphere* WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g,
+		const Vector3& position, const Vector3& rot, const Vector3& scale, 
+		const std::string& fp = "default", const std::string& tx = "Data/Images/white.png");
 	CollisionBox* WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position,
 		const Vector3& rot, const Vector3& scale, const bool& awake = true, const bool& sleepable = false);
 	CollisionConvexObject* WrapAroundTestConvex(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position,
@@ -157,6 +159,7 @@ public:
 	WrapAround* m_wraparound_demo_0;
 	WrapAround* m_wraparound_demo_1;
 	WrapAround* m_wraparound_verlet;
+	WrapAround* m_wraparound_ccd;
 
 	// corner case demo
 	CollisionBox* m_corner_case_1 = nullptr;
@@ -235,4 +238,9 @@ public:
 	// utility
 	std::vector<Vector3> m_inspection;
 	int m_insepction_count = 0;
+
+	// continuous
+	CollisionSphere* m_discrete_ball;
+	CollisionSphere* m_ccd_ball;
+	CollisionPlane*  m_omni_plane;
 };

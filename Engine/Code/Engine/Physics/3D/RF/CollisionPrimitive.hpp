@@ -6,6 +6,13 @@
 #include "Engine/Physics/3D/RF/ConvexHull.hpp"
 #include "Engine/Physics/3D/RF/ConvexPolyhedron.hpp"
 
+enum eCCD
+{
+	COL_CCD,
+	COL_DISCRETE,
+	COL_DETECTION_NUM,
+};
+
 // covariance method
 struct TetrahedronBody
 {
@@ -27,6 +34,8 @@ struct TetrahedronBody
 
 class CollisionPrimitive
 {
+	eCCD m_ccd = COL_DETECTION_NUM;
+
 	Matrix44 m_transform_mat;
 
 	CollisionRigidBody* m_rigid_body = nullptr;
@@ -53,6 +62,7 @@ public:
 	void SetTexture(Texture* texture) { m_texture = texture; }
 	void SetTint(const Vector4& tint) { m_tint = tint; }
 	void SetShouldDelete(const bool& value) { m_should_delete = value; }
+	void SetFrozen(bool val) { m_rigid_body->SetFrozen(val); }
 	virtual void SetRigidBodyPosition(const Vector3&){}		// ...need to consider scale in general case when this is implemented 
 
 	virtual void Update(float deltaTime);
@@ -68,6 +78,7 @@ public:
 	Texture* GetTexture() const { return m_texture; }
 	Vector4 GetTint() const { return m_tint; }
 	Vector3 GetCenter() const { return m_rigid_body->GetCenter(); }
+	bool IsFrozen() const { return m_rigid_body->IsFrozen(); }
 	bool ShouldDelete() const { return m_should_delete; }
 };
 
@@ -84,13 +95,11 @@ public:
 	// set point body position, affecting position of primitive...
 	// may be turned to not virtual later...
 	void SetRigidBodyPosition(const Vector3& pos) override;
-	void SetFrozen(bool val) { GetRigidBody()->SetFrozen(val); }
+	//void SetFrozen(bool val) { GetRigidBody()->SetFrozen(val); }
 
 	void Update(float dt) override;
-	//void UpdateEuler(float dt);
-	//void UpdateVerlet(float dt);
 
-	bool IsFrozen() const { return GetRigidBody()->IsFrozen(); }
+	//bool IsFrozen() const { return GetRigidBody()->IsFrozen(); }
 	bool IsVerlet() const { return GetRigidBody()->IsVerlet(); }
 	bool IsParticle() const { return GetRigidBody()->IsParticle(); }
 	eParticleVerlet GetParticleVerletScheme() const { return GetRigidBody()->GetParticleVerletScheme(); }
@@ -110,6 +119,8 @@ public:
 	void AttachToRigidBody(CollisionRigidBody* rb) override;
 
 	float GetRadius() const { return m_radius; }
+
+	void Update(float dt) override;
 };
 
 class CollisionBox : public CollisionPrimitive

@@ -152,6 +152,7 @@ Physics3State::Physics3State()
 	// inspection
 	m_inspection.push_back(m_cameraInitialPos);
 	m_inspection.push_back(Vector3(-5.f, 220.f, -20.f));
+	m_inspection.push_back(Vector3(200.f, 200.f, -20.f));
 
 	// particle springs
 	CollisionPoint* sp_point_0 = WrapAroundTestPoint(nullptr, false, false, false,
@@ -170,6 +171,13 @@ Physics3State::Physics3State()
 	//// two points initialized to be 5 units away, constraint by a spring system with rest length of 3
 	//// B. anchored spring
 	//m_anchorSpring = SetupAnchorSpring(asp_point_0, asp_point_1, 2.f, 8.f);
+
+	// continuity demo
+	m_wraparound_ccd = new WrapAround(Vector3(190.f, 190.f, -10.f), Vector3(210.f, 210.f, 10.f));
+	m_discrete_ball = WrapAroundTestSphere(m_wraparound_ccd, false, false, false, 
+		Vector3(195.f, 195.f, 0.f), Vector3::ZERO, Vector3::ONE,
+		"wireframe", "Data/Images/white.png");
+	m_discrete_ball->GetRigidBody()->SetFrozen(true);
 
 	// debug render
 	DebugRenderSet3DCamera(m_camera);
@@ -190,6 +198,9 @@ Physics3State::~Physics3State()
 	delete m_wraparound_verlet;
 	m_wraparound_verlet = nullptr;
 
+	delete m_wraparound_ccd;
+	m_wraparound_ccd = nullptr;
+
 	delete m_spring;
 	m_spring = nullptr;
 
@@ -208,6 +219,7 @@ void Physics3State::PostConstruct()
 	m_wraparound_demo_0->m_physState = this;
 	m_wraparound_demo_1->m_physState = this;
 	m_wraparound_verlet->m_physState = this;
+	m_wraparound_ccd->m_physState = this;
 }
 
 void Physics3State::Update(float deltaTime)
@@ -486,6 +498,11 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		}
 	}
 
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_L))
+	{
+
+	}
+
 	// camera update from input
 	Vector3 camForward = m_camera->GetLocalForward(); 
 	Vector3 camUp = m_camera->GetLocalUp(); 
@@ -537,6 +554,7 @@ void Physics3State::UpdateWrapArounds()
 	m_wraparound_demo_0->Update();
 	m_wraparound_demo_1->Update();
 	m_wraparound_verlet->Update();
+	m_wraparound_ccd->Update();
 }
 
 void Physics3State::UpdateUI()
@@ -976,6 +994,7 @@ void Physics3State::RenderWrapArounds(Renderer* renderer)
 	m_wraparound_demo_0->Render(renderer);
 	m_wraparound_demo_1->Render(renderer);
 	m_wraparound_verlet->Render(renderer);
+	m_wraparound_ccd->Render(renderer);
 }
 
 void Physics3State::RenderForwardPath(Renderer*)
@@ -1012,9 +1031,12 @@ void Physics3State::RenderUI(Renderer*)
 	}
 }
 
-CollisionSphere* Physics3State::WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, const Vector3& rot, const Vector3&)
+CollisionSphere* Physics3State::WrapAroundTestSphere(WrapAround* wpa, 
+	bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, 
+	const Vector3& rot, const Vector3&,
+	const std::string& fp, const std::string& tx)
 {
-	CollisionSphere* sph = new CollisionSphere(1.f);
+	CollisionSphere* sph = new CollisionSphere(1.f, fp, tx);
 
 	CollisionRigidBody* rb = new CollisionRigidBody(1.f, position, rot);
 	rb->SetAwake(true);

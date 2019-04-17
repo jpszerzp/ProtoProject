@@ -216,6 +216,21 @@ void CollisionSphere::AttachToRigidBody(CollisionRigidBody* rb)
 	SetPrimitiveTransformMat4(rb->GetTransformMat4());
 }
 
+void CollisionSphere::Update(float dt)
+{
+	InputSystem* input = InputSystem::GetInstance();
+
+	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_L))
+		SetFrozen(!IsFrozen());
+
+	if (GetRigidBody() != nullptr && !IsFrozen())
+	{
+		GetRigidBody()->Integrate(dt);
+
+		SetPrimitiveTransformMat4(GetRigidBody()->GetTransformMat4());
+	}
+}
+
 CollisionBox::CollisionBox(const Vector3& half, const std::string& fp, const std::string& tx)
 	: m_half_size(half)
 {
