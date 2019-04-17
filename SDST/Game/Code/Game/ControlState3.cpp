@@ -3,12 +3,39 @@
 #include "Engine/Renderer/Window.hpp"
 #include "Engine/Renderer/DebugRenderer.hpp"
 #include "Engine/Core/Util/RenderUtil.hpp"
+#include "Engine/Core/Util/DataUtils.hpp"
 #include "Engine/Math/Plane.hpp"
 #include "Engine/Math/MathUtils.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/Physics/3D/RF/ConvexHull.hpp"
 #include "Engine/Physics/3D/RF/CollisionDetector.hpp"
+#include "Engine/Physics/3D/GJK3.hpp"
+#include "Engine/Physics/3D/GJK3Simplex.hpp"
 
+static QuickHull* gjk_hull = nullptr;
+static Vector3 net_disp;
+
+// status
+static eGJKStatus gjk_stat = GJK_FIND_SUPP_INITIAL;
+static float gjk_closest_dist;
+
+// support point
+static Vector3 gjk_supp;
+static Mesh* gjk_supp_mesh;
+
+// support direction
+static Line3 gjk_supp_dir;
+static Mesh* gjk_supp_dir_mesh;
+
+// gjk simplex
+static std::set<Vector3> gjk_simplex;
+static eGJKSimplex gjk_simplex_stat= GJK_SIMPLEX_NONE;
+static Mesh* gjk_simplex_mesh =nullptr;
+
+// gjk normal base
+static Mesh* gjk_normal_base_mesh = nullptr;
+static Vector3 gjk_normal_base;
+static Vector3 gjk_last_normal_base;
 
 ControlState3::ControlState3()
 {
@@ -47,6 +74,9 @@ ControlState3::ControlState3()
 
 		m_UICamera->SetProjectionOrtho(width, height, 0.f, 100.f);
 	}
+
+	// origin
+	m_origin = Mesh::CreatePointImmediate(VERT_PCU, Vector3::ZERO, Rgba::CYAN);
 
 	// collision keep
 	m_keep.m_collision_head = m_storage;
@@ -162,8 +192,28 @@ ControlState3::ControlState3()
 	Vector3 qh_max = Vector3(-200.f, 100.f, 100.f);
 	m_qh = new QuickHull(20, qh_min, qh_max);
 
+	m_inspection.push_back(Vector3(0.f, 0.f, -80.f));
 	m_inspection.push_back(Vector3(0.f, 200.f, -20.f));
 	m_inspection.push_back(Vector3(-250.f, 50.f, -50.f));
+
+	// hulls - point def
+	Vector3 pos = Vector3(-35.f, 0.f, 0.f);
+	Vector3 rot = Vector3::ZERO;
+	Vector3 scale = Vector3::ONE;
+	Vector3 hull_ext = Vector3(15.f);
+	Rgba tint = Rgba::WHITE;
+	eMoveStatus stat = MOVE_KINEMATIC;
+	eBodyIdentity bid = BODY_RIGID;
+	bool multipass = false;
+	eDepthCompare compare = COMPARE_LESS;
+	eCullMode cull = CULLMODE_BACK;
+	eWindOrder wind = WIND_COUNTER_CLOCKWISE;
+	m_hobj_0 = new HullObject(pos, hull_ext, rot, scale, tint, "white", stat, bid, 5, "", multipass, compare, cull, wind);
+	pos = Vector3(35.f, 0.f, 0.f);
+	rot = Vector3(45.f, 0.f, 0.f);
+	m_hobj_1 = new HullObject(pos, hull_ext, rot, scale, tint, "white", stat, bid, 5, "", multipass, compare, cull, wind);
+	m_hobj_0->SetHullObject();
+	m_hobj_1->SetHullObject();
 
 	// debug
 	DebugRenderSet3DCamera(m_camera);
@@ -379,6 +429,68 @@ void ControlState3::UpdateKeyboard(float deltaTime)
 		}
 	}
 
+	// hull 0 for gjk
+	if (g_input->IsKeyDown(InputSystem::KEYBOARD_UP_ARROW))
+	{
+		Vector3 pos = m_hobj_0->m_renderable->m_transform.GetLocalPosition();
+		pos += Vector3(0.f, 0.f, 1.f);
+		m_hobj_0->m_renderable->m_transform.SetLocalPosition(pos);
+		net_disp = Vector3(0.f, 0.f, 1.f);
+	}
+	if (g_input->IsKeyDown(InputSystem::KEYBOARD_DOWN_ARROW))
+	{
+		Vector3 pos = m_hobj_0->m_renderable->m_transform.GetLocalPosition();
+		pos -= Vector3(0.f, 0.f, 1.f);
+		m_hobj_0->m_renderable->m_transform.SetLocalPosition(pos);
+		net_disp = -Vector3(0.f, 0.f, 1.f);
+	}
+	if (g_input->IsKeyDown(InputSystem::KEYBOARD_LEFT_ARROW))
+	{
+		Vector3 pos = m_hobj_0->m_renderable->m_transform.GetLocalPosition();
+		pos -= Vector3(1.f, 0.f, 0.f);
+		m_hobj_0->m_renderable->m_transform.SetLocalPosition(pos);
+		net_disp = -Vector3(1.f, 0.f, 0.f);
+	}
+	if (g_input->IsKeyDown(InputSystem::KEYBOARD_RIGHT_ARROW))
+	{
+		Vector3 pos = m_hobj_0->m_renderable->m_transform.GetLocalPosition();
+		pos += Vector3(1.f, 0.f, 0.f);
+		m_hobj_0->m_renderable->m_transform.SetLocalPosition(pos);
+		net_disp = Vector3(1.f, 0.f, 0.f);
+	}
+	if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEUP))
+	{
+		Vector3 pos = m_hobj_0->m_renderable->m_transform.GetLocalPosition();
+		pos += Vector3(0.f, 1.f, 0.f);
+		m_hobj_0->m_renderable->m_transform.SetLocalPosition(pos);
+		net_disp = Vector3(0.f, 1.f, 0.f);
+	}
+	if (g_input->IsKeyDown(InputSystem::KEYBOARD_PAGEDOWN))
+	{
+		Vector3 pos = m_hobj_0->m_renderable->m_transform.GetLocalPosition();
+		pos -= Vector3(0.f, 1.f, 0.f);
+		m_hobj_0->m_renderable->m_transform.SetLocalPosition(pos);
+		net_disp = -Vector3(0.f, 1.f, 0.f);
+	}
+	if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_1))
+	{
+		Vector3 rot = m_hobj_0->m_renderable->m_transform.GetLocalRotation();
+		rot += Vector3(1.f, 0.f, 0.f);
+		m_hobj_0->m_renderable->m_transform.SetLocalRotation(rot);
+	}
+	if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_4))
+	{
+		Vector3 rot = m_hobj_0->m_renderable->m_transform.GetLocalRotation();
+		rot += Vector3(0.f, 1.f, 0.f);
+		m_hobj_0->m_renderable->m_transform.SetLocalRotation(rot);
+	}
+	if (g_input->IsKeyDown(InputSystem::KEYBOARD_NUMPAD_7))
+	{
+		Vector3 rot = m_hobj_0->m_renderable->m_transform.GetLocalRotation();
+		rot += Vector3(0.f, 0.f, 1.f);
+		m_hobj_0->m_renderable->m_transform.SetLocalRotation(rot);
+	}
+
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_TAB))
 	{
 		if (!m_inspection.empty())
@@ -398,6 +510,158 @@ void ControlState3::UpdateKeyboard(float deltaTime)
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_0))
 	{
 		ManualGenQH(m_qh);
+	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_3))
+	{
+		if (!gjk_hull)
+		{
+			QuickHull* qh_0 = m_hobj_0->GetHullPrimitive();
+			QuickHull* qh_1 = m_hobj_1->GetHullPrimitive();
+
+			gjk_hull = QuickHull::GenerateMinkowskiHull(qh_0, qh_1);
+		}
+	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_6))
+	{
+		if (gjk_hull)
+		{
+			switch (gjk_stat)
+			{
+			case GJK_FIND_SUPP_INITIAL:
+			{
+				gjk_supp = gjk_hull->GetRandomPt();
+				if (gjk_supp_mesh != nullptr)
+				{
+					delete gjk_supp_mesh;
+					gjk_supp_mesh= nullptr;
+				}
+				gjk_supp_mesh = Mesh::CreatePointImmediate(VERT_PCU, gjk_supp, Rgba::RED);
+
+				// update simplex
+				gjk_simplex.insert(gjk_supp);
+				gjk_simplex_stat = GJK_UpdateSimplex(gjk_simplex);
+				if (gjk_simplex_mesh != nullptr)
+				{
+					delete gjk_simplex_mesh;
+					gjk_simplex_mesh = nullptr;
+				}
+				gjk_simplex_mesh = GJK_CreateSimplexMesh(gjk_simplex, gjk_simplex_stat);
+
+				gjk_stat = GJK_FIND_DIRECTION_INITIAL;
+			}
+			break;
+			case GJK_FIND_DIRECTION_INITIAL:
+			{
+				// given the supp point, find the direction to start with iterations
+				gjk_supp_dir = Line3(gjk_supp, Vector3::ZERO);
+				if (gjk_supp_dir_mesh != nullptr)
+				{
+					delete gjk_supp_dir_mesh;
+					gjk_supp_dir_mesh = nullptr;
+				}
+				gjk_supp_dir_mesh = Mesh::CreateLineImmediate(VERT_PCU, gjk_supp,Vector3::ZERO, Rgba::CYAN);
+
+				gjk_stat = GJK_FIND_SUPP;
+			}
+			break;
+			case GJK_FIND_SUPP:
+			{
+				gjk_supp = GJK_FindSupp(gjk_hull, gjk_supp_dir);
+				if (gjk_supp_mesh != nullptr)
+				{
+					delete gjk_supp_mesh;
+					gjk_supp_mesh = nullptr;
+				}
+				gjk_supp_mesh = Mesh::CreatePointImmediate(VERT_PCU, gjk_supp, Rgba::RED);
+
+				// update simplex
+				std::vector<Vector3> gjk_simplex_snapshot = ConvertToVectorFromSet(gjk_simplex);
+				gjk_simplex.insert(gjk_supp);
+				gjk_simplex_stat = GJK_UpdateSimplex(gjk_simplex);
+				if (gjk_simplex_mesh != nullptr)
+				{
+					delete gjk_simplex_mesh;
+					gjk_simplex_mesh = nullptr;
+				}
+				gjk_simplex_mesh = GJK_CreateSimplexMesh(gjk_simplex, gjk_simplex_stat);
+
+				// TODO: when the simplex is a tetrahedron, we check if the origin is in it; if yes we abort and the two hulls intersect
+				// there may be a better early out check on this using an IsPointContainedHull(Vector3::ZERO)
+				if (gjk_simplex.size() == 4)
+				{
+					// Note: this also means that when gjk ends the simplex is mostly a tetrahedron? (not a triangle or line)
+					// when it is triangle it is most when the origin is outside the mksi_hull
+					GJK3SimplexTetra tetra = GJK3SimplexTetra(gjk_simplex);
+					if (tetra.IsPointInTetra(Vector3::ZERO))
+					{
+						gjk_closest_dist = -INFINITY;
+						gjk_stat = GJK_COMPLETE;
+					}
+					else
+						gjk_stat = GJK_UPDATE_MIN_NORMAL;
+				}
+				else
+					gjk_stat = GJK_UPDATE_MIN_NORMAL;
+			}
+			break;
+			case GJK_UPDATE_MIN_NORMAL:
+			{
+				// find the min normal of current simplex
+				float dist;
+				gjk_normal_base= GJK_FindMinNormalBase(gjk_simplex, gjk_simplex_stat, dist);
+
+				// there is a chance where finding the normal base would reduce the simplex
+				if (gjk_simplex_mesh != nullptr)
+				{
+					delete gjk_simplex_mesh;
+					gjk_simplex_mesh = nullptr;
+				}
+				gjk_simplex_mesh = GJK_CreateSimplexMesh(gjk_simplex, gjk_simplex_stat);
+
+				if (gjk_normal_base_mesh != nullptr)
+				{
+					delete gjk_normal_base_mesh;
+					gjk_normal_base_mesh = nullptr;
+				}
+				gjk_normal_base_mesh = Mesh::CreatePointImmediate(VERT_PCU, gjk_normal_base, Rgba::YELLOW);
+
+				// if the normal base remains the same, gjk ends
+				if (gjk_normal_base == gjk_last_normal_base)
+				{
+					gjk_closest_dist = dist;
+					gjk_stat = GJK_COMPLETE;
+				}
+				else
+				{
+					gjk_last_normal_base = gjk_normal_base;
+					gjk_stat = GJK_FIND_DIRECTION;
+				}
+			}
+			break;
+			case GJK_FIND_DIRECTION:
+			{
+				gjk_supp_dir = Line3(gjk_normal_base, Vector3::ZERO);
+				if (gjk_supp_dir_mesh != nullptr)
+				{
+					delete gjk_supp_dir_mesh;
+					gjk_supp_dir_mesh= nullptr;
+				}
+				gjk_supp_dir_mesh = Mesh::CreateLineImmediate(VERT_PCU, gjk_normal_base,Vector3::ZERO, Rgba::CYAN);
+
+				gjk_stat = GJK_FIND_SUPP;
+			}
+			break;
+			case GJK_COMPLETE:
+			{
+				// do nothing...
+			}
+			break;
+			default:
+				break;
+			}
+		}
 	}
 
 	// camera update from input
@@ -438,6 +702,19 @@ void ControlState3::UpdatePair(float deltaTime)
 {
 	m_controlled_0->Update(deltaTime);
 	m_controlled_1->Update(deltaTime);
+
+	// gjk demo
+	m_hobj_0->Update(deltaTime);
+	m_hobj_1->Update(deltaTime);
+	if (gjk_hull != nullptr)
+	{
+		gjk_hull->m_ref_pos += net_disp;
+
+		for (std::vector<Vector3>::size_type idx = 0; idx < gjk_hull->m_vertices.size(); ++idx)
+			gjk_hull->m_vertices[idx] += net_disp;
+
+		net_disp = Vector3::ZERO;
+	}
 }
 
 void ControlState3::UpdateContacts(float deltaTime)
@@ -599,9 +876,29 @@ void ControlState3::Render(Renderer* renderer)
 
 	// draw group contents
 	renderer->SetCamera(m_camera);
+
+	// control pair
 	RenderPair(renderer);
 
+	// quick hull demo
 	m_qh->RenderHull(renderer);
+
+	// gjk demo
+	m_hobj_0->Render(renderer);
+	m_hobj_1->Render(renderer);
+	if (gjk_hull != nullptr)
+		gjk_hull->RenderHull(renderer);
+	if (gjk_supp_mesh != nullptr)
+		DrawPoint(gjk_supp_mesh);
+	if (gjk_supp_dir_mesh != nullptr)
+		DrawLine(gjk_supp_dir_mesh);
+	if (gjk_simplex_mesh != nullptr)
+		GJK_DrawSimplex(gjk_simplex_mesh, gjk_simplex_stat);
+	if (gjk_normal_base_mesh != nullptr)
+		DrawPoint(gjk_normal_base_mesh, 20.f);
+
+	// origin
+	DrawPoint(m_origin);
 
 	m_forwardPath->RenderScene(m_sceneGraph);
 }

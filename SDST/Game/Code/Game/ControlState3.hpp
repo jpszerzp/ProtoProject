@@ -3,6 +3,7 @@
 #include "Game/GameState.hpp"
 #include "Engine/Physics/3D/RF/CollisionPrimitive.hpp"
 #include "Engine/Physics/3D/RF/CollisionKeep.hpp"
+#include "Engine/Core/HullObject.hpp"
 
 enum eCID
 {
@@ -63,6 +64,12 @@ private:
 
 	QuickHull* m_qh = nullptr;
 
+	HullObject* m_hobj_0;
+	HullObject* m_hobj_1;
+
 	std::vector<Vector3> m_inspection;
 	int m_insepction_count = 0;
+
+	// origin
+	Mesh* m_origin;
 };

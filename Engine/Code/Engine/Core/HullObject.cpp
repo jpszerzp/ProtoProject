@@ -20,6 +20,11 @@ void HullObject::Render(Renderer* renderer)
 	m_hull->RenderBasis(renderer);
 }
 
+void HullObject::RenderHull(Renderer* renderer)
+{
+	m_hull->RenderHull(renderer);
+}
+
 void HullObject::Update(float)
 {
 	InputSystem* input = InputSystem::GetInstance();

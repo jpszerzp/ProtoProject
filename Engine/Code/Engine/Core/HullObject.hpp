@@ -7,6 +7,7 @@ class HullObject : public GameObject
 {
 public:
 	void Render(Renderer* renderer) override;
+	void RenderHull(Renderer* renderer);
 	void Update(float deltaTime) override;
 
 	void SetHullObject() { m_hull->m_go_ref = this; }

@@ -827,24 +827,6 @@ void SleepThresholdCommand(Command& cmd)
 	ConsolePrintfUnit(Rgba::GREEN, "Sleep threshold set to %f", s);
 }
 
-/*
-void QHNormalDrawCommand(Command& cmd)
-{
-	std::string subStr = cmd.GetNextString();
-
-	if (subStr == "true")
-	{
-		g_hull->CreateNormalMeshes();
-		ConsolePrintfUnit(Rgba::GREEN, "QH normal meshes generated!");
-	}
-	else if (subStr == "false")
-	{
-		g_hull->FlushNormalMeshes();
-		ConsolePrintfUnit(Rgba::YELLOW, "QH normal meshes flushed!");
-	}
-}
-*/
-
 void EncounterCommand(Command&)
 {
 	g_rcs->m_echo = 2;

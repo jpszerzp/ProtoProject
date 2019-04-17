@@ -23,7 +23,7 @@ extern Blackboard*		g_gameConfigBlackboard;
 extern Clock*			g_masterClock;
 extern RCS*				g_rcs;
 extern bool				g_broadphase;
-extern QuickHull*		g_hull;
+//extern QuickHull*		g_hull;
 extern CollisionKeep*	g_col_keep;
 extern ProfilerTree*    g_my_tree;
 extern ProfilerTree*	g_phys_tree;
