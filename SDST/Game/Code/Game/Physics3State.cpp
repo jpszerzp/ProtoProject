@@ -176,7 +176,6 @@ Physics3State::Physics3State()
 	m_discrete_ball = WrapAroundTestSphere(m_wraparound_ccd, false, false, false, 
 		m_discrete_ball_pos, Vector3::ZERO, Vector3(.05f),
 		"wireframe", "Data/Images/white.png");
-	m_discrete_ball->SetContinuity(COL_DISCRETE);
 	m_discrete_ball->GetRigidBody()->SetFrozen(true);
 
 	m_ccd_ball_pos = Vector3(195.f, 205.f, 0.f);
@@ -602,12 +601,12 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	// ccd demo
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_L))
 	{
-		m_discrete_ball->GetRigidBody()->SetCenter(m_discrete_ball_pos);
+		m_discrete_ball->SetRigidBodyPosition(m_discrete_ball_pos);
 		m_discrete_ball->GetRigidBody()->SetLinearVelocity(Vector3::ZERO);
 		m_discrete_ball->GetRigidBody()->SetAngularVelocity(Vector3::ZERO);
 		m_discrete_ball->SetFrozen(true);
 
-		m_ccd_ball->GetRigidBody()->SetCenter(m_ccd_ball_pos);
+		m_ccd_ball->SetRigidBodyPosition(m_ccd_ball_pos);
 		m_ccd_ball->GetRigidBody()->SetLinearVelocity(Vector3::ZERO);
 		m_ccd_ball->GetRigidBody()->SetAngularVelocity(Vector3::ZERO);
 		m_ccd_ball->SetFrozen(true);
@@ -615,10 +614,10 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_N))
 	{
-		m_discrete_ball->GetRigidBody()->SetLinearVelocity(Vector3(100.f, 0.f, 0.f));
+		m_discrete_ball->GetRigidBody()->SetLinearVelocity(Vector3(500.f, 0.f, 0.f));
 		m_discrete_ball->SetFrozen(false);
 
-		m_ccd_ball->GetRigidBody()->SetLinearVelocity(Vector3(100.f, 0.f, 0.f));
+		m_ccd_ball->GetRigidBody()->SetLinearVelocity(Vector3(500.f, 0.f, 0.f));
 		m_ccd_ball->SetFrozen(false);
 	}
 
@@ -997,15 +996,36 @@ void Physics3State::UpdateContactGeneration()
 			CollisionSensor::SphereVsSphere(*sph0, *sph1, &m_keep);
 		}
 
-		// sphere vs plane
+		// sphere vs plane, ccd vs discrete
 		for (std::vector<CollisionPlane*>::size_type idx1 = 0; idx1 < m_planes.size(); ++idx1)
 		{
-			if (!m_keep.AllowMoreCollision())
-				return;
+			if (sph0->GetContinuity() != COL_CCD)
+			{
+				if (!m_keep.AllowMoreCollision())
+					return;
 
-			CollisionPlane* pl = m_planes[idx1];
+				CollisionPlane* pl = m_planes[idx1];
 
-			CollisionSensor::SphereVsPlane(*sph0, *pl, &m_keep);
+				CollisionSensor::SphereVsPlane(*sph0, *pl, &m_keep);
+			}
+			else
+			{
+				// we do not put data into keep here, we want the ccd ball to get stuck
+				CollisionPlane* pl = m_planes[idx1];
+
+				// hit time and position
+				// t is normalized 0 to 1, p is on the plane
+				float t = 0.f;
+				Vector3 p = Vector3::ZERO;
+				const Vector3& v = sph0->GetRigidBody()->GetLinearVelocity();
+				uint collided_ccd = CollisionSensor::SphereVsPlaneContinuous(*sph0, *pl, v, t, p, &m_keep);
+
+				if (collided_ccd != 0)
+				{
+					Vector3 next_frame = sph0->GetCenter() + v * t;
+					sph0->SetNextFrameTeleport(next_frame);
+				}
+			}
 		}
 	}
 

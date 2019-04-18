@@ -34,7 +34,9 @@ struct TetrahedronBody
 
 class CollisionPrimitive
 {
+	// ccd
 	eCCD m_ccd = COL_DISCRETE;
+	Vector3 m_ccd_teleport = Vector3::ZERO;
 
 	Matrix44 m_transform_mat;
 
@@ -55,6 +57,8 @@ public:
 
 	virtual void AttachToRigidBody(CollisionRigidBody* rb);
 
+	//void SetCCDT(float t) { m_t_ccd = t; }
+	void SetNextFrameTeleport(const Vector3& v) { m_ccd_teleport = v; }
 	void SetRigidBody(CollisionRigidBody* rb) { m_rigid_body = rb; }
 	void SetPrimitiveTransformMat4(const Matrix44& transform) { m_transform_mat = transform; }
 	void SetMesh(Mesh* mesh) { m_mesh = mesh; }
@@ -64,6 +68,7 @@ public:
 	void SetShouldDelete(const bool& value) { m_should_delete = value; }
 	void SetFrozen(bool val) { m_rigid_body->SetFrozen(val); }
 	void SetContinuity(eCCD val) { m_ccd = val; }
+	void SetRigidBodyPositionOnly(const Vector3& pos);
 	virtual void SetRigidBodyPosition(const Vector3&){}		// ...need to consider scale in general case when this is implemented 
 
 	virtual void Update(float deltaTime);
@@ -71,6 +76,7 @@ public:
 
 	CollisionRigidBody* GetRigidBody() const { return m_rigid_body; }
 	float GetBodyMass() const { return m_rigid_body->GetMass(); }
+	//float GetCCDT() const { return m_t_ccd; }
 	Vector3 GetBasisAndPosition(uint index) const;
 	Matrix44 GetTransformMat4() const { return m_transform_mat; }
 	Mesh* GetMesh() const { return m_mesh; }
@@ -78,6 +84,7 @@ public:
 	Texture* GetTexture() const { return m_texture; }
 	Vector4 GetTint() const { return m_tint; }
 	Vector3 GetCenter() const { return m_rigid_body->GetCenter(); }
+	Vector3 GetNextFrameTeleport() const { return m_ccd_teleport; }
 	eCCD GetContinuity() const { return m_ccd; }
 	bool IsFrozen() const { return m_rigid_body->IsFrozen(); }
 	bool ShouldDelete() const { return m_should_delete; }

@@ -313,7 +313,7 @@ uint CollisionSensor::SphereVsPlane(const CollisionSphere& sphere, const Collisi
 	return 1;
 }
 
-// ...for now we do not resolve, hence putting no data into the keep
+// ...for now we do not resolve, hence putting no data into the keep...
 uint CollisionSensor::SphereVsPlaneContinuous(const CollisionSphere& sph, const CollisionPlane& pl, 
 	const Vector3& v, float& t, Vector3& hit, CollisionKeep*)
 {
@@ -339,9 +339,9 @@ uint CollisionSensor::SphereVsPlaneContinuous(const CollisionSphere& sph, const 
 		{
 			// sphere moving towards the plane
 			// use +r if sphere in front of plane, -r otherwise
-			float r = dist > 0.f ? sph.m_radius : -sph.m_radius;
+			float r = dist > 0.f ? sph.GetRadius() : -sph.GetRadius();
 			t = (r - dist) / denom;
-			hit = sph.m_center + v * t - pl.m_normal * r;
+			hit = sph.GetCenter() + v * t - pl.GetNormal() * r;
 			return 1;
 		}
 	}

@@ -27,6 +27,13 @@ void CollisionPrimitive::AttachToRigidBody(CollisionRigidBody*)
 
 }
 
+void CollisionPrimitive::SetRigidBodyPositionOnly(const Vector3& pos)
+{
+	m_rigid_body->SetCenter(pos);
+
+	m_rigid_body->CacheData();
+}
+
 void CollisionPrimitive::Update(float deltaTime)
 {
 	if (m_rigid_body != nullptr)
@@ -232,14 +239,23 @@ void CollisionSphere::SetRigidBodyPosition(const Vector3& pos)
 
 void CollisionSphere::Update(float dt)
 {
-	//InputSystem* input = InputSystem::GetInstance();
-
-	//if (input->WasKeyJustPressed(InputSystem::KEYBOARD_L))
-	//	SetFrozen(!IsFrozen());
-
 	if (GetRigidBody() != nullptr && !IsFrozen())
 	{
-		GetRigidBody()->Integrate(dt);
+		if (GetContinuity() != COL_CCD)
+			GetRigidBody()->Integrate(dt);
+		else
+		{
+			if (GetNextFrameTeleport() != Vector3::ZERO)
+			{
+				SetRigidBodyPositionOnly(GetNextFrameTeleport());
+				SetFrozen(true);
+
+				// reset next frame teleport
+				SetNextFrameTeleport(Vector3::ZERO);
+			}
+			else
+				GetRigidBody()->Integrate(dt);
+		}
 
 		// calculate internal
 		// again, do not put scale into rb transform, put it into primitive transform
