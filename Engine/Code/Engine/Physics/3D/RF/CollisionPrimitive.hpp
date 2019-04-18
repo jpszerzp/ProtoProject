@@ -34,7 +34,7 @@ struct TetrahedronBody
 
 class CollisionPrimitive
 {
-	eCCD m_ccd = COL_DETECTION_NUM;
+	eCCD m_ccd = COL_DISCRETE;
 
 	Matrix44 m_transform_mat;
 
@@ -63,10 +63,10 @@ public:
 	void SetTint(const Vector4& tint) { m_tint = tint; }
 	void SetShouldDelete(const bool& value) { m_should_delete = value; }
 	void SetFrozen(bool val) { m_rigid_body->SetFrozen(val); }
+	void SetContinuity(eCCD val) { m_ccd = val; }
 	virtual void SetRigidBodyPosition(const Vector3&){}		// ...need to consider scale in general case when this is implemented 
 
 	virtual void Update(float deltaTime);
-
 	virtual void Render(Renderer* renderer);
 
 	CollisionRigidBody* GetRigidBody() const { return m_rigid_body; }
@@ -78,6 +78,7 @@ public:
 	Texture* GetTexture() const { return m_texture; }
 	Vector4 GetTint() const { return m_tint; }
 	Vector3 GetCenter() const { return m_rigid_body->GetCenter(); }
+	eCCD GetContinuity() const { return m_ccd; }
 	bool IsFrozen() const { return m_rigid_body->IsFrozen(); }
 	bool ShouldDelete() const { return m_should_delete; }
 };
@@ -95,11 +96,9 @@ public:
 	// set point body position, affecting position of primitive...
 	// may be turned to not virtual later...
 	void SetRigidBodyPosition(const Vector3& pos) override;
-	//void SetFrozen(bool val) { GetRigidBody()->SetFrozen(val); }
 
 	void Update(float dt) override;
 
-	//bool IsFrozen() const { return GetRigidBody()->IsFrozen(); }
 	bool IsVerlet() const { return GetRigidBody()->IsVerlet(); }
 	bool IsParticle() const { return GetRigidBody()->IsParticle(); }
 	eParticleVerlet GetParticleVerletScheme() const { return GetRigidBody()->GetParticleVerletScheme(); }
@@ -117,6 +116,8 @@ public:
 	CollisionSphere(const float& radius, const std::string& fp = "default", const std::string& tx = "Data/Images/perspective_test.png");
 
 	void AttachToRigidBody(CollisionRigidBody* rb) override;
+
+	void SetRigidBodyPosition(const Vector3& pos) override;
 
 	float GetRadius() const { return m_radius; }
 

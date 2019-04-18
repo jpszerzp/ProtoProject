@@ -83,16 +83,13 @@ Physics3State::Physics3State()
 
 	// a plane
 	m_wraparound_plane = new WrapAround(Vector3(20.f, 340.f, -10.f), Vector3(130.f, 400.f, 100.f));
-
 	CollisionPlane* plane = new CollisionPlane(Vector2(110.f), Vector3(0.f, 1.f, 0.f), 342.f);
 	CollisionRigidBody* rb = new CollisionRigidBody(1.f, Vector3(75.f, 342.f, 45.f), Vector3(90.f, 0.f, 0.f));
 	rb->SetAwake(true);
 	rb->SetSleepable(false);
-
 	plane->AttachToRigidBody(rb);
 	m_planes.push_back(plane);
-
-	// do not include plane in wraparound
+	// no need to include plane in wraparound
 
 	// demo 0, my api
 	m_wraparound_demo_0 = new WrapAround(Vector3(20.f, 300.f, -10.f), Vector3(40.f, 320.f, 10.f));
@@ -174,10 +171,28 @@ Physics3State::Physics3State()
 
 	// continuity demo
 	m_wraparound_ccd = new WrapAround(Vector3(190.f, 190.f, -10.f), Vector3(210.f, 210.f, 10.f));
+	m_wraparound_ccd->m_particle = true;					// just so the primitive will wrap around
+	m_discrete_ball_pos = Vector3(195.f, 195.f, 0.f);
 	m_discrete_ball = WrapAroundTestSphere(m_wraparound_ccd, false, false, false, 
-		Vector3(195.f, 195.f, 0.f), Vector3::ZERO, Vector3::ONE,
+		m_discrete_ball_pos, Vector3::ZERO, Vector3(.05f),
 		"wireframe", "Data/Images/white.png");
+	m_discrete_ball->SetContinuity(COL_DISCRETE);
 	m_discrete_ball->GetRigidBody()->SetFrozen(true);
+
+	m_ccd_ball_pos = Vector3(195.f, 205.f, 0.f);
+	m_ccd_ball = WrapAroundTestSphere(m_wraparound_ccd, false, false, false,
+		m_ccd_ball_pos, Vector3::ZERO, Vector3(.05f),
+		"wireframe", "Data/Images/white.png");
+	m_ccd_ball->SetContinuity(COL_CCD);
+	m_ccd_ball->GetRigidBody()->SetFrozen(true);
+
+	CollisionPlane* plane_ccd = new CollisionPlane(Vector2(20.f), Vector3(-1.f, 0.f, 0.f), -205.f, "wireframe", "Data/Images/white.png");
+	CollisionRigidBody* pl_rb_ccd = new CollisionRigidBody(1.f, Vector3(205.f, 200.f, 0.f), Vector3(0.f, 90.f, 0.f));
+	pl_rb_ccd->SetAwake(true);
+	pl_rb_ccd->SetSleepable(false);
+	plane_ccd->AttachToRigidBody(pl_rb_ccd);
+	m_planes.push_back(plane_ccd);
+	// no need to include the plane in this wraparound
 
 	// debug render
 	DebugRenderSet3DCamera(m_camera);
@@ -584,9 +599,27 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		}
 	}
 
+	// ccd demo
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_L))
 	{
+		m_discrete_ball->GetRigidBody()->SetCenter(m_discrete_ball_pos);
+		m_discrete_ball->GetRigidBody()->SetLinearVelocity(Vector3::ZERO);
+		m_discrete_ball->GetRigidBody()->SetAngularVelocity(Vector3::ZERO);
+		m_discrete_ball->SetFrozen(true);
 
+		m_ccd_ball->GetRigidBody()->SetCenter(m_ccd_ball_pos);
+		m_ccd_ball->GetRigidBody()->SetLinearVelocity(Vector3::ZERO);
+		m_ccd_ball->GetRigidBody()->SetAngularVelocity(Vector3::ZERO);
+		m_ccd_ball->SetFrozen(true);
+	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_N))
+	{
+		m_discrete_ball->GetRigidBody()->SetLinearVelocity(Vector3(100.f, 0.f, 0.f));
+		m_discrete_ball->SetFrozen(false);
+
+		m_ccd_ball->GetRigidBody()->SetLinearVelocity(Vector3(100.f, 0.f, 0.f));
+		m_ccd_ball->SetFrozen(false);
 	}
 
 	// camera update from input
@@ -1117,12 +1150,49 @@ void Physics3State::RenderUI(Renderer*)
 	}
 }
 
+CollisionBox* Physics3State::WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, 
+	bool register_g, const Vector3& position, const Vector3& rot, const Vector3& scale, const bool& awake, const bool& sleepable)
+{
+	CollisionBox* box = new CollisionBox(scale / 2.f);
+
+	CollisionRigidBody* rb = new CollisionRigidBody(1.f, position, rot);
+	rb->SetAwake(awake);
+	rb->SetSleepable(sleepable);
+
+	box->AttachToRigidBody(rb);
+
+	// add to general box vector
+	m_boxes.push_back(box);
+
+	if(register_g)
+	{
+		Vector3 gravity = (Vector3::GRAVITY / 2.f);
+		rb->SetBaseLinearAcceleration(gravity);
+	}
+
+	if (give_lin_vel)
+		rb->SetLinearVelocity(GetRandomVector3() * 5.f);
+
+	if (give_ang_vel)
+	{
+		float ang_v_x = GetRandomFloatInRange(-5.f, 5.f);
+		float ang_v_y = GetRandomFloatInRange(-5.f, 5.f);
+		float ang_v_z = GetRandomFloatInRange(-5.f, 5.f);
+		rb->SetAngularVelocity(Vector3(ang_v_x, ang_v_y, ang_v_z));
+	}
+
+	// add to primitive vector in wpa
+	wpa->m_primitives.push_back(box);
+
+	return box;
+}
+
 CollisionSphere* Physics3State::WrapAroundTestSphere(WrapAround* wpa, 
 	bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, 
-	const Vector3& rot, const Vector3&,
+	const Vector3& rot, const Vector3& scale,
 	const std::string& fp, const std::string& tx)
 {
-	CollisionSphere* sph = new CollisionSphere(1.f, fp, tx);
+	CollisionSphere* sph = new CollisionSphere(scale.x, fp, tx);
 
 	CollisionRigidBody* rb = new CollisionRigidBody(1.f, position, rot);
 	rb->SetAwake(true);
@@ -1217,43 +1287,6 @@ Spring* Physics3State::SetupSpring(CollisionPoint* end1, CollisionPoint* end2, f
 	m_particleRegistry->Register(e2, sg2);
 
 	return sp;
-}
-
-CollisionBox* Physics3State::WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, 
-	bool register_g, const Vector3& position, const Vector3& rot, const Vector3& scale, const bool& awake, const bool& sleepable)
-{
-	CollisionBox* box = new CollisionBox(scale / 2.f);
-
-	CollisionRigidBody* rb = new CollisionRigidBody(1.f, position, rot);
-	rb->SetAwake(awake);
-	rb->SetSleepable(sleepable);
-
-	box->AttachToRigidBody(rb);
-
-	// add to general box vector
-	m_boxes.push_back(box);
-
-	if(register_g)
-	{
-		Vector3 gravity = (Vector3::GRAVITY / 2.f);
-		rb->SetBaseLinearAcceleration(gravity);
-	}
-
-	if (give_lin_vel)
-		rb->SetLinearVelocity(GetRandomVector3() * 5.f);
-
-	if (give_ang_vel)
-	{
-		float ang_v_x = GetRandomFloatInRange(-5.f, 5.f);
-		float ang_v_y = GetRandomFloatInRange(-5.f, 5.f);
-		float ang_v_z = GetRandomFloatInRange(-5.f, 5.f);
-		rb->SetAngularVelocity(Vector3(ang_v_x, ang_v_y, ang_v_z));
-	}
-
-	// add to primitive vector in wpa
-	wpa->m_primitives.push_back(box);
-
-	return box;
 }
 
 CollisionConvexObject* Physics3State::WrapAroundTestConvex(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, const Vector3& rot, const Vector3& scale, const bool& awake /*= true*/, const bool& sleepable /*= false*/)
@@ -1355,8 +1388,11 @@ void Physics3State::SpawnRandomSphere(WrapAround* wpa, uint num, const Vector3& 
 
 	for (uint i = 0; i < num; ++i)
 	{
+		const float& scale = GetRandomFloatInRange(1.f, 5.f);
+		Vector3 s = Vector3(scale, scale, scale);
+
 		const Vector3& rand_pos = GetRandomLocationWithin(bound);
-		WrapAroundTestSphere(wpa, true, false, true, rand_pos, Vector3::ZERO, Vector3::ONE);
+		WrapAroundTestSphere(wpa, true, false, true, rand_pos, Vector3::ZERO, s);
 	}
 }
 

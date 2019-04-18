@@ -210,24 +210,41 @@ void CollisionSphere::AttachToRigidBody(CollisionRigidBody* rb)
 	rb->SetInvTensor(tensor.Invert());
 
 	// so that transform mat and inv tensor world are set 
+	// tensor has considered scale (in radius), so do not consider it again in transform
 	rb->CacheData();
 
 	// use same transform mat for primitive
-	SetPrimitiveTransformMat4(rb->GetTransformMat4());
+	Matrix44 transform_mat = rb->GetTransformMat4() * Matrix44::MakeScale3D(m_radius, m_radius, m_radius);
+	SetPrimitiveTransformMat4(transform_mat);
+}
+
+void CollisionSphere::SetRigidBodyPosition(const Vector3& pos)
+{
+	GetRigidBody()->SetCenter(pos);
+
+	// cache
+	GetRigidBody()->CacheData();
+
+	// transform
+	Matrix44 transform_mat = GetRigidBody()->GetTransformMat4() * Matrix44::MakeScale3D(m_radius, m_radius, m_radius);
+	SetPrimitiveTransformMat4(transform_mat);
 }
 
 void CollisionSphere::Update(float dt)
 {
-	InputSystem* input = InputSystem::GetInstance();
+	//InputSystem* input = InputSystem::GetInstance();
 
-	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_L))
-		SetFrozen(!IsFrozen());
+	//if (input->WasKeyJustPressed(InputSystem::KEYBOARD_L))
+	//	SetFrozen(!IsFrozen());
 
 	if (GetRigidBody() != nullptr && !IsFrozen())
 	{
 		GetRigidBody()->Integrate(dt);
 
-		SetPrimitiveTransformMat4(GetRigidBody()->GetTransformMat4());
+		// calculate internal
+		// again, do not put scale into rb transform, put it into primitive transform
+		Matrix44 transform_mat = GetRigidBody()->GetTransformMat4() * Matrix44::MakeScale3D(m_radius, m_radius, m_radius);
+		SetPrimitiveTransformMat4(transform_mat);
 	}
 }
 
@@ -262,41 +279,6 @@ void CollisionBox::Update(float deltaTime)
 	}
 }
 
-/*
-void CollisionBox::CacheWorldVerts()
-{
-	const Vector3& centre = GetRigidBody()->GetCenter();
-	const Vector3& xdir = GetBasisAndPosition(0);
-	const Vector3& ydir = GetBasisAndPosition(1);
-	const Vector3& zdir = GetBasisAndPosition(2);
-
-	float x_sqr = xdir.GetLengthSquared();
-	float y_sqr = ydir.GetLengthSquared();
-	float z_sqr = zdir.GetLengthSquared();
-
-	ASSERT_OR_DIE(AreFloatsCloseEnough(x_sqr, 1.f), "basis should be unit vector");
-	ASSERT_OR_DIE(AreFloatsCloseEnough(y_sqr, 1.f), "basis should be unit vector");
-	ASSERT_OR_DIE(AreFloatsCloseEnough(z_sqr, 1.f), "basis should be unit vector");
-
-	Vector3 v1 = centre + xdir * m_half_size.x + ydir * m_half_size.y + zdir * m_half_size.z;
-	Vector3 v2 = centre - xdir * m_half_size.x + ydir * m_half_size.y + zdir * m_half_size.z;
-	Vector3 v3 = centre + xdir * m_half_size.x - ydir * m_half_size.y + zdir * m_half_size.z;
-	Vector3 v4 = centre + xdir * m_half_size.x + ydir * m_half_size.y - zdir * m_half_size.z;
-	Vector3 v5 = centre - xdir * m_half_size.x - ydir * m_half_size.y + zdir * m_half_size.z;
-	Vector3 v6 = centre + xdir * m_half_size.x - ydir * m_half_size.y - zdir * m_half_size.z;
-	Vector3 v7 = centre - xdir * m_half_size.x + ydir * m_half_size.y - zdir * m_half_size.z;
-	Vector3 v8 = centre - xdir * m_half_size.x - ydir * m_half_size.y - zdir * m_half_size.z;
-	m_world_verts[0] = v1;
-	m_world_verts[1] = v2;
-	m_world_verts[2] = v3;
-	m_world_verts[3] = v4;
-	m_world_verts[4] = v5;
-	m_world_verts[5] = v6;
-	m_world_verts[6] = v7;
-	m_world_verts[7] = v8;
-}
-*/
-
 void CollisionBox::AttachToRigidBody(CollisionRigidBody* rb)
 {
 	SetRigidBody(rb);
@@ -317,6 +299,7 @@ void CollisionBox::AttachToRigidBody(CollisionRigidBody* rb)
 	rb->SetTensor(tensor);
 	rb->SetInvTensor(tensor.Invert());
 
+	// tensor has considered scal, so in cache don't consider scale
 	rb->CacheData();
 
 	Matrix44 transform_mat = rb->GetTransformMat4() * Matrix44::MakeScale3D(ext_x, ext_y, ext_z);
@@ -383,7 +366,12 @@ CollisionPlane::CollisionPlane(const Vector2& bound, const Vector3& normal, cons
 {
 	Renderer* renderer = Renderer::GetInstance();
 
-	SetMesh(renderer->CreateOrGetMesh("quad_pcu_110"));
+	// select mesh
+	if (bound == Vector2(110.f))
+		SetMesh(renderer->CreateOrGetMesh("quad_pcu_110"));
+	else if (bound == Vector2(20.f))
+		SetMesh(renderer->CreateOrGetMesh("quad_pcu_20"));
+
 	SetShader(renderer->CreateOrGetShader(fp));
 	SetTexture(renderer->CreateOrGetTexture(tx));
 

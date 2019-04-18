@@ -313,6 +313,40 @@ uint CollisionSensor::SphereVsPlane(const CollisionSphere& sphere, const Collisi
 	return 1;
 }
 
+// ...for now we do not resolve, hence putting no data into the keep
+uint CollisionSensor::SphereVsPlaneContinuous(const CollisionSphere& sph, const CollisionPlane& pl, 
+	const Vector3& v, float& t, Vector3& hit, CollisionKeep*)
+{
+	// sph to plane distance
+	float dist = DotProduct(pl.GetNormal(), sph.GetCenter());
+	dist -= pl.GetOffset();
+
+	if (abs(dist) <= sph.GetRadius())
+	{
+		// sphere is already overlapping plane.
+		// set TOI to 0 and impact point to sphere center
+		t = 0.f;
+		hit = sph.GetCenter();
+		return 1;
+	}
+	else
+	{
+		float denom = DotProduct(pl.GetNormal(), v);
+		if (denom * dist >= 0.f)
+			// sphere moving parallel to or away from the plane
+			return 0;
+		else
+		{
+			// sphere moving towards the plane
+			// use +r if sphere in front of plane, -r otherwise
+			float r = dist > 0.f ? sph.m_radius : -sph.m_radius;
+			t = (r - dist) / denom;
+			hit = sph.m_center + v * t - pl.m_normal * r;
+			return 1;
+		}
+	}
+}
+
 uint CollisionSensor::BoxVsHalfPlane(const CollisionBox& box, const CollisionPlane& plane, CollisionKeep* c_data)
 {
 	// since it is half space, do not consider collisions if box is in negative space of plane
@@ -372,12 +406,13 @@ uint CollisionSensor::BoxVsHalfPlane(const CollisionBox& box, const CollisionPla
 
 uint CollisionSensor::BoxVsSphere(const CollisionBox& box, const CollisionSphere& sphere, CollisionKeep* c_data)
 {
-	Vector3 centre = sphere.GetBasisAndPosition(3);
-	Vector3 relCentre = box.GetTransformMat4().MultiplyInverse(centre);
+	Vector3 center = sphere.GetBasisAndPosition(3);
+	Vector3 relCenter = box.GetRigidBody()->GetTransformMat4().MultiplyInverse(center);
+	//Vector3 relCentre = box.GetTransformMat4().MultiplyInverse(centre);
 
-	if (abs(relCentre.x) - sphere.GetRadius() > box.GetHalfSize().x ||
-		abs(relCentre.y) - sphere.GetRadius() > box.GetHalfSize().y ||
-		abs(relCentre.z) - sphere.GetRadius() > box.GetHalfSize().z)
+	if (abs(relCenter.x) - sphere.GetRadius() > box.GetHalfSize().x ||
+		abs(relCenter.y) - sphere.GetRadius() > box.GetHalfSize().y ||
+		abs(relCenter.z) - sphere.GetRadius() > box.GetHalfSize().z)
 	{
 		return 0;
 	}
@@ -385,36 +420,36 @@ uint CollisionSensor::BoxVsSphere(const CollisionBox& box, const CollisionSphere
 	Vector3 closestPt(0,0,0);
 	float dist;
 
-	dist = relCentre.x;
+	dist = relCenter.x;
 	if (dist > box.GetHalfSize().x) 
 		dist = box.GetHalfSize().x;
 	if (dist < -box.GetHalfSize().x)
 		dist = -box.GetHalfSize().x;
 	closestPt.x = dist;
 
-	dist = relCentre.y;
+	dist = relCenter.y;
 	if (dist > box.GetHalfSize().y) 
 		dist = box.GetHalfSize().y;
 	if (dist < -box.GetHalfSize().y) 
 		dist = -box.GetHalfSize().y;
 	closestPt.y = dist;
 
-	dist = relCentre.z;
+	dist = relCenter.z;
 	if (dist > box.GetHalfSize().z) 
 		dist = box.GetHalfSize().z;
 	if (dist < -box.GetHalfSize().z) 
 		dist = -box.GetHalfSize().z;
 	closestPt.z = dist;
 
-	dist = (closestPt - relCentre).GetLengthSquared();
+	dist = (closestPt - relCenter).GetLengthSquared();
 	if (dist > sphere.GetRadius() * sphere.GetRadius()) 
 		return 0;
 
-	Vector3 closestPtWorld = box.GetTransformMat4() * closestPt;
+	//Vector3 closestPtWorld = box.GetTransformMat4() * closestPt;
+	Vector3 closestPtWorld = box.GetRigidBody()->GetTransformMat4() * closestPt;
 
 	Collision* collision = c_data->m_collision;
-	collision->m_normal = (closestPtWorld - centre);
-	collision->m_normal.Normalize();
+	collision->m_normal = (closestPtWorld - center).GetNormalized();
 	collision->m_pos = closestPtWorld;
 	collision->m_penetration = sphere.GetRadius() - sqrtf(dist);
 	collision->SetBodies(box.GetRigidBody(), sphere.GetRigidBody());

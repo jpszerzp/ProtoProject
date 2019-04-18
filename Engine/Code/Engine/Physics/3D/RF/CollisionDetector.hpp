@@ -11,6 +11,8 @@ public:
 
 	static uint SphereVsPlane(const CollisionSphere& sphere, const CollisionPlane& plane, CollisionKeep* c_data);
 
+	static uint SphereVsPlaneContinuous(const CollisionSphere& sph, const CollisionPlane& pl, const Vector3& v, float& t, Vector3& hit, CollisionKeep* c_data);
+
 	static uint BoxVsBox(const CollisionBox& b1, const CollisionBox& b2, CollisionKeep* c_data);
 
 	static uint BoxVsHalfPlane(const CollisionBox& box, const CollisionPlane& plane, CollisionKeep* c_data);
@@ -24,4 +26,6 @@ public:
 	static uint ConvexVsSphere(const CollisionConvexObject& convex, const CollisionSphere& sph, CollisionKeep* c_data);
 
 	static uint LineVsAABB(const CollisionLine& line, const CollisionBox& aabb, CollisionKeep* c_data);
+
+
 };
