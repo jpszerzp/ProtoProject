@@ -16,7 +16,6 @@
 
 #include <algorithm>
 
-
 bool IsGameobjectDead(GameObject* go) { return go->m_dead; }
 
 Physics3State::Physics3State()
