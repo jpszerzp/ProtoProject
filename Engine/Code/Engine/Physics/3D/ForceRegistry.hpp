@@ -16,10 +16,12 @@ struct ParticleForceRegistration
 struct RigidbodyForceRegistration
 {
 	Rigidbody3* m_rb3;
+
 	RigidForceGenerator* m_rigidGenerator;
 
 	RigidbodyForceRegistration(Rigidbody3* rb, RigidForceGenerator* rfg)
 		: m_rb3(rb), m_rigidGenerator(rfg){}
+
 	~RigidbodyForceRegistration(){}
 };
 
@@ -44,6 +46,7 @@ public:
 
 public:
 	void Register(Rigidbody3* rb, RigidForceGenerator* rbGenerator);
+
 	void ClearAllRegistries();
 
 	void UpdateForces(float deltaTime);

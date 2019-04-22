@@ -305,27 +305,27 @@ void Collision3State::UpdateKeyboard(float deltaTime)
 	float upDown = 0.f; 
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_A))
 	{
-		leftRight = -10.f;
+		leftRight = -50.f;
 	}
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_D))
 	{
-		leftRight = 10.f;
+		leftRight = 50.f;
 	}
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_W))
 	{
-		forwardBack = 10.f;
+		forwardBack = 50.f;
 	}
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_S))
 	{
-		forwardBack = -10.f;
+		forwardBack = -50.f;
 	}
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_Q))
 	{
-		upDown = 10.f;
+		upDown = 50.f;
 	}
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_E))
 	{
-		upDown = -10.f;
+		upDown = -50.f;
 	}
 	// camera update from input
 	Vector3 camForward = m_camera->GetLocalForward(); 

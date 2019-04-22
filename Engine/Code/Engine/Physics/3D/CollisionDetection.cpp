@@ -2638,9 +2638,9 @@ bool CollisionDetector::OBB3VsOBB3StepOne(const OBB3& obb1, const OBB3& obb2, st
 
 	if (!record2.empty())
 	{
-		const Vector3& pt = std::get<0>(c_info2);
-		const Vector3& normal = std::get<1>(c_info2);
-		const float& dist = std::get<2>(c_info2);
+		//const Vector3& pt = std::get<0>(c_info2);
+		//const Vector3& normal = std::get<1>(c_info2);
+		//const float& dist = std::get<2>(c_info2);
 		//DebugRenderLine(0.1f, pt, pt + normal * dist, 3.f, Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
 		return true;
 	}
@@ -2717,9 +2717,9 @@ bool CollisionDetector::OBB3VsOBB3StepTwo(const OBB3& obb1, const OBB3& obb2, st
 
 	if (!record1.empty())
 	{
-		const Vector3& pt = std::get<0>(c_info1);
-		const Vector3& normal = std::get<1>(c_info1);
-		const float& dist = std::get<2>(c_info1);
+		//const Vector3& pt = std::get<0>(c_info1);
+		//const Vector3& normal = std::get<1>(c_info1);
+		//const float& dist = std::get<2>(c_info1);
 		//DebugRenderLine(0.1f, pt, pt + normal * dist, 3.f, Rgba::GREEN, Rgba::GREEN, DEBUG_RENDER_USE_DEPTH);
 		return true;
 	}
@@ -2802,8 +2802,8 @@ bool CollisionDetector::OBB3VsOBB3StepThree(const OBB3& obb1, const OBB3& obb2, 
 		OBB3Edge edge2 = std::get<0>(tup);
 		//const Vector3& n = std::get<1>(tup);
 		const float& dist = std::get<2>(tup);
-		const Vector3& pt1 = std::get<3>(tup);
-		const Vector3& pt2 = std::get<4>(tup);
+		//const Vector3& pt1 = std::get<3>(tup);
+		//const Vector3& pt2 = std::get<4>(tup);
 
 		//DebugRenderLine(0.1f, pt1, pt2, 5.f, Rgba::MEGENTA, Rgba::MEGENTA, DEBUG_RENDER_USE_DEPTH);
 
@@ -2820,8 +2820,8 @@ bool CollisionDetector::OBB3VsOBB3StepThree(const OBB3& obb1, const OBB3& obb2, 
 
 	if (!edge_pen_record.empty())
 	{
-		const Vector3& deep_pt1 = std::get<3>(c_info);
-		const Vector3& deep_pt2 = std::get<4>(c_info);
+		//const Vector3& deep_pt1 = std::get<3>(c_info);
+		//const Vector3& deep_pt2 = std::get<4>(c_info);
 		//DebugRenderLine(0.1f, deep_pt1, deep_pt2, 10.f, Rgba::CYAN, Rgba::CYAN, DEBUG_RENDER_USE_DEPTH);
 		return true;
 	}

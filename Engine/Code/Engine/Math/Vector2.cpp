@@ -26,6 +26,13 @@ Vector2::Vector2( float initialX, float initialY )
 }
 
 
+Vector2::Vector2(const float& initialXY)
+	: x(initialXY)
+	, y(initialXY)
+{
+
+}
+
 //-----------------------------------------------------------------------------------------------
 const Vector2 Vector2::operator + ( const Vector2& vecToAdd ) const
 {

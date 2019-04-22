@@ -45,7 +45,7 @@ Sphere::Sphere(const float& mass, const Vector3& pos, const Vector3& rot, const 
 }
 
 
-Sphere::Sphere(const float& mass, const Vector3& pos, const Vector3& rot, const Vector3& scale, const Rgba& tint)
+Sphere::Sphere(const float&, const Vector3& pos, const Vector3& rot, const Vector3& scale, const Rgba& tint)
 {
 	Renderer* renderer = Renderer::GetInstance();
 
@@ -119,7 +119,7 @@ float Sphere::GetRadius() const
 	return res;
 }
 
-void Sphere::Update(float deltaTime)
+void Sphere::Update(float)
 {
 	//if (m_physEntity)
 	//{

@@ -63,6 +63,7 @@ public:
 	// inverse
 	Matrix44 Invert() const;
 	bool Invert(const float m[16], float invOut[16]);
+	Vector3 MultiplyInverse(const Vector3& vector) const;
 
 	// transpose
 	Matrix44 Transpose();
@@ -71,6 +72,7 @@ public:
 
 	Matrix44 operator*(const Matrix44& rhs) const;
 	Vector4 operator*(const Vector4& rhs) const;
+	Vector3 operator*(const Vector3& rhs) const;
 
 	Vector3 GetForward() const;
 	Vector3 GetUp() const;

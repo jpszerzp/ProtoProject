@@ -110,7 +110,8 @@ void TheApp::UpdateTime()
 {
 	//m_deltaSeconds = g_masterClock->frame.seconds;
 
-	m_deltaSeconds = TimingData::GetTimeDurationSeconds();		// ms to s
+	PhysTimeSystem& time = PhysTimeSystem::GetTimeSystem();
+	m_deltaSeconds = time.GetTimeDurationSeconds();			// ms to s
 	if (m_deltaSeconds <= 0.0f) 
 		return;
 	else if (m_deltaSeconds > 0.05f)
@@ -136,7 +137,8 @@ void TheApp::Render()
 void TheApp::RunFrame()
 {
 	//ClockSystemBeginFrame();
-	TimingData::Get().UpdateTime();
+	PhysTimeSystem& time = PhysTimeSystem::GetTimeSystem();
+	time.UpdateTime();
 
 	g_renderer->BeginFrame();
 	g_input->BeginFrame();
@@ -183,14 +185,14 @@ void TheApp::ProcessInput()
 		}
 	}
 
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_7) && !DevConsoleIsOpen())
-	{
-#if defined(PROFILE_ENABLED) 
-		Profiler* profiler = Profiler::GetInstance();
-
-		profiler->m_on = !profiler->m_on;
-#endif
-	}
+//	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_7) && !DevConsoleIsOpen())
+//	{
+//#if defined(PROFILE_ENABLED) 
+//		Profiler* profiler = Profiler::GetInstance();
+//
+//		profiler->m_on = !profiler->m_on;
+//#endif
+//	}
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_1))
 	{

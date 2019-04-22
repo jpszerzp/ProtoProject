@@ -577,6 +577,8 @@ Mesh* Renderer::CreateOrGetMesh(std::string meshName)
 			mesh = Mesh::CreateCube(VERT_PCU);
 		else if (meshName == "quad_pcu")
 			mesh = Mesh::CreateQuad(VERT_PCU);
+		else if (meshName == "quad_pcu_20")
+			mesh = Mesh::CreateQuad20(VERT_PCU);
 		else if (meshName == "sphere_pcu")
 			mesh = Mesh::CreateUVSphere(VERT_PCU, 18, 36);
 		else if (meshName == "ship_pcu")
@@ -1683,7 +1685,7 @@ void Renderer::SetColorUBO( GLuint )
 }
 
 
-void Renderer::SetSingleLightUBO(GLuint handle)
+void Renderer::SetSingleLightUBO(GLuint)
 {
 	m_uboSingleLight->CopyToGPU(sizeof(sSingleLightData), &m_singleLightData);
 	glBindBufferBase(GL_UNIFORM_BUFFER, SINGLE_LIGHT_BUFFER_BIND_IDX, m_uboSingleLight->GetHandle());

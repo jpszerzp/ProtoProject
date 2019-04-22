@@ -2,89 +2,36 @@
 
 #include "Engine/Core/EngineCommon.hpp"
 
-struct TimingData
+class PhysTimeSystem
 {
-	/** The current render frame. This simply increments. */
-	uint m_frame_num;
+	PhysTimeSystem() {}
+	PhysTimeSystem(const PhysTimeSystem&) {}
 
-	/**
-	* The timestamp when the last frame ended. Times are
-	* given in milliseconds since some undefined time.
-	*/
-	uint m_last_frame_time_stamp;
+public:
+	uint m_frames;
 
-	/**
-	* The duration of the last frame in milliseconds.
-	*/
-	uint m_last_frame_duration;
+	uint m_frame_stamp;
+	uint m_frame_duration;
 
-	/**
-	* The clockstamp of the end of the last frame.
-	*/
-	unsigned long m_last_frame_clock_stamp;
+	unsigned long m_hpc_stamp;
+	unsigned long m_hpc_tick;
 
-	/**
-	* The duration of the last frame in clock ticks.
-	*/
-	unsigned long m_last_frame_clock_tick;
-
-	/**
-	* Keeps track of whether the rendering is paused.
-	*/
-	bool m_paused;
-
-	// Calculated data
-
-	/**
-	* This is a recency weighted average of the frame time, calculated
-	* from frame durations.
-	*/
-	double m_average_duration;
-
-	/**
-	* The reciprocal of the average frame duration giving the mean
-	* fps over a recency weighted average.
-	*/
 	float m_fps;
 
-	/**
-	* Gets the global timing data object.
-	*/
-	static TimingData& Get();
+	bool m_paused;
 
-	/**
-	* Updates the timing system, should be called once per frame.
-	*/
-	static void UpdateTime();
+	double m_average;
 
-	/**
-	* Initialises the frame information system. Use the overall
-	* init function to set up all modules.
-	*/
-	static void Init();
+	static void InitTimeSystem();
+	static PhysTimeSystem& GetTimeSystem();
+	static void DestroyTimeSystem();
 
-	/**
-	* Deinitialises the frame information system.
-	*/
-	static void Release();
+	void UpdateTime();
+	void LerpTime();
 
-	/**
-	* Gets the global system time, in the best resolution possible.
-	* Timing is in milliseconds.
-	*/
-	static unsigned GetTime();
+	uint GetTime();
+	unsigned long GetClock();
 
-	/**
-	* Gets the clock ticks since process start.
-	*/
-	static unsigned long GetClock();
-
-	static float GetTimeSeconds();
-	static float GetTimeDurationSeconds();
-
-private:
-	// These are private to stop instances being created: use get().
-	TimingData() {}
-	TimingData(const TimingData&) {}
-	//TimingData& operator=(const TimingData&);
+	float GetTimeSeconds();
+	float GetTimeDurationSeconds();
 };

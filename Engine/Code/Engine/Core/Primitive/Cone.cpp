@@ -80,7 +80,7 @@ void Cone::Render(Renderer* renderer)
 	}
 }
 
-void Cone::Update(float deltaTime)
+void Cone::Update(float)
 {
 
 }

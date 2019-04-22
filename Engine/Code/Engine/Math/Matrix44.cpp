@@ -523,6 +523,24 @@ Vector4 Matrix44::operator*(const Vector4& rhs) const
 }
 
 
+Vector3 Matrix44::operator*(const Vector3& rhs) const
+{
+	Vector3 row1 = Vector3(Ix, Jx, Kx);
+	Vector3 row2 = Vector3(Iy, Jy, Ky);
+	Vector3 row3 = Vector3(Iz, Jz, Kz);
+
+	float x = DotProduct(row1, rhs);
+	float y = DotProduct(row2, rhs);
+	float z = DotProduct(row3, rhs);
+
+	// also considers translation
+	x += Tx;
+	y += Ty;
+	z += Tz;
+
+	return Vector3(x, y, z);
+}
+
 Matrix44 Matrix44::Invert() const
 {
 	float inv[16];
@@ -808,6 +826,20 @@ bool Matrix44::Invert(const float m[16], float invOut[16])
 	return true;
 }
 
+
+Vector3 Matrix44::MultiplyInverse(const Vector3& vector) const
+{
+	Vector3 tmp = vector;
+	tmp.x -= Tx;
+	tmp.y -= Ty;
+	tmp.z -= Tz;
+
+	float x = tmp.x * Ix + tmp.y * Iy + tmp.z * Iz;
+	float y = tmp.x * Jx + tmp.y * Jy + tmp.z * Jz;
+	float z = tmp.x * Kx + tmp.y * Ky + tmp.z * Kz;
+
+	return Vector3(x, y, z);
+}
 
 Matrix44 Matrix44::Transpose()
 {

@@ -21,7 +21,8 @@ public:
 	// Operators
 	const Vector3 operator+( const Vector3& vecToAdd ) const;		
 	const Vector3 operator-( const Vector3& vecToSubtract ) const;	
-	const Vector3 operator*( float uniformScale ) const;			
+	const Vector3 operator*( float uniformScale ) const;
+	const Vector3 operator*(const Vector3& toMultiply) const;
 	const Vector3 operator/( float inverseScale ) const;			
 	const bool operator<(const Vector3& compared) const;	// for std::set
 	const bool operator<=(const Vector3& compared) const;
@@ -35,6 +36,7 @@ public:
 	bool operator==( const Vector3& compare ) const;				
 	bool operator!=( const Vector3& compare ) const;	
 	const float operator[](const int idx) const;
+	float& operator[](const int& idx);
 	const Vector3 operator-() const;
  
 	float	GetLength() const;

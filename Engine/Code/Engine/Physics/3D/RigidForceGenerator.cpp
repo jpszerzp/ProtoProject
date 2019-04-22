@@ -23,7 +23,6 @@ void GravityRigidForceGenerator::UpdateForce(Rigidbody3* body, float)
 	DebugRenderLine(.01f, center, center + force, 5.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
 }	
 
-
 void AnchorSpringRigidForceGenerator::UpdateForce(Rigidbody3* body, float)
 {
 	Vector3 attach_world = body->GetPointInWorld(m_attachLocal);
