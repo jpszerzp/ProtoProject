@@ -1658,7 +1658,7 @@ void Renderer::SetCameraUBO(GLuint handle)
 }
 
 
-void Renderer::SetLightsUBO(GLuint handle)
+void Renderer::SetLightsUBO(GLuint)
 {
 	//m_uboLights->CopyToGPU(sizeof(sAllLightsData), &m_lightsData);
 	//glBindBufferBase(GL_UNIFORM_BUFFER, LIGHTS_BUFFER_BIND_IDX, m_uboLights->GetHandle());

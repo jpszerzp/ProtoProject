@@ -214,3 +214,43 @@ Vector3 Matrix33::MultiplyTranspose(const Vector3& v) const
 	Matrix33 t = this->Transpose();
 	return t * v;
 }
+
+Matrix33 Matrix33::FromEuler(const Vector3& euler)
+{
+	Matrix33 res = IDENTITY;
+
+	//// yaw pitch roll - column major
+	//res.Ix = CosDegrees(euler.y) * CosDegrees(euler.z) + SinDegrees(euler.y) * SinDegrees(euler.x) * SinDegrees(euler.z);
+	//res.Iy = -CosDegrees(euler.y) * SinDegrees(euler.z) + SinDegrees(euler.y) * SinDegrees(euler.x) * CosDegrees(euler.z);
+	//res.Iz = SinDegrees(euler.y) * CosDegrees(euler.x);
+
+	//res.Jx = SinDegrees(euler.z) * CosDegrees(euler.x);
+	//res.Jy = CosDegrees(euler.z) * CosDegrees(euler.x);
+	//res.Jz = -SinDegrees(euler.x);
+
+	//res.Kx = -SinDegrees(euler.y) * CosDegrees(euler.z) + CosDegrees(euler.y) * SinDegrees(euler.x) * SinDegrees(euler.z);
+	//res.Ky = SinDegrees(euler.z) * SinDegrees(euler.y) + CosDegrees(euler.y) * SinDegrees(euler.x) * CosDegrees(euler.z);
+	//res.Kz = CosDegrees(euler.y) * CosDegrees(euler.x);
+
+	// yaw pitch roll
+	Vector3 pitch_x = Vector3(1.f, 0.f, 0.f);
+	Vector3 pitch_y = Vector3(0.f, CosDegrees(euler.x), SinDegrees(euler.x));
+	Vector3 pitch_z = Vector3(0.f, -SinDegrees(euler.x), CosDegrees(euler.x));
+	Matrix33 pitch = Matrix33(pitch_x, pitch_y, pitch_z);
+
+	Vector3 yaw_x = Vector3(CosDegrees(euler.y), 0.f, -SinDegrees(euler.y));
+	Vector3 yaw_y = Vector3(0.f, 1.f, 0.f);
+	Vector3 yaw_z = Vector3(SinDegrees(euler.y), 0.f, CosDegrees(euler.y));
+	Matrix33 yaw = Matrix33(yaw_x, yaw_y, yaw_z);
+
+	Vector3 roll_x = Vector3(CosDegrees(euler.z), SinDegrees(euler.z), 0.f);
+	Vector3 roll_y = Vector3(-SinDegrees(euler.z), CosDegrees(euler.z), 0.f);
+	Vector3 roll_z = Vector3(0.f, 0.f, 1.f);
+	Matrix33 roll = Matrix33(roll_x, roll_y, roll_z);
+
+	res = roll * res;
+	res = pitch * res;
+	res = yaw * res;
+
+	return res;
+}

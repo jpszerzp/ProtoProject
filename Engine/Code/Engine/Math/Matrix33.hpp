@@ -41,4 +41,6 @@ public:
 	// transpose
 	Matrix33 Transpose() const;
 	Vector3 MultiplyTranspose(const Vector3& v) const;
+
+	static Matrix33 FromEuler(const Vector3& euler);
 };

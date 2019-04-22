@@ -117,6 +117,11 @@ void Quaternion::operator*=(const float scalar)
 }
 
 
+bool Quaternion::operator==(const Quaternion& rhs)
+{
+	return (m_real == rhs.m_real) && (m_imaginary == rhs.m_imaginary);
+}
+
 float Quaternion::GetNorm() const
 {
 	float realSquare = m_real * m_real;
@@ -341,4 +346,23 @@ Quaternion Quaternion::FromMatrix(const Matrix33& rot)
 	}
 
 	return res;
+}
+
+Quaternion Quaternion::FromEuler(const Vector3& euler)
+{
+	double c1 = cos(euler.y/2);
+	double s1 = sin(euler.y/2);
+	double c2 = cos(euler.x/2);
+	double s2 = sin(euler.x/2);
+	double c3 = cos(euler.z/2);
+	double s3 = sin(euler.z/2);
+	double c1c2 = c1*c2;
+	double s1s2 = s1*s2;
+
+	Quaternion q;
+	q.m_real =c1c2*c3 - s1s2*s3;
+	q.m_imaginary.x =c1c2*s3 + s1s2*c3;
+	q.m_imaginary.y =s1*c2*c3 + c1*s2*s3;
+	q.m_imaginary.z =c1*s2*c3 - s1*c2*s3;
+	return q;
 }

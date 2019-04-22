@@ -28,7 +28,7 @@ public:
 
 	// producers
 	static Matrix44 MakeRotationDegrees2D(const float deg);
-	static Matrix44 MakeRotationDegrees3D(Vector3 euler);
+	static Matrix44 MakeRotationDegrees3D(const Vector3& euler);
 	static Matrix44 MakeRotationDegrees3DTranspose(Vector3 euler);
 	static Vector3  DecomposeMatrixIntoEuler(Matrix44 mat4);
 

@@ -193,31 +193,31 @@ void Rigidbody3::Render(Renderer* renderer)
 		m_boundSphere.DrawBound(renderer);
 }
 
-void Rigidbody3::Integrate(float deltaTime)
+void Rigidbody3::Integrate(float)
 {
-	CacheData();
+	//CacheData();
 
-	if (!m_frozen)
-	{
-		// acc
-		m_lastFrameLinearAcc = m_linearAcceleration;
-		m_linearAcceleration = m_netforce * m_massData.m_invMass;
-		Vector3 angularAcc = m_inverseInertiaTensorWorld * m_torqueAcc;
+	//if (!m_frozen)
+	//{
+	//	// acc
+	//	m_lastFrameLinearAcc = m_linearAcceleration;
+	//	m_linearAcceleration = m_netforce * m_massData.m_invMass;
+	//	Vector3 angularAcc = m_inverseInertiaTensorWorld * m_torqueAcc;
 
-		// vel
-		m_linearVelocity += m_linearAcceleration * deltaTime;
-		m_angularVelocity += angularAcc * deltaTime;
+	//	// vel
+	//	m_linearVelocity += m_linearAcceleration * deltaTime;
+	//	m_angularVelocity += angularAcc * deltaTime;
 
-		// damp on vel
-		m_linearVelocity *= powf(m_linearDamp, deltaTime);	// damp 1 means no damp	
-		m_angularVelocity *= powf(m_angularDamp, deltaTime);
+	//	// damp on vel
+	//	m_linearVelocity *= powf(m_linearDamp, deltaTime);	// damp 1 means no damp	
+	//	m_angularVelocity *= powf(m_angularDamp, deltaTime);
 
-		// pos
-		m_center += m_linearVelocity * deltaTime;
-		m_orientation.AddScaledVector(m_angularVelocity, deltaTime);
-	}
+	//	// pos
+	//	m_center += m_linearVelocity * deltaTime;
+	//	m_orientation.AddScaledVector(m_angularVelocity, deltaTime);
+	//}
 
-	ClearAccs();
+	//ClearAccs();
 }
 
 void Rigidbody3::Simulate(float deltaTime, Vector3& simulate_pos, Quaternion& simulate_orient)

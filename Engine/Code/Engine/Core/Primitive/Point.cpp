@@ -56,7 +56,7 @@ void Point::Update(float deltaTime)
 {
 	UpdateInput(deltaTime);
 
-	if (m_physDriven)
+	if (m_physEntity)
 	{
 		m_physEntity->Integrate(deltaTime);
 		m_physEntity->UpdateTransforms();		// including bound transforms

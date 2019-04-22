@@ -16,6 +16,7 @@
 #include "Engine/Core/ErrorWarningAssert.hpp"
 #include "Engine/Net/Net.hpp"
 #include "Engine/Net/NetAddress.hpp"
+#include "Engine/Physics/3D/RF/PhysTime.hpp"
 
 TheApp::TheApp()
 {
@@ -97,17 +98,25 @@ void TheApp::Update()
 		OnQuitRequested();
 	}
 
-	// If it turns out problematic to put profiler update inside run_frame of app
-	// use game's process_input for input detection instead.
-	// Disable profiler update/update_input accordingly.
-	Profiler* profiler = Profiler::GetInstance();
-	profiler->Update();
+	//// If it turns out problematic to put profiler update inside run_frame of app
+	//// use game's process_input for input detection instead.
+	//// Disable profiler update/update_input accordingly.
+	//Profiler* profiler = Profiler::GetInstance();
+	//profiler->Update();
 }
 
 
 void TheApp::UpdateTime()
 {
-	m_deltaSeconds = g_masterClock->frame.seconds;
+	//m_deltaSeconds = g_masterClock->frame.seconds;
+
+	m_deltaSeconds = TimingData::GetTimeDurationSeconds();		// ms to s
+	if (m_deltaSeconds <= 0.0f) 
+		return;
+	else if (m_deltaSeconds > 0.05f)
+		m_deltaSeconds = 0.05f;
+
+	g_theGame->SetDeltaTime(m_deltaSeconds);
 }
 
 
@@ -118,15 +127,17 @@ void TheApp::Render()
 	DevConsole* console = DevConsole::GetInstance();
 	console->Render(g_renderer);
 	
-	// profiler render
-	Profiler* profiler = Profiler::GetInstance();
-	profiler->Render(g_renderer);
+	//// profiler render
+	//Profiler* profiler = Profiler::GetInstance();
+	//profiler->Render(g_renderer);
 }
 
 
 void TheApp::RunFrame()
 {
-	ClockSystemBeginFrame();
+	//ClockSystemBeginFrame();
+	TimingData::Get().UpdateTime();
+
 	g_renderer->BeginFrame();
 	g_input->BeginFrame();
 	g_audio->BeginFrame();
@@ -255,15 +266,13 @@ void TheApp::StateStartup()
 {
 	Physics3State* phys3 = new Physics3State();
 	Collision3State* collision = new Collision3State();
-	//ProtoState* proto = new ProtoState();
 	StateMachine* states = new StateMachine();
 	phys3->PostConstruct();
-	//states->AppendState(proto);
 	states->AppendState(phys3);
 	states->AppendState(collision);
 	g_theGame = new TheGame();
 	g_theGame->SetStateMachine(states);
-	g_theGame->UseDefaultState();			// now that we set default state, we use/apply it
+	g_theGame->UseDefaultState();			// set default state as state at index 0 
 	g_theGame->UseGameState(nullptr);
 }
 

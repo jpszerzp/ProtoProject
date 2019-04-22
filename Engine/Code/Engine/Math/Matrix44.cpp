@@ -150,7 +150,7 @@ Matrix44 Matrix44::MakeRotationDegrees2D(const float deg)
 }
 
 
-Matrix44 Matrix44::MakeRotationDegrees3D(Vector3 euler)
+Matrix44 Matrix44::MakeRotationDegrees3D(const Vector3& euler)
 {
 	Matrix44 res = IDENTITY;
 

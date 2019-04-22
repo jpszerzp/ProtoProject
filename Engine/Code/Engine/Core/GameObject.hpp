@@ -5,11 +5,12 @@
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Math/Vector4.hpp"
 #include "Engine/Physics/3D/Entity3.hpp"
+#include "Engine/Physics/3D/RF/CollisionEntity.hpp"
 
 class GameObject
 {
 public:
-	bool		m_physDriven = false;
+	//bool		m_physDriven = false;
 	bool		m_dead = false;
 
 	bool		m_transparent = false;
@@ -34,9 +35,11 @@ public:
 
 	Entity3* m_physEntity = nullptr;
 
+	CollisionEntity* m_ent = nullptr;
+
 public:
 	virtual void Update(float){}
-	virtual void UpdateWithSetPos(const Vector3& pos){}
+	virtual void UpdateWithSetPos(const Vector3&){}
 	virtual void UpdateInput(float){}
 	virtual void UpdateBasis();
 

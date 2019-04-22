@@ -13,7 +13,7 @@ Cube::Cube()
 Cube::Cube(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint,
 	std::string meshName, std::string materialName, 
 	eMoveStatus moveStat, eBodyIdentity bid, bool multipass,
-	eDepthCompare compare, eCullMode cull, eWindOrder order, bool drawBorder)
+	eDepthCompare compare, eCullMode cull, eWindOrder order, bool)
 {
 	Renderer* renderer = Renderer::GetInstance();
 
@@ -76,7 +76,7 @@ Cube::~Cube()
 
 void Cube::Update(float deltaTime)
 {
-	if (m_physDriven)
+	if (m_physEntity)
 	{
 		m_physEntity->Integrate(deltaTime);
 		m_physEntity->UpdateTransforms();

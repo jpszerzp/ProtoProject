@@ -13,6 +13,7 @@
 #include "Engine/Physics/3D/BoxEntity3.hpp"
 #include "Engine/Physics/3D/BoxRB3.hpp"
 #include "Engine/Physics/3D/QuadRB3.hpp"
+#include "Engine/Physics/3D/RF/PhysTime.hpp"
 
 #include <algorithm>
 
@@ -57,183 +58,29 @@ Physics3State::Physics3State()
 		m_UICamera->SetProjectionOrtho(window->GetWindowWidth(), window->GetWindowHeight(), 0.f, 100.f);
 	}
 
-	// bp title
-	float txtHeight = height / 50.f;
-	Vector2 titleMin = Vector2(-width / 2.f, height / 2.f - txtHeight);
-	std::string bp_title = "Broadphase status: ";
-	BitmapFont* font = theRenderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
-	m_bp_title = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, bp_title, VERT_PCU);
-
-	// quick hull
-	Vector3 qhMin = Vector3(-150.f, 0.f, 0.f);
-	Vector3 qhMax = Vector3(-50.f, 100.f, 100.f);
-	g_hull = new QuickHull(20, qhMin, qhMax);
-
-	// auto-gen qh 
-	qhMin = Vector3(-300.f, 0.f, 0.f);
-	qhMax = Vector3(-200, 100.f, 100.f);
-	m_qh = new QuickHull(20, qhMin, qhMax, true);
-
 	// force registry 
-	m_particleRegistry = new ParticleForceRegistry();
 	m_rigidRegistry = new RigidForceRegistry();
 
-	//m_gravity = new GravityRigidForceGenerator(Vector3::GRAVITY);
 	m_gravity = new GravityRigidForceGenerator(Vector3::GRAVITY / 2.f);
-	//m_gravity = new GravityRigidForceGenerator(Vector3::GRAVITY / 4.f);
-	//m_gravity = new GravityRigidForceGenerator(Vector3::GRAVITY / 8.f);
-	//m_gravity = new GravityRigidForceGenerator(Vector3::GRAVITY / 16.f);
-	
-	//m_iterResolver = new ContactResolver(2);
-	m_allResolver = new ContactResolver();
-	m_coherentResolver = new ContactResolver(RESOLVE_COHERENT);
-
-	// temporary - assimp test
-	m_assimp_0 = new AssimpLoader("nanosuit/nanosuit.obj");
-	int limit = 0;
-	for (std::set<Vector3>::iterator it = m_assimp_0->m_vertPos.begin();
-		it != m_assimp_0->m_vertPos.end(); ++it)
-	{
-		if (limit == 100)
-		{
-			m_modelPoints.emplace(*it);
-			limit = 0;
-
-			// also generate a mesh for this point
-			Mesh* ptMesh = Mesh::CreatePointImmediate(VERT_PCU, *it, Rgba::RED);
-			m_modelPointMeshes.push_back(ptMesh);
-		}
-
-		limit++;
-	}
-
-	// wraparounds
-	m_wraparound_general = new WrapAround(Vector3(-10.f, 280.f, -10.f), Vector3(10.f, 380.f, 10.f),
-		Vector3(-5.f, 295.f, -5.f), Vector3(5.f, 295.f, -5.f),
-		Vector3(-5.f, 295.f, 5.f), Vector3(5.f, 295.f, 5.f),
-		Vector3(-5.f, 305.f, -5.f), Vector3(5.f, 305.f, -5.f),
-		Vector3(-5.f, 305.f, 5.f), Vector3(5.f, 305.f, 5.f));
-	// for dynamics demo
-	InitializePhysQuad(Vector3(0.f, 280.f, 0.f), Vector3(90.f, 0.f, 0.f), Vector3(20.f, 20.f, 1.f), Rgba::GREEN, MOVE_STATIC, BODY_RIGID);
-
-	m_wraparound_verlet = new WrapAround(Vector3(-10.f, 200.f, -10.f), Vector3(0.f, 250.f, 0.f));
-
-	m_wraparound_continuous = new WrapAround(Vector3(1000.f, 1000.f, 1000.f), Vector3(1200.f, 1200.f, 1200.f));
 
 	m_wraparound_sphere_only = new WrapAround(Vector3(20.f, 300.f, -10.f), Vector3(40.f, 320.f, 10.f),
 		Vector3(25.f, 305.f, -5.f), Vector3(35.f, 305.f, -5.f),
 		Vector3(25.f, 305.f, 5.f), Vector3(35.f, 305.f, 5.f),
 		Vector3(25.f, 315.f, -5.f), Vector3(35.f, 315.f, -5.f),
 		Vector3(25.f, 315.f, 5.f), Vector3(35.f, 315.f, 5.f));
-	sph_holder = InitializePhysSphere(1.f, Vector3(30.f, 310.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::GREEN, MOVE_DYNAMIC, BODY_RIGID);
-	SphereRB3* sph_rb_11 = static_cast<SphereRB3*>(sph_holder->m_physEntity);
-	sph_rb_11->SetAwake(true);
-	sph_rb_11->SetCanSleep(true);
-	m_wraparound_sphere_only->m_gos.push_back(sph_holder);
-	
-	m_wraparound_box_only = new WrapAround(Vector3(50.f, 300.f, -10.f), Vector3(70.f, 320.f, 10.f),
-		Vector3(55.f, 305.f, -5.f), Vector3(65.f, 305.f, -5.f),
-		Vector3(55.f, 305.f, 5.f), Vector3(65.f, 305.f, 5.f),
-		Vector3(55.f, 315.f, -5.f), Vector3(65.f, 315.f, -5.f),
-		Vector3(55.f, 315.f, 5.f), Vector3(65.f, 315.f, 5.f));
-	Box* box_11 = InitializePhysBox(Vector3(60.f, 310.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::GREEN, MOVE_DYNAMIC, BODY_RIGID);
-	m_wraparound_box_only->m_gos.push_back(box_11);
-
-	m_wraparound_bvh = new WrapAround(Vector3(55.f, 200.f, -10.f), Vector3(75.f, 220.f, 10.f),
-		Vector3(60.f, 205.f, -5.f), Vector3(70.f, 205.f, -5.f),
-		Vector3(60.f, 205.f, 5.f), Vector3(70.f, 205.f, 5.f),
-		Vector3(60.f, 215.f, -5.f), Vector3(70.f, 215.f, -5.f),
-		Vector3(60.f, 215.f, 5.f), Vector3(70.f, 215.f, 5.f));
-	m_wraparound_bvh->m_bvh_based = true;
-	//Quad* bvh_quad = InitializePhysQuad(Vector3(65.f, 200.f, 0.f), Vector3(90.f, 0.f, 0.f), Vector3(20.f, 20.f, 1.f), Rgba::GREEN, MOVE_STATIC, BODY_RIGID);
-	//m_wraparound_bvh->m_gos.push_back(bvh_quad);
-
-	// verlet comparison
-	Ballistics* free_ballistics = SetupBallistics(FREEFALL, Vector3(-7.f, 240.f, -5.f), true, Rgba::CYAN);
-	// NOTE: we do not present basic verlet here, simply because wraparound will mess the way center is corrected
-	// and it is NOT worth adjusting the existing correct pipeline just because we want to fit it in the wraparound
-	//Ballistics* verlet_basic_ballistics = SetupBallistics(FREEFALL, Vector3(26.f, 240.f, -5.f), true, Rgba::MEGENTA);
-	//verlet_basic_ballistics->m_physEntity->SetVerlet(true);
-	//verlet_basic_ballistics->m_physEntity->SetVerletScheme(BASIC_VERLET);
-	//verlet_basic_ballistics->m_physEntity->SetEntityLastCenter(verlet_basic_ballistics->m_physEntity->GetEntityCenter());
-	Ballistics* verlet_vel_ballistics = SetupBallistics(FREEFALL, Vector3(-3.f, 240.f, -5.f), true, Rgba::PINK);
-	verlet_vel_ballistics->m_physEntity->SetVerlet(true);
-	verlet_vel_ballistics->m_physEntity->SetVerletScheme(VELOCITY_VERLET);
-	m_wraparound_verlet->m_gos.push_back(free_ballistics);
-	//m_wraparound_verlet->m_gos.push_back(verlet_basic_ballistics);
-	m_wraparound_verlet->m_gos.push_back(verlet_vel_ballistics);
-
-	// particla springs
-	// points for springs
-	Point* sp_point_0 = InitializePhysPoint(Vector3(10.f, 225.f, -5.f), Vector3::ZERO, 10.f, Rgba::RED, MOVE_DYNAMIC, BODY_PARTICLE);
-	Point* sp_point_1 = InitializePhysPoint(Vector3(10.f, 235.f, -5.f), Vector3::ZERO, 10.f, Rgba::CYAN, MOVE_DYNAMIC, BODY_PARTICLE);
-	Point* asp_point_0 = InitializePhysPoint(Vector3(15.f, 225.f, -5.f), Vector3::ZERO, 10.f, Rgba::RED, MOVE_DYNAMIC, BODY_PARTICLE);
-	Point* asp_point_1 = InitializePhysPoint(Vector3(15.f, 235.f, -5.f), Vector3::ZERO, 10.f, Rgba::CYAN, MOVE_STATIC, BODY_PARTICLE);
-	sp_point_0->m_physEntity->SetFrozen(true);
-	sp_point_1->m_physEntity->SetFrozen(true);
-	asp_point_0->m_physEntity->SetFrozen(true);
-	asp_point_1->m_physEntity->SetFrozen(true);
-	// setting up registrations in the registry
-	// A. springs
-	m_spring = SetupSpring(sp_point_0, sp_point_1, 2.f, 8.f);		
-	// two points initialized to be 5 units away, constraint by a spring system with rest length of 3
-	// B. anchored spring
-	m_anchorSpring = SetupAnchorSpring(asp_point_0, asp_point_1, 2.f, 8.f);
-
-	// rigid spring
-	// the rigid ball
-	Sphere* spring_sphere = InitializePhysSphere(1.f, Vector3(45.f, 220.f, -5.f), Vector3::ZERO, Vector3::ONE, Rgba::MEGENTA, MOVE_DYNAMIC, BODY_RIGID, DISCRETE);
-	spring_sphere->m_physEntity->SetFrozen(true);
-	// anchor
-	Point* rigid_anchor = InitializePhysPoint(Vector3(45.f, 235.f, -5.f), Vector3::ZERO, 10.f, Rgba::MEGENTA, MOVE_STATIC, BODY_PARTICLE);
-	rigid_anchor->m_physEntity->SetFrozen(true);
-	// entities
-	Entity3* anchor_entity = rigid_anchor->GetEntity();
-	Rigidbody3* attached_rigid = static_cast<Rigidbody3*>(spring_sphere->GetEntity());
-	anchor_entity->m_constrained = true;
-	attached_rigid->m_constrained = true;
-	// set up anchor spring
-	m_rigidAnchorSpring = new GeneralRigidAnchorSpring(anchor_entity, attached_rigid, .25f, 12.f);
-	// force generator
-	Vector3 attach_local = Vector3::ZERO;
-	ProjectPlaneToSphere(Vector2(.01f, .01f), spring_sphere->GetRadius(), attach_local);
-	GravityRigidForceGenerator* grg = new GravityRigidForceGenerator(Vector3::GRAVITY);
-	AnchorSpringRigidForceGenerator* asrfg = new AnchorSpringRigidForceGenerator(rigid_anchor->GetWorldPosition(), attached_rigid, attach_local, .25f, 12.f);
-	// force registration
-	m_rigidRegistry->Register(attached_rigid, asrfg);
-	m_rigidRegistry->Register(attached_rigid, grg);
-
-	// fireworks
-	SetupFireworks(5.f, Vector3(25.f, 230.f, -5.f), Vector3::ZERO, Vector3(0.f, 4.f, 0.f), Vector3(0.f, 4.f, 0.f), false);
-
-	// continuity
-	// ccd plane
-	m_quad_ccd_test = InitializePhysQuad(Vector3(1150.f, 1100.f, 1100.f), Vector3(0.f, 90.f, 0.f), Vector3(200.f, 200.f, 1.f), Rgba::WHITE, MOVE_STATIC, BODY_RIGID, CONTINUOUS);
-	// discrete ball for ccd comparison test
-	m_ball_ccd_test_discrete = InitializePhysSphere(1.f, Vector3(1050.f, 1100.f, 1100.f), Vector3::ZERO, Vector3(0.5f, 0.5f, 0.5f), Rgba::CYAN, MOVE_DYNAMIC, BODY_RIGID);			// this is for comparison without ccd
-	Rigidbody3* rigid_ccd_s_discrete = static_cast<Rigidbody3*>(m_ball_ccd_test_discrete->GetEntity());
-	rigid_ccd_s_discrete->SetLinearVelocity(Vector3(500.f, 0.f, 0.f));	
-	rigid_ccd_s_discrete->SetAwake(true);
-	rigid_ccd_s_discrete->SetCanSleep(false);
-	rigid_ccd_s_discrete->SetFrozen(true);			// freeze at the start
-	m_wraparound_continuous->m_gos.push_back(m_ball_ccd_test_discrete);
-	// continuous ball for ccd comparison test
-	m_ball_ccd_test_continuous = InitializePhysSphere(1.f, Vector3(1050.f, 1050.f, 1050.f), Vector3::ZERO, Vector3(0.5f, 0.5f, 0.5f), Rgba::CYAN, MOVE_DYNAMIC, BODY_RIGID, CONTINUOUS);
-	Rigidbody3* rigid_ccd_s_cnt = static_cast<Rigidbody3*>(m_ball_ccd_test_continuous->GetEntity());
-	rigid_ccd_s_cnt->SetLinearVelocity(Vector3(500.f, -1.f, 0.f));	
-	rigid_ccd_s_cnt->SetAwake(true);
-	rigid_ccd_s_cnt->SetCanSleep(false);
-	rigid_ccd_s_cnt->SetFrozen(true);			// freeze at the start
-	m_wraparound_continuous->m_gos.push_back(m_ball_ccd_test_continuous);
+	//sph_holder = new Sphere(1.f, Vector3(30.f, 310.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::GREEN);
+	////sph_holder->m_physDriven = true;
+	//m_gameObjects.push_back(sph_holder);
+	//m_wraparound_sphere_only->m_gos.push_back(sph_holder);
 
 	// debug
 	DebugRenderSet3DCamera(m_camera);
 	DebugRenderSet2DCamera(m_UICamera);
 
 	// inspection spot
+	m_inspection.push_back(Vector3(30.f, 310.f, -30.f));
 	m_inspection.push_back(Vector3(0.f, 0.f, -7.f));
 	m_inspection.push_back(Vector3(-100.f, 50.f, -50.f));
-	m_inspection.push_back(Vector3(0.f, 310.f, -30.f));
 	m_inspection.push_back(Vector3(0.f, 225, -30.f));
 	m_inspection.push_back(Vector3(1100.f, 1100.f, 900.f));		
 }
@@ -282,19 +129,19 @@ Physics3State::~Physics3State()
 
 void Physics3State::PostConstruct()
 {
-	m_wraparound_general->m_physState = this;
+	//m_wraparound_general->m_physState = this;
 	m_wraparound_sphere_only->m_physState = this;
-	m_wraparound_box_only->m_physState = this;
-	m_wraparound_verlet->m_physState = this;
-	m_wraparound_continuous->m_physState = this;
-	m_wraparound_bvh->m_physState = this;
+	//m_wraparound_box_only->m_physState = this;
+	//m_wraparound_verlet->m_physState = this;
+	//m_wraparound_continuous->m_physState = this;
+	//m_wraparound_bvh->m_physState = this;
 }
 
 Sphere* Physics3State::InitializePhysSphere(const float& mass, const Vector3& pos, const Vector3& rot, const Vector3& scale,
 	const Rgba& tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme scheme)
 {
 	Sphere* s = new Sphere(mass, pos, rot, scale, tint, "sphere_pcu", "default", moveStat, bid, false, COMPARE_LESS, CULLMODE_BACK, WIND_COUNTER_CLOCKWISE, scheme);
-	s->m_physDriven = true;
+	//s->m_physDriven = true;
 	m_gameObjects.push_back(s);
 	m_spheres.push_back(s);
 
@@ -312,7 +159,7 @@ Cube* Physics3State::InitializePhysCube(Vector3 pos, Vector3 rot, Vector3 scale,
 {
 	// AABB3 - deprecated
 	Cube* c = new Cube(pos, rot, scale, tint, "cube_pcu", "default", moveStat, bid);
-	c->m_physDriven = true;
+	//c->m_physDriven = true;
 	m_gameObjects.push_back(c);
 	m_cubes.push_back(c);
 	c->m_physEntity->SetGameobject(c);
@@ -325,7 +172,7 @@ Quad* Physics3State::InitializePhysQuad(Vector3 pos, Vector3 rot, Vector3 scale,
 	Rgba tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme scheme)
 {
 	Quad* q = new Quad(pos, rot, scale, tint, "quad_pcu", "default", moveStat, bid, false, COMPARE_LESS, CULLMODE_FRONT, WIND_COUNTER_CLOCKWISE, scheme);
-	q->m_physDriven = true;
+	//q->m_physDriven = true;
 	m_gameObjects.push_back(q);
 	m_quads.push_back(q);
 
@@ -339,10 +186,10 @@ Quad* Physics3State::InitializePhysQuad(Vector3 pos, Vector3 rot, Vector3 scale,
 }
 
 Box* Physics3State::InitializePhysBox(const Vector3& pos, const Vector3& rot, const Vector3& scale,
-	const Rgba& tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme scheme)
+	const Rgba& tint, eMoveStatus moveStat, eBodyIdentity bid, eDynamicScheme)
 {
 	Box* b = new Box(pos, rot, scale, tint, "cube_pcu", "default", moveStat, bid);
-	b->m_physDriven = true;
+	//b->m_physDriven = true;
 	m_gameObjects.push_back(b);
 	m_boxes.push_back(b);
 
@@ -358,7 +205,7 @@ Point* Physics3State::InitializePhysPoint(Vector3 pos, Vector3 rot, float size,
 {
 	// note: points are all entities and non-rigid
 	Point* pt = new Point(pos, rot, size, tint, "point_pcu", "default", moveStat, bid);
-	pt->m_physDriven = true;
+	//pt->m_physDriven = true;
 	m_gameObjects.push_back(pt);
 	m_points.push_back(pt);
 
@@ -386,7 +233,7 @@ Ballistics* Physics3State::SetupBallistics(eBallisticsType type, Vector3 pos, bo
 {
 	// note: ballistics is point by nature, so non-rigid
 	Ballistics* b = new Ballistics(type, pos, frozen, color);
-	b->m_physDriven = true;
+	//b->m_physDriven = true;
 	m_gameObjects.push_back(b);
 	m_points.push_back(b);
 
@@ -456,10 +303,10 @@ Rod* Physics3State::SetupRod(float length, Point* p1, Point* p2)
 void Physics3State::Update(float deltaTime)
 {
 	UpdateInput(deltaTime);				// update input
-	UpdateForceRegistry(deltaTime);		// update force registry
+	//UpdateForceRegistry(deltaTime);		// update force registry
 	UpdateGameobjects(deltaTime);		// update gameobjects
 	UpdateContacts(deltaTime);
-	UpdateDebug(deltaTime);			
+	//UpdateDebug(deltaTime);			
 	UpdateUI();
 }
 
@@ -1003,33 +850,33 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_5))
 		WrapAroundTestSphere(m_wraparound_bvh, false, false);
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_6))
-		WrapAroundTestSphere(m_wraparound_sphere_only, false, false, true, Vector3(31.f, 315.f, 0.5f), Vector3::ZERO, Vector3::ONE);
+		WrapAroundTestSphere(m_wraparound_sphere_only, false, false, true, Vector3(31.8f, 315.f, 0.f), Vector3::ZERO, Vector3::ONE);
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_8))
-		WrapAroundTestBox(m_wraparound_box_only, false, false, true, Vector3(60.6f, 315.f, 0.f), Vector3(50.f, 50.f, 50.f), Vector3::ONE); // pos - (60.8f, 315.f, 0.f), rot - (-20.f, 0.f, -20.f) gives visual appealing result
+		WrapAroundTestBox(m_wraparound_box_only, false, false, true, Vector3(60.8f, 315.f, 0.f), Vector3(10.f), Vector3::ONE); // pos - (60.8f, 315.f, 0.f), rot - (-20.f, 0.f, -20.f) gives visual appealing result
 
 	// slow
 	if (g_input->IsKeyDown(InputSystem::KEYBOARD_0))
 	{
-		// slow down gameobjects in the specified wraparound
-		for (GameObject* go : m_wraparound_general->m_gos)
-			go->m_physEntity->m_slowed = 0.1f;
+		//// slow down gameobjects in the specified wraparound
+		//for (GameObject* go : m_wraparound_general->m_gos)
+		//	go->m_physEntity->m_slowed = 0.1f;
 
-		for (GameObject* go : m_wraparound_sphere_only->m_gos)
-			go->m_physEntity->m_slowed = 0.1f;
+		//for (GameObject* go : m_wraparound_sphere_only->m_gos)
+		//	go->m_physEntity->m_slowed = 0.1f;
 
-		for (GameObject* go : m_wraparound_box_only->m_gos)
-			go->m_physEntity->m_slowed = 0.1f;
+		//for (GameObject* go : m_wraparound_box_only->m_gos)
+		//	go->m_physEntity->m_slowed = 0.1f;
 	}
 	else
 	{
-		for (GameObject* go : m_wraparound_general->m_gos)
-			go->m_physEntity->m_slowed = 1.f; 
+		//for (GameObject* go : m_wraparound_general->m_gos)
+		//	go->m_physEntity->m_slowed = 1.f; 
 
-		for (GameObject* go : m_wraparound_sphere_only->m_gos)
-			go->m_physEntity->m_slowed = 1.f;
+		//for (GameObject* go : m_wraparound_sphere_only->m_gos)
+		//	go->m_physEntity->m_slowed = 1.f;
 
-		for (GameObject* go : m_wraparound_box_only->m_gos)
-			go->m_physEntity->m_slowed = 1.f;
+		//for (GameObject* go : m_wraparound_box_only->m_gos)
+		//	go->m_physEntity->m_slowed = 1.f;
 	}
 
 	// camera update from input
@@ -1056,9 +903,9 @@ void Physics3State::UpdateInput(float deltaTime)
 
 void Physics3State::UpdateGameobjects(float deltaTime)
 {
-	UpdateFireworksStatus();
+	//UpdateFireworksStatus();
 
-	UpdateHulls(deltaTime);
+	//UpdateHulls(deltaTime);
 
 	UpdateGameobjectsCore(deltaTime);		// update GO core
 }
@@ -1118,7 +965,7 @@ void Physics3State::UpdateDebugDraw(float deltaTime)
 	}
 }
 
-void Physics3State::UpdateDebugCore(float deltaTime)
+void Physics3State::UpdateDebugCore(float)
 {
 	const Vector3& euler = sph_holder->m_renderable->m_transform.GetLocalRotation();
 
@@ -1134,12 +981,12 @@ void Physics3State::UpdateHulls(float)
 void Physics3State::UpdateWrapArounds()
 {
 	// WRAPAROUND UPDATE
-	m_wraparound_general->Update();
+	//m_wraparound_general->Update();
 	m_wraparound_sphere_only->Update();
-	m_wraparound_box_only->Update();
-	m_wraparound_verlet->Update();
-	m_wraparound_continuous->Update();
-	m_wraparound_bvh->Update();
+	//m_wraparound_box_only->Update();
+	//m_wraparound_verlet->Update();
+	//m_wraparound_continuous->Update();
+	//m_wraparound_bvh->Update();re
 }
 
 void Physics3State::UpdateFireworksStatus()
@@ -1151,26 +998,38 @@ void Physics3State::UpdateFireworksStatus()
 
 void Physics3State::UpdateUI()
 {
-	// update UI
-	if (m_bp_stat != nullptr)
-	{
-		delete m_bp_stat;
-		m_bp_stat = nullptr;
-	}
+	//// update UI
+	//if (m_bp_stat != nullptr)
+	//{
+	//	delete m_bp_stat;
+	//	m_bp_stat = nullptr;
+	//}
+
+	//BitmapFont* font = theRenderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
+	//std::string bp_status = g_broadphase ? "On" : "Off";
+	//std::string bp_title = "Broadphase status: ";
+	//float txtHeight = window_height / 50.f;
+	//Vector2 titleMin = Vector2(-window_width / 2.f, window_height / 2.f - txtHeight);
+	//float bp_title_width = bp_title.size() * (.5f * txtHeight);
+	//Vector2 bp_status_min = titleMin + Vector2(bp_title_width, 0.f);
+	//m_bp_stat = Mesh::CreateTextImmediate(Rgba::WHITE, bp_status_min, font, txtHeight, .5f, bp_status, VERT_PCU);
 
 	Renderer* theRenderer = Renderer::GetInstance();
 	Window* window = Window::GetInstance();
 	float window_height = window->GetWindowHeight();
 	float window_width = window->GetWindowWidth();
-
 	BitmapFont* font = theRenderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
-	std::string bp_status = g_broadphase ? "On" : "Off";
-	std::string bp_title = "Broadphase status: ";
 	float txtHeight = window_height / 50.f;
 	Vector2 titleMin = Vector2(-window_width / 2.f, window_height / 2.f - txtHeight);
-	float bp_title_width = bp_title.size() * (.5f * txtHeight);
-	Vector2 bp_status_min = titleMin + Vector2(bp_title_width, 0.f);
-	m_bp_stat = Mesh::CreateTextImmediate(Rgba::WHITE, bp_status_min, font, txtHeight, .5f, bp_status, VERT_PCU);
+
+	if (m_time_ui != nullptr)
+	{
+		delete m_time_ui;
+		m_time_ui= nullptr;
+	}
+
+	std::string time_ui = Stringf("Time: %f", TimingData::GetTimeSeconds());
+	m_time_ui = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, time_ui, VERT_PCU);
 }
 
 void Physics3State::UpdateForceRegistry(float deltaTime)
@@ -1184,7 +1043,7 @@ void Physics3State::UpdateForceRegistry(float deltaTime)
 void Physics3State::UpdateGameobjectsCore(float deltaTime)
 {
 	// continuous clamp time preparation (if there is some collision among continuous objects)
-	UpdateGameobjectContinuous(deltaTime);
+	//UpdateGameobjectContinuous(deltaTime);re
 
 	UpdateGameobjectsDynamics(deltaTime);
 
@@ -1309,18 +1168,18 @@ void Physics3State::UpdateGameobjectsDynamics(float deltaTime)
 	for (std::vector<GameObject*>::size_type idx = 0; idx < m_gameObjects.size(); ++idx)
 	{
 		m_gameObjects[idx]->Update(deltaTime);
-		if (m_gameObjects[idx]->m_dead)
-		{
-			GameObject* to_be_deleted = m_gameObjects[idx];
+		//if (m_gameObjects[idx]->m_dead)
+		//{
+		//	GameObject* to_be_deleted = m_gameObjects[idx];
 
-			std::vector<GameObject*>::iterator it = m_gameObjects.begin() + idx;
-			m_gameObjects.erase(it);
+		//	std::vector<GameObject*>::iterator it = m_gameObjects.begin() + idx;
+		//	m_gameObjects.erase(it);
 
-			idx--;
+		//	idx--;
 
-			delete to_be_deleted;
-			to_be_deleted = nullptr;
-		}
+		//	delete to_be_deleted;
+		//	to_be_deleted = nullptr;
+		//}
 	}
 }
 
@@ -1333,7 +1192,7 @@ void Physics3State::UpdateContacts(float deltaTime)
 
 void Physics3State::UpdateContactGeneration()
 {
-	UpdateResolverEnd();
+	//UpdateResolverEnd();
 
 	UpdateContactGenerationCore();
 }
@@ -1342,8 +1201,8 @@ void Physics3State::UpdateContactGenerationCore()
 {
 	if (!g_broadphase)
 		UpdateContactGenerationOrdinary();
-	else
-		UpdateContactGenerationBVH();
+	//else
+	//	UpdateContactGenerationBVH();
 }
 
 void Physics3State::UpdateContactGenerationOrdinary()
@@ -1648,11 +1507,11 @@ void Physics3State::UpdateContactGenerationBVH()
 	m_wraparound_bvh->UpdateBVHContactGeneration();
 }
 
-void Physics3State::UpdateContactResolution(float deltaTime)
+void Physics3State::UpdateContactResolution(float)
 {
 	//m_iterResolver->ResolveContacts(deltaTime);
-	m_allResolver->ResolveContacts(deltaTime);
-	m_coherentResolver->ResolveContacts(deltaTime);
+	//m_allResolver->ResolveContacts(deltaTime);
+	//m_coherentResolver->ResolveContacts(deltaTime);
 }
 
 void Physics3State::UpdateResolverEnd()
@@ -1675,13 +1534,13 @@ void Physics3State::Render(Renderer* renderer)
 
 	renderer->SetCamera(m_camera);
 
-	RenderHulls(renderer);
+	//RenderHulls(renderer);
 
-	RenderAssimpModels(renderer);
+	//RenderAssimpModels(renderer);
 
 	RenderGameobjects(renderer);
 	
-	RenderForwardPath(renderer);
+	//RenderForwardPath(renderer);
 
 	RenderWrapArounds(renderer);
 }
@@ -1728,15 +1587,15 @@ void Physics3State::RenderHulls(Renderer* renderer)
 
 void Physics3State::RenderWrapArounds(Renderer* renderer)
 {
-	m_wraparound_general->Render(renderer);
+	//m_wraparound_general->Render(renderer);
 	m_wraparound_sphere_only->Render(renderer);
-	m_wraparound_box_only->Render(renderer);
-	m_wraparound_verlet->Render(renderer);
-	m_wraparound_continuous->Render(renderer);
-	m_wraparound_bvh->Render(renderer);
+	//m_wraparound_box_only->Render(renderer);
+	//m_wraparound_verlet->Render(renderer);
+	//m_wraparound_continuous->Render(renderer);
+	//m_wraparound_bvh->Render(renderer);
 }
 
-void Physics3State::RenderForwardPath(Renderer* renderer)
+void Physics3State::RenderForwardPath(Renderer*)
 {
 	m_forwardPath->RenderScene(m_sceneGraph);
 }
@@ -1750,10 +1609,12 @@ void Physics3State::RenderAssimpModels(Renderer* renderer)
 	RenderModelSamples(renderer);				// sample points for model
 }
 
-void Physics3State::RenderUI(Renderer* renderer)
+void Physics3State::RenderUI(Renderer*)
 {
-	DrawTextCut(m_bp_title);
-	DrawTextCut(m_bp_stat);
+	//DrawTextCut(m_bp_title);
+	//DrawTextCut(m_bp_stat);
+
+	DrawTextCut(m_time_ui);
 }
 
 static int wraparound_toggle = 0;

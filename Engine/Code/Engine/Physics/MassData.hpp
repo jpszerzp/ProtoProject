@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Engine/Math/Matrix33.hpp"
+
 struct MassData
 {
 	// linear
@@ -18,4 +20,5 @@ struct MassData3
 
 	Matrix33 m_tensor;
 	Matrix33 m_invTensor;
+	Matrix33 m_invTensorWorld;
 };

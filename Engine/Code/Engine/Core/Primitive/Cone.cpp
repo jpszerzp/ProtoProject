@@ -85,7 +85,7 @@ void Cone::Update(float deltaTime)
 
 }
 
-Cone::Cone(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint, std::string meshName, std::string materialName, eMoveStatus moveStat, eBodyIdentity bid, bool multipass /*= false*/, eDepthCompare compare /*= COMPARE_LESS*/, eCullMode cull /*= CULLMODE_BACK*/, eWindOrder wind /*= WIND_COUNTER_CLOCKWISE*/)
+Cone::Cone(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint, std::string meshName, std::string materialName, eMoveStatus, eBodyIdentity, bool multipass /*= false*/, eDepthCompare compare /*= COMPARE_LESS*/, eCullMode cull /*= CULLMODE_BACK*/, eWindOrder wind /*= WIND_COUNTER_CLOCKWISE*/)
 {
 	Renderer* r = Renderer::GetInstance();
 
