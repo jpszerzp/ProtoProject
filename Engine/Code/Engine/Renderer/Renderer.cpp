@@ -1502,10 +1502,9 @@ void Renderer::DrawMesh(Mesh* mesh, bool culling, bool depth_test)
 	glUseProgram(programHandle);
 
 	SetObjectUBO(programHandle);
+	SetColorUBO(programHandle);
 	SetCameraUBO(programHandle);
-	SetLightsUBO(programHandle);
 	SetDebugModeUBO(programHandle);
-	//SetGameTimeUBO(programHandle);
 
 	TODO("VAO?");
 

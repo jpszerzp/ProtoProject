@@ -8,13 +8,27 @@ class CollisionPrimitive
 {
 	Matrix44 m_transform_mat;
 
-	CollisionRigidBody* m_rigid_body;
+	CollisionRigidBody* m_rigid_body = nullptr;
 
-	void CalculateTransformMat4();
-
-	void Render(Renderer* renderer);
+	// for render pipeline
+	Mesh* m_mesh = nullptr;
+	Shader* m_shader = nullptr;
+	Texture* m_texture = nullptr;
+	Vector4 m_tint;
 
 	virtual void AttachToRigidBody(CollisionRigidBody* rb);
+
+public:
+	void SetRigidBody(CollisionRigidBody* rb) { m_rigid_body = rb; }
+	void SetPrimitiveTransformMat4(const Matrix44& transform) { m_transform_mat = transform; }
+	void SetMesh(Mesh* mesh) { m_mesh = mesh; }
+	void SetShader(Shader* shader) { m_shader = shader; }
+	void SetTexture(Texture* texture) { m_texture = texture; }
+	void SetTint(const Vector4& tint) { m_tint = tint; }
+
+	void Update(float deltaTime);
+
+	void Render(Renderer* renderer);
 };
 
 class CollisionSphere : public CollisionPrimitive
@@ -23,7 +37,6 @@ class CollisionSphere : public CollisionPrimitive
 
 public:
 	CollisionSphere(const float& radius);
-	//CollisionSphere(const Vector3& center, const Vector3& euler, const Vector3& scale);
 
 	void AttachToRigidBody(CollisionRigidBody* rb) override;
 };
