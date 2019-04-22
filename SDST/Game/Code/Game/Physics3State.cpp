@@ -68,6 +68,10 @@ Physics3State::Physics3State()
 		Vector3(25.f, 305.f, 5.f), Vector3(35.f, 305.f, 5.f),
 		Vector3(25.f, 315.f, -5.f), Vector3(35.f, 315.f, -5.f),
 		Vector3(25.f, 315.f, 5.f), Vector3(35.f, 315.f, 5.f));
+	//CollisionSphere* sph = new CollisionSphere(Vector3(30.f, 310.f, 0.f), Vector3::ZERO, Vector3::ONE);
+	//CollisionSphere* sph = new CollisionSphere(1.f);
+	//CollisionRigidBody* rb = new CollisionRigidBody(Vector3(30.f, 310.f, 0.f), Vector3(0.f));
+	//sph->AttachToRigidBody(rb);
 	//sph_holder = new Sphere(1.f, Vector3(30.f, 310.f, 0.f), Vector3::ZERO, Vector3::ONE, Rgba::GREEN);
 	////sph_holder->m_physDriven = true;
 	//m_gameObjects.push_back(sph_holder);

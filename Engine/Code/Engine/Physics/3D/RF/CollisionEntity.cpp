@@ -42,6 +42,12 @@ CollisionRigidBody::CollisionRigidBody(const Vector3& center, const Quaternion& 
 	SetCenter(center);
 }
 
+CollisionRigidBody::CollisionRigidBody(const Vector3& center, const Vector3& euler)
+{
+	m_orientation = Quaternion::FromEuler(euler);
+	SetCenter(center);
+}
+
 void CollisionRigidBody::CacheData()
 {
 	m_orientation.Normalize();

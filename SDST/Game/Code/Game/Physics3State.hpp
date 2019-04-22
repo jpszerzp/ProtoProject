@@ -6,6 +6,7 @@
 #include "Engine/Physics/3D/Rigidbody3.hpp"
 #include "Engine/Physics/3D/SphereRB3.hpp"
 #include "Engine/Physics/3D/CCDResolver.hpp"
+#include "Engine/Physics/3D/RF/CollisionPrimitive.hpp"
 #include "Engine/Core/Primitive/Sphere.hpp"
 #include "Engine/Core/Primitive/Cube.hpp"
 #include "Engine/Core/Primitive/Quad.hpp"
@@ -161,4 +162,7 @@ public:
 	Mesh* m_time_ui;
 
 	Sphere* sph_holder;
+
+	// refactor
+	std::vector<CollisionPrimitive*> m_primitives;
 };
