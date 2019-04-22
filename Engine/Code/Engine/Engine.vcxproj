@@ -220,7 +220,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)../../Engine/Code/;$(SolutionDir)Code/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)../../Engine/Code/;$(SolutionDir)Code/;C:\PhysX-4.0\physx\include;C:\PhysX-4.0\pxshared\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -243,7 +243,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)../../Engine/Code/;$(SolutionDir)Code/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)../../Engine/Code/;$(SolutionDir)Code/;C:\PhysX-4.0\physx\include;C:\PhysX-4.0\pxshared\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -543,6 +543,8 @@
     <ClInclude Include="Physics\3D\ForceRegistry.hpp" />
     <ClInclude Include="Physics\3D\GJK3.hpp" />
     <ClInclude Include="Physics\3D\GJK3Simplex.hpp" />
+    <ClInclude Include="Physics\3D\PHYSX\PhysAllocator.hpp" />
+    <ClInclude Include="Physics\3D\PHYSX\PhysErrorCallback.hpp" />
     <ClInclude Include="Physics\3D\PointEntity3.hpp" />
     <ClInclude Include="Physics\3D\PointRB3.hpp" />
     <ClInclude Include="Physics\3D\QuadEntity3.hpp" />

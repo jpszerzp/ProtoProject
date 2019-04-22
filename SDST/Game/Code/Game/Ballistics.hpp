@@ -1,3 +1,4 @@
+/*
 #pragma once
 
 #include "Engine/Core/Primitive/Point.hpp"
@@ -28,3 +29,4 @@ public:
 	void Update(float deltaTime) override;
 	void UpdateInput(float deltaTime) override;
 };
+*/

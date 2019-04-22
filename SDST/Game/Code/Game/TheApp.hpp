@@ -6,6 +6,8 @@
 #include "Engine/Audio/AudioSystem.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/Net/Socket.hpp"
+#include "Engine/Physics/3D/PHYSX/PhysErrorCallback.hpp"
+#include "Engine/Physics/3D/PHYSX/PhysAllocator.hpp"
 
 //#include "PxPhysicsAPI.h"
 //using namespace physx;
@@ -26,6 +28,12 @@ class TheApp
 	float m_deltaSeconds;
 	float m_accTimer;
 	int m_frames;
+
+	PxFoundation* m_foundation = nullptr;
+	PxPvd* m_pvd = nullptr;
+	PxPhysics* m_physics = nullptr;
+	//PhysAllocator m_phys_allocator;
+	//PhysErrorCallback m_phys_error_cb;
 	
 public:
 	//// physx
@@ -72,6 +80,7 @@ public:
 	void ConsoleStartup();
 	void BlackboardStartup();
 	void PhysxStartup();
+	void PhysxShutdown();
 };
 
 extern TheApp* g_theApp;

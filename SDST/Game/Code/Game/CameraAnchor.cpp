@@ -1,3 +1,4 @@
+/*
 #include "Game/CameraAnchor.hpp"
 #include "Game/GameCommon.hpp"
 #include "Engine/Renderer/Renderable.hpp"
@@ -47,3 +48,4 @@ void CameraAnchor::UpdateInput(float deltaTime)
 		m_transform.SetLocalRotation(Vector3(eulerPitch, eulerYaw, eulerRoll));
 	}
 }
+*/

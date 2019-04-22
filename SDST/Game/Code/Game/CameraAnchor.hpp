@@ -1,3 +1,4 @@
+/*
 #pragma once
 
 #include "Engine/Core/GameObject.hpp"
@@ -15,3 +16,4 @@ public:
 	void Update(float deltaTime);
 	void UpdateInput(float deltaTime);
 };
+*/

@@ -968,5 +968,7 @@
     <ClInclude Include="Physics\3D\RF\CollisionDetector.hpp" />
     <ClInclude Include="Physics\3D\RF\CollisionResolver.hpp" />
     <ClInclude Include="Physics\3D\RF\CollisionSolver.hpp" />
+    <ClInclude Include="Physics\3D\PHYSX\PhysErrorCallback.hpp" />
+    <ClInclude Include="Physics\3D\PHYSX\PhysAllocator.hpp" />
   </ItemGroup>
 </Project>

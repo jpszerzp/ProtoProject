@@ -1,3 +1,4 @@
+/*
 #pragma once
 
 #include "Engine/Math/Vector3.hpp"
@@ -19,3 +20,4 @@ public:
 	Primitive3(){}
 	virtual ~Primitive3(){}
 };
+*/

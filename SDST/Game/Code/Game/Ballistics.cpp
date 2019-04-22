@@ -1,3 +1,4 @@
+/*
 #include "Engine/Renderer/Renderable.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/Core/Console/DevConsole.hpp"
@@ -104,4 +105,4 @@ void Ballistics::UpdateInput(float)
 		m_physEntity->SetFrozen(!frostness);
 	}
 }
-
+*/
