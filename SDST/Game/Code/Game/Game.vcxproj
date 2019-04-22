@@ -265,11 +265,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-<<<<<<< HEAD
-      <AdditionalLibraryDirectories>$(SolutionDir)../../Engine/Code/physx;$(SolutionDir)../../Engine/Code/;$(SolutionDir)Code/;$(SolutionDir)../../Engine/Code/assimp;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-=======
       <AdditionalLibraryDirectories>$(SolutionDir)../../Engine/Code/;$(SolutionDir)Code/;$(SolutionDir)../../Engine/Code/assimp;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
->>>>>>> 23e094274f1168b56bd9b574db74cb073444d5fa
       <AdditionalDependencies>assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
@@ -297,11 +293,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-<<<<<<< HEAD
-      <AdditionalLibraryDirectories>$(SolutionDir)../../Engine/Code/physx;$(SolutionDir)../../Engine/Code/;$(SolutionDir)Code/;$(SolutionDir)../../Engine/Code/assimp;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-=======
       <AdditionalLibraryDirectories>$(SolutionDir)../../Engine/Code/;$(SolutionDir)Code/;$(SolutionDir)../../Engine/Code/assimp;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
->>>>>>> 23e094274f1168b56bd9b574db74cb073444d5fa
       <AdditionalDependencies>assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
