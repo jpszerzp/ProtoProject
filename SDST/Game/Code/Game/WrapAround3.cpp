@@ -72,6 +72,7 @@ void WrapAround::UpdateWraparound()
 				primitive->SetShouldDelete(true);
 		}
 
+		/*
 		for (PhysXObject* px_obj : m_phys_obj)
 		{
 			if (px_obj->GetPos().x < m_bounds.m_min.x)
@@ -92,6 +93,7 @@ void WrapAround::UpdateWraparound()
 			else if (px_obj->GetPos().z > m_bounds.m_max.z)
 				px_obj->SetShouldDelete(true);
 		}
+		*/
 	}
 	else
 	{
@@ -186,6 +188,7 @@ void WrapAround::RemovePrimitive(CollisionPrimitive* prim)
 	}
 }
 
+/*
 void WrapAround::RemovePhysXObj(PhysXObject* px)
 {
 	for (int i = 0; i < m_phys_obj.size(); ++i)
@@ -199,6 +202,7 @@ void WrapAround::RemovePhysXObj(PhysXObject* px)
 		}
 	}
 }
+*/
 
 void WrapAround::Render(Renderer* renderer)
 {

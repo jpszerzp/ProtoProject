@@ -1,3 +1,4 @@
+/*
 #pragma once
 
 #include "Engine/Renderer/Renderer.hpp"
@@ -35,3 +36,4 @@ public:
 
 	void DisableGravity();
 };
+*/

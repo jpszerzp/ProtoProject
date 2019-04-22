@@ -8,7 +8,7 @@
 #include "Engine/Physics/3D/Rigidbody3.hpp"
 #include "Engine/Physics/3D/BVH3.hpp"
 #include "Engine/Physics/3D/RF/CollisionPrimitive.hpp"
-#include "Engine/Physics/3D/PHYSX/PhysXObject.hpp"
+//#include "Engine/Physics/3D/PHYSX/PhysXObject.hpp"
 
 #include <vector>
 
@@ -29,7 +29,7 @@ public:
 
 	// storage
 	std::vector<CollisionPrimitive*> m_primitives;
-	std::vector<PhysXObject*> m_phys_obj;
+	//std::vector<PhysXObject*> m_phys_obj;
 
 	// state reference
 	Physics3State* m_physState = nullptr;
@@ -49,5 +49,5 @@ public:
 	void RenderWraparounds(Renderer* renderer);
 
 	void RemovePrimitive(CollisionPrimitive* prim);
-	void RemovePhysXObj(PhysXObject* px);
+	//void RemovePhysXObj(PhysXObject* px);
 };

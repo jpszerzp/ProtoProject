@@ -5,7 +5,7 @@
 #include "Engine/Physics/3D/RF/CollisionEntity.hpp"
 #include "Engine/Physics/3D/RF/ConvexHull.hpp"
 #include "Engine/Physics/3D/RF/ConvexPolyhedron.hpp"
-#include "Engine/Physics/3D/PHYSX/PhysXObject.hpp"
+//#include "Engine/Physics/3D/PHYSX/PhysXObject.hpp"
 
 enum eCCD
 {
@@ -88,7 +88,7 @@ public:
 	eCCD GetContinuity() const { return m_ccd; }
 	bool IsFrozen() const { return m_rigid_body->IsFrozen(); }
 	bool ShouldDelete() const { return m_should_delete; }
-	PhysXObject* m_phys_compare = nullptr;
+	//PhysXObject* m_phys_compare = nullptr;
 };
 
 class CollisionPoint : public CollisionPrimitive

@@ -20,12 +20,12 @@
 #include "Engine/Physics/3D/RF/ConvexHull.hpp"
 #include "Engine/Physics/3D/RF/ConvexPolyhedron.hpp"
 
-#include "PsThread.h"
-#include "CmPhysXCommon.h"
+//#include "PsThread.h"
+//#include "CmPhysXCommon.h"
 
 #include <algorithm>
 
-#define PVD_HOST "127.0.0.1"
+//#define PVD_HOST "127.0.0.1"
 
 // this is the physics state for thesis
 const Vector3 Physics3State::ORIGIN_CAMERA = Vector3(0.f, 0.f, -20.f);
@@ -34,7 +34,7 @@ bool IsGameobjectDead(GameObject* go) { return go->m_dead; }
 
 Physics3State::Physics3State()
 {
-	PhysxStartup();
+	//PhysxStartup();
 
 	Renderer* theRenderer = Renderer::GetInstance();
 	m_sceneGraph = new RenderSceneGraph();
@@ -123,7 +123,7 @@ Physics3State::Physics3State()
 	m_tensor_ui.push_back(t_mesh);
 	titleMin -= Vector2(0.f, txtHeight);
 
-	InitPhysxScene(true);
+	//InitPhysxScene(true);
 
 	// demo 1, physx api
 	m_wraparound_demo_1 = new WrapAround(Vector3(60.f, 300.f, -10.f), Vector3(80.f, 320.f, 10.f));
@@ -224,7 +224,7 @@ Physics3State::~Physics3State()
 	delete m_particleRegistry;
 	m_particleRegistry = nullptr;
 
-	PhysxShutdown(true);
+	//PhysxShutdown(true);
 }
 
 void Physics3State::PostConstruct()
@@ -245,10 +245,12 @@ void Physics3State::Update(float deltaTime)
 	MyPhysicsUpdate(deltaTime);
 	profiler->ProfileMyMarkEndFrame();
 
+	/*
 	// physx API
 	profiler->ProfilePhysXMarkFrame();
 	PhysxUpdate(true, deltaTime);
 	profiler->ProfilePhysXMarkEndFrame();
+	*/
 }
 
 void Physics3State::UpdateMouse(float deltaTime)
@@ -371,6 +373,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 			primitive->GetRigidBody()->SetSlow(1.f);
 	}
 
+	/*
 	// physx corner case comparison group 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_0))
 	{
@@ -442,6 +445,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		if (obj_pair.second != nullptr)
 			m_wraparound_demo_1->m_phys_obj.push_back(obj_pair.second);
 	}
+	*/
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_1))
 	{
@@ -514,6 +518,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		}
 	}
 
+	/*
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_I))
 	{
 		if (m_phys_corner_case == FCC_FF)
@@ -547,7 +552,9 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 			m_corner_case_4->SetLinearVel(CORNER_CASE_LIN_VEL_PE_4);
 		}
 	}
+	*/
 
+	/*
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_MINUS))
 		SpawnPhysxStack(Vector3(100.f, 342.5f, 45.f), 5, 5);
 
@@ -558,6 +565,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 
 		m_physx_stack.clear();
 	}
+	*/
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_2))
 		m_debug_ui = !m_debug_ui;
@@ -816,6 +824,7 @@ void Physics3State::UpdateUI()
 	}
 }
 
+/*
 void Physics3State::UpdateDeletePhysx()
 {
 	// stack vector has already been emptied, objs are already marked as deleted
@@ -867,6 +876,7 @@ void Physics3State::UpdateDeletePhysx()
 		}
 	}
 }
+*/
 
 void Physics3State::UpdateDelete()
 {
@@ -1106,7 +1116,7 @@ void Physics3State::Render(Renderer* renderer)
 
 	RenderWrapArounds(renderer);
 
-	PhysxRender(renderer);
+	//PhysxRender(renderer);
 }
 
 void Physics3State::RenderGameobjects(Renderer* renderer)
@@ -1496,6 +1506,7 @@ class ContactReportCallback: public PxSimulationEventCallback
 
 ContactReportCallback gContactReportCallback;
 
+/*
 void Physics3State::InitPhysxScene(bool interactive)
 {
 	PX_UNUSED(interactive);
@@ -1602,6 +1613,7 @@ void Physics3State::PhysxRender(Renderer* renderer)
 	for (int i = 0; i < m_physx_objs.size(); ++i)
 		m_physx_objs[i]->RenderActor(renderer);
 }
+*/
 
 void Physics3State::ResetCollisionCornerCase(const Vector3& pos1, const Vector3& pos2, const Vector3& rot1, const Vector3& rot2)
 {
@@ -1647,6 +1659,7 @@ void Physics3State::ResetCollisionCornerCase(const Vector3& pos1, const Vector3&
 	}
 }
 
+/*
 std::pair<PhysXObject*, PhysXObject*> Physics3State::ResetCollisionCornerCasePhysX(const Vector3& pos1, const Vector3& pos2, const Vector3& rot1, const Vector3& rot2)
 {
 	std::pair<PhysXObject*, PhysXObject*> m_pair;
@@ -1776,3 +1789,4 @@ void Physics3State::PhysxShutdown(bool interactive)
 
 	DebuggerPrintf("Physx unregistered.\n");
 }
+*/
