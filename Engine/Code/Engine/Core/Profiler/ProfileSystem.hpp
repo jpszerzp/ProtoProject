@@ -18,9 +18,10 @@ public:
 	~Profiler();
 
 	void ProfileMarkFrame();
+	void ProfileMarkEndFrame();
 	void ProfilePause();
 	void ProfileResume();
-	static ProfilerHistory& ProfileGetPreviousFrame(uint skipCount);
+	//static ProfilerHistory& ProfileGetPreviousFrame(uint skipCount);
 
 	void ConfigureSections();
 	void ConfigureMeshes();

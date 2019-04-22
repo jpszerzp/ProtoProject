@@ -109,6 +109,7 @@ void Initialize( HINSTANCE )
 	g_theApp = new TheApp();
 	Window* theWindow = Window::GetInstance();
 	theWindow->RegisterHandler(HandleMsg);
+
 	LogSystemStartup();
 
 	PhysTimeSystem::InitTimeSystem();
@@ -158,14 +159,15 @@ int WINAPI WinMain( HINSTANCE applicationInstanceHandle, HINSTANCE, LPSTR comman
 	// Program main loop; keep running frames until it's time to quit
 	while( !g_theApp->IsQuitting() )
 	{
-		//Profiler* profiler = Profiler::GetInstance();
-		//profiler->ProfileMarkFrame();
+		Profiler* profiler = Profiler::GetInstance();
+		profiler->ProfileMarkFrame();
 
-		//// update last frame hpc duration for profiling
+		// update last frame hpc duration for profiling
 		//std::string appFrameTag = "TheApp::RunFrame";
 		//PROFILE_LOG_SCOPED(appFrameTag.c_str());
-
 		g_theApp->RunFrame();
+
+		profiler->ProfileMarkEndFrame();
 	}
 
 	Shutdown();

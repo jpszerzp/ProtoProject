@@ -41,6 +41,35 @@ void Matrix33::operator+=(const Matrix33& rhs)
 	Iz += rhs.Iz; Jz += rhs.Jz; Kz += rhs.Kz;
 }
 
+Matrix33 Matrix33::operator+(const Matrix33& rhs) const
+{
+	Matrix33 res;
+
+	res.Ix = Ix + rhs.Ix; res.Jx = Jx + rhs.Jx; res.Kx = Kx + rhs.Kx;
+	res.Iy = Iy + rhs.Iy; res.Jy = Jy + rhs.Jy; res.Ky = Ky + rhs.Ky;
+	res.Iz = Iz + rhs.Iz; res.Jz = Jz + rhs.Jz; res.Kz = Kz + rhs.Kz;
+
+	return res;
+}
+
+Matrix33 Matrix33::operator+(const float& rhs) const
+{
+	Matrix33 res = *this;
+
+	res.Ix += rhs; res.Ix += rhs; res.Kx += rhs;
+	res.Iy += rhs; res.Jy += rhs; res.Ky += rhs;
+	res.Iz += rhs; res.Jz += rhs; res.Kz += rhs;
+
+	return res;
+}
+
+void Matrix33::operator-=(const Matrix33& rhs)
+{
+	Ix -= rhs.Ix; Jx -= rhs.Jx; Kx -= rhs.Kx;
+	Iy -= rhs.Iy; Jy -= rhs.Jy; Ky -= rhs.Ky;
+	Iz -= rhs.Iz; Jz -= rhs.Jz; Kz -= rhs.Kz;
+}
+
 Vector3 Matrix33::operator*(const Vector3& rhs) const
 {
 	Vector3 row1 = Vector3(Ix, Jx, Kx);
@@ -258,4 +287,23 @@ Matrix33 Matrix33::FromEuler(const Vector3& euler)
 	res = yaw * res;
 
 	return res;
+}
+
+void Matrix33::Append(const Matrix33& mat)
+{
+	float t_Ix = Ix;	float t_Jx = Jx;	float t_Kx = Kx;
+	float t_Iy = Iy;	float t_Jy = Jy;	float t_Ky = Ky;
+	float t_Iz = Iz;	float t_Jz = Jz;	float t_Kz = Kz;
+
+	Ix = t_Ix * mat.Ix + t_Jx * mat.Iy + t_Kx * mat.Iz;
+	Jx = t_Ix * mat.Jx + t_Jx * mat.Jy + t_Kx * mat.Jz;
+	Kx = t_Ix * mat.Kx + t_Jx * mat.Ky + t_Kx * mat.Kz;
+
+	Iy = t_Iy * mat.Ix + t_Jy * mat.Iy + t_Ky * mat.Iz;
+	Jy = t_Iy * mat.Jx + t_Jy * mat.Jy + t_Ky * mat.Jz;
+	Ky = t_Iy * mat.Kx + t_Jy * mat.Ky + t_Ky * mat.Kz;
+
+	Iz = t_Iz * mat.Ix + t_Jz * mat.Iy + t_Kz * mat.Iz;
+	Jz = t_Iz * mat.Jx + t_Jz * mat.Jy + t_Kz * mat.Jz;
+	Kz = t_Iz * mat.Kx + t_Jz * mat.Ky * t_Kz * mat.Kz;
 }

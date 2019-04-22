@@ -41,3 +41,5 @@ public:
 bool OverlapOnAxis(const AABB3& box1, const AABB3& box2, const Vector3& axis, float& overlap);
 bool OverlapOnAxis(const AABB3& box1, const AABB3& box2, const Vector3& axis);			// SAT on AABB3
 bool CollideAABB3(const AABB3& box1, const AABB3& box2);								// ordinary AABB3 test
+
+Vector3 GetRandomLocationWithin(const AABB3& bound);

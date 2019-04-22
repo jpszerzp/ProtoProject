@@ -67,7 +67,6 @@ class LogSystem
 public:
 	tThreadHandle				 m_thread;
 	bool						 m_running;
-	//bool						 m_flushing = false;	// not actively flushing by default
 	ThreadSafeQueue<sLog*>		 m_logQueue;
 	SpinLock					 m_hookLock;
 	std::vector<sLogHook*>		 m_hooks;

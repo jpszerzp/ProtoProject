@@ -118,60 +118,50 @@ bool Blackboard::GetValue( const std::string& keyName, bool defaultValue ) const
 	return res; 
 }
 
+/*
 void Blackboard::MarkEndFrame()
 {
-	// end of "last" frame
-	for (std::map<ProfilerNode*, UInt64Vector2>::iterator it = m_functionHpcInfoPairs.begin();
-		it != m_functionHpcInfoPairs.end(); ++it)
-	{
-		UInt64Vector2 startEnd;
-		if (it->first->m_tag == "TheApp::RunFrame")
-		{
-			startEnd = it->second;
-			uint64_t start = startEnd.ux;
-			uint64_t end = startEnd.uy;
-			uint64_t diff = end - start;
-			float ms = (float)PerformanceCountToSeconds(diff) * 1000.f;
-			m_lastFrameTime = ms;
+	//// end of "last" frame
+	//for (std::map<ProfilerNode*, UInt64Vector2>::iterator it = m_functionHpcInfoPairs.begin();
+	//	it != m_functionHpcInfoPairs.end(); ++it)
+	//{
+	//	UInt64Vector2 startEnd;
+	//	if (it->first->m_tag == "TheApp::RunFrame")
+	//	{
+	//		startEnd = it->second;
+	//		uint64_t start = startEnd.ux;
+	//		uint64_t end = startEnd.uy;
+	//		uint64_t diff = end - start;
+	//		float ms = (float)PerformanceCountToSeconds(diff) * 1000.f;
+	//		m_lastFrameTime = ms;
 
-			break;
-		}
-	}
+	//		break;
+	//	}
+	//}
 
-	// clear history
+	//// clear history
 	//for each (ProfilerHistory history in m_history)
 	//{
 	//	history.Clear();
 	//}
 
-	ProfilerHistory history = ProfilerHistory(m_functionHpcInfoPairs);
+	//ProfilerHistory history = ProfilerHistory(m_functionHpcInfoPairs);
 
-	// by default we just keep last frame, history number is 1
-	m_history.push_back(history);
-	if (m_history.size() > 1U)
-	{
-		ProfilerHistory poppedHistory = m_history.front();
-		poppedHistory.Clear();
+	//// by default we just keep last frame, history number is 1
+	//m_history.push_back(history);
+	//if (m_history.size() > 1U)
+	//{
+	//	ProfilerHistory poppedHistory = m_history.front();
+	//	poppedHistory.Clear();
 
-		m_history.pop_front();
-	}
+	//	m_history.pop_front();
+	//}
 }
+*/
 
+/*
 void Blackboard::ClearMap()
 {
-	/*
-	for (std::map<ProfilerNode*, UInt64Vector2>::iterator it = m_functionHpcInfoPairs.begin();
-		it != m_functionHpcInfoPairs.end(); ++it)
-	{
-		ProfilerNode* node = it->first;
-		if (node != nullptr)
-		{
-			delete node;
-			node = nullptr;
-		}
-		
-	}
-	*/
 	m_functionHpcInfoPairs.clear();
 }
 
@@ -197,6 +187,7 @@ void Blackboard::ClearTreeArray()
 		}
 	}
 }
+*/
 
 void Blackboard::SetValue( const std::string& keyName, const std::string& newValue )
 {

@@ -12,7 +12,7 @@
 #include <map>
 #include <stack>
 
-#define MAX_PROFILER_TREE_NODE 100
+//#define MAX_PROFILER_TREE_NODE 100
 using namespace tinyxml2;
 
 class Blackboard 
@@ -20,17 +20,15 @@ class Blackboard
 private:
 	std::map<std::string, std::string>		 m_keyValuePairs;
 
-public:
-	std::map<ProfilerNode*, UInt64Vector2>		m_functionHpcInfoPairs;
-	//std::stack<std::string>					m_profilerCallStack;
-	float										m_lastFrameTime = -INFINITY;
-	float										m_largestTime = -INFINITY;
-
-	ProfilerNode*								m_profiledFunctionTree[MAX_PROFILER_TREE_NODE];
-	//ProfilerHistory							m_history;
-	std::deque<ProfilerHistory>					m_history;
-	int											m_profiledFunctionIdx = 0;
-	int											m_scopeIdx = 0;
+//public:
+//	std::map<ProfilerNode*, UInt64Vector2>		m_functionHpcInfoPairs;
+//	float										m_lastFrameTime = -INFINITY;
+//	float										m_largestTime = -INFINITY;
+//
+//	ProfilerNode*								m_profiledFunctionTree[MAX_PROFILER_TREE_NODE];
+//	std::deque<ProfilerHistory>					m_history;
+//	int											m_profiledFunctionIdx = 0;
+//	int											m_scopeIdx = 0;
 
 public:
 	Blackboard();
@@ -49,8 +47,8 @@ public:
 	FloatRange		GetValue( const std::string& keyName, const FloatRange& defaultValue ) const;
 	IntRange		GetValue( const std::string& keyName, const IntRange& defaultValue ) const;
 
-	void MarkEndFrame();
-	void ClearMap();
-	void ClearIndex();
-	void ClearTreeArray();
+	//void MarkEndFrame();
+	//void ClearMap();
+	//void ClearIndex();
+	//void ClearTreeArray();
 };

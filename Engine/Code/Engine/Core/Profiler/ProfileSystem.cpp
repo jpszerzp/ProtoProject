@@ -2,6 +2,7 @@
 #include "Engine/Core/Util/StringUtils.hpp"
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Core/Blackboard.hpp"
+#include "Engine/Core/Time/TheTime.hpp"
 #include "Engine/Renderer/Camera.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Renderer/Window.hpp"
@@ -9,10 +10,18 @@
 
 #include <algorithm>
 
+uint64_t g_start_frame_hpc = 0U;
+uint64_t g_end_frame_hpc = 0U;
+uint64_t g_last_frame_hpc = 0U;
+uint64_t g_total_hpc = 0U; 
+//uint64_t g_max_hpc = 0LLU;	// sets to max uint64_t
+//uint64_t g_min_hpc = ~0LLU; 
+
 Profiler* Profiler::m_profilerInstance = nullptr;
 
 bool TotalTimeSort(ProfilerNode* n1, ProfilerNode* n2)
 {
+	/*
 	ProfilerHistory& history = Profiler::ProfileGetPreviousFrame(0);
 	Vector2 t1 = history.InspectNodeTime(n1);
 	Vector2 t2 = history.InspectNodeTime(n2);
@@ -23,10 +32,13 @@ bool TotalTimeSort(ProfilerNode* n1, ProfilerNode* n2)
 	float total2 = t2.x;
 
 	return total1 > total2;
+	*/
+	return false;
 }
 
 bool SelfTimeSort(ProfilerNode* n1, ProfilerNode* n2)
 {
+	/*
 	ProfilerHistory& history = Profiler::ProfileGetPreviousFrame(0);
 	Vector2 t1 = history.InspectNodeTime(n1);
 	Vector2 t2 = history.InspectNodeTime(n2);
@@ -35,6 +47,8 @@ bool SelfTimeSort(ProfilerNode* n1, ProfilerNode* n2)
 	float self2 = t2.y;
 
 	return self1 > self2;
+	*/
+	return false;
 }
 
 bool IsProfilerOn()
@@ -88,16 +102,29 @@ Profiler::~Profiler()
 
 void Profiler::ProfileMarkFrame()
 {
-	g_gameConfigBlackboard->MarkEndFrame();
+	g_start_frame_hpc = GetPerformanceCounter();
+	//uint64_t this_hpc = GetPerformanceCounter();
+	//uint64_t last_hpc = this_hpc - g_total_hpc;
+	//g_last_frame_time = (float)PerformanceCountToSeconds(last_hpc) * 1000.f;	// in ms
+	//g_total_hpc += last_hpc;
 
-	// clear map
-	g_gameConfigBlackboard->ClearMap();
+	//g_gameConfigBlackboard->MarkEndFrame();
 
-	// set blackboard indices
-	g_gameConfigBlackboard->ClearIndex();
+	//// clear map
+	//g_gameConfigBlackboard->ClearMap();
 
-	// unregister tree (or an array)
-	g_gameConfigBlackboard->ClearTreeArray();
+	//// set blackboard indices
+	//g_gameConfigBlackboard->ClearIndex();
+
+	//// unregister tree (or an array)
+	//g_gameConfigBlackboard->ClearTreeArray();
+}
+
+void Profiler::ProfileMarkEndFrame()
+{
+	g_end_frame_hpc = GetPerformanceCounter();
+	g_last_frame_hpc = g_end_frame_hpc - g_start_frame_hpc;
+	g_total_hpc += g_last_frame_hpc;
 }
 
 void Profiler::ProfilePause()
@@ -110,10 +137,12 @@ void Profiler::ProfileResume()
 	m_paused = false;
 }
 
+/*
 ProfilerHistory& Profiler::ProfileGetPreviousFrame(uint skipCount)
 {
-	return g_gameConfigBlackboard->m_history[skipCount];
+	//return g_gameConfigBlackboard->m_history[skipCount];
 }
+*/
 
 void Profiler::ConfigureSections()
 {
@@ -164,7 +193,7 @@ void Profiler::ConfigureMeshes()
 void Profiler::ConfigureTextMap()
 {
 	m_frameTextMeshes.emplace("frame_time", nullptr);
-	m_frameTextMeshes.emplace("sample", nullptr);
+	//m_frameTextMeshes.emplace("sample", nullptr);
 	m_frameTextMeshes.emplace("fps", nullptr);
 }
 
@@ -176,8 +205,8 @@ void Profiler::Update()
 		if (!m_paused)
 		{
 			UpdateFrameText();
-			UpdateTreeText();
-			UpdateFramePoints();
+			//UpdateTreeText();
+			//UpdateFramePoints();
 		}
 	}
 }
@@ -186,6 +215,7 @@ void Profiler::UpdateInput()
 {
 	InputSystem* input = InputSystem::GetInstance();
 
+	/*
 	// process input
 	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_V))
 	{
@@ -197,6 +227,7 @@ void Profiler::UpdateInput()
 		// toggle sort mode
 		m_totalSort = !m_totalSort;
 	}
+	*/
 
 	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_U))
 	{
@@ -249,29 +280,31 @@ void Profiler::UpdateFrameText()
 			Vector2 frameTextBL = m_frameTextBox.mins + Vector2(0.f, 20.f * count);
 
 			std::string text;
-			float lastFrameTime = g_gameConfigBlackboard->m_lastFrameTime;
-			if (lastFrameTime == -INFINITY)
+			//float lastFrameTime = g_gameConfigBlackboard->m_lastFrameTime;
+			if (g_last_frame_hpc == -INFINITY)
 			{
 				// first frame has not finished, print N/A
 				text = "Last Frame Time: N/A";
 			}
-			text = Stringf("Last Frame Time: %.8f", lastFrameTime);
+
+			double seconds = PerformanceCountToSeconds(g_last_frame_hpc);
+			text = Stringf("Last Frame Time (ms): %f", seconds * 1000.f);
 
 			m_frameTextMeshes[purpose] = MakeTextMesh(16.f, text, frameTextBL);
 		}
 
-		else if (purpose == "sample")
-		{
-			if (mesh != nullptr)
-			{
-				delete mesh;
-				mesh = nullptr;
-			}
+		//else if (purpose == "sample")
+		//{
+		//	if (mesh != nullptr)
+		//	{
+		//		delete mesh;
+		//		mesh = nullptr;
+		//	}
 
-			Vector2 frameTextBL = m_frameTextBox.mins + Vector2(0.f, 20.f * count);
-			std::string text = Stringf("Samples Number: %i", 0);
-			m_frameTextMeshes[purpose] = MakeTextMesh(16.f, text, frameTextBL);
-		}
+		//	Vector2 frameTextBL = m_frameTextBox.mins + Vector2(0.f, 20.f * count);
+		//	std::string text = Stringf("Samples Number: %i", 0);
+		//	m_frameTextMeshes[purpose] = MakeTextMesh(16.f, text, frameTextBL);
+		//}
 
 		else if (purpose == "fps")
 		{
@@ -280,10 +313,12 @@ void Profiler::UpdateFrameText()
 				delete mesh;
 				mesh = nullptr;
 			}
-
+			
 			Vector2 frameTextBL = m_frameTextBox.mins + Vector2(0.f, 20.f * count);
-			float lastFrameTime = g_gameConfigBlackboard->m_lastFrameTime * 0.001f;			// in s
-			float fps = 1.f / lastFrameTime;
+			//float lastFrameTime = g_gameConfigBlackboard->m_lastFrameTime * 0.001f;			// in s
+			//float lastFrameTime = g_last_frame_hpc * 0.001f;			// in s
+			double seconds = PerformanceCountToSeconds(g_last_frame_hpc);
+			float fps = 1.f / seconds;
 			std::string text = Stringf("FPS: %.4f", fps);
 			m_frameTextMeshes[purpose] = MakeTextMesh(16.f, text, frameTextBL);
 		}
@@ -294,6 +329,7 @@ void Profiler::UpdateFrameText()
 
 void Profiler::UpdateTreeText()
 {
+	/*
 	std::stack<ProfilerNode*> traversal;
 	traversal.push(g_gameConfigBlackboard->m_profiledFunctionTree[0]);
 
@@ -384,10 +420,12 @@ void Profiler::UpdateTreeText()
 			}
 		}
 	}
+	*/
 }
 
 void Profiler::UpdateFramePoints()
 {
+	/*
 	// store largest frame time so far
 	if (g_gameConfigBlackboard->m_lastFrameTime > g_gameConfigBlackboard->m_largestTime)
 	{
@@ -424,6 +462,7 @@ void Profiler::UpdateFramePoints()
 		x -= pointSpeed;
 		it->x = x;
 	}
+	*/
 }
 
 Mesh* Profiler::MakeTextMesh(float textHeight, std::string text, Vector2 drawmin)
@@ -444,11 +483,11 @@ void Profiler::Render(Renderer* renderer)
 		renderer->SetCamera(m_profilerCamera);
 
 		RenderFrameText(renderer);
-		RenderTreeText(renderer);
-		RenderFramePoints(renderer);
+		//RenderTreeText(renderer);
+		//RenderFramePoints(renderer);
 
-		DrawCutoutText(renderer, m_framePropertyMesh);
-		DrawGraphAlpha(renderer, m_frameGraphMesh);
+		//DrawCutoutText(renderer, m_framePropertyMesh);
+		//DrawGraphAlpha(renderer, m_frameGraphMesh);
 		DrawGraphAlpha(renderer, m_backgroundMesh);
 	}
 }

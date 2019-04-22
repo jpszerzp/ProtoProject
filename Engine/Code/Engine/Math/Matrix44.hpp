@@ -32,6 +32,13 @@ public:
 	static Matrix44 MakeRotationDegrees3DTranspose(Vector3 euler);
 	static Vector3  DecomposeMatrixIntoEuler(Matrix44 mat4);
 
+	void RotateX(const float& deg);
+	void RotateY(const float& deg);
+	void RotateZ(const float& deg);
+	static Matrix44 MakeRotationXAxis(const float& deg);
+	static Matrix44 MakeRotationYAxis(const float& deg);
+	static Matrix44 MakeRotationZAxis(const float& deg);
+
 	static Matrix44 MakeTranslation2D(const Vector2& translation);
 	static Matrix44 MakeTranslation3D(const Vector3& translation);
 

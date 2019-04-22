@@ -100,11 +100,11 @@ void TheApp::Update()
 		OnQuitRequested();
 	}
 
-	//// If it turns out problematic to put profiler update inside run_frame of app
-	//// use game's process_input for input detection instead.
-	//// Disable profiler update/update_input accordingly.
-	//Profiler* profiler = Profiler::GetInstance();
-	//profiler->Update();
+	// If it turns out problematic to put profiler update inside run_frame of app
+	// use game's process_input for input detection instead.
+	// Disable profiler update/update_input accordingly.
+	Profiler* profiler = Profiler::GetInstance();
+	profiler->Update();
 }
 
 
@@ -130,9 +130,9 @@ void TheApp::Render()
 	DevConsole* console = DevConsole::GetInstance();
 	console->Render(g_renderer);
 	
-	//// profiler render
-	//Profiler* profiler = Profiler::GetInstance();
-	//profiler->Render(g_renderer);
+	// profiler render
+	Profiler* profiler = Profiler::GetInstance();
+	profiler->Render(g_renderer);
 }
 
 
@@ -187,14 +187,14 @@ void TheApp::ProcessInput()
 		}
 	}
 
-//	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_7) && !DevConsoleIsOpen())
-//	{
-//#if defined(PROFILE_ENABLED) 
-//		Profiler* profiler = Profiler::GetInstance();
-//
-//		profiler->m_on = !profiler->m_on;
-//#endif
-//	}
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_7) && !DevConsoleIsOpen())
+	{
+#if defined(PROFILE_ENABLED) 
+		Profiler* profiler = Profiler::GetInstance();
+
+		profiler->m_on = !profiler->m_on;
+#endif
+	}
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_1))
 	{
@@ -346,6 +346,8 @@ void TheApp::PhysxStartup()
 	m_physics = PxCreatePhysics(PX_PHYSICS_VERSION, *m_foundation, PxTolerancesScale(), recordMemoryAllocations, m_pvd);
 	if (!m_physics)
 		ASSERT_OR_DIE(false, "PxCreatePhysics failed!");
+
+	TODO("optional startups: cooking, extensions, articulations, height fields");
 }
 
 void TheApp::PhysxShutdown()

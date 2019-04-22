@@ -107,7 +107,13 @@ public:
 	CollisionSphere* WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, const Vector3& rot, const Vector3& scale);
 	void WrapAroundTestBox(bool give_ang_vel, bool register_g);
 	void WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool register_g);
-	CollisionBox* WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, const Vector3& rot, const Vector3& scale);
+	CollisionBox* WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position,
+		const Vector3& rot, const Vector3& scale, const bool& awake = true, const bool& sleepable = false);
+
+	void SpawnStack(const Vector3& origin, uint sideLength, uint stackHeight);
+	void SpawnRandomBox(WrapAround* wpa, uint num, const Vector3& min, const Vector3& max);
+	void SpawnRandomSphere(WrapAround* wpa, uint num, const Vector3& min, const Vector3& max);
+	void ShootSphere(WrapAround* wpa);
 
 public:
 	const static uint MAX_CONTACT_NUM = 256;
@@ -120,9 +126,11 @@ public:
 	std::vector<CollisionSphere*> m_spheres;
 	std::vector<CollisionBox*> m_boxes;
 	std::vector<CollisionPlane*> m_planes;
+	std::vector<CollisionConvexObject*> m_convex_objs;
 
 	// temp
-	CollisionSphere* m_handle_0;
+	CollisionSphere* m_sph_handle_0;
+	CollisionConvexObject* m_cobj_handle_0;
 
 	Collision m_storage[MAX_CONTACT_NUM];
 
@@ -133,4 +141,5 @@ public:
 	WrapAround* m_wraparound_sphere;
 	WrapAround* m_wraparound_box;
 	WrapAround* m_wraparound_plane;
+	WrapAround* m_wraparound_convex;
 };

@@ -125,3 +125,12 @@ bool CollideAABB3(const AABB3& box1, const AABB3& box2)
 	// Overlapping on all axes means AABBs are intersecting
 	return true;
 }
+
+Vector3 GetRandomLocationWithin(const AABB3& bound)
+{
+	float x = GetRandomFloatInRange(bound.m_min.x, bound.m_max.x);
+	float y = GetRandomFloatInRange(bound.m_min.y, bound.m_max.y);
+	float z = GetRandomFloatInRange(bound.m_min.z, bound.m_max.z);
+
+	return Vector3(x, y, z);
+}

@@ -19,8 +19,7 @@ public:
 
 public:
 	Plane(){}
-	Plane(Vector3 normal, float offset)
-		: m_normal(normal), m_offset(offset) {}
+	Plane(Vector3 normal, float offset);
 	~Plane(){}
 
 	void Translate(Vector3 translation);

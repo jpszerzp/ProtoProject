@@ -3,6 +3,27 @@
 #include "Engine/Core/Transform.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Physics/3D/RF/CollisionEntity.hpp"
+#include "Engine/Physics/3D/RF/ConvexHull.hpp"
+#include "Engine/Physics/3D/RF/ConvexPolyhedron.hpp"
+
+// covariance method
+struct TetrahedronBody
+{
+	Matrix33 m_covariance = Matrix33::ZERO;
+	Vector3 m_com = Vector3::ZERO;
+	float m_mass = 0.f;
+
+	TetrahedronBody(){}
+	TetrahedronBody(const Matrix33& cov, const Vector3& com, const float& mass)
+		: m_covariance(cov), m_com(com), m_mass(mass){}
+	~TetrahedronBody(){}
+
+	TetrahedronBody operator+(const TetrahedronBody& other) const;
+	void operator+=(const TetrahedronBody& other);
+
+	// DEPRECATED
+	Matrix33 TranslateTetrahedronWithOffsetToGetCovariance(const Vector3& offset) const;
+};
 
 class CollisionPrimitive
 {
@@ -17,6 +38,8 @@ class CollisionPrimitive
 	Vector4 m_tint;
 
 public:
+	void BuildCommon();
+
 	virtual void AttachToRigidBody(CollisionRigidBody* rb);
 
 	void SetRigidBody(CollisionRigidBody* rb) { m_rigid_body = rb; }
@@ -32,12 +55,17 @@ public:
 	void Render(Renderer* renderer);
 
 	CollisionRigidBody* GetRigidBody() const { return m_rigid_body; }
+	float GetBodyMass() const { return m_rigid_body->GetMass(); }
 	Vector3 GetBasisAndPosition(uint index) const;
 	Matrix44 GetTransformMat4() const { return m_transform_mat; }
 	Mesh* GetMesh() const { return m_mesh; }
 	Shader* GetShader() const { return m_shader; }
 	Texture* GetTexture() const { return m_texture; }
 	Vector4 GetTint() const { return m_tint; }
+
+	Vector3 GetPrimitiveRight() const;
+	Vector3 GetPrimitiveUp() const;
+	Vector3 GetPrimitiveForward() const;
 };
 
 class CollisionSphere : public CollisionPrimitive
@@ -79,4 +107,51 @@ public:
 
 	Vector3 GetNormal() const { return m_normal; }
 	float GetOffset() const { return m_offset; }
+};
+
+class CollisionConvexObject : public CollisionPrimitive
+{
+	ConvexHull m_hull;
+
+	std::vector<Vector3> m_verts;
+
+	std::vector<ConvexPolygon> m_polygons;
+
+	// BAD DESIGN, ONLY USED ONCE...
+	// the mystery of GO contains an entity or an entity owns a GO
+	// to find inertia tensor: the covariance method
+	Vector3 m_initial_poi;
+
+	// we computed it in obj in this case, so we cache it for later use when attaching rb
+	Matrix33 m_initial_it;
+
+	// record the initial mass so that it can be reused
+	float m_initial_mass;
+
+	// random ref point of covariance method (to compute inertia tensor)
+	static Vector3 s_ref;
+
+public:
+	CollisionConvexObject(const ConvexHull& hull);
+
+	void AttachToRigidBody(CollisionRigidBody* rb) override;
+
+	void BuildVerticesAndPolygons(const ConvexHull& hull);
+	void BuildPolygonMeshes();
+
+	void SortVerticesCCW(ConvexPolygon& polygon);
+	void SortPolygonVerticesCCW();
+
+	std::vector<IntVector3> GetTriangulationIndices() const;
+	std::vector<TetrahedronBody> GetTetrahedronBodies(const std::vector<IntVector3>& triangle_vert_idx) const;
+	TetrahedronBody GetSummedTetrahedronBody(const std::vector<TetrahedronBody>& bodies) const; 
+
+	void AppendPolygonMesh(MeshBuilder& mb, ConvexPolygon& polygon);
+
+	Vector3 ComputeVolumeWeightedCenter() const;
+	Vector3 ComputeGeometricCentroid() const;
+
+	Vector3 GetInitialCOM() const { return m_initial_poi; }
+	Matrix33 GetInitialIT() const { return m_initial_it; }
+	float GetInitialMass() const { return m_initial_mass; }
 };

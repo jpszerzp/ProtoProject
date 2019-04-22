@@ -1499,7 +1499,6 @@ void Renderer::SetStencilMask(GLuint mask)
 // Not using forward path or material - for example, see the use of SetObjectColorUBO
 void Renderer::DrawMesh(Mesh* mesh, bool culling, bool depth_test)
 {
-	//PROFILE_LOG_SCOPED_FUNCTION();
 	GLuint programHandle = m_currentShader->GetShaderProgram()->GetHandle();
 	glUseProgram(programHandle);
 
