@@ -586,6 +586,9 @@
     <ClCompile Include="Core\Thread\NaiveLock.cpp">
       <Filter>Core\Thread</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Util\PhysUtil.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -996,5 +999,7 @@
     <ClInclude Include="Core\Thread\NaiveLock.hpp">
       <Filter>Core\Thread</Filter>
     </ClInclude>
+    <ClInclude Include="Physics\3D\PHYSX\PhysXProcessor.hpp" />
+    <ClInclude Include="Core\Util\PhysUtil.hpp" />
   </ItemGroup>
 </Project>

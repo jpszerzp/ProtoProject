@@ -6,7 +6,7 @@ void ParticleForceRegistry::Register(CollisionRigidBody* e, ForceGenerator* gene
 	m_registrations.push_back(registration);
 }
 
-void ParticleForceRegistry::Unregister(CollisionRigidBody* e, ForceGenerator* generator)
+void ParticleForceRegistry::Unregister(CollisionRigidBody*, ForceGenerator*)
 {
 	// ...
 }
@@ -16,7 +16,7 @@ void ParticleForceRegistry::ClearAllRegistries()
 	m_registrations.clear();
 }
 
-bool ParticleForceRegistry::NavigateRegistry(CollisionRigidBody* e, ForceGenerator* generator)
+bool ParticleForceRegistry::NavigateRegistry(CollisionRigidBody*, ForceGenerator*)
 {
 	// ...
 	return false;

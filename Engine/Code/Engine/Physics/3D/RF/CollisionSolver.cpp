@@ -139,7 +139,7 @@ void CollisionSolver::SolvePositions(Collision* collisions, uint collision_num, 
 		// Find biggest penetration
 		max = m_pos_threshold;
 		index = collision_num;
-		for (i=0; i<collision_num; i++)
+		for (i=0; i < collision_num; i++)
 		{
 			if (collisions[i].GetPenetration() > max)
 			{

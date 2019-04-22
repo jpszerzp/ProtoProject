@@ -274,7 +274,7 @@ void Profiler::UpdateFrameText()
 
 	// data you wish to update
 	double last_frame_seconds = PerformanceCountToSeconds(g_last_frame_hpc);
-	float fps = 1.f / last_frame_seconds;
+	float fps = (float)(1.f / last_frame_seconds);
 
 	std::string text = Stringf("Last Frame Time (ms): %f\nFPS: %.4f", 
 		last_frame_seconds * 1000.f, fps);
@@ -294,8 +294,8 @@ void Profiler::UpdateFramePoints()
 	if (g_last_frame_hpc > g_max_hpc)
 		g_max_hpc = g_last_frame_hpc;
 
-	float max_ms = PerformanceCountToMilliseconds(g_max_hpc);
-	float last_frame_ms = PerformanceCountToMilliseconds(g_last_frame_hpc);
+	float max_ms = (float)(PerformanceCountToMilliseconds(g_max_hpc));
+	float last_frame_ms = (float)(PerformanceCountToMilliseconds(g_last_frame_hpc));
 	
 	// there are 255 segments 
 	float pointSpeed = PROFILER_WIDTH / 255.f;
@@ -331,8 +331,8 @@ void Profiler::UpdateFramePoints()
 	if (g_my_last_hpc > g_my_max_hpc)
 		g_my_max_hpc = g_my_last_hpc;
 
-	max_ms = PerformanceCountToMilliseconds(g_my_max_hpc);
-	last_frame_ms = PerformanceCountToMilliseconds(g_my_last_hpc);
+	max_ms = (float)(PerformanceCountToMilliseconds(g_my_max_hpc));
+	last_frame_ms = (float)(PerformanceCountToMilliseconds(g_my_last_hpc));
 
 	pointSpeed = SUB_PROFILER_WIDTH / 127.f;
 
@@ -364,8 +364,8 @@ void Profiler::UpdateFramePoints()
 	if (g_physx_last_hpc > g_physx_max_hpc)
 		g_physx_max_hpc = g_physx_last_hpc;
 
-	max_ms = PerformanceCountToMilliseconds(g_physx_max_hpc);
-	last_frame_ms = PerformanceCountToMilliseconds(g_physx_last_hpc);
+	max_ms = (float)(PerformanceCountToMilliseconds(g_physx_max_hpc));
+	last_frame_ms = (float)(PerformanceCountToMilliseconds(g_physx_last_hpc));
 
 	if (last_frame_ms > 0.f)
 	{
@@ -446,7 +446,7 @@ void Profiler::Render(Renderer* renderer)
 	}
 }
 
-void Profiler::RenderFrameText(Renderer* renderer)
+void Profiler::RenderFrameText(Renderer*)
 {
 	DrawTexts(m_frame_text_mesh);
 	DrawTexts(m_profiled_mesh);
@@ -547,7 +547,7 @@ void Profiler::DestroyInstance()
 
 void ProfilerTree::Initialize()
 {
-	m_root = new ProfilerNode("root", nullptr, 0.f);
+	m_root = new ProfilerNode("root", nullptr, 0);
 	m_current = m_root;
 }
 

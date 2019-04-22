@@ -1,6 +1,6 @@
 #include "Engine/Physics/3D/ForceGenerator.hpp"
 
-void GravityGenerator::UpdateForce(CollisionRigidBody* entity3D, float)
+void GravityGenerator::UpdateForce(CollisionRigidBody*, float)
 {
 	/*
 	// if entity is const (infinite mass), force does not apply
@@ -11,7 +11,7 @@ void GravityGenerator::UpdateForce(CollisionRigidBody* entity3D, float)
 	*/
 }
 
-void DragGenerator::UpdateForce(CollisionRigidBody* entity3D, float)
+void DragGenerator::UpdateForce(CollisionRigidBody*, float)
 {
 	/*
 	Vector3 vel = entity3D->GetLinearVelocity();
@@ -37,7 +37,7 @@ void SpringGenerator::UpdateForce(CollisionRigidBody* r, float)
 	r->AddForce(force);
 }
 
-void AnchorSpringGenerator::UpdateForce(CollisionRigidBody* entity3D, float)
+void AnchorSpringGenerator::UpdateForce(CollisionRigidBody*, float)
 {
 	/*
 	Vector3 extension = entity3D->GetEntityCenter() - m_anchor;

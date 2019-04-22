@@ -6,7 +6,7 @@
  * May use torque generator to generate torque exclusively.
  */
 
-void GravityRigidForceGenerator::UpdateForce(CollisionRigidBody* body, float)
+void GravityRigidForceGenerator::UpdateForce(CollisionRigidBody*, float)
 {
 	/*
 	if (body->IsConst())
@@ -25,7 +25,7 @@ void GravityRigidForceGenerator::UpdateForce(CollisionRigidBody* body, float)
 	*/
 }	
 
-void AnchorSpringRigidForceGenerator::UpdateForce(CollisionRigidBody* body, float)
+void AnchorSpringRigidForceGenerator::UpdateForce(CollisionRigidBody*, float)
 {
 	/*
 	Vector3 attach_world = body->GetPointInWorld(m_attachLocal);

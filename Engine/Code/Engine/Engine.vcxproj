@@ -220,10 +220,11 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;NDEBUG</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)../../Engine/Code/;$(SolutionDir)Code/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\PhysX-4.0\physx\include;C:\PhysX-4.0\pxshared\include\;C:\PhysX-4.0\physx\source\common\src;C:\PhysX-4.0\physx\source\foundation\include;$(SolutionDir)../../Engine/Code/;$(SolutionDir)Code/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -243,10 +244,11 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;NDEBUG</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)../../Engine/Code/;$(SolutionDir)Code/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\PhysX-4.0\physx\include;C:\PhysX-4.0\pxshared\include\;C:\PhysX-4.0\physx\source\common\src;C:\PhysX-4.0\physx\source\foundation\include;$(SolutionDir)../../Engine/Code/;$(SolutionDir)Code/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -306,6 +308,7 @@
     <ClCompile Include="Core\Light\SpotLight.cpp" />
     <ClCompile Include="Core\Time\Stopwatch.cpp" />
     <ClCompile Include="Core\Util\DataUtils.cpp" />
+    <ClCompile Include="Core\Util\PhysUtil.cpp" />
     <ClCompile Include="Core\Util\RenderUtil.cpp" />
     <ClCompile Include="Core\Util\StringUtils.cpp" />
     <ClCompile Include="Core\Time\TheTime.cpp" />
@@ -489,6 +492,7 @@
     <ClInclude Include="Core\Light\SpotLight.hpp" />
     <ClInclude Include="Core\Time\Stopwatch.hpp" />
     <ClInclude Include="Core\Util\DataUtils.hpp" />
+    <ClInclude Include="Core\Util\PhysUtil.hpp" />
     <ClInclude Include="Core\Util\RenderUtil.hpp" />
     <ClInclude Include="Core\Util\StringUtils.hpp" />
     <ClInclude Include="Core\Time\TheTime.hpp" />
@@ -555,6 +559,7 @@
     <ClInclude Include="Physics\3D\PHYSX\PhysAllocator.hpp" />
     <ClInclude Include="Physics\3D\PHYSX\PhysErrorCallback.hpp" />
     <ClInclude Include="Physics\3D\PHYSX\PhysXObject.hpp" />
+    <ClInclude Include="Physics\3D\PHYSX\PhysXProcessor.hpp" />
     <ClInclude Include="Physics\3D\PHYSX\PhysXShapeRender.hpp" />
     <ClInclude Include="Physics\3D\PointEntity3.hpp" />
     <ClInclude Include="Physics\3D\PointRB3.hpp" />

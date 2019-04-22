@@ -2658,7 +2658,7 @@ void ManualGenQH(QuickHull* qh)
 	break;
 	case HORIZON_START:
 	{
-		QHFace* conflict_face = std::get<0>(qh->m_eyePair);
+		//QHFace* conflict_face = std::get<0>(qh->m_eyePair);
 		QHVert* conflict_pt = std::get<1>(qh->m_eyePair);
 
 		// to start with, we can assume the we have never visited any other faces
@@ -2702,7 +2702,7 @@ void ManualGenQH(QuickHull* qh)
 	break;
 	case HORIZON_PROCESS:
 	{
-		QHFace* conflict_face = std::get<0>(qh->m_eyePair);
+		//QHFace* conflict_face = std::get<0>(qh->m_eyePair);
 		QHVert* conflict_pt = std::get<1>(qh->m_eyePair);
 
 		if (!qh->ReachStartHalfEdge())
@@ -2733,7 +2733,7 @@ void ManualGenQH(QuickHull* qh)
 					else
 					{
 						// this is not the face we came from, it is just a normal face we previously visited; skip it
-						HalfEdge* expiring = qh->m_current_he;
+						//HalfEdge* expiring = qh->m_current_he;
 
 						qh->ChangeCurrentHalfEdgeOldFace();
 						qh->ChangeCurrentHalfEdgeMesh();			// verifies if the new HE has twin
@@ -2797,7 +2797,7 @@ void ManualGenQH(QuickHull* qh)
 
 			// remove from list of all faces
 			std::vector<QHFace*>::iterator it = std::find(qh->m_faces.begin(), qh->m_faces.end(), visited_frontier);
-			bool inList = (it != qh->m_faces.end());
+			//bool inList = (it != qh->m_faces.end());
 			qh->m_faces.erase(it);
 
 			// delete this face
@@ -2870,7 +2870,7 @@ void ManualGenQH(QuickHull* qh)
 			qh->m_horizon_infos.pop_front();
 
 			// build new face and verify it 
-			const Vector3& eyePos = eye->vert;
+			//const Vector3& eyePos = eye->vert;
 			QHFace* new_face = new QHFace(he_restore, std::get<1>(he_data), eye->vert);
 			qh->CreateFaceMesh(*new_face);							// face mesh
 			qh->GenerateOutboundNorm(qh->m_anchor, *new_face);		// normal

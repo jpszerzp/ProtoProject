@@ -2,6 +2,7 @@
 #include "Engine/Renderer/DebugRenderer.hpp"
 #include "Engine/Math/MathUtils.hpp"
 #include "Engine/Input/InputSystem.hpp"
+#include "Game/GameCommon.hpp"
 
 CollisionPrimitive::~CollisionPrimitive()
 {
@@ -278,6 +279,22 @@ CollisionBox::CollisionBox(const Vector3& half, const std::string& fp, const std
 	tint.GetAsFloats(tintV4.x, tintV4.y, tintV4.z, tintV4.w);
 	SetTint(tintV4);
 }
+
+/*
+CollisionBox::CollisionBox(const Vector3& half, const std::string& fp, const std::string& tx, bool cmp)
+{
+	Renderer* renderer = Renderer::GetInstance();
+
+	SetMesh(renderer->CreateOrGetMesh("cube_pcu"));
+	SetShader(renderer->CreateOrGetShader(fp));
+	SetTexture(renderer->CreateOrGetTexture(tx));
+
+	Vector4 tintV4;
+	Rgba tint = Rgba::WHITE;
+	tint.GetAsFloats(tintV4.x, tintV4.y, tintV4.z, tintV4.w);
+	SetTint(tintV4);
+}
+*/
 
 void CollisionBox::Update(float deltaTime)
 {
@@ -969,7 +986,7 @@ CollisionLine::CollisionLine(const Vector3& start, const Vector3& end, const std
 	SetTexture(renderer->CreateOrGetTexture(tx));
 }
 
-void CollisionLine::Update(float deltaTime)
+void CollisionLine::Update(float)
 {
 	Mesh* m = GetMesh();
 

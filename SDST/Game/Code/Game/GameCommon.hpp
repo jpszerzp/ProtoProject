@@ -11,6 +11,7 @@ class SpriteSheet;
 extern Renderer* g_renderer;
 extern InputSystem* g_input;
 extern TheGame* g_theGame;
+//extern Physics3State* g_phys_state;
 extern AudioSystem* g_audio;
 extern SpriteSheet* g_atlas;
 extern SpriteSheet* g_archer;

@@ -1,5 +1,7 @@
 #pragma once
 
+//#include "Engine/Physics/3D/PHYSX/PhysXProcessor.hpp"
+
 #include "Engine/Math/QuickHull.hpp"
 #include "Engine/Physics/3D/CollisionDetection.hpp"
 #include "Engine/Physics/3D/ContactResolver.hpp"
@@ -111,6 +113,7 @@ public:
 
 	void ResetCollisionCornerCase(const Vector3& pos1, const Vector3& pos2, const Vector3& rot1, const Vector3& rot2);
 	std::pair<PhysXObject*, PhysXObject*> ResetCollisionCornerCasePhysX(const Vector3& pos1, const Vector3& pos2, const Vector3& rot1, const Vector3& rot2);
+	void SetupMyCornerCase();
 
 public:
 	const static uint MAX_CONTACT_NUM = 256;

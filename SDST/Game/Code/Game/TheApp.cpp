@@ -4,9 +4,9 @@
 #include "Game/Collision3State.hpp"
 #include "Game/ControlState3.hpp"
 #include "Game/TransformTest.hpp"
-#include "Game/MathTest.hpp"
+//#include "Game/MathTest.hpp"
+//#include "Game/NetTest.hpp"
 #include "Game/DelegateTest.hpp"
-#include "Game/NetTest.hpp"
 #include "Engine/Core/Blackboard.hpp"
 #include "Engine/Core/Time/Clock.hpp"
 #include "Engine/Core/EngineCommon.hpp"
@@ -194,9 +194,9 @@ void TheApp::ProcessInput()
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_1))
 	{
-		MathTest::RunMathTest();
+		//MathTest::RunMathTest();
+		//NetTest::RunNetTest();
 		TransformTest::RunTransformTest();
-		NetTest::RunNetTest();
 		RunDelegateTest();
 	}
 
@@ -265,11 +265,17 @@ void TheApp::NetStartup()
 void TheApp::StateStartup()
 {
 	Physics3State* phys3 = new Physics3State();
+	//g_phys_state = phys3;
+	//g_phys_state->SetupMyCornerCase();
+
 	ControlState3* control = new ControlState3();
 	StateMachine* states = new StateMachine();
+
 	phys3->PostConstruct();
+
 	states->AppendState(phys3);
 	states->AppendState(control);
+
 	g_theGame = new TheGame();
 	g_theGame->SetStateMachine(states);
 	g_theGame->UseDefaultState();			// set default state as state at index 0 

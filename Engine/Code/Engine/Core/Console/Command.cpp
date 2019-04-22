@@ -963,8 +963,8 @@ void CommandStartup()
 	CommandRegister("udp_send", UDPSendCommand, "{}", "Sending with UDP");
 	
 	// physics
-	CommandRegister("broadphase", BroadPhaseCommand, "{bool}", "Turn on/off broadphase");
 	//CommandRegister("qh_draw_normal", QHNormalDrawCommand, "{true}", "Draw face normal of a convex hull");
+	CommandRegister("broadphase", BroadPhaseCommand, "{bool}", "Turn on/off broadphase");
 	CommandRegister("set_rst", RestitutionCommand, "{float}", "Set global restitution to specified value");
 	CommandRegister("set_slp", SleepThresholdCommand, "{float}", "Set global sleep threshold to specified value");
 }

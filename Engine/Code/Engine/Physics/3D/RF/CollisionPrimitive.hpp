@@ -5,6 +5,7 @@
 #include "Engine/Physics/3D/RF/CollisionEntity.hpp"
 #include "Engine/Physics/3D/RF/ConvexHull.hpp"
 #include "Engine/Physics/3D/RF/ConvexPolyhedron.hpp"
+#include "Engine/Physics/3D/PHYSX/PhysXObject.hpp"
 
 enum eCCD
 {
@@ -76,7 +77,6 @@ public:
 
 	CollisionRigidBody* GetRigidBody() const { return m_rigid_body; }
 	float GetBodyMass() const { return m_rigid_body->GetMass(); }
-	//float GetCCDT() const { return m_t_ccd; }
 	Vector3 GetBasisAndPosition(uint index) const;
 	Matrix44 GetTransformMat4() const { return m_transform_mat; }
 	Mesh* GetMesh() const { return m_mesh; }
@@ -88,6 +88,7 @@ public:
 	eCCD GetContinuity() const { return m_ccd; }
 	bool IsFrozen() const { return m_rigid_body->IsFrozen(); }
 	bool ShouldDelete() const { return m_should_delete; }
+	PhysXObject* m_phys_compare = nullptr;
 };
 
 class CollisionPoint : public CollisionPrimitive
@@ -138,6 +139,7 @@ class CollisionBox : public CollisionPrimitive
 
 public:
 	CollisionBox(const Vector3& half, const std::string& fp = "default", const std::string& tx = "Data/Images/perspective_test.png");
+	//CollisionBox(const Vector3& half, const std::string fp, const std::string& tx, bool cmp = true);
 	~CollisionBox(){}
 
 	void Update(float deltaTime) override;

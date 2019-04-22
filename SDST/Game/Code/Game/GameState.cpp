@@ -1,6 +1,5 @@
 #include "Game/GameState.hpp"
 
-
 GameState::~GameState()
 {
 	delete m_camera;
