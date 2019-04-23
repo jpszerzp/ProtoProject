@@ -81,6 +81,7 @@ public:
 	CollisionPoint* WrapAroundTestPoint(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position,
 		const Vector3& rot, const Vector3& scale, const bool& awake = true, const bool& sleepable = false);
 	Spring* SetupSpring(CollisionPoint* end1, CollisionPoint* end2, float coef, float rl);
+	AnchorSpring* SetupAnchorSpring(CollisionPoint* end1, CollisionPoint* end2, float coef, float rl);
 
 	void SpawnStack(const Vector3& origin, uint sideLength, uint stackHeight);
 	void SpawnRandomBox(WrapAround* wpa, uint num, const Vector3& min, const Vector3& max);
@@ -223,4 +224,5 @@ public:
 
 	// springs
 	Spring* m_spring;
+	AnchorSpring* m_anchorSpring;
 };

@@ -145,18 +145,16 @@ Physics3State::Physics3State()
 		Vector3(10.f, 225.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
 	CollisionPoint* sp_point_1 = WrapAroundTestPoint(nullptr, false, false, false,
 		Vector3(10.f, 235.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
-	//CollisionPoint* asp_point_0 = WrapAroundTestPoint(nullptr, false, false, false,
-	//	Vector3(15.f, 225.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
-	//CollisionPoint* asp_point_1 = WrapAroundTestPoint(nullptr, false, false, false,
-	//	Vector3(15.f, 235.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
-	//asp_point_0->GetRigidBody()->SetFrozen(true);
-	//asp_point_1->GetRigidBody()->SetFrozen(true);
+	CollisionPoint* asp_point_0 = WrapAroundTestPoint(nullptr, false, false, false,
+		Vector3(15.f, 225.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
+	CollisionPoint* asp_point_1 = WrapAroundTestPoint(nullptr, false, false, false,
+		Vector3(15.f, 235.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
 	// setting up registrations in the registry
 	// A. springs
 	m_spring = SetupSpring(sp_point_0, sp_point_1, 2.f, 9.5f);		
-	//// two points initialized to be 5 units away, constraint by a spring system with rest length of 3
-	//// B. anchored spring
-	//m_anchorSpring = SetupAnchorSpring(asp_point_0, asp_point_1, 2.f, 8.f);
+	// two points initialized to be 5 units away, constraint by a spring system with rest length of 3
+	// B. anchored spring
+	m_anchorSpring = SetupAnchorSpring(asp_point_0, asp_point_1, 2.f, 8.f);
 
 	// debug
 	DebugRenderSet3DCamera(m_camera);
@@ -716,8 +714,8 @@ void Physics3State::UpdateForceRegistries(float dt)
 {
 	if (m_particleRegistry != nullptr)
 		m_particleRegistry->UpdateForces(dt);
-	//if (m_rigidRegistry != nullptr)
-	//	m_rigidRegistry->UpdateForces(dt);
+	if (m_rigidRegistry != nullptr)
+		m_rigidRegistry->UpdateForces(dt);
 }
 
 void Physics3State::UpdateGameobjectsCore(float deltaTime)
@@ -1118,6 +1116,30 @@ Spring* Physics3State::SetupSpring(CollisionPoint* end1, CollisionPoint* end2, f
 	m_particleRegistry->Register(e2, sg2);
 
 	return sp;
+}
+
+AnchorSpring* Physics3State::SetupAnchorSpring(CollisionPoint* end1, CollisionPoint* end2, float coef, float rl)
+{
+	AnchorSpring* asp = new AnchorSpring(end1, end2, coef, rl);
+
+	// get entities 
+	CollisionRigidBody* e1 = end1->GetRigidBody();
+	CollisionRigidBody* e2 = end2->GetRigidBody();
+
+	// use euler
+	e1->SetVerlet(false);
+	e2->SetVerlet(false);
+
+	e1->SetFrozen(true);
+	e2->SetFrozen(true);
+
+	// anchored spring generator
+	AnchorSpringGenerator* asg1 = new AnchorSpringGenerator(e2->GetCenter(), coef, rl);
+
+	// register the generator
+	m_particleRegistry->Register(e1, asg1);
+
+	return asp;
 }
 
 void Physics3State::SpawnStack(const Vector3& origin , uint sideLength, uint stackHeight)
