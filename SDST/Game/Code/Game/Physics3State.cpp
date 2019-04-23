@@ -248,7 +248,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		SpawnRandomConvex(m_wraparound_plane, 10, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 360.f, 100.f));
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_8))
-		SpawnRandomSphere(m_wraparound_plane, 10, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 360.f, 100.f));
+		SpawnRandomSphere(m_wraparound_plane, 5, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 360.f, 100.f));
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_9))
 		SpawnRandomBox(m_wraparound_plane, 5, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 360.f, 100.f));
@@ -733,10 +733,11 @@ void Physics3State::RenderUI(Renderer*)
 	DrawTextCut(m_vel_ui);
 }
 
-
-CollisionSphere* Physics3State::WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, const Vector3& rot, const Vector3&)
+CollisionSphere* Physics3State::WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, 
+	bool give_lin_vel, bool register_g, const Vector3& position, const Vector3& rot, 
+	const Vector3& scale, const std::string& fp, const std::string& tx)
 {
-	CollisionSphere* sph = new CollisionSphere(1.f);
+	CollisionSphere* sph = new CollisionSphere(scale.x, fp, tx);
 
 	CollisionRigidBody* rb = new CollisionRigidBody(1.f, position, rot);
 	rb->SetAwake(true);
@@ -901,8 +902,11 @@ void Physics3State::SpawnRandomSphere(WrapAround* wpa, uint num, const Vector3& 
 
 	for (uint i = 0; i < num; ++i)
 	{
+		const float& scale = GetRandomFloatInRange(1.f, 5.f);
+		Vector3 s = Vector3(scale, scale, scale);
+
 		const Vector3& rand_pos = GetRandomLocationWithin(bound);
-		WrapAroundTestSphere(wpa, true, false, true, rand_pos, Vector3::ZERO, Vector3::ONE);
+		WrapAroundTestSphere(wpa, true, false, true, rand_pos, Vector3::ZERO, s);
 	}
 }
 
@@ -921,7 +925,7 @@ void Physics3State::ShootSphere(WrapAround* wpa)
 {
 	// handle_0 is a sphere rb
 	CollisionSphere* sph = WrapAroundTestSphere(wpa, true, false, true, m_camera->GetWorldPosition(), Vector3::ZERO, Vector3::ONE);
-	sph->GetRigidBody()->SetLinearVelocity(m_camera->GetWorldForward().GetNormalized() * 10.f);
+	sph->GetRigidBody()->SetLinearVelocity(m_camera->GetWorldForward().GetNormalized() * 50.f);
 }
 
 void Physics3State::ShootBox(WrapAround* wpa)

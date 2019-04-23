@@ -55,14 +55,17 @@ public:
 
 	virtual void AttachToRigidBody(CollisionRigidBody* rb);
 
+	void SetNextFrameTeleport(const Vector3& v) { m_ccd_teleport = v; }
 	void SetRigidBody(CollisionRigidBody* rb) { m_rigid_body = rb; }
 	void SetPrimitiveTransformMat4(const Matrix44& transform) { m_transform_mat = transform; }
 	void SetMesh(Mesh* mesh) { m_mesh = mesh; }
 	void SetShader(Shader* shader) { m_shader = shader; }
 	void SetTexture(Texture* texture) { m_texture = texture; }
 	void SetTint(const Vector4& tint) { m_tint = tint; }
-	void SetRigidBodyPosition(const Vector3& pos);
 	void SetShouldDelete(const bool& value) { m_delete = value; }
+	void SetRigidBodyPositionOnly(const Vector3& pos);
+	void SetFrozen(bool val) { m_rigid_body->SetFrozen(val); }
+	virtual void SetRigidBodyPosition(const Vector3&){}		// ...need to consider scale in general case when this is implemented 
 
 	virtual void Update(float deltaTime);
 	virtual void Render(Renderer* renderer);
@@ -77,6 +80,9 @@ public:
 	Vector4 GetTint() const { return m_tint; }
 	Vector3 GetCenter() const { return m_rigid_body->GetCenter(); }
 	bool ShouldDelete() const { return m_delete; }
+	bool IsFrozen() const { return m_rigid_body->IsFrozen(); }
+	eCCD GetContinuity() const { return m_ccd; }
+	Vector3 GetNextFrameTeleport() const { return m_ccd_teleport; }
 
 	Vector3 GetPrimitiveRight() const;
 	Vector3 GetPrimitiveUp() const;
@@ -92,7 +98,11 @@ public:
 
 	void AttachToRigidBody(CollisionRigidBody* rb) override;
 
+	void SetRigidBodyPosition(const Vector3& pos) override;
+
 	float GetRadius() const { return m_radius; }
+
+	void Update(float dt) override;
 };
 
 class CollisionBox : public CollisionPrimitive

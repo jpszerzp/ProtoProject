@@ -367,12 +367,15 @@ uint CollisionSensor::BoxVsHalfPlane(const CollisionBox& box, const CollisionPla
 
 uint CollisionSensor::BoxVsSphere(const CollisionBox& box, const CollisionSphere& sphere, CollisionKeep* c_data)
 {
-	Vector3 centre = sphere.GetBasisAndPosition(3);
-	Vector3 relCentre = box.GetTransformMat4().MultiplyInverse(centre);
+	float rad = sphere.GetRadius();
+	Vector3 half_size = box.GetHalfSize();
 
-	if (abs(relCentre.x) - sphere.GetRadius() > box.GetHalfSize().x ||
-		abs(relCentre.y) - sphere.GetRadius() > box.GetHalfSize().y ||
-		abs(relCentre.z) - sphere.GetRadius() > box.GetHalfSize().z)
+	Vector3 centre = sphere.GetBasisAndPosition(3);
+	Vector3 relCentre = box.GetRigidBody()->GetTransformMat4().MultiplyInverse(centre);
+
+	if (abs(relCentre.x) - rad > half_size.x ||
+		abs(relCentre.y) - rad > half_size.y ||
+		abs(relCentre.z) - rad > half_size.z)
 	{
 		return 0;
 	}
@@ -381,37 +384,37 @@ uint CollisionSensor::BoxVsSphere(const CollisionBox& box, const CollisionSphere
 	float dist;
 
 	dist = relCentre.x;
-	if (dist > box.GetHalfSize().x) 
-		dist = box.GetHalfSize().x;
-	if (dist < -box.GetHalfSize().x)
-		dist = -box.GetHalfSize().x;
+	if (dist > half_size.x) 
+		dist = half_size.x;
+	if (dist < -half_size.x)
+		dist = -half_size.x;
 	closestPt.x = dist;
 
 	dist = relCentre.y;
-	if (dist > box.GetHalfSize().y) 
-		dist = box.GetHalfSize().y;
-	if (dist < -box.GetHalfSize().y) 
-		dist = -box.GetHalfSize().y;
+	if (dist > half_size.y) 
+		dist = half_size.y;
+	if (dist < -half_size.y) 
+		dist = -half_size.y;
 	closestPt.y = dist;
 
 	dist = relCentre.z;
-	if (dist > box.GetHalfSize().z) 
-		dist = box.GetHalfSize().z;
-	if (dist < -box.GetHalfSize().z) 
-		dist = -box.GetHalfSize().z;
+	if (dist > half_size.z) 
+		dist = half_size.z;
+	if (dist < -half_size.z) 
+		dist = -half_size.z;
 	closestPt.z = dist;
 
 	dist = (closestPt - relCentre).GetLengthSquared();
-	if (dist > sphere.GetRadius() * sphere.GetRadius()) 
+	if (dist > rad * rad) 
 		return 0;
 
-	Vector3 closestPtWorld = box.GetTransformMat4() * closestPt;
+	Vector3 closestPtWorld = box.GetRigidBody()->GetTransformMat4() * closestPt;
 
 	Collision* collision = c_data->m_collision;
 	collision->m_normal = (closestPtWorld - centre);
 	collision->m_normal.Normalize();
 	collision->m_pos = closestPtWorld;
-	collision->m_penetration = sphere.GetRadius() - sqrtf(dist);
+	collision->m_penetration = rad - sqrtf(dist);
 	collision->SetBodies(box.GetRigidBody(), sphere.GetRigidBody());
 
 	collision->SetFriction(c_data->m_global_friction);

@@ -90,15 +90,11 @@ Vector3 CollisionPrimitive::GetPrimitiveForward() const
 	return m_transform_mat.GetForward();
 }
 
-void CollisionPrimitive::SetRigidBodyPosition(const Vector3& pos)
+void CollisionPrimitive::SetRigidBodyPositionOnly(const Vector3& pos)
 {
 	m_rigid_body->SetCenter(pos);
 
-	// position changed, update cache
 	m_rigid_body->CacheData();
-
-	// update primitive transform at last
-	m_transform_mat = m_rigid_body->GetTransformMat4();
 }
 
 CollisionSphere::CollisionSphere(const float& radius, const std::string& fp, const std::string& tx)
@@ -135,7 +131,47 @@ void CollisionSphere::AttachToRigidBody(CollisionRigidBody* rb)
 	rb->CacheData();
 
 	// use same transform mat for primitive
-	SetPrimitiveTransformMat4(rb->GetTransformMat4());
+	Matrix44 transform_mat = rb->GetTransformMat4() * Matrix44::MakeScale3D(m_radius, m_radius, m_radius);
+	SetPrimitiveTransformMat4(transform_mat);
+}
+
+void CollisionSphere::SetRigidBodyPosition(const Vector3& pos)
+{
+	GetRigidBody()->SetCenter(pos);
+
+	// cache
+	GetRigidBody()->CacheData();
+
+	// transform
+	Matrix44 transform_mat = GetRigidBody()->GetTransformMat4() * Matrix44::MakeScale3D(m_radius, m_radius, m_radius);
+	SetPrimitiveTransformMat4(transform_mat);
+}
+
+void CollisionSphere::Update(float dt)
+{
+	if (GetRigidBody() != nullptr && !IsFrozen())
+	{
+		if (GetContinuity() != COL_CCD)
+			GetRigidBody()->Integrate(dt);
+		else
+		{
+			if (GetNextFrameTeleport() != Vector3::ZERO)
+			{
+				SetRigidBodyPositionOnly(GetNextFrameTeleport());
+				SetFrozen(true);
+
+				// reset next frame teleport
+				SetNextFrameTeleport(Vector3::ZERO);
+			}
+			else
+				GetRigidBody()->Integrate(dt);
+		}
+
+		// calculate internal
+		// again, do not put scale into rb transform, put it into primitive transform
+		Matrix44 transform_mat = GetRigidBody()->GetTransformMat4() * Matrix44::MakeScale3D(m_radius, m_radius, m_radius);
+		SetPrimitiveTransformMat4(transform_mat);
+	}
 }
 
 CollisionBox::CollisionBox(const Vector3& half, const std::string& fp, const std::string& tx)

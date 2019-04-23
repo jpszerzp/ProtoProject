@@ -30,6 +30,9 @@ protected:
 
 	float m_slow = 1.f;
 
+	// freeze has highest priority on pause
+	bool m_frozen = false;
+
 public:
 	virtual void Integrate(float deltaTime);
 	virtual void ClearAcc();
@@ -42,6 +45,7 @@ public:
 	void SetSleepable(bool sleepable);
 	void SetBaseLinearAcceleration(const Vector3& acc) { m_lin_acc = acc; }
 	void SetSlow(const float& slow) { m_slow = slow; }
+	void SetFrozen(bool val) { m_frozen = val; }
 
 	virtual void CacheData(){}
 
@@ -59,6 +63,7 @@ public:
 	Vector3 GetLastFrameLinearAcc() const { return m_last_lin_acc; }
 	bool IsAwake() const { return m_awake; }
 	bool IsSleepable() const { return m_sleepable; }
+	bool IsFrozen() const { return m_frozen; }
 	virtual Vector3 GetAngularVelocity() const { ASSERT_OR_DIE(false, "general entity does not have angular velocity"); }
 	virtual float GetRealTimeMotion() const;
 	virtual Matrix33 GetTensor() const { ASSERT_OR_DIE(false, "general entity does not have tensor"); }
@@ -81,12 +86,6 @@ protected:
 
 	// derived data
 	Matrix33 m_inv_tensor_world;	
-
-	//// kinematics
-	//bool kinematics = false;
-	//Vector3 pos;
-	//Vector3 rot;
-	//Vector3 scale;
 
 public:
 	void Integrate(float deltaTime) override;

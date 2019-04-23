@@ -70,7 +70,9 @@ public:
 	void RenderUI(Renderer* renderer);
 
 	// scene tests
-	CollisionSphere* WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, const Vector3& rot, const Vector3& scale);
+	CollisionSphere* WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, 
+		bool register_g, const Vector3& position, const Vector3& rot, const Vector3& scale,
+		const std::string& fp = "default", const std::string& tx = "Data/Images/perspective_test.png");
 	CollisionBox* WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position,
 		const Vector3& rot, const Vector3& scale, const bool& awake = true, const bool& sleepable = false);
 	CollisionConvexObject* WrapAroundTestConvex(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position,
