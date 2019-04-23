@@ -404,6 +404,13 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_MINUS))
 		g_theApp->SpawnPhysxStack(Vector3(100.f, 342.5f, 45.f), 5, 5);
 
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_PLUS))
+	{
+		for (int i = 0; i < g_theApp->m_physx_stack.size(); ++i)
+			g_theApp->m_physx_stack[i]->SetShouldDelete(true);
+		g_theApp->m_physx_stack.clear();
+	}
+
 	//CollisionRigidBody* rb = m_handle_0->GetRigidBody();
 
 	//if (g_input->IsKeyDown(InputSystem::KEYBOARD_UP_ARROW))

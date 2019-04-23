@@ -461,7 +461,47 @@ void TheApp::PhysxUpdate(float dt)
 
 void TheApp::PhysxUpdateDelete()
 {
+	// stack vector has already been emptied, objs are already marked as deleted
+	// delete those obj prescence in general vector
+	// remove those actors in physx scene
+	for (int i = 0; i < m_physx_objs.size(); ++i)
+	{
+		PhysXObject* phys_obj = m_physx_objs[i];
+		if (phys_obj->ShouldDelete())
+		{
+			// obj vector
+			std::vector<PhysXObject*>::iterator it = m_physx_objs.begin() + i;
+			m_physx_objs.erase(it);
+			// we do not know which vector of physx obj is affected, so we check all
+			// still check those in stacks just to be safe
+			for (int j = 0; j < m_physx_stack.size(); ++j)
+			{
+				if (m_physx_stack[j] == phys_obj)
+				{
+					std::vector<PhysXObject*>::iterator it_del = m_physx_stack.begin() + j;
+					m_physx_stack.erase(it_del);
+					j--;
+				}
+			}
+			// check those in wraparounds
+			//m_wraparound_demo_0->RemovePhysXObj(phys_obj);
+			//m_wraparound_demo_1->RemovePhysXObj(phys_obj);
+			// todo: check those in plane wraparound after they are actually added to it...
+			//m_wraparound_plane...
+			// check corner case place holder
+			//if (m_corner_case_3 == phys_obj)
+			//	m_corner_case_3 = nullptr;
+			//else if (m_corner_case_4 == phys_obj)
+			//	m_corner_case_4 = nullptr;
+			// scene actor
+			PxRigidActor* ra = phys_obj->GetRigidActor();
+			gScene->removeActor(*ra);
+			ra->release();
 
+			delete phys_obj;
+			i = i - 1;
+		}
+	}
 }
 
 void TheApp::PhysxRender(Renderer* rdr)

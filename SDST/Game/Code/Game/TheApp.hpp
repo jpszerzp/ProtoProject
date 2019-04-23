@@ -20,6 +20,7 @@ class TheApp
 	float m_accTimer;
 	int m_frames;
 
+public:
 	std::vector<PhysXObject*> m_physx_objs;
 	std::vector<PhysXObject*> m_physx_stack;
 
