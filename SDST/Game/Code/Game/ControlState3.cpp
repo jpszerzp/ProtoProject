@@ -531,7 +531,7 @@ void ControlState3::UpdateKeyboard(float deltaTime)
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_0))
 	{
-		//ManualGenQH(m_qh);
+		ManualGenQH(m_qh);
 	}
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_3))

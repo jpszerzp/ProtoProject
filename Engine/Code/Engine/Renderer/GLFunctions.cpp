@@ -128,7 +128,6 @@ static HGLRC CreateOldRenderContext( HDC hdc )
 	return context; 
 }
 
-
 //------------------------------------------------------------------------
 // Creates a real context as a specific version (major.minor)
 static HGLRC CreateRealRenderContext( HDC hdc, int major, int minor ) 
@@ -210,14 +209,12 @@ static HGLRC CreateRealRenderContext( HDC hdc, int major, int minor )
 	return context;
 }
 
-
 void BindNewWGLFunctions()
 {
 	GL_BIND_FUNCTION( wglGetExtensionsStringARB		); 
 	GL_BIND_FUNCTION( wglChoosePixelFormatARB		); 
 	GL_BIND_FUNCTION( wglCreateContextAttribsARB	);
 }
-
 
 void BindGLFunctions()
 {
@@ -305,7 +302,6 @@ void BindGLFunctions()
 	GL_BIND_FUNCTION( glTexParameteri				);
 	GL_BIND_FUNCTION( glDrawBuffer					);
 }
-
 
 bool AreGLFuncitonsBound()
 {
@@ -403,7 +399,6 @@ bool AreGLFuncitonsBound()
 	return true;
 }
 
-
 void GLShutdown()
 {
 	wglMakeCurrent( gHDC, NULL ); 
@@ -417,7 +412,6 @@ void GLShutdown()
 
 	::FreeLibrary( gGLLibrary ); 
 }
-
 
 // Rendering startup - called after we have created our window
 // error checking has been removed for brevity, but you should check
@@ -459,7 +453,6 @@ bool RenderStartup( HWND hwnd, float startupWidth, float startupHeight )
 
 	return true;
 }
-
 
 //------------------------------------------------------------------------
 bool GLCheckError( char const *file, int line )

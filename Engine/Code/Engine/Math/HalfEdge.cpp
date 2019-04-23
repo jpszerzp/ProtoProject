@@ -38,7 +38,7 @@ void HalfEdge::Draw(Renderer* renderer)
 
 	glLineWidth(1.f);
 	renderer->DrawMesh(m_body_mesh);
-	
+
 	glLineWidth(3.f);
 	for (int i = 0; i < 3; ++i)
 		renderer->DrawMesh(m_arrow_mesh[i]);
@@ -134,7 +134,7 @@ void HalfEdge::CreateArrowMeshesOffset(float percentage, const Vector3& centroid
 	GetOffsetTailHead(percentage, centroid, tail, head);
 
 	const Vector3& dir = (tail - head).GetNormalized();
-	
+
 	Vector3 used_aixs;
 	Vector3 axis[3] = {Vector3(1.f, 0.f, 0.f), Vector3(0.f, 1.f, 0.f), Vector3(0.f, 0.f, 1.f)};
 	float dot_0 = abs( DotProduct(axis[0], dir) );
@@ -206,7 +206,7 @@ void HalfEdge::SwapMeshTwin(bool twinSet)
 	CreateArrowMeshesOffset(percentage, centroid, usedColor);
 }
 
-void HalfEdge::SwapMeshTwinGeneral(bool twinSet)
+void HalfEdge::SwapMeshTwinGeneral(bool twinSet, QuickHull* hull)
 {
 	FlushMeshes();
 
@@ -215,7 +215,7 @@ void HalfEdge::SwapMeshTwinGeneral(bool twinSet)
 	Rgba usedColor;
 
 	TODO("Better work for ALL hulls");
-	if (g_hull->m_current_he == this)
+	if (hull->m_current_he == this)
 	{
 		if (twinSet)
 			usedColor = Rgba::CYAN;

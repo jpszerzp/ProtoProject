@@ -85,7 +85,7 @@ Physics3State::Physics3State()
 	// local tensor is fixed
 	// the format is motion - mass - tensor - velocity (to be modified)
 	BitmapFont* font = theRenderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
-	float txtHeight = height / 70.f;
+	float txtHeight = height / 50.f;
 	Vector2 titleMin = Vector2(-width/ 2.f, height / 2.f - txtHeight);
 	titleMin -= Vector2(0.f, txtHeight);
 	titleMin -= Vector2(0.f, txtHeight);
@@ -572,13 +572,13 @@ void Physics3State::UpdateDelete()
 			m_wraparound_demo_1->RemovePrimitive(box);
 
 			// need to update my stack vector
-			for (int i = 0; i < m_my_stack.size(); ++i)
+			for (int j = 0; j < m_my_stack.size(); ++j)
 			{
-				if (m_my_stack[i] == box)
+				if (m_my_stack[j] == box)
 				{
-					std::vector<CollisionBox*>::iterator it = m_my_stack.begin() + i;
-					m_my_stack.erase(it);
-					i--;
+					std::vector<CollisionBox*>::iterator it_t = m_my_stack.begin() + j;
+					m_my_stack.erase(it_t);
+					j--;
 					
 					break;		// deleted box found in stack, abort
 				}
