@@ -604,6 +604,14 @@ Vector3 Matrix44::operator*(const Vector3& rhs) const
 	return Vector3(x, y, z);
 }
 
+void Matrix44::operator=(const PxMat44& rhs)
+{
+	Ix = rhs.column0.x;		Jx = rhs.column1.x;		Kx = rhs.column2.x;		Tx = rhs.column3.x;		
+	Iy = rhs.column0.y;		Jy = rhs.column1.y;		Ky = rhs.column2.y;		Ty = rhs.column3.y;
+	Iz = rhs.column0.z;		Jz = rhs.column1.z;		Kz = rhs.column2.z;		Tz = rhs.column3.z;
+	Iw = rhs.column0.w;		Jw = rhs.column1.w;		Kw = rhs.column2.w;		Tw = rhs.column3.w;
+}
+
 Matrix44 Matrix44::Invert() const
 {
 	float inv[16];

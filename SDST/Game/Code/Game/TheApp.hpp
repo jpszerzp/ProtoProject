@@ -8,6 +8,7 @@
 #include "Engine/Net/Socket.hpp"
 #include "Engine/Physics/3D/PHYSX/PhysErrorCallback.hpp"
 #include "Engine/Physics/3D/PHYSX/PhysAllocator.hpp"
+#include "Engine/Physics/3D/PHYSX/PhysXObject.hpp"
 
 class TheApp
 {
@@ -18,6 +19,9 @@ class TheApp
 	float m_deltaSeconds;
 	float m_accTimer;
 	int m_frames;
+
+	std::vector<PhysXObject*> m_physx_objs;
+	std::vector<PhysXObject*> m_physx_stack;
 
 public:
 	TheApp();
@@ -60,6 +64,9 @@ public:
 	void PhysxStartup();
 	void PhysxShutdown();
 	void SpawnPhysxStack(const Vector3& origin, uint sideLength, uint stackHeight);
+	void PhysxUpdate(float dt);
+	void PhysxUpdateDelete();
+	void PhysxRender(Renderer* rdr);
 };
 
 extern TheApp* g_theApp;

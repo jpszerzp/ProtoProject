@@ -18,7 +18,41 @@
 #include "Engine/Net/Net.hpp"
 #include "Engine/Net/NetAddress.hpp"
 #include "Engine/Physics/3D/RF/PhysTime.hpp"
-#include "Engine/Physics/3D/PHYSX/PhysXObject.hpp"
+
+std::vector<PxVec3> gContactPositions;
+std::vector<PxVec3> gContactImpulses;
+
+class ContactReportCallback: public PxSimulationEventCallback
+{
+	void onConstraintBreak(PxConstraintInfo* constraints, PxU32 count)	{ PX_UNUSED(constraints); PX_UNUSED(count); }
+	void onWake(PxActor** actors, PxU32 count)							{ PX_UNUSED(actors); PX_UNUSED(count); }
+	void onSleep(PxActor** actors, PxU32 count)							{ PX_UNUSED(actors); PX_UNUSED(count); }
+	void onTrigger(PxTriggerPair* pairs, PxU32 count)					{ PX_UNUSED(pairs); PX_UNUSED(count); }
+	void onAdvance(const PxRigidBody*const*, const PxTransform*, const PxU32) {}
+	void onContact(const PxContactPairHeader& pairHeader, const PxContactPair* pairs, PxU32 nbPairs) 
+	{
+		PX_UNUSED((pairHeader));
+		std::vector<PxContactPairPoint> contactPoints;
+
+		for(PxU32 i=0;i<nbPairs;i++)
+		{
+			PxU32 contactCount = pairs[i].contactCount;
+			if(contactCount)
+			{
+				contactPoints.resize(contactCount);
+				pairs[i].extractContacts(&contactPoints[0], contactCount);
+
+				for(PxU32 j=0;j<contactCount;j++)
+				{
+					gContactPositions.push_back(contactPoints[j].position);
+					gContactImpulses.push_back(contactPoints[j].impulse);
+				}
+			}
+		}
+	}
+};
+
+ContactReportCallback gContactReportCallback;
 
 PhysAllocator gAllocator;
 PhysErrorCallback gErrorCallback;
@@ -239,7 +273,6 @@ void TheApp::ProcessInput()
 	}
 }
 
-
 void TheApp::PlayAudio(std::string clipName)
 {
 	SoundID testSound = g_audio->CreateOrGetSound( clipName );
@@ -334,6 +367,7 @@ void TheApp::PhysxStartup()
 	gDispatcher = PxDefaultCpuDispatcherCreate(2);
 	sceneDesc.cpuDispatcher	= gDispatcher;
 	sceneDesc.filterShader	= PxDefaultSimulationFilterShader;
+	sceneDesc.simulationEventCallback = &gContactReportCallback;
 	gScene = gPhysics->createScene(sceneDesc);
 
 	PxPvdSceneClient* pvdClient = gScene->getScenePvdClient();
@@ -367,38 +401,71 @@ void TheApp::SpawnPhysxStack(const Vector3& origin, uint sideLength, uint stackH
 	gScene->addActor(*pl);
 
 	// interface with my API
-	PhysXObject* pl_obj = new PhysXObject();
-	//PhysXObject* pl_obj = new PhysXObject(pl);
-	//m_physx_objs.push_back(pl_obj);
-	//m_physx_stack.push_back(pl_obj);
-	//PxVec3 stack_offset = PxVec3(0.f);
-	//PxVec3 stack_origin = PxVec3(origin.x, origin.y, origin.z);
-	//PxTransform pxt = PxTransform(stack_origin);
-	//PxReal half_ext = .5f;
-	//PxShape* shape = m_physics->createShape(PxBoxGeometry(half_ext, half_ext, half_ext), *m_physx_mat);
-	//for (PxU32 k = 0; k < stackHeight; ++k)
-	//{
-	//	for (PxU32 i = 0; i < sideLength; ++i)
-	//	{
-	//		// * 2.f is why we use half_ext when setting up local transform
-	//		PxReal stack_x = stack_offset.x + i * 2.f;			
-	//		for (uint j = 0; j < sideLength; ++j)
-	//		{
-	//			PxReal stack_z = stack_offset.z + j * 2.f;
-	//			PxVec3 offset = PxVec3(stack_x, stack_offset.y, stack_z);
-	//			PxTransform local_t(offset * half_ext);
-	//			PxRigidDynamic* body = m_physics->createRigidDynamic(pxt.transform(local_t));
-	//			body->attachShape(*shape);
-	//			PxRigidBodyExt::updateMassAndInertia(*body, 10.f);
-	//			m_physx_scene->addActor(*body);
-	//			PhysXObject* phys_obj = new PhysXObject(body);
-	//			m_physx_objs.push_back(phys_obj);
-	//			m_physx_stack.push_back(phys_obj);
-	//		}
-	//	}
-	//	sideLength--;
-	//	stack_origin = PxVec3(stack_origin.x + .5f, stack_origin.y + 1.f, stack_origin.z + .5f);
-	//	pxt = PxTransform(stack_origin);
-	//}
-	//shape->release();
+	PhysXObject* pl_obj = new PhysXObject(pl);
+	m_physx_objs.push_back(pl_obj);
+	m_physx_stack.push_back(pl_obj);
+
+	PxVec3 stack_offset = PxVec3(0.f);
+	PxVec3 stack_origin = PxVec3(origin.x, origin.y, origin.z);
+	PxTransform pxt = PxTransform(stack_origin);
+	PxReal half_ext = .5f;
+
+	PxShape* shape = gPhysics->createShape(PxBoxGeometry(half_ext, half_ext, half_ext), *gMaterial);
+
+	for (PxU32 k = 0; k < stackHeight; ++k)
+	{
+		for (PxU32 i = 0; i < sideLength; ++i)
+		{
+			// * 2.f is why we use half_ext when setting up local transform
+			PxReal stack_x = stack_offset.x + i * 2.f;			
+			for (uint j = 0; j < sideLength; ++j)
+			{
+				PxReal stack_z = stack_offset.z + j * 2.f;
+				PxVec3 offset = PxVec3(stack_x, stack_offset.y, stack_z);
+				PxTransform local_t(offset * half_ext);
+
+				PxRigidDynamic* body = gPhysics->createRigidDynamic(pxt.transform(local_t));
+
+				body->attachShape(*shape);
+				PxRigidBodyExt::updateMassAndInertia(*body, 10.f);
+
+				gScene->addActor(*body);
+
+				PhysXObject* phys_obj = new PhysXObject(body);
+				m_physx_objs.push_back(phys_obj);
+				m_physx_stack.push_back(phys_obj);
+			}
+		}
+
+		sideLength--;
+		stack_origin = PxVec3(stack_origin.x + .5f, stack_origin.y + 1.f, stack_origin.z + .5f);
+		pxt = PxTransform(stack_origin);
+	}
+
+	shape->release();
+}
+
+void TheApp::PhysxUpdate(float dt)
+{
+	gContactPositions.clear();
+	gContactImpulses.clear();
+
+	// in sample code, this is forced to be 60 fps...
+	//deltaTime = 1.f / 60.f;
+	gScene->simulate(dt);
+	gScene->fetchResults(true);
+	DebuggerPrintf("%d contact reports\n", PxU32(gContactPositions.size()));
+
+	PhysxUpdateDelete();
+}
+
+void TheApp::PhysxUpdateDelete()
+{
+
+}
+
+void TheApp::PhysxRender(Renderer* rdr)
+{
+	for (int i = 0; i < m_physx_objs.size(); ++i)
+		m_physx_objs[i]->RenderActor(rdr);
 }

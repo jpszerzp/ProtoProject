@@ -19,6 +19,9 @@
 #include "Engine/Core/Rgba.hpp"
 #include "Engine/Core/Vertex.hpp"
 
+#include "PxPhysicsAPI.h"
+using namespace physx;
+
 #include <string>
 #include <map>
 #include <vector>
@@ -321,6 +324,9 @@ public:
 
 	void SetStencilFunc(GLenum func);
 	void SetStencilMask(GLuint mask);
+
+	// physx
+	void RenderPhysxGeometry(const std::string& mn, const std::string sn, const std::string tn, const PxMat44& mm);
 
 public:
 	const static int DIFFUSE_MAP_BIND_IDX = 0;
