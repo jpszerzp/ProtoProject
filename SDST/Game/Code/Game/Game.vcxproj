@@ -259,6 +259,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)../../Engine/Code/;$(SolutionDir)Code/;C:\PhysX-4.0\physx\include;C:\PhysX-4.0\pxshared\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -266,7 +267,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)../../Engine/Code/;$(SolutionDir)Code/;$(SolutionDir)../../Engine/Code/assimp;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp-vc140-mt.lib;C:\PhysX-4.0\physx\bin\win.x86_64.vc141.mt\release\PhysX_64.lib;C:\PhysX-4.0\physx\bin\win.x86_64.vc141.mt\release\PhysXCommon_64.lib;C:\PhysX-4.0\physx\bin\win.x86_64.vc141.mt\release\PhysXFoundation_64.lib;C:\PhysX-4.0\physx\bin\win.x86_64.vc141.mt\release\PhysXCooking_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc140-mt.lib;C:\PhysX-4.0\physx\bin\win.x86_64.vc141.mt\release\PhysX_64.lib;C:\PhysX-4.0\physx\bin\win.x86_64.vc141.mt\release\PhysXCommon_64.lib;C:\PhysX-4.0\physx\bin\win.x86_64.vc141.mt\release\PhysXFoundation_64.lib;C:\PhysX-4.0\physx\bin\win.x86_64.vc141.mt\release\PhysXCooking_64.lib;C:\PhysX-4.0\physx\bin\win.x86_64.vc141.mt\release\PhysXExtensions_static_64.lib;C:\PhysX-4.0\physx\bin\win.x86_64.vc141.mt\release\PhysXPvdSDK_static_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y /F /I "$(TargetPath)" "$(SolutionDir)Run_Win32"</Command>
@@ -287,6 +288,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)../../Engine/Code/;$(SolutionDir)Code/;C:\PhysX-4.0\physx\include;C:\PhysX-4.0\pxshared\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -294,7 +296,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)../../Engine/Code/;$(SolutionDir)Code/;$(SolutionDir)../../Engine/Code/assimp;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp-vc140-mt.lib;C:\PhysX-4.0\physx\bin\win.x86_64.vc141.mt\release\PhysX_64.lib;C:\PhysX-4.0\physx\bin\win.x86_64.vc141.mt\release\PhysXCommon_64.lib;C:\PhysX-4.0\physx\bin\win.x86_64.vc141.mt\release\PhysXFoundation_64.lib;C:\PhysX-4.0\physx\bin\win.x86_64.vc141.mt\release\PhysXCooking_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc140-mt.lib;C:\PhysX-4.0\physx\bin\win.x86_64.vc141.mt\release\PhysX_64.lib;C:\PhysX-4.0\physx\bin\win.x86_64.vc141.mt\release\PhysXCommon_64.lib;C:\PhysX-4.0\physx\bin\win.x86_64.vc141.mt\release\PhysXFoundation_64.lib;C:\PhysX-4.0\physx\bin\win.x86_64.vc141.mt\release\PhysXCooking_64.lib;C:\PhysX-4.0\physx\bin\win.x86_64.vc141.mt\release\PhysXExtensions_static_64.lib;C:\PhysX-4.0\physx\bin\win.x86_64.vc141.mt\release\PhysXPvdSDK_static_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y /F /I "$(TargetPath)" "$(SolutionDir)Run_Win32"</Command>

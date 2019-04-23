@@ -321,48 +321,41 @@ void TheApp::BlackboardStartup()
 
 void TheApp::PhysxStartup()
 {
-	/*
-	static PhysErrorCallback gErrorCB;
-	static PhysAllocator gAllocator;
-
-	// create physx foundation
-	m_foundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCB);
-	if (!m_foundation)
-		ASSERT_OR_DIE(false, "PxCreateFoundation failed!");
-
-	// create top-level physx object
-	bool recordMemoryAllocations = true;
-
-	m_physics = PxCreatePhysics(PX_PHYSICS_VERSION, *m_foundation, PxTolerancesScale(), recordMemoryAllocations, m_pvd);
-	if (!m_physics)
-		ASSERT_OR_DIE(false, "PxCreatePhysics failed!");
-
-	TODO("optional startups: cooking, extensions, articulations, height fields");
-	*/
-
 	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
 
-	//gPvd = PxCreatePvd(*gFoundation);
-	//PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate("127.0.0.1", 5425, 10);
-	//gPvd->connect(*transport,PxPvdInstrumentationFlag::eALL);
+	gPvd = PxCreatePvd(*gFoundation);
+	PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate("127.0.0.1", 5425, 10);
+	gPvd->connect(*transport,PxPvdInstrumentationFlag::eALL);
 
 	gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, PxTolerancesScale(),true,gPvd);
 
 	PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
 	sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
-	//gDispatcher = PxDefaultCpuDispatcherCreate(2);
-	//sceneDesc.cpuDispatcher	= gDispatcher;
-	//sceneDesc.filterShader	= PxDefaultSimulationFilterShader;
-	//gScene = gPhysics->createScene(sceneDesc);
+	gDispatcher = PxDefaultCpuDispatcherCreate(2);
+	sceneDesc.cpuDispatcher	= gDispatcher;
+	sceneDesc.filterShader	= PxDefaultSimulationFilterShader;
+	gScene = gPhysics->createScene(sceneDesc);
+
+	PxPvdSceneClient* pvdClient = gScene->getScenePvdClient();
+	if(pvdClient)
+	{
+		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS, true);
+		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
+		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
+	}
+
+	gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
 }
 
 void TheApp::PhysxShutdown()
 {
-	/*
-	// release PxPhysics object
-	m_physics->release();
+	PX_UNUSED(true);
+	gScene->release();
+	gDispatcher->release();
+	gPhysics->release();	
+	PxPvdTransport* transport = gPvd->getTransport();
+	gPvd->release();
+	transport->release();
 
-	// release foundation
-	m_foundation->release();
-	*/
+	gFoundation->release();
 }

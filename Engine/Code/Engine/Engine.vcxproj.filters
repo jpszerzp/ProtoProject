@@ -565,12 +565,6 @@
     <ClCompile Include="Physics\3D\RF\CollisionSolver.cpp">
       <Filter>General</Filter>
     </ClCompile>
-    <ClCompile Include="Physics\3D\PHYSX\PhysAllocator.cpp">
-      <Filter>General</Filter>
-    </ClCompile>
-    <ClCompile Include="Physics\3D\PHYSX\PhysErrorCallback.cpp">
-      <Filter>General</Filter>
-    </ClCompile>
     <ClCompile Include="Physics\3D\RF\ConvexHull.cpp">
       <Filter>General</Filter>
     </ClCompile>

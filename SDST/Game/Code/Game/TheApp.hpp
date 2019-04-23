@@ -19,10 +19,6 @@ class TheApp
 	float m_accTimer;
 	int m_frames;
 
-	//PxFoundation* m_foundation = nullptr;
-	//PxPvd* m_pvd = nullptr;
-	//PxPhysics* m_physics = nullptr;
-
 public:
 	TheApp();
 	~TheApp();
