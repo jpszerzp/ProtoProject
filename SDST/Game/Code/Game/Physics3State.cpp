@@ -818,7 +818,7 @@ CollisionBox* Physics3State::WrapAroundTestBox(WrapAround* wpa, bool give_ang_ve
 	return box;
 }
 
-CollisionConvexObject* Physics3State::WrapAroundTestConvex(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, const Vector3& rot, const Vector3& scale, const bool& awake /*= true*/, const bool& sleepable /*= false*/)
+CollisionConvexObject* Physics3State::WrapAroundTestConvex(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, const Vector3&, const Vector3&, const bool& awake /*= true*/, const bool& sleepable /*= false*/)
 {
 	Plane p1 = Plane(Vector3(.1f, 0.f, .9f), 1.f);
 	Plane p2 = Plane(Vector3(.1f, 0.f, -.9f), 1.f);

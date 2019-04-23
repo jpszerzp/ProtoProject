@@ -111,7 +111,7 @@ float sEPAFace::ComputeAndSetDistOrigin()
 //	return m_verts[idx].mksi_vert;
 //}
 
-void sEPAFace::Draw(Renderer* renderer) const
+void sEPAFace::Draw(Renderer*) const
 {
 	if (m_mesh != nullptr)
 		DrawTriangle(m_mesh);

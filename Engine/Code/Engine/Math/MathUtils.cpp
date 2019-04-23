@@ -1651,7 +1651,7 @@ float SATHalfProjectionBox(const CollisionBox& b, const Vector3& axis)
 }
 
 // test of box and convex shapes along the given axis
-bool SATTestBoxVsConvex(const CollisionBox& b1, const CollisionConvexObject& cobj, Vector3 axis, const Vector3& disp, unsigned idx, float& smallest_pen, unsigned& smallest_idx,
+bool SATTestBoxVsConvex(const CollisionBox& b1, const CollisionConvexObject& cobj, Vector3 axis, const Vector3&, unsigned idx, float& smallest_pen, unsigned& smallest_idx,
 	Vector3& box_min, Vector3& box_max, Vector3& convex_min, Vector3& convex_max)
 {
 	// axes was parallel, ignore

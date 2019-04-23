@@ -104,7 +104,7 @@ void FillPointFaceBoxBox(const CollisionBox& b1, const CollisionBox& b2,
 }
 
 void FillPointFaceBoxConvex(const CollisionBox& b, const CollisionConvexObject& cobj,
-	const Vector3& disp, CollisionKeep* c_data, unsigned best, float pen,
+	const Vector3&, CollisionKeep* c_data, unsigned best, float pen,
 	Vector3 b_min, Vector3 b_max, Vector3 c_min, Vector3 c_max)
 {
 	Collision* collision = c_data->m_collision;
@@ -120,7 +120,7 @@ void FillPointFaceBoxConvex(const CollisionBox& b, const CollisionConvexObject& 
 }
 
 void FillPointFaceConvexBox(const CollisionConvexObject& cobj, const CollisionBox& b, 
-	const Vector3& disp, CollisionKeep* c_data, unsigned best, float pen,
+	const Vector3&, CollisionKeep* c_data, unsigned best, float pen,
 	Vector3 b_min, Vector3 b_max, Vector3 c_min, Vector3 c_max)
 {
 	Collision* collision = c_data->m_collision;
@@ -505,7 +505,7 @@ uint CollisionSensor::ConvexVsBox(const CollisionConvexObject& convex, const Col
 	}
 
 	// the best idx not considering cross product axes
-	unsigned best_axis_record = best;
+	//unsigned best_axis_record = best;
 
 	// cross product axes
 	// for those cross with 0 axis of box
@@ -558,7 +558,7 @@ uint CollisionSensor::ConvexVsBox(const CollisionConvexObject& convex, const Col
 	int box_idx_milestone = 2;
 	int convex_idx_milestone = box_idx_milestone + convex.GetPolyNum();
 	// axis is box's basis
-	if (best <= box_idx_milestone)
+	if (best <= (uint)(box_idx_milestone))
 	{
 		FillPointFaceBoxConvex(box, convex, disp, c_data, 
 			best, pen, box_min, box_max, convex_min, convex_max);
@@ -566,7 +566,7 @@ uint CollisionSensor::ConvexVsBox(const CollisionConvexObject& convex, const Col
 		return 1;
 	}
 	// axis is convex normals
-	else if (best <= convex_idx_milestone)
+	else if (best <= (uint)(convex_idx_milestone))
 	{
 		FillPointFaceConvexBox(convex, box, -disp, c_data, 
 			best, pen, box_min, box_max, convex_min, convex_max);

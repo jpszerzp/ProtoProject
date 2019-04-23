@@ -19,7 +19,7 @@ uint64_t g_total_hpc = 0U;
 
 Profiler* Profiler::m_profilerInstance = nullptr;
 
-bool TotalTimeSort(ProfilerNode* n1, ProfilerNode* n2)
+bool TotalTimeSort(ProfilerNode*, ProfilerNode*)
 {
 	/*
 	ProfilerHistory& history = Profiler::ProfileGetPreviousFrame(0);
@@ -36,7 +36,7 @@ bool TotalTimeSort(ProfilerNode* n1, ProfilerNode* n2)
 	return false;
 }
 
-bool SelfTimeSort(ProfilerNode* n1, ProfilerNode* n2)
+bool SelfTimeSort(ProfilerNode*, ProfilerNode*)
 {
 	/*
 	ProfilerHistory& history = Profiler::ProfileGetPreviousFrame(0);
@@ -318,7 +318,7 @@ void Profiler::UpdateFrameText()
 			//float lastFrameTime = g_gameConfigBlackboard->m_lastFrameTime * 0.001f;			// in s
 			//float lastFrameTime = g_last_frame_hpc * 0.001f;			// in s
 			double seconds = PerformanceCountToSeconds(g_last_frame_hpc);
-			float fps = 1.f / seconds;
+			float fps = 1.f / (float)(seconds);
 			std::string text = Stringf("FPS: %.4f", fps);
 			m_frameTextMeshes[purpose] = MakeTextMesh(16.f, text, frameTextBL);
 		}

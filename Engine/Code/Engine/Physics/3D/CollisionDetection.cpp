@@ -583,10 +583,10 @@ void Contact3::RF_ResolvePositionCoherent(Vector3 linearChange[2], Vector3 angul
 	{
 		Vector3 targetAngularDirection = m_relativePosWorld[0].Cross(m_normal);
 
-		Matrix33 iit;
-		iit = m_e1->GetIITWorld();
+		Matrix33 iit_t;
+		iit_t = m_e1->GetIITWorld();
 
-		angularChange[0] = iit * targetAngularDirection * (angularMove[0] / angularInertia[0]);
+		angularChange[0] = iit_t * targetAngularDirection * (angularMove[0] / angularInertia[0]);
 	}
 
 	linearChange[0] = m_normal * linearMove[0];
@@ -634,10 +634,10 @@ void Contact3::RF_ResolvePositionCoherent(Vector3 linearChange[2], Vector3 angul
 	{
 		Vector3 targetAngularDirection = m_relativePosWorld[1].Cross(m_normal);
 
-		Matrix33 iit;
-		iit = m_e2->GetIITWorld();
+		Matrix33 iit_t;
+		iit_t = m_e2->GetIITWorld();
 
-		angularChange[1] = iit * targetAngularDirection * (angularMove[1] / angularInertia[1]);
+		angularChange[1] = iit_t * targetAngularDirection * (angularMove[1] / angularInertia[1]);
 	}
 
 	linearChange[1] = m_normal * linearMove[1];

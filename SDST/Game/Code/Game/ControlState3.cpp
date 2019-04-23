@@ -312,7 +312,7 @@ void ControlState3::UpdatePair(float deltaTime)
 	m_controlled_1->Update(deltaTime);
 }
 
-void ControlState3::UpdateContacts(float deltaTime)
+void ControlState3::UpdateContacts(float)
 {
 	m_keep.Reset(MAX_CONTACT_NUM);
 	m_keep.m_global_friction = .9f;
@@ -367,7 +367,7 @@ void ControlState3::UpdateContacts(float deltaTime)
 	}
 }
 
-void ControlState3::UpdateUI(float deltaTime)
+void ControlState3::UpdateUI(float)
 {
 	
 }
