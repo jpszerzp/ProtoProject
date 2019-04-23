@@ -53,17 +53,22 @@ Vector3 CollisionPrimitive::GetBasisAndPosition(uint index) const
 	Vector3 res;
 
 	if (index == 0)
+	{
 		res = m_transform_mat.GetRight();
-
+		res.Normalize();
+	}
 	else if (index == 1)
+	{
 		res = m_transform_mat.GetUp();
-
+		res.Normalize();
+	}
 	else if (index == 2)
+	{
 		res = m_transform_mat.GetForward();
-
+		res.Normalize();
+	}
 	else if (index == 3)
 		res = m_transform_mat.GetTranslation();
-
 	else 
 		ASSERT_OR_DIE(false, "Invalid index for axis");
 
@@ -150,16 +155,21 @@ CollisionBox::CollisionBox(const Vector3& half, const std::string& fp, const std
 
 void CollisionBox::Update(float deltaTime)
 {
-	// take rigid body and integrate
-	GetRigidBody()->Integrate(deltaTime);
+	if (GetRigidBody() != nullptr)
+	{
+		// take rigid body and integrate
+		GetRigidBody()->Integrate(deltaTime);
 
-	// calculate internal
-	SetPrimitiveTransformMat4(GetRigidBody()->GetTransformMat4());
-
-	// cache verts in world space
-	CacheWorldVerts();
+		// calculate internal
+		float ext_x = m_half_size.x * 2.f;
+		float ext_y = m_half_size.y * 2.f;
+		float ext_z = m_half_size.z * 2.f;
+		Matrix44 transform_mat = GetRigidBody()->GetTransformMat4() * Matrix44::MakeScale3D(ext_x, ext_y, ext_z);
+		SetPrimitiveTransformMat4(transform_mat);
+	}
 }
 
+/*
 void CollisionBox::CacheWorldVerts()
 {
 	const Vector3& centre = GetRigidBody()->GetCenter();
@@ -192,6 +202,7 @@ void CollisionBox::CacheWorldVerts()
 	m_world_verts.push_back(v7);
 	m_world_verts.push_back(v8);
 }
+*/
 
 void CollisionBox::AttachToRigidBody(CollisionRigidBody* rb)
 {
@@ -202,9 +213,10 @@ void CollisionBox::AttachToRigidBody(CollisionRigidBody* rb)
 	float ext_x = m_half_size.x * 2.f;
 	float ext_y = m_half_size.y * 2.f;
 	float ext_z = m_half_size.z * 2.f;
-	float factor_i = (1.f / 12.f) * mass * (ext_y * ext_y + ext_z * ext_z);
-	float factor_j = (1.f / 12.f) * mass * (ext_x * ext_x + ext_z * ext_z);
-	float factor_k = (1.f / 12.f) * mass * (ext_x * ext_x + ext_y * ext_y);
+	float s = 1.f / 12.f;
+	float factor_i = s * mass * (ext_y * ext_y + ext_z * ext_z);
+	float factor_j = s * mass * (ext_x * ext_x + ext_z * ext_z);
+	float factor_k = s * mass * (ext_x * ext_x + ext_y * ext_y);
 	Vector3 tensor_i = Vector3(factor_i, 0.f, 0.f);
 	Vector3 tensor_j = Vector3(0.f, factor_j, 0.f);
 	Vector3 tensor_k = Vector3(0.f, 0.f, factor_k);
@@ -215,7 +227,8 @@ void CollisionBox::AttachToRigidBody(CollisionRigidBody* rb)
 
 	rb->CacheData();
 
-	SetPrimitiveTransformMat4(rb->GetTransformMat4());
+	Matrix44 transform_mat = rb->GetTransformMat4() * Matrix44::MakeScale3D(ext_x, ext_y, ext_z);
+	SetPrimitiveTransformMat4(transform_mat);
 }
 
 float CollisionBox::ProjectVertToAxis(const Vector3& axis, const int& idx) const
@@ -277,7 +290,11 @@ CollisionPlane::CollisionPlane(const Vector2& bound, const Vector3& normal, cons
 {
 	Renderer* renderer = Renderer::GetInstance();
 
-	SetMesh(renderer->CreateOrGetMesh("quad_pcu_110"));
+	if (bound == Vector2(110.f))
+		SetMesh(renderer->CreateOrGetMesh("quad_pcu_110"));
+	else if (bound == Vector2(20.f))
+		SetMesh(renderer->CreateOrGetMesh("quad_pcu_20"));
+
 	SetShader(renderer->CreateOrGetShader(fp));
 	SetTexture(renderer->CreateOrGetTexture(tx));
 

@@ -66,7 +66,7 @@ void CollisionRigidBody::Integrate(float deltaTime)
 		float currentMotion = GetRealTimeMotion();
 
 		float bias = powf(0.5, deltaTime);
-		m_motion = bias*m_motion + (1-bias)*currentMotion;
+		m_motion = bias * m_motion + (1 - bias) * currentMotion;
 
 		if (m_motion < SLEEP_THRESHOLD) 
 			SetAwake(false);

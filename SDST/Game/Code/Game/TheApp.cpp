@@ -488,7 +488,7 @@ void TheApp::PhysxUpdateDelete()
 				}
 			}
 			// check those in wraparounds
-			//m_wraparound_demo_0->RemovePhysXObj(phys_obj);
+			g_physState->m_wraparound_demo_0->RemovePhysXObj(phys_obj);
 			g_physState->m_wraparound_demo_1->RemovePhysXObj(phys_obj);
 
 			// todo: check those in plane wraparound after they are actually added to it...

@@ -65,8 +65,7 @@ public:
 	void SetShouldDelete(const bool& value) { m_delete = value; }
 
 	virtual void Update(float deltaTime);
-
-	void Render(Renderer* renderer);
+	virtual void Render(Renderer* renderer);
 
 	CollisionRigidBody* GetRigidBody() const { return m_rigid_body; }
 	float GetBodyMass() const { return m_rigid_body->GetMass(); }
@@ -77,6 +76,7 @@ public:
 	Texture* GetTexture() const { return m_texture; }
 	Vector4 GetTint() const { return m_tint; }
 	Vector3 GetCenter() const { return m_rigid_body->GetCenter(); }
+	bool ShouldDelete() const { return m_delete; }
 
 	Vector3 GetPrimitiveRight() const;
 	Vector3 GetPrimitiveUp() const;
@@ -102,9 +102,10 @@ class CollisionBox : public CollisionPrimitive
 
 public:
 	CollisionBox(const Vector3& half, const std::string& fp = "default", const std::string& tx = "Data/Images/perspective_test.png");
+	~CollisionBox(){}
 
 	void Update(float deltaTime) override;
-	void CacheWorldVerts();
+	//void CacheWorldVerts();
 
 	void AttachToRigidBody(CollisionRigidBody* rb) override;
 

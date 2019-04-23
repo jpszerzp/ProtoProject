@@ -21,6 +21,8 @@
 
 #include <algorithm>
 
+const Vector3 Physics3State::ORIGIN_CAMERA = Vector3(0.f, 0.f, -20.f);
+
 bool IsGameobjectDead(GameObject* go) { return go->m_dead; }
 
 Physics3State::Physics3State()
@@ -109,6 +111,10 @@ Physics3State::Physics3State()
 	m_tensor_ui.push_back(t_mesh);
 	titleMin -= Vector2(0.f, txtHeight);
 
+	// my demo
+	m_wraparound_demo_0 = new WrapAround(Vector3(20.f, 300.f, -10.f), Vector3(40.f, 320.f, 10.f));
+
+	// phsx demo
 	m_wraparound_demo_1 = new WrapAround(Vector3(60.f, 300.f, -10.f), Vector3(80.f, 320.f, 10.f));
 
 	// debug
@@ -121,6 +127,9 @@ Physics3State::~Physics3State()
 	delete m_wraparound_plane;
 	m_wraparound_plane = nullptr;
 
+	delete m_wraparound_demo_0;
+	m_wraparound_demo_0 = nullptr;
+
 	delete m_wraparound_demo_1;
 	m_wraparound_demo_1 = nullptr;
 }
@@ -128,6 +137,7 @@ Physics3State::~Physics3State()
 void Physics3State::PostConstruct()
 {
 	m_wraparound_plane->m_physState = this;
+	m_wraparound_demo_0->m_physState = this;
 	m_wraparound_demo_1->m_physState = this;
 }
 
@@ -204,6 +214,14 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		m_camera->GetTransform().SetLocalRotation(Vector3::ZERO);
 		m_camera->GetTransform().SetLocalScale(Vector3::ONE);
 	}
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_V))
+	{
+		// Reset camera position, euler and scale 
+		m_camera->GetTransform().SetLocalPosition(ORIGIN_CAMERA);
+		m_camera->GetTransform().SetLocalRotation(Vector3::ZERO);
+		m_camera->GetTransform().SetLocalScale(Vector3::ONE);
+	}
+
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_F))
 	{
 		DebugRenderTasksFlush();
@@ -232,7 +250,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		SpawnRandomBox(m_wraparound_plane, 10, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 360.f, 100.f));
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_4))
-		SpawnRandomConvex(m_wraparound_plane, 1, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 360.f, 100.f));
+		SpawnRandomConvex(m_wraparound_plane, 10, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 360.f, 100.f));
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_SPACE))
 		ShootBox(m_wraparound_plane);
@@ -245,10 +263,16 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	{
 		for (CollisionPrimitive* primitive : m_wraparound_plane->m_primitives)
 			primitive->GetRigidBody()->SetSlow(.01f);
+
+		for (CollisionPrimitive* primitive : m_wraparound_demo_0->m_primitives)
+			primitive->GetRigidBody()->SetSlow(.01f);
 	}
 	else
 	{
 		for (CollisionPrimitive* primitive : m_wraparound_plane->m_primitives)
+			primitive->GetRigidBody()->SetSlow(1.f);
+
+		for (CollisionPrimitive* primitive : m_wraparound_demo_0->m_primitives)
 			primitive->GetRigidBody()->SetSlow(1.f);
 	}
 
@@ -393,6 +417,7 @@ void Physics3State::UpdateDebugDraw(float deltaTime)
 void Physics3State::UpdateWrapArounds()
 {
 	m_wraparound_plane->Update();
+	m_wraparound_demo_0->Update();
 	m_wraparound_demo_1->Update();
 }
 
@@ -439,6 +464,66 @@ void Physics3State::UpdateUI()
 	titleMin -= Vector2(0.f, txtHeight);
 }
 
+void Physics3State::UpdateDelete()
+{
+	// box
+	for (int i = 0; i < m_boxes.size(); ++i)
+	{
+		CollisionBox* box = m_boxes[i];
+		if (box->ShouldDelete())
+		{
+			// obj vector
+			std::vector<CollisionBox*>::iterator it = m_boxes.begin() + i;
+			m_boxes.erase(it);
+
+			// check each wrap arounds, since we do not know which wraparound this obj is in (could be any)
+			m_wraparound_plane->RemovePrimitive(box);
+			m_wraparound_demo_0->RemovePrimitive(box);
+			m_wraparound_demo_1->RemovePrimitive(box);
+
+			delete box;
+			i = i - 1;
+		}
+	}
+
+	// spheres
+	for (int i = 0; i < m_spheres.size(); ++i)
+	{
+		CollisionSphere* sph = m_spheres[i];
+		if (sph->ShouldDelete())
+		{
+			// obj vector
+			std::vector<CollisionSphere*>::iterator it = m_spheres.begin() + i;
+			m_spheres.erase(it);
+
+			m_wraparound_plane->RemovePrimitive(sph);
+			m_wraparound_demo_0->RemovePrimitive(sph);
+			m_wraparound_demo_1->RemovePrimitive(sph);
+
+			delete sph;
+			i = i - 1;
+		}
+	}
+
+	// convex
+	for (int i = 0; i < m_convex_objs.size(); ++i)
+	{
+		CollisionConvexObject* cobj = m_convex_objs[i];
+		if (cobj->ShouldDelete())
+		{
+			std::vector<CollisionConvexObject*>::iterator it = m_convex_objs.begin() + i;
+			m_convex_objs.erase(it);
+
+			m_wraparound_plane->RemovePrimitive(cobj);
+			m_wraparound_demo_0->RemovePrimitive(cobj);
+			m_wraparound_demo_1->RemovePrimitive(cobj);
+
+			delete cobj;
+			i = i - 1;
+		}
+	}
+}
+
 void Physics3State::UpdateGameobjectsCore(float deltaTime)
 {
 	UpdateGameobjectsDynamics(deltaTime);
@@ -472,8 +557,6 @@ void Physics3State::UpdateContactGeneration()
 {
 	// set up collision keep
 	m_keep.Reset(MAX_CONTACT_NUM);
-	m_keep.m_global_friction = .9f;
-	m_keep.m_global_restitution = .1f;
 	m_keep.m_tolerance = .1f;
 
 	// generate collisions
@@ -628,10 +711,9 @@ void Physics3State::RenderGameobjects(Renderer* renderer)
 
 void Physics3State::RenderWrapArounds(Renderer* renderer)
 {
-	//m_wraparound_sphere->Render(renderer);
-	//m_wraparound_box->Render(renderer);
-	//m_wraparound_convex->Render(renderer);
 	m_wraparound_plane->Render(renderer);
+	m_wraparound_demo_0->Render(renderer);
+	m_wraparound_demo_1->Render(renderer);
 }
 
 void Physics3State::RenderForwardPath(Renderer*)
@@ -686,9 +768,9 @@ CollisionSphere* Physics3State::WrapAroundTestSphere(WrapAround* wpa, bool give_
 }
 
 CollisionBox* Physics3State::WrapAroundTestBox(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, 
-	bool register_g, const Vector3& position, const Vector3& rot, const Vector3&, const bool& awake, const bool& sleepable)
+	bool register_g, const Vector3& position, const Vector3& rot, const Vector3& scale, const bool& awake, const bool& sleepable)
 {
-	CollisionBox* box = new CollisionBox(Vector3(.5f));
+	CollisionBox* box = new CollisionBox(scale / 2.f);
 
 	CollisionRigidBody* rb = new CollisionRigidBody(1.f, position, rot);
 	rb->SetAwake(awake);
@@ -801,8 +883,14 @@ void Physics3State::SpawnRandomBox(WrapAround* wpa, uint num, const Vector3& min
 
 	for (uint i = 0; i < num; ++i)
 	{
+		// get box with random scales
+		const float& scale_x = GetRandomFloatInRange(1.f, 5.f);
+		const float& scale_y = GetRandomFloatInRange(1.f, 5.f);
+		const float& scale_z = GetRandomFloatInRange(1.f, 5.f);
+		Vector3 rand_scale = Vector3(scale_x, scale_y, scale_z);
+
 		const Vector3& rand_pos = GetRandomLocationWithin(bound);
-		WrapAroundTestBox(wpa, true, false, true, rand_pos, Vector3::ZERO, Vector3::ONE);
+		WrapAroundTestBox(wpa, true, false, true, rand_pos, Vector3::ZERO, rand_scale);
 	}
 }
 
