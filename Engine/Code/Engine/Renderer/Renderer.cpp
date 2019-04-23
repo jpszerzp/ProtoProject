@@ -1524,6 +1524,11 @@ void Renderer::RenderPhysxGeometry(const std::string& mn, const std::string sn, 
 	DrawMesh(mesh);
 }
 
+void Renderer::SetPointSize(float size)
+{
+	glPointSize(size);
+}
+
 // Not using forward path or material - for example, see the use of SetObjectColorUBO
 void Renderer::DrawMesh(Mesh* mesh, bool culling, bool depth_test)
 {

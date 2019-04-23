@@ -328,13 +328,14 @@ public:
 	// physx
 	void RenderPhysxGeometry(const std::string& mn, const std::string sn, const std::string tn, const PxMat44& mm);
 
+	void SetPointSize(float size);
+
 public:
 	const static int DIFFUSE_MAP_BIND_IDX = 0;
 	const static int NORMAL_MAP_BIND_IDX = 1;
 	const static int SHADOW_MAP_BIND_IDX = 11;
 
 	const static int CAMERA_BUFFER_BIND_IDX = 2;
-	//const static int LIGHTS_BUFFER_BIND_IDX = 3;
 	const static int SINGLE_LIGHT_BUFFER_BIND_IDX = 3;
 	const static int LIGHT_CONST_BUFFER_BIND_IDX = 4;
 	const static int OBJECT_BUFFER_BIND_IDX = 5;

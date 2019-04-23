@@ -4,6 +4,13 @@
 #include "Engine/Core/Quaternion.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
 
+enum eParticleVerlet
+{
+	VERLET_VEL_P,
+	VERLET_BASIC_P,
+	VERLET_P_NUM,
+};
+
 class CollisionEntity
 {
 protected:
@@ -32,6 +39,10 @@ protected:
 
 	// freeze has highest priority on pause
 	bool m_frozen = false;
+
+	// verlet specific
+	Vector3 m_last_center = Vector3::ZERO;
+	Vector3 m_half_step_vel = Vector3::ZERO;
 
 public:
 	virtual void Integrate(float deltaTime);
@@ -75,6 +86,12 @@ public:
 class CollisionRigidBody : public CollisionEntity
 {
 protected:
+	// if this body is for particle...
+	// if yes, rigid body works effectively like an entity...
+	bool m_particle = false;
+	bool m_verlet = false;
+	eParticleVerlet m_verlet_p = VERLET_P_NUM;
+
 	Quaternion m_orientation;
 
 	Vector3 m_ang_vel = Vector3::ZERO;
@@ -89,6 +106,9 @@ protected:
 
 public:
 	void Integrate(float deltaTime) override;
+	void IntegrateEulerParticle(float dt);
+	void IntegrateVerletParticle(float dt);
+
 	void ClearAcc() override;
 	CollisionRigidBody(const float& mass, const Vector3& center, const Vector3& euler);
 	~CollisionRigidBody(){}
@@ -102,6 +122,9 @@ public:
 	void SetInvTensorWorld(const Matrix33& inv_tensor_world) override { m_inv_tensor_world = inv_tensor_world; }
 	void SetAngularVelocity(const Vector3& ang_vel) override { m_ang_vel = ang_vel; }
 	void SetAwake(bool awake) override;
+	void SetParticle(bool particle) { m_particle = particle; }
+	void SetVerlet(bool val) { m_verlet = val; }
+	void SetVerletScheme(eParticleVerlet val) { m_verlet_p = val; }
 
 	void SetOrientation(const Quaternion& q) { m_orientation = q; }
 
@@ -110,6 +133,9 @@ public:
 	Vector3 GetAngularVelocity() const override { return m_ang_vel; }
 	float GetRealTimeMotion() const override;
 	Matrix33 GetTensor() const override { return m_tensor; }
+	bool IsVerlet() const { return m_verlet; }
+	bool IsParticle() const { return m_particle; }
+	eParticleVerlet GetParticleVerletScheme() const { return m_verlet_p; }
 
 	void AddAngularVelocity(const Vector3& v);
 };

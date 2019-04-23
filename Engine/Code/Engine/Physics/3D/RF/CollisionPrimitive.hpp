@@ -147,6 +147,31 @@ public:
 	float GetOffset() const { return m_offset; }
 };
 
+class CollisionPoint : public CollisionPrimitive
+{
+	float m_size;
+
+public:
+	CollisionPoint(const float& size, const std::string& fp = "default", const std::string& tx = "Data/Images/white.png");
+
+	// tensor for a singular point is not meaningful, different from other primitives
+	void AttachToRigidBody(CollisionRigidBody* rb) override;
+
+	// set point body position, affecting position of primitive...
+	// may be turned to not virtual later...
+	void SetRigidBodyPosition(const Vector3& pos) override;
+
+	void Update(float dt) override;
+
+	bool IsVerlet() const { return GetRigidBody()->IsVerlet(); }
+	bool IsParticle() const { return GetRigidBody()->IsParticle(); }
+	eParticleVerlet GetParticleVerletScheme() const { return GetRigidBody()->GetParticleVerletScheme(); }
+
+	void Render(Renderer* renderer) override;
+
+	float GetSize() const { return m_size; }
+};
+
 class CollisionConvexObject : public CollisionPrimitive
 {
 	ConvexHull m_hull;

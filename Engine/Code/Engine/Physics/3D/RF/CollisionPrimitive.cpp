@@ -1,6 +1,7 @@
 #include "Engine/Physics/3D/RF/CollisionPrimitive.hpp"
 #include "Engine/Renderer/DebugRenderer.hpp"
 #include "Engine/Math/MathUtils.hpp"
+#include "Engine/Input/InputSystem.hpp"
 
 void CollisionPrimitive::BuildCommon(const std::string& shader, const std::string& tx)
 {
@@ -375,6 +376,99 @@ void CollisionPlane::AttachToRigidBody(CollisionRigidBody* rb)
 	rb->CacheData();
 
 	SetPrimitiveTransformMat4(rb->GetTransformMat4());
+}
+
+CollisionPoint::CollisionPoint(const float& size, const std::string& fp, const std::string& tx)
+	: m_size(size)
+{
+	Renderer* renderer = Renderer::GetInstance();
+
+	// render data
+	SetMesh(renderer->CreateOrGetMesh("point_pcu"));
+	SetShader(renderer->CreateOrGetShader(fp));
+	SetTexture(renderer->CreateOrGetTexture(tx));
+
+	Vector4 tintV4;
+	Rgba tint = Rgba::WHITE;
+	tint.GetAsFloats(tintV4.x, tintV4.y, tintV4.z, tintV4.w);
+	SetTint(tintV4);
+}
+
+void CollisionPoint::AttachToRigidBody(CollisionRigidBody* rb)
+{
+	SetRigidBody(rb);
+
+	// tensor not needed for point...
+
+	// so that transform mat and inv tensor world are set 
+	rb->CacheData();
+
+	// use same transform mat for primitive...
+	// point is not in collision pipeline, hence scale may be not used...
+	// instead, scale can be directly applied when building mesh...
+	SetPrimitiveTransformMat4(rb->GetTransformMat4());
+}
+
+void CollisionPoint::SetRigidBodyPosition(const Vector3& pos)
+{
+	GetRigidBody()->SetCenter(pos);
+
+	// cache
+	GetRigidBody()->CacheData();
+
+	// transform
+	SetPrimitiveTransformMat4(GetRigidBody()->GetTransformMat4());
+}
+
+void CollisionPoint::Update(float dt)
+{
+	// get input
+	InputSystem* input = InputSystem::GetInstance();
+
+	// input detection
+	if (input->WasKeyJustPressed(InputSystem::KEYBOARD_P))
+	{
+		SetFrozen(!IsFrozen());
+	}
+
+	// particle update
+	if (GetRigidBody() != nullptr && !IsFrozen())
+	{
+		if (!IsVerlet())
+		{
+			// euler
+			GetRigidBody()->IntegrateEulerParticle(dt);
+
+			// calculate internal
+			SetPrimitiveTransformMat4(GetRigidBody()->GetTransformMat4());
+		}
+		else
+		{
+			// verlet
+			GetRigidBody()->IntegrateVerletParticle(dt);
+
+			// internal
+			SetPrimitiveTransformMat4(GetRigidBody()->GetTransformMat4());
+		}
+	}
+}
+
+void CollisionPoint::Render(Renderer* renderer)
+{
+	if (GetMesh())
+	{
+		renderer->UseShader(GetShader());
+		renderer->SetTexture2D(0, GetTexture());
+		renderer->SetSampler2D(0, GetTexture()->GetSampler());
+	}
+
+	// ubo
+	renderer->m_colorData.rgba = GetTint();
+	renderer->m_objectData.model = GetTransformMat4();
+
+	// draw
+	renderer->SetPointSize(m_size);
+	renderer->DrawMesh(GetMesh());
 }
 
 Vector3 CollisionConvexObject::s_ref = Vector3::ZERO;
