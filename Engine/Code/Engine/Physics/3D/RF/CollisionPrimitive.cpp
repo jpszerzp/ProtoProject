@@ -471,6 +471,53 @@ void CollisionPoint::Render(Renderer* renderer)
 	renderer->DrawMesh(GetMesh());
 }
 
+
+CollisionLine::CollisionLine(const Vector3& start, const Vector3& end, const std::string& fp, const std::string& tx)
+	: m_start(start), m_end(end)
+{
+	Renderer* renderer = Renderer::GetInstance();
+
+	Vector4 tintV4;
+	Rgba tint = Rgba::WHITE;
+	tint.GetAsFloats(tintV4.x, tintV4.y, tintV4.z, tintV4.w);
+	SetTint(tintV4);
+
+	SetMesh(Mesh::CreateLineImmediate(VERT_PCU, m_start, m_end, tint));
+	SetShader(renderer->CreateOrGetShader(fp));
+	SetTexture(renderer->CreateOrGetTexture(tx));
+}
+
+void CollisionLine::Update(float)
+{
+	Mesh* m = GetMesh();
+
+	delete m;
+	SetMesh(nullptr);
+
+	const Vector4& tint = GetTint();
+	Rgba t;
+	t.SetAsFloats(tint.x, tint.y, tint.z, tint.w);
+	SetMesh(Mesh::CreateLineImmediate(VERT_PCU, m_start, m_end, t));
+}
+
+void CollisionLine::Render(Renderer* renderer)
+{
+	if (GetMesh())
+	{
+		renderer->UseShader(GetShader());
+		renderer->SetTexture2D(0, GetTexture());
+		renderer->SetSampler2D(0, GetTexture()->GetSampler());
+	}
+
+	// ubo
+	renderer->m_colorData.rgba = GetTint();
+	renderer->m_objectData.model = Matrix44::IDENTITY;
+
+	// draw
+	renderer->SetPointSize(1.f);
+	renderer->DrawMesh(GetMesh());
+}
+
 Vector3 CollisionConvexObject::s_ref = Vector3::ZERO;
 
 CollisionConvexObject::CollisionConvexObject(const ConvexHull& hull, const std::string& fp, const std::string& tx)

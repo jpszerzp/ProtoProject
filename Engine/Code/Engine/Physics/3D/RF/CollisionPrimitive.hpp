@@ -172,6 +172,25 @@ public:
 	float GetSize() const { return m_size; }
 };
 
+class CollisionLine : public CollisionPrimitive
+{
+	Vector3 m_start;
+	Vector3 m_end;
+
+public:
+	CollisionLine(const Vector3& start, const Vector3& end, const std::string& fp = "default", const std::string& tx = "Data/Images/perspective_test.png");
+	~CollisionLine(){}
+
+	Vector3 GetStart() const { return m_start; }
+	Vector3 GetEnd() const { return m_end; }
+
+	void SetStart(const Vector3& v) { m_start = v; }
+	void SetEnd(const Vector3& v) { m_end = v; }
+
+	void Update(float deltaTime) override;
+	void Render(Renderer* renderer) override;
+};
+
 class CollisionConvexObject : public CollisionPrimitive
 {
 	ConvexHull m_hull;
