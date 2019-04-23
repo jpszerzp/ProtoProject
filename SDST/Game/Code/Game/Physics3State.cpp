@@ -68,7 +68,7 @@ Physics3State::Physics3State()
 	m_keep.m_collision_head = m_storage;
 
 	// solver
-	m_solver = CollisionSolver(3, .01f, .01f);
+	m_solver = CollisionSolver(5, .01f, .01f);
 
 	// a plane
 	m_wraparound_plane = new WrapAround(Vector3(20.f, 340.f, -10.f), Vector3(130.f, 400.f, 100.f));
@@ -148,6 +148,7 @@ void Physics3State::Update(float deltaTime)
 	UpdateContacts(deltaTime);
 	UpdateDebug(deltaTime);			
 	UpdateUI();
+	UpdateDelete();
 
 	g_theApp->PhysxUpdate(deltaTime);
 }
@@ -243,14 +244,14 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		DebugRenderPlaneGrid(lifetime, gridBL, gridTL, gridTR, gridBR, 10.f, 10.f, 2.5f, mode);
 	}
 
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_7))
+		SpawnRandomConvex(m_wraparound_plane, 10, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 360.f, 100.f));
+
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_8))
 		SpawnRandomSphere(m_wraparound_plane, 10, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 360.f, 100.f));
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_9))
-		SpawnRandomBox(m_wraparound_plane, 10, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 360.f, 100.f));
-
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_4))
-		SpawnRandomConvex(m_wraparound_plane, 10, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 360.f, 100.f));
+		SpawnRandomBox(m_wraparound_plane, 5, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 360.f, 100.f));
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_SPACE))
 		ShootBox(m_wraparound_plane);
@@ -890,7 +891,7 @@ void Physics3State::SpawnRandomBox(WrapAround* wpa, uint num, const Vector3& min
 		Vector3 rand_scale = Vector3(scale_x, scale_y, scale_z);
 
 		const Vector3& rand_pos = GetRandomLocationWithin(bound);
-		WrapAroundTestBox(wpa, true, false, true, rand_pos, Vector3::ZERO, rand_scale);
+		WrapAroundTestBox(wpa, true, false, true, rand_pos, Vector3::ZERO, rand_scale, true, true);
 	}
 }
 
@@ -925,8 +926,8 @@ void Physics3State::ShootSphere(WrapAround* wpa)
 
 void Physics3State::ShootBox(WrapAround* wpa)
 {
-	CollisionBox* bx = WrapAroundTestBox(wpa, true, false, true, m_camera->GetWorldPosition(), Vector3::ZERO, Vector3::ONE);
-	bx->GetRigidBody()->SetLinearVelocity(m_camera->GetWorldForward().GetNormalized() * 100.f);		// give it a speed boost
+	CollisionBox* bx = WrapAroundTestBox(wpa, true, false, true, m_camera->GetWorldPosition(), Vector3::ZERO, Vector3::ONE, true, true);
+	bx->GetRigidBody()->SetLinearVelocity(m_camera->GetWorldForward().GetNormalized() * 50.f);		// give it a speed boost
 }
 
 std::pair<PhysXObject*, PhysXObject*> Physics3State::ResetCollisionCornerCasePhysX(const Vector3& pos1, const Vector3& pos2, const Vector3& rot1, const Vector3& rot2)

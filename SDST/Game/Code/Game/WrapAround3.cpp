@@ -193,5 +193,6 @@ void WrapAround::RemovePhysXObj(PhysXObject* px)
 
 void WrapAround::Render(Renderer* renderer)
 {
-	RenderWraparounds(renderer);
+	if (m_particle)
+		RenderWraparounds(renderer);
 }

@@ -1,7 +1,7 @@
 #include "Engine/Physics/3D/RF/CollisionEntity.hpp"
 #include "Engine/Math/MathUtils.hpp"
 
-#define SLEEP_THRESHOLD .1f
+#define SLEEP_THRESHOLD 1.5f
 
 void CollisionEntity::Integrate(float)
 {
@@ -149,7 +149,7 @@ void CollisionRigidBody::SetAwake(bool awake)
 		m_awake = true;
 
 		// Add a bit of motion to avoid it falling asleep immediately.
-		m_motion = SLEEP_THRESHOLD*2.f;
+		m_motion = SLEEP_THRESHOLD * 1.05f;
 	} 
 	else 
 	{

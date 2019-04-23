@@ -339,7 +339,11 @@ uint CollisionSensor::BoxVsHalfPlane(const CollisionBox& box, const CollisionPla
 
 		if (vertexDistance <= plane.GetOffset())
 		{
+			//collision->m_pos = plane.GetNormal();
+			//collision->m_pos *= (vertexDistance-plane.GetOffset());
+			//collision->m_pos += vertexPos;
 			collision->m_pos = vertexPos;
+
 			collision->m_normal = plane.GetNormal();
 			collision->m_penetration = plane.GetOffset() - vertexDistance;
 
