@@ -476,6 +476,7 @@ void TheApp::PhysxUpdateDelete()
 			// obj vector
 			std::vector<PhysXObject*>::iterator it = m_physx_objs.begin() + i;
 			m_physx_objs.erase(it);
+
 			// we do not know which vector of physx obj is affected, so we check all
 			// still check those in stacks just to be safe
 			for (int j = 0; j < m_physx_stack.size(); ++j)

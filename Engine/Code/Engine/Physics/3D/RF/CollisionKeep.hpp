@@ -14,8 +14,8 @@ public:
 
 	uint m_collision_count;
 
-	float m_global_friction = .9f;
-	float m_global_restitution = .1f;
+	float m_global_friction = .5f;
+	float m_global_restitution = .6f;
 	float m_tolerance;
 
 	bool AllowMoreCollision();

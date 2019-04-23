@@ -85,6 +85,8 @@ public:
 	void ShootSphere(WrapAround* wpa);
 	void ShootBox(WrapAround* wpa);
 
+	void ResetCollisionCornerCase(const Vector3& pos1, const Vector3& pos2,
+		const Vector3& rot1, const Vector3& rot2);
 	std::pair<PhysXObject*, PhysXObject*> ResetCollisionCornerCasePhysX(const Vector3& pos1, 
 		const Vector3& pos2, const Vector3& rot1, const Vector3& rot2);
 
@@ -199,4 +201,9 @@ public:
 	const Vector3 CORNER_CASE_LIN_VEL_PE_4 = Vector3(-3.f, 0.f, 0.f);
 
 	const static Vector3 ORIGIN_CAMERA;
+
+	std::vector<CollisionBox*> m_my_stack;
+
+	CollisionBox* m_corner_case_1 = nullptr;
+	CollisionBox* m_corner_case_2 = nullptr;
 };

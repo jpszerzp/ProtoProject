@@ -5,6 +5,7 @@
 #include "Engine/Physics/3D/RF/CollisionEntity.hpp"
 #include "Engine/Physics/3D/RF/ConvexHull.hpp"
 #include "Engine/Physics/3D/RF/ConvexPolyhedron.hpp"
+#include "Engine/Physics/3D/PHYSX/PhysXObject.hpp"
 
 enum eCCD
 {
@@ -66,6 +67,7 @@ public:
 	void SetRigidBodyPositionOnly(const Vector3& pos);
 	void SetFrozen(bool val) { m_rigid_body->SetFrozen(val); }
 	virtual void SetRigidBodyPosition(const Vector3&){}		// ...need to consider scale in general case when this is implemented 
+	PhysXObject* m_cmp = nullptr;
 
 	virtual void Update(float deltaTime);
 	virtual void Render(Renderer* renderer);

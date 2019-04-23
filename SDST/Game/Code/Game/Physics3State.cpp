@@ -95,21 +95,24 @@ Physics3State::Physics3State()
 	m_tensor_ui.push_back(t_mesh);
 	titleMin -= Vector2(0.f, txtHeight);
 
-	const Matrix33& tensor_mat = m_focus->GetRigidBody()->GetTensor();
-	tensor_ui = Stringf("%f, %f, %f", tensor_mat.GetI().x, tensor_mat.GetJ().x, tensor_mat.GetK().x);
-	t_mesh = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, tensor_ui, VERT_PCU);
-	m_tensor_ui.push_back(t_mesh);
-	titleMin -= Vector2(0.f, txtHeight);
+	if (m_focus)
+	{
+		const Matrix33& tensor_mat = m_focus->GetRigidBody()->GetTensor();
+		tensor_ui = Stringf("%f, %f, %f", tensor_mat.GetI().x, tensor_mat.GetJ().x, tensor_mat.GetK().x);
+		t_mesh = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, tensor_ui, VERT_PCU);
+		m_tensor_ui.push_back(t_mesh);
+		titleMin -= Vector2(0.f, txtHeight);
 
-	tensor_ui = Stringf("%f, %f, %f", tensor_mat.GetI().y, tensor_mat.GetJ().y, tensor_mat.GetK().y);
-	t_mesh = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, tensor_ui, VERT_PCU);
-	m_tensor_ui.push_back(t_mesh);
-	titleMin -= Vector2(0.f, txtHeight);
+		tensor_ui = Stringf("%f, %f, %f", tensor_mat.GetI().y, tensor_mat.GetJ().y, tensor_mat.GetK().y);
+		t_mesh = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, tensor_ui, VERT_PCU);
+		m_tensor_ui.push_back(t_mesh);
+		titleMin -= Vector2(0.f, txtHeight);
 
-	tensor_ui = Stringf("%f, %f, %f", tensor_mat.GetI().z, tensor_mat.GetJ().z, tensor_mat.GetK().z);
-	t_mesh = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, tensor_ui, VERT_PCU);
-	m_tensor_ui.push_back(t_mesh);
-	titleMin -= Vector2(0.f, txtHeight);
+		tensor_ui = Stringf("%f, %f, %f", tensor_mat.GetI().z, tensor_mat.GetJ().z, tensor_mat.GetK().z);
+		t_mesh = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, tensor_ui, VERT_PCU);
+		m_tensor_ui.push_back(t_mesh);
+		titleMin -= Vector2(0.f, txtHeight);
+	}
 
 	// my demo
 	m_wraparound_demo_0 = new WrapAround(Vector3(20.f, 300.f, -10.f), Vector3(40.f, 320.f, 10.f));
@@ -277,6 +280,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 			primitive->GetRigidBody()->SetSlow(1.f);
 	}
 
+	// physx stack
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_MINUS))
 		g_theApp->SpawnPhysxStack(Vector3(100.f, 342.5f, 45.f), 5, 5);
 
@@ -285,6 +289,17 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		for (int i = 0; i < g_theApp->m_physx_stack.size(); ++i)
 			g_theApp->m_physx_stack[i]->SetShouldDelete(true);
 		g_theApp->m_physx_stack.clear();
+	}
+
+	// my stack
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_4))
+		SpawnStack(Vector3(75.f, 342.5f, 45.f), 5, 5);
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_6))
+	{
+		for (int i = 0; i < m_my_stack.size(); ++i)
+			m_my_stack[i]->SetShouldDelete(true);
+		m_my_stack.clear();
 	}
 
 	// physx corner case demo
@@ -341,6 +356,77 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 			m_wraparound_demo_1->m_phys_obj.push_back(obj_pair.first);
 		if (obj_pair.second != nullptr)
 			m_wraparound_demo_1->m_phys_obj.push_back(obj_pair.second);
+	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_1))
+	{
+		m_ff_test = true; m_fp_test = false; m_pp_test = false; m_ee_test = false; m_pe_test = false; m_fe_test = false;
+		ResetCollisionCornerCase(CORNER_CASE_POS_FF_1, CORNER_CASE_POS_FF_2, CORNER_CASE_ORIENT_FF_1, CORNER_CASE_ORIENT_FF_2);
+	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_2))
+	{
+		m_fp_test = true; m_ff_test = false; m_pp_test = false; m_ee_test = false; m_pe_test = false; m_fe_test = false;
+		ResetCollisionCornerCase(CORNER_CASE_POS_FP_1, CORNER_CASE_POS_FP_2, CORNER_CASE_ORIENT_FP_1, CORNER_CASE_ORIENT_FP_2);
+	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_3))
+	{
+		m_pp_test = true; m_ff_test = false; m_fp_test = false; m_ee_test = false; m_pe_test = false; m_fe_test = false;
+		ResetCollisionCornerCase(CORNER_CASE_POS_PP_1, CORNER_CASE_POS_PP_2, CORNER_CASE_ORIENT_PP_1, CORNER_CASE_ORIENT_PP_2);
+	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_4))
+	{
+		m_ee_test = true; m_pp_test = false; m_ff_test = false; m_fp_test = false; m_pe_test = false; m_fe_test = false;
+		ResetCollisionCornerCase(CORNER_CASE_POS_EE_1, CORNER_CASE_POS_EE_2, CORNER_CASE_ORIENT_EE_1, CORNER_CASE_ORIENT_EE_2);
+	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_5))
+	{
+		m_pe_test = true; m_ee_test = false; m_pp_test = false; m_ff_test = false; m_fp_test = false; m_fe_test = false;
+		ResetCollisionCornerCase(CORNER_CASE_POS_PE_1, CORNER_CASE_POS_PE_2, CORNER_CASE_ORIENT_PE_1, CORNER_CASE_ORIENT_PE_2);
+	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_6))
+	{
+		m_fe_test = true; m_pe_test = false; m_ee_test = false; m_pp_test = false; m_ff_test = false; m_fp_test = false; 
+		ResetCollisionCornerCase(CORNER_CASE_POS_FE_1, CORNER_CASE_POS_FE_2, CORNER_CASE_ORIENT_FE_1, CORNER_CASE_ORIENT_FE_2);
+	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_U))
+	{
+		// to fire the corner case test, give opposite velocities
+		if (m_corner_case_1 != nullptr && m_corner_case_2 != nullptr && m_ff_test)
+		{
+			m_corner_case_1->GetRigidBody()->SetLinearVelocity(CORNER_CASE_LIN_VEL_FF_1);
+			m_corner_case_2->GetRigidBody()->SetLinearVelocity(CORNER_CASE_LIN_VEL_FF_2);
+		}
+		else if (m_corner_case_1 != nullptr && m_corner_case_2 != nullptr && m_fp_test)
+		{
+			m_corner_case_1->GetRigidBody()->SetLinearVelocity(CORNER_CASE_LIN_VEL_FP_1);
+			m_corner_case_2->GetRigidBody()->SetLinearVelocity(CORNER_CASE_LIN_VEL_FP_2);
+		}
+		else if (m_corner_case_1 != nullptr && m_corner_case_2 != nullptr && m_pp_test)
+		{
+			m_corner_case_1->GetRigidBody()->SetLinearVelocity(CORNER_CASE_LIN_VEL_PP_1);
+			m_corner_case_2->GetRigidBody()->SetLinearVelocity(CORNER_CASE_LIN_VEL_PP_2);
+		}
+		else if (m_corner_case_1 != nullptr && m_corner_case_2 != nullptr && m_ee_test)
+		{
+			m_corner_case_1->GetRigidBody()->SetLinearVelocity(CORNER_CASE_LIN_VEL_EE_1);
+			m_corner_case_2->GetRigidBody()->SetLinearVelocity(CORNER_CASE_LIN_VEL_EE_2);
+		}
+		else if (m_corner_case_1 != nullptr && m_corner_case_2 != nullptr && m_pe_test)
+		{
+			m_corner_case_1->GetRigidBody()->SetLinearVelocity(CORNER_CASE_LIN_VEL_PE_1);
+			m_corner_case_2->GetRigidBody()->SetLinearVelocity(CORNER_CASE_LIN_VEL_PE_2);
+		}
+		else if (m_corner_case_1 != nullptr && m_corner_case_2 != nullptr && m_fe_test)
+		{
+			m_corner_case_1->GetRigidBody()->SetLinearVelocity(CORNER_CASE_LIN_VEL_FE_1);
+			m_corner_case_2->GetRigidBody()->SetLinearVelocity(CORNER_CASE_LIN_VEL_FE_2);
+		}
 	}
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_I))
@@ -437,32 +523,35 @@ void Physics3State::UpdateUI()
 	delete m_motion_ui;
 	m_motion_ui = nullptr;
 
-	std::string motion_ui = Stringf("Motion of focused: %f", m_focus->GetRigidBody()->GetRealTimeMotion());
-	m_motion_ui = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, motion_ui, VERT_PCU);
-	titleMin -= Vector2(0.f, txtHeight);
-
-	// mass
-	delete m_mass_ui;
-	m_mass_ui = nullptr;
-
-	std::string mass_ui = Stringf("Mass: %f", m_focus->GetRigidBody()->GetMass());
-	m_mass_ui = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, mass_ui, VERT_PCU);
-	titleMin -= Vector2(0.f, txtHeight);
-
-	// considering tensor takes 4 lines
-	for (int i = 0; i < 4; ++i)
+	if (m_focus)
+	{
+		std::string motion_ui = Stringf("Motion of focused: %f", m_focus->GetRigidBody()->GetRealTimeMotion());
+		m_motion_ui = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, motion_ui, VERT_PCU);
 		titleMin -= Vector2(0.f, txtHeight);
 
-	// velocity
-	delete m_vel_ui;
-	m_vel_ui = nullptr;
+		// mass
+		delete m_mass_ui;
+		m_mass_ui = nullptr;
 
-	const Vector3& lin_vel = m_focus->GetRigidBody()->GetLinearVelocity();
-	const Vector3& ang_vel = m_focus->GetRigidBody()->GetAngularVelocity();
-	std::string vel_ui = Stringf("Linear and angular velocity of the focused: (%f, %f, %f), (%f, %f, %f)", 
-		lin_vel.x, lin_vel.y, lin_vel.z, ang_vel.x, ang_vel.y, ang_vel.z);
-	m_vel_ui = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, vel_ui, VERT_PCU);
-	titleMin -= Vector2(0.f, txtHeight);
+		std::string mass_ui = Stringf("Mass: %f", m_focus->GetRigidBody()->GetMass());
+		m_mass_ui = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, mass_ui, VERT_PCU);
+		titleMin -= Vector2(0.f, txtHeight);
+
+		// considering tensor takes 4 lines
+		for (int i = 0; i < 4; ++i)
+			titleMin -= Vector2(0.f, txtHeight);
+
+		// velocity
+		delete m_vel_ui;
+		m_vel_ui = nullptr;
+
+		const Vector3& lin_vel = m_focus->GetRigidBody()->GetLinearVelocity();
+		const Vector3& ang_vel = m_focus->GetRigidBody()->GetAngularVelocity();
+		std::string vel_ui = Stringf("Linear and angular velocity of the focused: (%f, %f, %f), (%f, %f, %f)", 
+			lin_vel.x, lin_vel.y, lin_vel.z, ang_vel.x, ang_vel.y, ang_vel.z);
+		m_vel_ui = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, vel_ui, VERT_PCU);
+		titleMin -= Vector2(0.f, txtHeight);
+	}
 }
 
 void Physics3State::UpdateDelete()
@@ -481,6 +570,29 @@ void Physics3State::UpdateDelete()
 			m_wraparound_plane->RemovePrimitive(box);
 			m_wraparound_demo_0->RemovePrimitive(box);
 			m_wraparound_demo_1->RemovePrimitive(box);
+
+			// need to update my stack vector
+			for (int i = 0; i < m_my_stack.size(); ++i)
+			{
+				if (m_my_stack[i] == box)
+				{
+					std::vector<CollisionBox*>::iterator it = m_my_stack.begin() + i;
+					m_my_stack.erase(it);
+					i--;
+					
+					break;		// deleted box found in stack, abort
+				}
+			}
+
+			// is focused?
+			if (m_focus == box)
+				m_focus = nullptr;
+
+			// if corner case
+			if (m_corner_case_1 == box)
+				m_corner_case_1 = nullptr;
+			if (m_corner_case_2 == box)
+				m_corner_case_2 = nullptr;
 
 			delete box;
 			i = i - 1;
@@ -870,7 +982,8 @@ void Physics3State::SpawnStack(const Vector3& origin , uint sideLength, uint sta
 
 				Vector3 stack_pos = Vector3(stack_x, stack_pos_origin.y, stack_z);
 
-				WrapAroundTestBox(m_wraparound_plane, false, false, true, stack_pos, Vector3::ZERO, Vector3::ONE, false, true);
+				CollisionBox* box = WrapAroundTestBox(m_wraparound_plane, false, false, true, stack_pos, Vector3::ZERO, Vector3::ONE, true, true);
+				m_my_stack.push_back(box);
 			}
 		}
 
@@ -932,6 +1045,50 @@ void Physics3State::ShootBox(WrapAround* wpa)
 {
 	CollisionBox* bx = WrapAroundTestBox(wpa, true, false, true, m_camera->GetWorldPosition(), Vector3::ZERO, Vector3::ONE, true, true);
 	bx->GetRigidBody()->SetLinearVelocity(m_camera->GetWorldForward().GetNormalized() * 50.f);		// give it a speed boost
+}
+
+void Physics3State::ResetCollisionCornerCase(const Vector3& pos1, const Vector3& pos2, const Vector3& rot1, const Vector3& rot2)
+{
+	if (!m_corner_case_1 && !m_corner_case_2)
+	{
+		m_corner_case_1 = new CollisionBox(Vector3(.5f));
+		CollisionRigidBody* rb = new CollisionRigidBody(1.f, pos1, rot1);
+		rb->SetAwake(true);
+		rb->SetSleepable(false);
+
+		m_corner_case_1->AttachToRigidBody(rb);
+		m_boxes.push_back(m_corner_case_1);
+		m_wraparound_demo_0->m_primitives.push_back(m_corner_case_1);
+		m_focus = m_corner_case_1;
+
+		m_corner_case_2 = new CollisionBox(Vector3(.5f));
+		rb = new CollisionRigidBody(1.f, pos2, rot2);
+		rb->SetAwake(true);
+		rb->SetSleepable(false);
+
+		m_corner_case_2->AttachToRigidBody(rb);
+		m_boxes.push_back(m_corner_case_2);
+		m_wraparound_demo_0->m_primitives.push_back(m_corner_case_2);
+	}
+
+	if (m_corner_case_1 != nullptr && m_corner_case_2 != nullptr)
+	{
+		// to restore FF corner case, restore position, reset velocity, set orient, make sure gravity is null
+		m_corner_case_1->GetRigidBody()->SetCenter(pos1);
+		m_corner_case_2->GetRigidBody()->SetCenter(pos2);
+
+		m_corner_case_1->GetRigidBody()->SetOrientation(Quaternion::FromEuler(rot1));
+		m_corner_case_2->GetRigidBody()->SetOrientation(Quaternion::FromEuler(rot2));
+
+		m_corner_case_1->GetRigidBody()->SetAngularVelocity(Vector3::ZERO);
+		m_corner_case_2->GetRigidBody()->SetAngularVelocity(Vector3::ZERO);
+
+		m_corner_case_1->GetRigidBody()->SetLinearVelocity(Vector3::ZERO);
+		m_corner_case_2->GetRigidBody()->SetLinearVelocity(Vector3::ZERO);
+
+		m_corner_case_1->GetRigidBody()->SetBaseLinearAcceleration(Vector3::ZERO);
+		m_corner_case_2->GetRigidBody()->SetBaseLinearAcceleration(Vector3::ZERO);
+	}
 }
 
 std::pair<PhysXObject*, PhysXObject*> Physics3State::ResetCollisionCornerCasePhysX(const Vector3& pos1, const Vector3& pos2, const Vector3& rot1, const Vector3& rot2)
