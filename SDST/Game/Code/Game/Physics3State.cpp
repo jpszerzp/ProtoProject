@@ -1,5 +1,6 @@
 ﻿#include "Game/Physics3State.hpp"
 #include "Game/GameCommon.hpp"
+#include "Game/TheApp.hpp"
 #include "Engine/Renderer/Window.hpp"
 #include "Engine/Renderer/DebugRenderer.hpp"
 #include "Engine/Core/Console/DevConsole.hpp"  
@@ -34,7 +35,6 @@ Physics3State::Physics3State()
 	float height = window->GetWindowHeight();
 	float aspect = width / height;
 
-	//m_cameraInitialPos = Vector3(0.f, 0.f, -20.f);
 	m_cameraInitialPos = Vector3(75.f, 350.f, 45.f);
 	m_cameraRotationSpd = 50.f;
 
@@ -254,6 +254,8 @@ void Physics3State::Update(float deltaTime)
 	UpdateContacts(deltaTime);
 	UpdateDebug(deltaTime);			
 	UpdateUI();
+
+	g_theApp->PhysxUpdate(deltaTime);
 }
 
 void Physics3State::UpdateMouse(float deltaTime)
@@ -398,6 +400,9 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		for (CollisionPrimitive* primitive : m_wraparound_plane->m_primitives)
 			primitive->GetRigidBody()->SetSlow(1.f);
 	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_MINUS))
+		g_theApp->SpawnPhysxStack(Vector3(100.f, 342.5f, 45.f), 5, 5);
 
 	//CollisionRigidBody* rb = m_handle_0->GetRigidBody();
 
@@ -707,6 +712,8 @@ void Physics3State::Render(Renderer* renderer)
 	RenderForwardPath(renderer);
 
 	RenderWrapArounds(renderer);
+
+	g_theApp->PhysxRender(renderer);
 }
 
 void Physics3State::RenderGameobjects(Renderer* renderer)

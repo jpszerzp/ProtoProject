@@ -85,6 +85,8 @@ std::string PhysXObject::ChooseMesh(const PxGeometryHolder& h)
 	default:
 		break;
 	}
+
+	return "";
 }
 
 void PhysXObject::ChooseShader(const bool& is_sleep, const bool& is_trigger, std::string& sn)

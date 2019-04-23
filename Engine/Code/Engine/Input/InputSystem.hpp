@@ -104,6 +104,8 @@ public:
 	static const unsigned char KEYBOARD_OEM_6;
 	static const unsigned char KEYBOARD_OEM_7;
 	static const unsigned char KEYBOARD_OEM_8;
+	static const unsigned char KEYBOARD_OEM_PLUS;
+	static const unsigned char KEYBOARD_OEM_MINUS;
 
 	static const unsigned char MOUSE_LBUTTON;
 	static const unsigned char MOUSE_RBUTTON;
