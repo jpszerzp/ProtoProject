@@ -19,7 +19,6 @@
 #include "Engine/Core/Rgba.hpp"
 #include "Engine/Core/Vertex.hpp"
 
-
 #include <string>
 #include <map>
 #include <vector>

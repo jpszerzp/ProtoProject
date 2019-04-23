@@ -55,8 +55,11 @@ public:
 	void ProfilerStartup();
 	void ConsoleStartup();
 	void BlackboardStartup();
+
+	// physx
 	void PhysxStartup();
 	void PhysxShutdown();
+	void SpawnPhysxStack(const Vector3& origin, uint sideLength, uint stackHeight);
 };
 
 extern TheApp* g_theApp;

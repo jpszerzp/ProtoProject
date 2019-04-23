@@ -18,6 +18,7 @@
 #include "Engine/Net/Net.hpp"
 #include "Engine/Net/NetAddress.hpp"
 #include "Engine/Physics/3D/RF/PhysTime.hpp"
+#include "Engine/Physics/3D/PHYSX/PhysXObject.hpp"
 
 PhysAllocator gAllocator;
 PhysErrorCallback gErrorCallback;
@@ -318,7 +319,6 @@ void TheApp::BlackboardStartup()
 	g_gameConfigBlackboard->PopulateFromXmlElementAttributes(*(gameConfigDoc.FirstChildElement()));
 }
 
-
 void TheApp::PhysxStartup()
 {
 	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
@@ -358,4 +358,47 @@ void TheApp::PhysxShutdown()
 	transport->release();
 
 	gFoundation->release();
+}
+
+void TheApp::SpawnPhysxStack(const Vector3& origin, uint sideLength, uint stackHeight)
+{
+	// plane
+	PxRigidStatic* pl = PxCreatePlane(*gPhysics, PxPlane(0, 1, 0, -342), *gMaterial);
+	gScene->addActor(*pl);
+
+	// interface with my API
+	PhysXObject* pl_obj = new PhysXObject();
+	//PhysXObject* pl_obj = new PhysXObject(pl);
+	//m_physx_objs.push_back(pl_obj);
+	//m_physx_stack.push_back(pl_obj);
+	//PxVec3 stack_offset = PxVec3(0.f);
+	//PxVec3 stack_origin = PxVec3(origin.x, origin.y, origin.z);
+	//PxTransform pxt = PxTransform(stack_origin);
+	//PxReal half_ext = .5f;
+	//PxShape* shape = m_physics->createShape(PxBoxGeometry(half_ext, half_ext, half_ext), *m_physx_mat);
+	//for (PxU32 k = 0; k < stackHeight; ++k)
+	//{
+	//	for (PxU32 i = 0; i < sideLength; ++i)
+	//	{
+	//		// * 2.f is why we use half_ext when setting up local transform
+	//		PxReal stack_x = stack_offset.x + i * 2.f;			
+	//		for (uint j = 0; j < sideLength; ++j)
+	//		{
+	//			PxReal stack_z = stack_offset.z + j * 2.f;
+	//			PxVec3 offset = PxVec3(stack_x, stack_offset.y, stack_z);
+	//			PxTransform local_t(offset * half_ext);
+	//			PxRigidDynamic* body = m_physics->createRigidDynamic(pxt.transform(local_t));
+	//			body->attachShape(*shape);
+	//			PxRigidBodyExt::updateMassAndInertia(*body, 10.f);
+	//			m_physx_scene->addActor(*body);
+	//			PhysXObject* phys_obj = new PhysXObject(body);
+	//			m_physx_objs.push_back(phys_obj);
+	//			m_physx_stack.push_back(phys_obj);
+	//		}
+	//	}
+	//	sideLength--;
+	//	stack_origin = PxVec3(stack_origin.x + .5f, stack_origin.y + 1.f, stack_origin.z + .5f);
+	//	pxt = PxTransform(stack_origin);
+	//}
+	//shape->release();
 }

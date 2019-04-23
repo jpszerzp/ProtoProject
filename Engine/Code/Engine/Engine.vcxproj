@@ -367,6 +367,7 @@
     <ClCompile Include="Physics\3D\ForceRegistry.cpp" />
     <ClCompile Include="Physics\3D\GJK3.cpp" />
     <ClCompile Include="Physics\3D\GJK3Simplex.cpp" />
+    <ClCompile Include="Physics\3D\PHYSX\PhysXObject.cpp" />
     <ClCompile Include="Physics\3D\PointEntity3.cpp" />
     <ClCompile Include="Physics\3D\PointRB3.cpp" />
     <ClCompile Include="Physics\3D\QuadEntity3.cpp" />
@@ -549,6 +550,7 @@
     <ClInclude Include="Physics\3D\GJK3Simplex.hpp" />
     <ClInclude Include="Physics\3D\PHYSX\PhysAllocator.hpp" />
     <ClInclude Include="Physics\3D\PHYSX\PhysErrorCallback.hpp" />
+    <ClInclude Include="Physics\3D\PHYSX\PhysXObject.hpp" />
     <ClInclude Include="Physics\3D\PointEntity3.hpp" />
     <ClInclude Include="Physics\3D\PointRB3.hpp" />
     <ClInclude Include="Physics\3D\QuadEntity3.hpp" />
