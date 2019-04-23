@@ -318,11 +318,15 @@ void TheApp::NetStartup()
 void TheApp::StateStartup()
 {
 	Physics3State* phys3 = new Physics3State();
+	g_physState = phys3;
+	phys3->PostConstruct();
+	
 	ControlState3* control = new ControlState3();
 	StateMachine* states = new StateMachine();
-	phys3->PostConstruct();
+
 	states->AppendState(phys3);
 	states->AppendState(control);
+
 	g_theGame = new TheGame();
 	g_theGame->SetStateMachine(states);
 	g_theGame->UseDefaultState();			// set default state as state at index 0 
@@ -485,14 +489,17 @@ void TheApp::PhysxUpdateDelete()
 			}
 			// check those in wraparounds
 			//m_wraparound_demo_0->RemovePhysXObj(phys_obj);
-			//m_wraparound_demo_1->RemovePhysXObj(phys_obj);
+			g_physState->m_wraparound_demo_1->RemovePhysXObj(phys_obj);
+
 			// todo: check those in plane wraparound after they are actually added to it...
 			//m_wraparound_plane...
+
 			// check corner case place holder
-			//if (m_corner_case_3 == phys_obj)
-			//	m_corner_case_3 = nullptr;
-			//else if (m_corner_case_4 == phys_obj)
-			//	m_corner_case_4 = nullptr;
+			if (m_corner_case_3 == phys_obj)
+				m_corner_case_3 = nullptr;
+			else if (m_corner_case_4 == phys_obj)
+				m_corner_case_4 = nullptr;
+
 			// scene actor
 			PxRigidActor* ra = phys_obj->GetRigidActor();
 			gScene->removeActor(*ra);
@@ -508,4 +515,30 @@ void TheApp::PhysxRender(Renderer* rdr)
 {
 	for (int i = 0; i < m_physx_objs.size(); ++i)
 		m_physx_objs[i]->RenderActor(rdr);
+}
+
+PhysXObject* TheApp::SpawnPhysxBox(const Vector3& pos)
+{
+	PxVec3 pxp = PxVec3(pos.x, pos.y, pos.z);
+	PxTransform pxt = PxTransform(pxp);
+	PxReal half_ext = .5f;
+	PxShape* shape = gPhysics->createShape(PxBoxGeometry(half_ext, half_ext, half_ext), *gMaterial);
+
+	// offset
+	PxVec3 offset = PxVec3(0.f, 0.f, 0.f);
+	PxTransform local = PxTransform(offset);
+
+	// dynamic rigidbody
+	PxRigidDynamic* body = gPhysics->createRigidDynamic(pxt.transform(local));
+	body->attachShape(*shape);
+	PxRigidBodyExt::updateMassAndInertia(*body, 1.f);
+	gScene->addActor(*body);
+
+	// encapsulation
+	PhysXObject* px_obj = new PhysXObject(body);
+	m_physx_objs.push_back(px_obj);
+
+	// shape release
+	shape->release();
+	return px_obj;
 }

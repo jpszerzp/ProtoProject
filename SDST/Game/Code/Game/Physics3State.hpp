@@ -9,6 +9,7 @@
 #include "Engine/Physics/3D/RF/CollisionPrimitive.hpp"
 #include "Engine/Physics/3D/RF/CollisionKeep.hpp"
 #include "Engine/Physics/3D/RF/CollisionSolver.hpp"
+#include "Engine/Physics/3D/PHYSX/PhysXObject.hpp"
 #include "Engine/Core/Primitive/Sphere.hpp"
 #include "Engine/Core/Primitive/Cube.hpp"
 #include "Engine/Core/Primitive/Quad.hpp"
@@ -24,18 +25,15 @@
 #include <set>
 #include <list>
 
-enum eHullGenerationStep
+enum eFeatureCornerCase
 {
-	HULL_GEN_FORM_CONFLICTS,
-	HULL_GEN_FORM_EYE,
-	HULL_GEN_FORM_HORIZON_START,
-	HULL_GEN_FORM_HORIZON_PROECSS,
-	HULL_GEN_DELETE_OLD_FACES,
-	HULL_GEN_FORM_NEW_FACES,
-	HULL_GEN_ASSIGN_ORPHANS,
-	HULL_GEN_TOPO_ERRORS,
-	HULL_GEN_FINISH_RESET,
-	HULL_GEN_COMPLETE
+	FCC_FF,
+	FCC_FP,
+	FCC_PP,
+	FCC_EE,
+	FCC_PE,
+	FCC_FE,
+	FCC_NUM,
 };
 
 class Physics3State : public GameState
@@ -84,6 +82,9 @@ public:
 	void ShootSphere(WrapAround* wpa);
 	void ShootBox(WrapAround* wpa);
 
+	std::pair<PhysXObject*, PhysXObject*> ResetCollisionCornerCasePhysX(const Vector3& pos1, 
+		const Vector3& pos2, const Vector3& rot1, const Vector3& rot2);
+
 public:
 	const static uint MAX_CONTACT_NUM = 256;
 
@@ -100,17 +101,55 @@ public:
 	std::vector<CollisionPlane*> m_planes;
 	std::vector<CollisionConvexObject*> m_convex_objs;
 
-	// debug
+	// focus
 	CollisionPrimitive* m_focus;
 
 	Collision m_storage[MAX_CONTACT_NUM];
-
 	CollisionKeep m_keep;
-
 	CollisionSolver m_solver;
 
-	//WrapAround* m_wraparound_sphere;
-	//WrapAround* m_wraparound_box;
-	//WrapAround* m_wraparound_convex;
 	WrapAround* m_wraparound_plane;
+	WrapAround* m_wraparound_demo_0;
+	WrapAround* m_wraparound_demo_1;
+
+	eFeatureCornerCase m_phys_corner_case = FCC_NUM;
+
+	const Vector3 CORNER_CASE_POS_FF_3 = Vector3(65.f, 305.f, 0.f);
+	const Vector3 CORNER_CASE_POS_FP_3 = Vector3(65.f, 305.f, 0.f);
+	const Vector3 CORNER_CASE_POS_FE_3 = Vector3(65.f, 305.f, 0.f);
+	const Vector3 CORNER_CASE_POS_PP_3 = Vector3(65.f, 305.f, -5.f);
+	const Vector3 CORNER_CASE_POS_EE_3 = Vector3(65.f, 305.f, 0.f);
+	const Vector3 CORNER_CASE_POS_PE_3 = Vector3(65.f, 305.f, 0.f);
+	const Vector3 CORNER_CASE_POS_FF_4 = Vector3(75.f, 305.f, 0.f);
+	const Vector3 CORNER_CASE_POS_FP_4 = Vector3(75.f, 305.f, 0.f);
+	const Vector3 CORNER_CASE_POS_FE_4 = Vector3(75.f, 305.f, 0.f);
+	const Vector3 CORNER_CASE_POS_PP_4 = Vector3(75.f, 315.f, 5.f);
+	const Vector3 CORNER_CASE_POS_EE_4 = Vector3(75.f, 305.f, 0.f);
+	const Vector3 CORNER_CASE_POS_PE_4 = Vector3(75.f, 305.9625f, 0.f);
+
+	const Vector3 CORNER_CASE_ORIENT_FF_3 = Vector3::ZERO;
+	const Vector3 CORNER_CASE_ORIENT_FP_3 = Vector3(45.f, 45.f, 0.f);
+	const Vector3 CORNER_CASE_ORIENT_FE_3 = Vector3(0.f, 45.f, 0.f);
+	const Vector3 CORNER_CASE_ORIENT_PP_3 = Vector3::ZERO;
+	const Vector3 CORNER_CASE_ORIENT_EE_3 = Vector3(45.f, 90.f, 0.f);
+	const Vector3 CORNER_CASE_ORIENT_PE_3 = Vector3(0.f, 45.f, 0.f);
+	const Vector3 CORNER_CASE_ORIENT_FF_4 = Vector3::ZERO;
+	const Vector3 CORNER_CASE_ORIENT_FP_4 = Vector3::ZERO;
+	const Vector3 CORNER_CASE_ORIENT_FE_4 = Vector3::ZERO;
+	const Vector3 CORNER_CASE_ORIENT_PP_4 = Vector3::ZERO;
+	const Vector3 CORNER_CASE_ORIENT_EE_4 = Vector3(0.f, 45.f, 0.f);
+	const Vector3 CORNER_CASE_ORIENT_PE_4 = Vector3::ZERO;
+
+	const Vector3 CORNER_CASE_LIN_VEL_FF_3 = Vector3(3.f, 0.f, 0.f);
+	const Vector3 CORNER_CASE_LIN_VEL_FP_3 = Vector3(3.f, 0.f, 0.f);
+	const Vector3 CORNER_CASE_LIN_VEL_FE_3 = Vector3(3.f, 0.f, 0.f);
+	const Vector3 CORNER_CASE_LIN_VEL_PP_3 = Vector3(1.f);
+	const Vector3 CORNER_CASE_LIN_VEL_EE_3 = Vector3(3.f, 0.f, 0.f);
+	const Vector3 CORNER_CASE_LIN_VEL_PE_3 = Vector3(3.f, 0.f, 0.f);
+	const Vector3 CORNER_CASE_LIN_VEL_FF_4 = Vector3(-3.f, 0.f, 0.f);
+	const Vector3 CORNER_CASE_LIN_VEL_FP_4 = Vector3(-3.f, 0.f, 0.f);
+	const Vector3 CORNER_CASE_LIN_VEL_FE_4 = Vector3(-3.f, 0.f, 0.f);
+	const Vector3 CORNER_CASE_LIN_VEL_PP_4 = Vector3(-1.f);
+	const Vector3 CORNER_CASE_LIN_VEL_EE_4 = Vector3(-3.f, 0.f, 0.f);
+	const Vector3 CORNER_CASE_LIN_VEL_PE_4 = Vector3(-3.f, 0.f, 0.f);
 };

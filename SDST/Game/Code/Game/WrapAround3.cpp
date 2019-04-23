@@ -46,62 +46,104 @@ void WrapAround::Update()
 
 void WrapAround::UpdateWraparound()
 {
-	// goes thru every gameobject in this wraparound group and update ONLY when they teleport
-	for (CollisionPrimitive* primitive : m_primitives)
+	if (!m_particle)
 	{
-		// surpassing xmin
-		if (primitive->GetBasisAndPosition(3).x < m_bounds.m_min.x)
+		// delete objects if they go beyond bound
+		for (CollisionPrimitive* primitive : m_primitives)
 		{
-			float pos_x = m_bounds.m_max.x;
-			float pos_y = primitive->GetBasisAndPosition(3).y;
-			float pos_z = primitive->GetBasisAndPosition(3).z;
+			if (primitive->GetBasisAndPosition(3).x < m_bounds.m_min.x)
+				primitive->SetShouldDelete(true);
 
-			primitive->SetRigidBodyPosition(Vector3(pos_x, pos_y, pos_z));
+			else if (primitive->GetBasisAndPosition(3).x > m_bounds.m_max.x)
+				primitive->SetShouldDelete(true);
+
+			else if (primitive->GetBasisAndPosition(3).y < m_bounds.m_min.y)
+				primitive->SetShouldDelete(true);
+
+			else if (primitive->GetBasisAndPosition(3).y > m_bounds.m_max.y)
+				primitive->SetShouldDelete(true);
+
+			else if (primitive->GetBasisAndPosition(3).z < m_bounds.m_min.z)
+				primitive->SetShouldDelete(true);
+
+			else if (primitive->GetBasisAndPosition(3).z > m_bounds.m_max.z)
+				primitive->SetShouldDelete(true);
 		}
 
-		if (primitive->GetBasisAndPosition(3).x > m_bounds.m_max.x)
+		for (PhysXObject* px_obj : m_phys_obj)
 		{
-			float pos_x = m_bounds.m_min.x;
-			float pos_y = primitive->GetBasisAndPosition(3).y;
-			float pos_z = primitive->GetBasisAndPosition(3).z;
-
-			primitive->SetRigidBodyPosition(Vector3(pos_x, pos_y, pos_z));
+			if (px_obj->GetPos().x < m_bounds.m_min.x)
+				px_obj->SetShouldDelete(true);
+			else if (px_obj->GetPos().x > m_bounds.m_max.x)
+				px_obj->SetShouldDelete(true);
+			else if (px_obj->GetPos().y < m_bounds.m_min.y)
+				px_obj->SetShouldDelete(true);
+			else if (px_obj->GetPos().y > m_bounds.m_max.y)
+				px_obj->SetShouldDelete(true);
+			else if (px_obj->GetPos().z < m_bounds.m_min.z)
+				px_obj->SetShouldDelete(true);
+			else if (px_obj->GetPos().z > m_bounds.m_max.z)
+				px_obj->SetShouldDelete(true);
 		}
-
-		if (primitive->GetBasisAndPosition(3).y < m_bounds.m_min.y)
+	}
+	else
+	{
+		for (CollisionPrimitive* primitive : m_primitives)
 		{
-			float pos_x = primitive->GetBasisAndPosition(3).x;
-			float pos_y = m_bounds.m_max.y;
-			float pos_z = primitive->GetBasisAndPosition(3).z;
+			// surpassing xmin
+			if (primitive->GetBasisAndPosition(3).x < m_bounds.m_min.x)
+			{
+				float pos_x = m_bounds.m_max.x;
+				float pos_y = primitive->GetBasisAndPosition(3).y;
+				float pos_z = primitive->GetBasisAndPosition(3).z;
 
-			primitive->SetRigidBodyPosition(Vector3(pos_x, pos_y, pos_z));
-		}
+				primitive->SetRigidBodyPosition(Vector3(pos_x, pos_y, pos_z));
+			}
 
-		if (primitive->GetBasisAndPosition(3).y > m_bounds.m_max.y)
-		{
-			float pos_x = primitive->GetBasisAndPosition(3).x;
-			float pos_y = m_bounds.m_min.y;
-			float pos_z = primitive->GetBasisAndPosition(3).z;
+			if (primitive->GetBasisAndPosition(3).x > m_bounds.m_max.x)
+			{
+				float pos_x = m_bounds.m_min.x;
+				float pos_y = primitive->GetBasisAndPosition(3).y;
+				float pos_z = primitive->GetBasisAndPosition(3).z;
 
-			primitive->SetRigidBodyPosition(Vector3(pos_x, pos_y, pos_z));
-		}
+				primitive->SetRigidBodyPosition(Vector3(pos_x, pos_y, pos_z));
+			}
 
-		if (primitive->GetBasisAndPosition(3).z < m_bounds.m_min.z)
-		{
-			float pos_x = primitive->GetBasisAndPosition(3).x;
-			float pos_y = primitive->GetBasisAndPosition(3).y;
-			float pos_z = m_bounds.m_max.z;
+			if (primitive->GetBasisAndPosition(3).y < m_bounds.m_min.y)
+			{
+				float pos_x = primitive->GetBasisAndPosition(3).x;
+				float pos_y = m_bounds.m_max.y;
+				float pos_z = primitive->GetBasisAndPosition(3).z;
 
-			primitive->SetRigidBodyPosition(Vector3(pos_x, pos_y, pos_z));
-		}
+				primitive->SetRigidBodyPosition(Vector3(pos_x, pos_y, pos_z));
+			}
 
-		if (primitive->GetBasisAndPosition(3).z > m_bounds.m_max.z)
-		{
-			float pos_x = primitive->GetBasisAndPosition(3).x;
-			float pos_y = primitive->GetBasisAndPosition(3).y;
-			float pos_z = m_bounds.m_min.z;
+			if (primitive->GetBasisAndPosition(3).y > m_bounds.m_max.y)
+			{
+				float pos_x = primitive->GetBasisAndPosition(3).x;
+				float pos_y = m_bounds.m_min.y;
+				float pos_z = primitive->GetBasisAndPosition(3).z;
 
-			primitive->SetRigidBodyPosition(Vector3(pos_x, pos_y, pos_z));
+				primitive->SetRigidBodyPosition(Vector3(pos_x, pos_y, pos_z));
+			}
+
+			if (primitive->GetBasisAndPosition(3).z < m_bounds.m_min.z)
+			{
+				float pos_x = primitive->GetBasisAndPosition(3).x;
+				float pos_y = primitive->GetBasisAndPosition(3).y;
+				float pos_z = m_bounds.m_max.z;
+
+				primitive->SetRigidBodyPosition(Vector3(pos_x, pos_y, pos_z));
+			}
+
+			if (primitive->GetBasisAndPosition(3).z > m_bounds.m_max.z)
+			{
+				float pos_x = primitive->GetBasisAndPosition(3).x;
+				float pos_y = primitive->GetBasisAndPosition(3).y;
+				float pos_z = m_bounds.m_min.z;
+
+				primitive->SetRigidBodyPosition(Vector3(pos_x, pos_y, pos_z));
+			}
 		}
 	}
 }
@@ -122,6 +164,32 @@ void WrapAround::RenderWraparounds(Renderer* renderer)
 		renderer->DrawMesh(m_mesh, false);
 }
 
+
+void WrapAround::RemovePrimitive(CollisionPrimitive* prim)
+{
+	for (int i = 0; i < m_primitives.size(); ++i)
+	{
+		if (m_primitives[i] == prim)
+		{
+			std::vector<CollisionPrimitive*>::iterator it = m_primitives.begin() + i;
+			m_primitives.erase(it);
+			i--;
+		}
+	}
+}
+
+void WrapAround::RemovePhysXObj(PhysXObject* px)
+{
+	for (int i = 0; i < m_phys_obj.size(); ++i)
+	{
+		if (m_phys_obj[i] == px)
+		{
+			std::vector<PhysXObject*>::iterator it = m_phys_obj.begin() + i;
+			m_phys_obj.erase(it);
+			i--;
+		}
+	}
+}
 
 void WrapAround::Render(Renderer* renderer)
 {

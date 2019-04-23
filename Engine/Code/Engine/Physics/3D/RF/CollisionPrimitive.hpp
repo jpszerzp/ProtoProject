@@ -6,6 +6,13 @@
 #include "Engine/Physics/3D/RF/ConvexHull.hpp"
 #include "Engine/Physics/3D/RF/ConvexPolyhedron.hpp"
 
+enum eCCD
+{
+	COL_CCD,
+	COL_DISCRETE,
+	COL_DETECTION_NUM,
+};
+
 // covariance method
 struct TetrahedronBody
 {
@@ -27,6 +34,10 @@ struct TetrahedronBody
 
 class CollisionPrimitive
 {
+	// ccd
+	eCCD m_ccd = COL_DISCRETE;
+	Vector3 m_ccd_teleport = Vector3::ZERO;
+
 	Matrix44 m_transform_mat;
 
 	CollisionRigidBody* m_rigid_body = nullptr;
@@ -36,6 +47,8 @@ class CollisionPrimitive
 	Shader* m_shader = nullptr;
 	Texture* m_texture = nullptr;
 	Vector4 m_tint;
+
+	bool m_delete = false;
 
 public:
 	void BuildCommon(const std::string& shader = "default", const std::string& tx = "Data/Images/perspective_test.png");
@@ -49,6 +62,7 @@ public:
 	void SetTexture(Texture* texture) { m_texture = texture; }
 	void SetTint(const Vector4& tint) { m_tint = tint; }
 	void SetRigidBodyPosition(const Vector3& pos);
+	void SetShouldDelete(const bool& value) { m_delete = value; }
 
 	virtual void Update(float deltaTime);
 

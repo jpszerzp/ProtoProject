@@ -24,6 +24,9 @@ public:
 	std::vector<PhysXObject*> m_physx_objs;
 	std::vector<PhysXObject*> m_physx_stack;
 
+	PhysXObject* m_corner_case_3 = nullptr;
+	PhysXObject* m_corner_case_4 = nullptr;
+
 public:
 	TheApp();
 	~TheApp();
@@ -68,6 +71,7 @@ public:
 	void PhysxUpdate(float dt);
 	void PhysxUpdateDelete();
 	void PhysxRender(Renderer* rdr);
+	PhysXObject* SpawnPhysxBox(const Vector3& pos);
 };
 
 extern TheApp* g_theApp;

@@ -14,6 +14,55 @@ PhysXObject::~PhysXObject()
 	// ...
 }
 
+Vector3 PhysXObject::GetPos() const
+{
+	PxVec3 pos = m_ra->getGlobalPose().p;
+	return Vector3(pos.x, pos.y, pos.z);
+}
+
+void PhysXObject::SetPos(const Vector3& pos)
+{
+	PxVec3 p = PxVec3(pos.x, pos.y, pos.z);
+	PxTransform new_t = PxTransform(p, m_ra->getGlobalPose().q);
+	m_ra->setGlobalPose(new_t);
+}
+
+void PhysXObject::SetOrient(const Quaternion& orient)
+{
+	// make sure it is normalize
+	PxQuat q = PxQuat(orient.m_imaginary.x, orient.m_imaginary.y, orient.m_imaginary.z, orient.m_real);
+	q.normalize();
+	PxTransform new_t = PxTransform(m_ra->getGlobalPose().p, q);
+	m_ra->setGlobalPose(new_t);
+}
+
+void PhysXObject::SetPosAndOrient(const Vector3& pos, const Quaternion& orient)
+{
+	// pos
+	PxVec3 p = PxVec3(pos.x, pos.y, pos.z);
+	// quat
+	PxQuat q = PxQuat(orient.m_imaginary.x, orient.m_imaginary.y, orient.m_imaginary.z, orient.m_real);
+	q.normalize();
+	PxTransform new_t = PxTransform(p, q);
+	m_ra->setGlobalPose(new_t);
+}
+
+void PhysXObject::SetLinearVel(const Vector3& lin_vel)
+{
+	// assuming the object set velocity with is dynamic
+	PxRigidDynamic* dyn = static_cast<PxRigidDynamic*>(m_ra);
+	PxVec3 vel = PxVec3(lin_vel.x, lin_vel.y, lin_vel.z);
+	dyn->setLinearVelocity(vel);
+}
+
+void PhysXObject::SetAngularVel(const Vector3& ang_vel)
+{
+	// assuming the object set veloicty with is dynamic
+	PxRigidDynamic* dyn = static_cast<PxRigidDynamic*>(m_ra);
+	PxVec3 vel = PxVec3(ang_vel.x, ang_vel.y, ang_vel.z);
+	dyn->setAngularVelocity(vel);
+}
+
 void PhysXObject::RenderActor(Renderer* rdr)
 {
 	PxShape* shapes[MAX_NUM_ACTOR_SHAPES_OBJ];
@@ -113,4 +162,9 @@ void PhysXObject::ChooseTexture(const bool& is_sleep, const bool& is_trigger, st
 	// non sleep non trigger
 	else
 		tn = "Data/Images/orient.png";
+}
+
+void PhysXObject::DisableGravity()
+{
+	m_ra->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, true);
 }
