@@ -55,6 +55,7 @@ public:
 	void UpdateWrapArounds();
 	void UpdateUI();
 	void UpdateDelete();
+	void UpdateForceRegistries(float dt);
 
 	// update of GO
 	void UpdateGameobjectsCore(float deltaTime);
@@ -77,6 +78,9 @@ public:
 		const Vector3& rot, const Vector3& scale, const bool& awake = true, const bool& sleepable = false);
 	CollisionConvexObject* WrapAroundTestConvex(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position,
 		const Vector3& rot, const Vector3& scale, const bool& awake = true, const bool& sleepable = false);
+	CollisionPoint* WrapAroundTestPoint(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position,
+		const Vector3& rot, const Vector3& scale, const bool& awake = true, const bool& sleepable = false);
+	Spring* SetupSpring(CollisionPoint* end1, CollisionPoint* end2, float coef, float rl);
 
 	void SpawnStack(const Vector3& origin, uint sideLength, uint stackHeight);
 	void SpawnRandomBox(WrapAround* wpa, uint num, const Vector3& min, const Vector3& max);
@@ -105,6 +109,7 @@ public:
 	std::vector<CollisionBox*> m_boxes;
 	std::vector<CollisionPlane*> m_planes;
 	std::vector<CollisionConvexObject*> m_convex_objs;
+	std::vector<CollisionPoint*> m_points;
 
 	// focus
 	CollisionPrimitive* m_focus;
@@ -116,6 +121,7 @@ public:
 	WrapAround* m_wraparound_plane;
 	WrapAround* m_wraparound_demo_0;
 	WrapAround* m_wraparound_demo_1;
+	WrapAround* m_wraparound_verlet;
 
 	bool m_ff_test = true;
 	bool m_fp_test = false;
@@ -206,4 +212,12 @@ public:
 
 	CollisionBox* m_corner_case_1 = nullptr;
 	CollisionBox* m_corner_case_2 = nullptr;
+
+	// force
+	ParticleForceRegistry* m_particleRegistry = nullptr;
+	RigidForceRegistry* m_rigidRegistry = nullptr;
+
+	// utility
+	std::vector<Vector3> m_inspection;
+	int m_insepction_count = 0;
 };

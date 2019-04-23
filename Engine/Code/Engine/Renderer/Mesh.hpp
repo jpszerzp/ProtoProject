@@ -31,6 +31,7 @@ public:
 		const Vector3& tl, const Vector3& tr, const Rgba& tint);
 	static Mesh* CreateQuadTextured(eVertexType, Vector2 uvBL, Vector2 uvBR, Vector2 uvTL, Vector2 uvTR);
 	static Mesh* CreateQuadTexturedImmediate(eVertexType type, Vector3 drawmin, Vector3 up, Vector3 right, AABB2 glphybound, float cellHeight, float cellWidth);
+	static Mesh* CreateUnitQuadInLine(eVertexType type, const Rgba& color);
 	static Mesh* CreatePolygonImmedidate(eVertexType type, const Vector2& bl, const Vector2& br, const Vector2& tl, const Vector2& tr, Rgba color);
 	static Mesh* CreateCube(eVertexType type);
 	static Mesh* CreateUVSphere( eVertexType type, uint slices, uint wedges );

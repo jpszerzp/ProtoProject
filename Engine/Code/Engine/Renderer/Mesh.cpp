@@ -385,6 +385,91 @@ Mesh* Mesh::CreateQuadTexturedImmediate(eVertexType type,
 }
 
 
+Mesh* Mesh::CreateUnitQuadInLine(eVertexType type, const Rgba& color)
+{
+	Vector3 v1 = Vector3(-.5f, -.5f, -.5f);
+	Vector3 v2 = Vector3(.5f, -.5f, -.5f);
+	Vector3 v3 = Vector3(.5f, .5f, -.5f);
+	Vector3 v4 = Vector3(-.5f, .5f, -.5f);
+	Vector3 v5 = Vector3(-.5f, -.5f, .5f);
+	Vector3 v6 = Vector3(.5f, -.5f, .5f);
+	Vector3 v7 = Vector3(.5f, .5f, .5f);
+	Vector3 v8 = Vector3(-.5f, .5f, .5f);
+
+	MeshBuilder mb;
+
+	mb.Begin(DRAW_LINE, true);
+	mb.SetColor(color);
+	mb.SetUV(Vector2(0.f));
+
+	// edges
+	// 1
+	uint idx = mb.PushVertex(v1);
+	mb.PushVertex(v2);
+	mb.AddLine(idx, idx + 1);
+
+	// 2
+	idx = mb.PushVertex(v2);
+	mb.PushVertex(v3);
+	mb.AddLine(idx, idx + 1);
+
+	// 3
+	idx = mb.PushVertex(v3);
+	mb.PushVertex(v4);
+	mb.AddLine(idx, idx + 1);
+
+	// 4
+	idx = mb.PushVertex(v4);
+	mb.PushVertex(v1);
+	mb.AddLine(idx, idx + 1);
+
+	// 5
+	idx = mb.PushVertex(v5);
+	mb.PushVertex(v6);
+	mb.AddLine(idx, idx + 1);
+
+	// 6 
+	idx = mb.PushVertex(v6);
+	mb.PushVertex(v7);
+	mb.AddLine(idx, idx + 1);
+
+	// 7
+	idx = mb.PushVertex(v7);
+	mb.PushVertex(v8);
+	mb.AddLine(idx, idx + 1);
+
+	// 8
+	idx = mb.PushVertex(v8);
+	mb.PushVertex(v5);
+	mb.AddLine(idx, idx + 1);
+
+	// 9
+	idx = mb.PushVertex(v1);
+	mb.PushVertex(v5);
+	mb.AddLine(idx, idx + 1);
+
+	// 10
+	idx = mb.PushVertex(v2);
+	mb.PushVertex(v6);
+	mb.AddLine(idx, idx + 1);
+
+	// 11
+	idx = mb.PushVertex(v3);
+	mb.PushVertex(v7);
+	mb.AddLine(idx, idx + 1);
+
+	// 12
+	idx = mb.PushVertex(v4);
+	mb.PushVertex(v8);
+	mb.AddLine(idx, idx + 1);
+
+	mb.End();
+
+	Mesh* mesh = mb.CreateMesh(type, DRAW_LINE);
+	mesh->m_immediate = false;
+	return mesh;
+}
+
 Mesh* Mesh::CreateCube(eVertexType type)
 {
 	MeshBuilder mb; 

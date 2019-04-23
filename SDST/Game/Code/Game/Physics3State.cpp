@@ -120,6 +120,26 @@ Physics3State::Physics3State()
 	// phsx demo
 	m_wraparound_demo_1 = new WrapAround(Vector3(60.f, 300.f, -10.f), Vector3(80.f, 320.f, 10.f));
 
+	// verlet
+	m_wraparound_verlet = new WrapAround(Vector3(-10.f, 200.f, -10.f), Vector3(0.f, 250.f, 0.f));
+	m_wraparound_verlet->m_particle = true;
+	CollisionPoint* free = WrapAroundTestPoint(m_wraparound_verlet, false, false, true, Vector3(-7.f, 240.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
+	CollisionPoint* verlet_vel = WrapAroundTestPoint(m_wraparound_verlet, false, false, true, Vector3(-3.f, 240.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
+	free->GetRigidBody()->SetVerlet(false);		// no verlet scheme for it as it is not verlet particle
+	free->GetRigidBody()->SetFrozen(true);
+	verlet_vel->GetRigidBody()->SetVerlet(true);
+	verlet_vel->GetRigidBody()->SetVerletScheme(VERLET_VEL_P);
+	verlet_vel->GetRigidBody()->SetFrozen(true);
+
+	// inspection
+	m_inspection.push_back(m_cameraInitialPos);
+	m_inspection.push_back(Vector3(-5.f, 220.f, -20.f));
+	//m_inspection.push_back(Vector3(200.f, 200.f, -20.f));
+
+	// force registry 
+	m_particleRegistry = new ParticleForceRegistry();
+	m_rigidRegistry = new RigidForceRegistry();
+
 	// debug
 	DebugRenderSet3DCamera(m_camera);
 	DebugRenderSet2DCamera(m_UICamera);
@@ -135,6 +155,15 @@ Physics3State::~Physics3State()
 
 	delete m_wraparound_demo_1;
 	m_wraparound_demo_1 = nullptr;
+
+	delete m_wraparound_verlet;
+	m_wraparound_verlet = nullptr;
+
+	delete m_rigidRegistry;
+	m_rigidRegistry = nullptr;
+
+	delete m_particleRegistry;
+	m_particleRegistry = nullptr;
 }
 
 void Physics3State::PostConstruct()
@@ -142,6 +171,7 @@ void Physics3State::PostConstruct()
 	m_wraparound_plane->m_physState = this;
 	m_wraparound_demo_0->m_physState = this;
 	m_wraparound_demo_1->m_physState = this;
+	m_wraparound_verlet->m_physState = this;
 }
 
 void Physics3State::Update(float deltaTime)
@@ -394,6 +424,31 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		ResetCollisionCornerCase(CORNER_CASE_POS_FE_1, CORNER_CASE_POS_FE_2, CORNER_CASE_ORIENT_FE_1, CORNER_CASE_ORIENT_FE_2);
 	}
 
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_TAB))
+	{
+		if (!m_inspection.empty())
+		{
+			Vector3 pos = m_inspection[m_insepction_count];
+
+			// set camera pos to this inspection position
+			m_camera->GetTransform().SetLocalPosition(pos);
+			m_camera->GetTransform().SetLocalRotation(Vector3::ZERO);
+
+			size_t size = m_inspection.size();
+			++m_insepction_count;
+			m_insepction_count = (m_insepction_count % size);
+		}
+	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_Y))
+	{
+		// delete all in wpa plane (or the most general wpa)
+		for (int i = 0; i < m_wraparound_plane->m_primitives.size(); ++i)
+			m_wraparound_plane->m_primitives[i]->SetShouldDelete(true);
+
+		m_wraparound_plane->m_primitives.clear();
+	}
+
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_U))
 	{
 		// to fire the corner case test, give opposite velocities
@@ -506,6 +561,7 @@ void Physics3State::UpdateWrapArounds()
 	m_wraparound_plane->Update();
 	m_wraparound_demo_0->Update();
 	m_wraparound_demo_1->Update();
+	m_wraparound_verlet->Update();
 }
 
 
@@ -637,6 +693,14 @@ void Physics3State::UpdateDelete()
 	}
 }
 
+void Physics3State::UpdateForceRegistries(float dt)
+{
+	if (m_particleRegistry != nullptr)
+		m_particleRegistry->UpdateForces(dt);
+	//if (m_rigidRegistry != nullptr)
+	//	m_rigidRegistry->UpdateForces(dt);
+}
+
 void Physics3State::UpdateGameobjectsCore(float deltaTime)
 {
 	UpdateGameobjectsDynamics(deltaTime);
@@ -657,6 +721,9 @@ void Physics3State::UpdateGameobjectsDynamics(float deltaTime)
 
 	for (std::vector<CollisionConvexObject*>::size_type idx = 0; idx < m_convex_objs.size(); ++idx)
 		m_convex_objs[idx]->Update(deltaTime);
+
+	for (std::vector<CollisionPoint*>::size_type idx = 0; idx < m_points.size(); ++idx)
+		m_points[idx]->Update(deltaTime);
 }
 
 void Physics3State::UpdateContacts(float deltaTime)
@@ -820,6 +887,9 @@ void Physics3State::RenderGameobjects(Renderer* renderer)
 
 	for (std::vector<CollisionConvexObject*>::size_type idx = 0; idx < m_convex_objs.size(); ++idx)
 		m_convex_objs[idx]->Render(renderer);
+
+	for (std::vector<CollisionPoint*>::size_type idx = 0; idx < m_points.size(); ++idx)
+		m_points[idx]->Render(renderer);
 }
 
 void Physics3State::RenderWrapArounds(Renderer* renderer)
@@ -827,6 +897,7 @@ void Physics3State::RenderWrapArounds(Renderer* renderer)
 	m_wraparound_plane->Render(renderer);
 	m_wraparound_demo_0->Render(renderer);
 	m_wraparound_demo_1->Render(renderer);
+	m_wraparound_verlet->Render(renderer);
 }
 
 void Physics3State::RenderForwardPath(Renderer*)
@@ -964,6 +1035,70 @@ CollisionConvexObject* Physics3State::WrapAroundTestConvex(WrapAround* wpa, bool
 	wpa->m_primitives.push_back(cObj);
 
 	return cObj;
+}
+
+CollisionPoint* Physics3State::WrapAroundTestPoint(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, const Vector3& rot, const Vector3& scale, const bool& awake /*= true*/, const bool& sleepable /*= false*/)
+{
+	// pt scale should be uniform
+	CollisionPoint* pt = new CollisionPoint(scale.x);
+
+	CollisionRigidBody* rb = new CollisionRigidBody(5.f, position, rot);
+	rb->SetParticle(true);
+	rb->SetAwake(awake);
+	rb->SetSleepable(sleepable);
+
+	pt->AttachToRigidBody(rb);
+
+	m_points.push_back(pt);
+
+	if(register_g)
+	{
+		Vector3 gravity = (Vector3::GRAVITY / 2.f);
+		rb->SetBaseLinearAcceleration(gravity);
+	}
+
+	if (give_lin_vel)
+		rb->SetLinearVelocity(GetRandomVector3() * 5.f);
+
+	if (give_ang_vel)
+	{
+		float ang_v_x = GetRandomFloatInRange(-5.f, 5.f);
+		float ang_v_y = GetRandomFloatInRange(-5.f, 5.f);
+		float ang_v_z = GetRandomFloatInRange(-5.f, 5.f);
+		rb->SetAngularVelocity(Vector3(ang_v_x, ang_v_y, ang_v_z));
+	}
+
+	// add to primitive vector in wpa
+	if (wpa != nullptr)
+		wpa->m_primitives.push_back(pt);
+
+	return pt;
+}
+
+Spring* Physics3State::SetupSpring(CollisionPoint* end1, CollisionPoint* end2, float coef, float rl)
+{
+	Spring* sp = new Spring(end1, end2, coef, rl);
+
+	// get the entities of points
+	CollisionRigidBody* e1 = end1->GetRigidBody();
+	CollisionRigidBody* e2 = end2->GetRigidBody();
+
+	// use euler
+	e1->SetVerlet(false);
+	e2->SetVerlet(false);
+
+	e1->SetFrozen(true);
+	e2->SetFrozen(true);
+
+	// initialize spring force generators
+	SpringGenerator* sg1 = new SpringGenerator(e2, coef, rl);
+	SpringGenerator* sg2 = new SpringGenerator(e1, coef, rl);
+
+	// register the generator with corresponding entity
+	m_particleRegistry->Register(e1, sg1);
+	m_particleRegistry->Register(e2, sg2);
+
+	return sp;
 }
 
 void Physics3State::SpawnStack(const Vector3& origin , uint sideLength, uint stackHeight)
