@@ -140,6 +140,24 @@ Physics3State::Physics3State()
 	m_particleRegistry = new ParticleForceRegistry();
 	m_rigidRegistry = new RigidForceRegistry();
 
+	// particle springs
+	CollisionPoint* sp_point_0 = WrapAroundTestPoint(nullptr, false, false, false,
+		Vector3(10.f, 225.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
+	CollisionPoint* sp_point_1 = WrapAroundTestPoint(nullptr, false, false, false,
+		Vector3(10.f, 235.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
+	//CollisionPoint* asp_point_0 = WrapAroundTestPoint(nullptr, false, false, false,
+	//	Vector3(15.f, 225.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
+	//CollisionPoint* asp_point_1 = WrapAroundTestPoint(nullptr, false, false, false,
+	//	Vector3(15.f, 235.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
+	//asp_point_0->GetRigidBody()->SetFrozen(true);
+	//asp_point_1->GetRigidBody()->SetFrozen(true);
+	// setting up registrations in the registry
+	// A. springs
+	m_spring = SetupSpring(sp_point_0, sp_point_1, 2.f, 9.5f);		
+	//// two points initialized to be 5 units away, constraint by a spring system with rest length of 3
+	//// B. anchored spring
+	//m_anchorSpring = SetupAnchorSpring(asp_point_0, asp_point_1, 2.f, 8.f);
+
 	// debug
 	DebugRenderSet3DCamera(m_camera);
 	DebugRenderSet2DCamera(m_UICamera);
@@ -177,6 +195,7 @@ void Physics3State::PostConstruct()
 void Physics3State::Update(float deltaTime)
 {
 	UpdateInput(deltaTime);				// update input
+	UpdateForceRegistries(deltaTime);
 	UpdateGameobjects(deltaTime);		// update gameobjects
 	UpdateContacts(deltaTime);
 	UpdateDebug(deltaTime);			

@@ -220,4 +220,7 @@ public:
 	// utility
 	std::vector<Vector3> m_inspection;
 	int m_insepction_count = 0;
+
+	// springs
+	Spring* m_spring;
 };
