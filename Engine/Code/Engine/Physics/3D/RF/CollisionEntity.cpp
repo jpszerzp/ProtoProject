@@ -275,3 +275,16 @@ void CollisionRigidBody::AddAngularVelocity(const Vector3& v)
 {
 	m_ang_vel += v;
 }
+
+void CollisionRigidBody::AddForcePointWorldCoord(const Vector3& force, const Vector3 point_world)
+{
+	// Convert to coordinates relative to center of mass.
+	Vector3 pt = point_world;
+	pt -= m_center;
+
+	m_net_force += force;
+	m_net_torque += pt.Cross(force);			// impulse causes torque
+
+	// wake it up
+	m_awake = true;
+}

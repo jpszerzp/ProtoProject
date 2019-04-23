@@ -146,15 +146,36 @@ Physics3State::Physics3State()
 	CollisionPoint* sp_point_1 = WrapAroundTestPoint(nullptr, false, false, false,
 		Vector3(10.f, 235.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
 	CollisionPoint* asp_point_0 = WrapAroundTestPoint(nullptr, false, false, false,
-		Vector3(15.f, 225.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
+		Vector3(15.f, 225.f, -5.f), Vector3::ZERO, Vector3(10.f), true, true);
 	CollisionPoint* asp_point_1 = WrapAroundTestPoint(nullptr, false, false, false,
-		Vector3(15.f, 235.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
+		Vector3(15.f, 235.f, -5.f), Vector3::ZERO, Vector3(10.f), true, true);
 	// setting up registrations in the registry
 	// A. springs
 	m_spring = SetupSpring(sp_point_0, sp_point_1, 2.f, 9.5f);		
 	// two points initialized to be 5 units away, constraint by a spring system with rest length of 3
 	// B. anchored spring
-	m_anchorSpring = SetupAnchorSpring(asp_point_0, asp_point_1, 2.f, 8.f);
+	m_anchorSpring = SetupAnchorSpring(asp_point_0, asp_point_1, 2.f, 9.5f);
+
+	// anchor
+	m_spr_anchor = WrapAroundTestPoint(nullptr, false, false, false, Vector3(20.f, 235.f, -5.f), Vector3::ZERO, Vector3(10.f), true, true);
+	m_spr_anchor->SetFrozen(true);
+	m_spr_anchor->GetRigidBody()->SetVerlet(false);
+	// attched
+	m_spr_attach = WrapAroundTestSphere(nullptr, false, false, false, Vector3(20.f, 225.f, -5.f), Vector3::ZERO, Vector3::ONE, 10.f);
+	m_spr_attach->SetFrozen(true);
+	// entities
+	CollisionRigidBody* anchor_rb = m_spr_anchor->GetRigidBody();
+	CollisionRigidBody* attached_rb = m_spr_attach->GetRigidBody();
+	// set up anchor spring
+	m_rigidAnchorSpring = new GeneralRigidAnchorSpring(anchor_rb, attached_rb, 80.f, 9.5f);
+	// force generator
+	Vector3 attach_local = Vector3::ZERO;
+	ProjectPlaneToSphere(Vector2(.01f, .01f), m_spr_attach->GetRadius(), attach_local);
+	GravityRigidForceGenerator* grg = new GravityRigidForceGenerator(Vector3::GRAVITY / 5.f);
+	AnchorSpringRigidForceGenerator* asrfg = new AnchorSpringRigidForceGenerator(m_spr_anchor->GetCenter(), attached_rb, attach_local, 80.f, 9.5f);
+	// force registration
+	m_rigidRegistry->Register(attached_rb, grg);
+	m_rigidRegistry->Register(attached_rb, asrfg);
 
 	// debug
 	DebugRenderSet3DCamera(m_camera);
@@ -336,6 +357,13 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		for (int i = 0; i < g_theApp->m_physx_stack.size(); ++i)
 			g_theApp->m_physx_stack[i]->SetShouldDelete(true);
 		g_theApp->m_physx_stack.clear();
+	}
+
+	// anchor rigid spring
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_1))
+	{
+		m_spr_anchor->SetFrozen(!m_spr_anchor->IsFrozen());
+		m_spr_attach->SetFrozen(!m_spr_attach->IsFrozen());
 	}
 
 	// my stack
@@ -714,6 +742,7 @@ void Physics3State::UpdateForceRegistries(float dt)
 {
 	if (m_particleRegistry != nullptr)
 		m_particleRegistry->UpdateForces(dt);
+
 	if (m_rigidRegistry != nullptr)
 		m_rigidRegistry->UpdateForces(dt);
 }
@@ -935,11 +964,11 @@ void Physics3State::RenderUI(Renderer*)
 
 CollisionSphere* Physics3State::WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, 
 	bool give_lin_vel, bool register_g, const Vector3& position, const Vector3& rot, 
-	const Vector3& scale, const std::string& fp, const std::string& tx)
+	const Vector3& scale, float mass, const std::string& fp, const std::string& tx)
 {
 	CollisionSphere* sph = new CollisionSphere(scale.x, fp, tx);
 
-	CollisionRigidBody* rb = new CollisionRigidBody(1.f, position, rot);
+	CollisionRigidBody* rb = new CollisionRigidBody(mass, position, rot);
 	rb->SetAwake(true);
 	rb->SetSleepable(false);
 
@@ -964,7 +993,8 @@ CollisionSphere* Physics3State::WrapAroundTestSphere(WrapAround* wpa, bool give_
 		rb->SetAngularVelocity(Vector3(ang_v_x, ang_v_y, ang_v_z));
 	}
 
-	wpa->m_primitives.push_back(sph);
+	if (wpa != nullptr)
+		wpa->m_primitives.push_back(sph);
 
 	return sph;
 }

@@ -138,4 +138,6 @@ public:
 	eParticleVerlet GetParticleVerletScheme() const { return m_verlet_p; }
 
 	void AddAngularVelocity(const Vector3& v);
+
+	void AddForcePointWorldCoord(const Vector3& force, const Vector3 point_world);	
 };

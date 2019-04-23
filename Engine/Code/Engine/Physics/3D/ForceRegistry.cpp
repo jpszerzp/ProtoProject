@@ -50,6 +50,6 @@ void RigidForceRegistry::UpdateForces(float deltaTime)
 	{
 		RigidForceGenerator* theGenerator = rfr->m_rigidGenerator;
 
-		//theGenerator->UpdateForce(rfr->m_rb3, deltaTime);
+		theGenerator->UpdateForce(rfr->m_rb3, deltaTime);
 	}
 }
