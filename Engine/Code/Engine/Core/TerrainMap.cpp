@@ -386,8 +386,8 @@ int TerrainMap::Raymarch(std::vector<RaycastHit3>& hits,
 
 	if (debug)
 	{
-		DebugRenderPoint(100.f, 10.f, startOfIntersection, Rgba::MEGENTA, Rgba::MEGENTA, DEBUG_RENDER_USE_DEPTH);
-		DebugRenderPoint(100.f, 10.f, endOfIntersection, Rgba::YELLOW, Rgba::YELLOW, DEBUG_RENDER_USE_DEPTH);
+		//DebugRenderPoint(100.f, 10.f, startOfIntersection, Rgba::MEGENTA, Rgba::MEGENTA, DEBUG_RENDER_USE_DEPTH);
+		//DebugRenderPoint(100.f, 10.f, endOfIntersection, Rgba::YELLOW, Rgba::YELLOW, DEBUG_RENDER_USE_DEPTH);
 	}
 
 	//If our first point is below the terrain,
@@ -448,7 +448,7 @@ int TerrainMap::Raymarch(std::vector<RaycastHit3>& hits,
 
 		if (debug)
 		{
-			DebugRenderPoint(100.f, 100.f, pointOfInterest, Rgba::DARK_BROWN, Rgba::DARK_BROWN, DEBUG_RENDER_USE_DEPTH);
+			//DebugRenderPoint(100.f, 100.f, pointOfInterest, Rgba::DARK_BROWN, Rgba::DARK_BROWN, DEBUG_RENDER_USE_DEPTH);
 		}
 
 		//Do this until we're "close enough" to the terrain. That is our intersection point.

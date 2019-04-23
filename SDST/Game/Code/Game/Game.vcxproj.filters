@@ -97,6 +97,9 @@
     <ClCompile Include="Collision3State.cpp">
       <Filter>General\States\Gallery</Filter>
     </ClCompile>
+    <ClCompile Include="ControlState3.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameCommon.hpp">
@@ -164,6 +167,7 @@
     <ClInclude Include="Collision3State.hpp">
       <Filter>General\States\Gallery</Filter>
     </ClInclude>
+    <ClInclude Include="ControlState3.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="..\..\Run_Win32\Data\Definitions\IsoSprite.xml" />

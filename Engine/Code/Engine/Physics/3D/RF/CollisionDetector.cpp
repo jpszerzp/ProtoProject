@@ -45,49 +45,6 @@ static Vector3 GenerateContactPoint(const Vector3& p1, const Vector3& d1,
 	}
 }
 
-// for box only
-static float ProjectToAxis(const CollisionBox& b, const Vector3& axis)
-{
-	float x = b.GetHalfSize().x * abs(DotProduct(axis, b.GetBasisAndPosition(0)));
-	float y = b.GetHalfSize().y * abs(DotProduct(axis, b.GetBasisAndPosition(1)));
-	float z = b.GetHalfSize().z * abs(DotProduct(axis, b.GetBasisAndPosition(2)));
-
-	return x + y + z;
-}
-
-static float PenetrationOnAxis(const CollisionBox& b1,
-	const CollisionBox& b2, const Vector3& axis, const Vector3& disp)
-{
-	float half_project_1 = ProjectToAxis(b1, axis);
-	float half_project_2 = ProjectToAxis(b2, axis);
-
-	float dist = abs(DotProduct(disp, axis));
-
-	return (half_project_1 + half_project_2 - dist);
-}
-
-static bool TryAxis(const CollisionBox& b1, const CollisionBox& b2, Vector3 axis, 
-	const Vector3& disp, unsigned index, float& smallest_pen, unsigned& smallest_index)
-{
-	if (axis.GetLengthSquared() < .0001)
-		return true;
-
-	axis.Normalize();
-
-	float penetration = PenetrationOnAxis(b1, b2, axis, disp);
-
-	if (penetration < 0.f)
-		return false;
-
-	if (penetration < smallest_pen)
-	{
-		smallest_pen = penetration;
-		smallest_index = index;
-	}
-
-	return true;
-}
-
 uint CollisionSensor::SphereVsSphere(const CollisionSphere& s1, const CollisionSphere& s2, CollisionKeep* c_data)
 {
 	// see if still allow collisions
@@ -146,6 +103,39 @@ void FillPointFaceBoxBox(const CollisionBox& b1, const CollisionBox& b2,
 	collision->SetRestitution(c_data->m_global_restitution);
 }
 
+void FillPointFaceBoxConvex(const CollisionBox& b, const CollisionConvexObject& cobj,
+	const Vector3& disp, CollisionKeep* c_data, unsigned best, float pen,
+	Vector3 b_min, Vector3 b_max, Vector3 c_min, Vector3 c_max)
+{
+	Collision* collision = c_data->m_collision;
+
+	const Vector3& n = b.GetBasisAndPosition(best).GetNormalized();
+
+	collision->m_normal = n;
+	collision->m_penetration = pen;
+	collision->m_pos = c_min;
+	collision->SetBodies(b.GetRigidBody(), cobj.GetRigidBody());
+	collision->SetFriction(c_data->m_global_friction);
+	collision->SetRestitution(c_data->m_global_restitution);
+}
+
+void FillPointFaceConvexBox(const CollisionConvexObject& cobj, const CollisionBox& b, 
+	const Vector3& disp, CollisionKeep* c_data, unsigned best, float pen,
+	Vector3 b_min, Vector3 b_max, Vector3 c_min, Vector3 c_max)
+{
+	Collision* collision = c_data->m_collision;
+
+	// there has been 3 axis candidate already indexed with this same variable
+	// polygon normals are normalized
+	const Vector3& n = cobj.GetPoly(best - 3).m_normal;
+
+	collision->m_normal = n;
+	collision->m_penetration = pen;
+	collision->m_pos = b_min;
+	collision->SetBodies(cobj.GetRigidBody(), b.GetRigidBody());
+	collision->SetFriction(c_data->m_global_friction);
+	collision->SetRestitution(c_data->m_global_restitution);
+}
 
 uint CollisionSensor::BoxVsBox(const CollisionBox& b1, const CollisionBox& b2, CollisionKeep* c_data)
 {
@@ -158,58 +148,58 @@ uint CollisionSensor::BoxVsBox(const CollisionBox& b1, const CollisionBox& b2, C
 	unsigned best = 0xffffff;
 
 	// b1 basis 
-	if (!TryAxis(b1, b2, b1.GetBasisAndPosition(0), disp, 0, pen, best))
+	if (!SATTestBoxVsBox(b1, b2, b1.GetBasisAndPosition(0), disp, 0, pen, best))
 		return 0;
-	if (!TryAxis(b1, b2, b1.GetBasisAndPosition(1), disp, 1, pen, best))
+	if (!SATTestBoxVsBox(b1, b2, b1.GetBasisAndPosition(1), disp, 1, pen, best))
 		return 0;
-	if (!TryAxis(b1, b2, b1.GetBasisAndPosition(2), disp, 2, pen, best))
+	if (!SATTestBoxVsBox(b1, b2, b1.GetBasisAndPosition(2), disp, 2, pen, best))
 		return 0;
 
 	// b2 basis
-	if (!TryAxis(b1, b2, b2.GetBasisAndPosition(0), disp, 3, pen, best))
+	if (!SATTestBoxVsBox(b1, b2, b2.GetBasisAndPosition(0), disp, 3, pen, best))
 		return 0;
-	if (!TryAxis(b1, b2, b2.GetBasisAndPosition(1), disp, 4, pen, best))
+	if (!SATTestBoxVsBox(b1, b2, b2.GetBasisAndPosition(1), disp, 4, pen, best))
 		return 0;
-	if (!TryAxis(b1, b2, b2.GetBasisAndPosition(2), disp, 5, pen, best))
+	if (!SATTestBoxVsBox(b1, b2, b2.GetBasisAndPosition(2), disp, 5, pen, best))
 		return 0;
 
 	unsigned best_major_axis = best;
 
 	// cross product axis
 	Vector3 cross = b1.GetBasisAndPosition(0).Cross(b2.GetBasisAndPosition(0));
-	if (!TryAxis(b1, b2, cross, disp, 6, pen, best))
+	if (!SATTestBoxVsBox(b1, b2, cross, disp, 6, pen, best))
 		return 0;
 
 	cross = b1.GetBasisAndPosition(0).Cross(b2.GetBasisAndPosition(1));
-	if (!TryAxis(b1, b2, cross, disp, 7, pen, best))
+	if (!SATTestBoxVsBox(b1, b2, cross, disp, 7, pen, best))
 		return 0;
 
 	cross = b1.GetBasisAndPosition(0).Cross(b2.GetBasisAndPosition(2));
-	if (!TryAxis(b1, b2, cross, disp, 8, pen, best))
+	if (!SATTestBoxVsBox(b1, b2, cross, disp, 8, pen, best))
 		return 0;
 
 	cross = b1.GetBasisAndPosition(1).Cross(b2.GetBasisAndPosition(0));
-	if (!TryAxis(b1, b2, cross, disp, 9, pen, best))
+	if (!SATTestBoxVsBox(b1, b2, cross, disp, 9, pen, best))
 		return 0;
 
 	cross = b1.GetBasisAndPosition(1).Cross(b2.GetBasisAndPosition(1));
-	if (!TryAxis(b1, b2, cross, disp, 10, pen, best))
+	if (!SATTestBoxVsBox(b1, b2, cross, disp, 10, pen, best))
 		return 0;
 
 	cross = b1.GetBasisAndPosition(1).Cross(b2.GetBasisAndPosition(2));
-	if (!TryAxis(b1, b2, cross, disp, 11, pen, best))
+	if (!SATTestBoxVsBox(b1, b2, cross, disp, 11, pen, best))
 		return 0;
 
 	cross = b1.GetBasisAndPosition(2).Cross(b2.GetBasisAndPosition(0));
-	if (!TryAxis(b1, b2, cross, disp, 12, pen, best))
+	if (!SATTestBoxVsBox(b1, b2, cross, disp, 12, pen, best))
 		return 0;
 
 	cross = b1.GetBasisAndPosition(2).Cross(b2.GetBasisAndPosition(1));
-	if (!TryAxis(b1, b2, cross, disp, 13, pen, best))
+	if (!SATTestBoxVsBox(b1, b2, cross, disp, 13, pen, best))
 		return 0;
 
 	cross = b1.GetBasisAndPosition(2).Cross(b2.GetBasisAndPosition(2));
-	if (!TryAxis(b1, b2, cross, disp, 14, pen, best))
+	if (!SATTestBoxVsBox(b1, b2, cross, disp, 14, pen, best))
 		return 0;
 
 	ASSERT_OR_DIE(best != 0xffffff, "should have penetration");
@@ -366,11 +356,9 @@ uint CollisionSensor::BoxVsHalfPlane(const CollisionBox& box, const CollisionPla
 
 uint CollisionSensor::BoxVsSphere(const CollisionBox& box, const CollisionSphere& sphere, CollisionKeep* c_data)
 {
-	// Transform the centre of the sphere into box coordinates
 	Vector3 centre = sphere.GetBasisAndPosition(3);
 	Vector3 relCentre = box.GetTransformMat4().MultiplyInverse(centre);
 
-	// Early out check to see if we can exclude the contact
 	if (abs(relCentre.x) - sphere.GetRadius() > box.GetHalfSize().x ||
 		abs(relCentre.y) - sphere.GetRadius() > box.GetHalfSize().y ||
 		abs(relCentre.z) - sphere.GetRadius() > box.GetHalfSize().z)
@@ -381,7 +369,6 @@ uint CollisionSensor::BoxVsSphere(const CollisionBox& box, const CollisionSphere
 	Vector3 closestPt(0,0,0);
 	float dist;
 
-	// Clamp each coordinate to the box.
 	dist = relCentre.x;
 	if (dist > box.GetHalfSize().x) 
 		dist = box.GetHalfSize().x;
@@ -403,12 +390,10 @@ uint CollisionSensor::BoxVsSphere(const CollisionBox& box, const CollisionSphere
 		dist = -box.GetHalfSize().z;
 	closestPt.z = dist;
 
-	// Check we're in contact
 	dist = (closestPt - relCentre).GetLengthSquared();
 	if (dist > sphere.GetRadius() * sphere.GetRadius()) 
 		return 0;
 
-	// Compile the contact
 	Vector3 closestPtWorld = box.GetTransformMat4() * closestPt;
 
 	Collision* collision = c_data->m_collision;
@@ -421,6 +406,266 @@ uint CollisionSensor::BoxVsSphere(const CollisionBox& box, const CollisionSphere
 	collision->SetFriction(c_data->m_global_friction);
 	collision->SetRestitution(c_data->m_global_restitution);
 
+	c_data->NotifyAddedCollisions(1);
+
+	return 1;
+}
+
+uint CollisionSensor::ConvexVsHalfPlane(const CollisionConvexObject& convex, const CollisionPlane& plane, CollisionKeep* c_data)
+{
+	// if negative half space, ignore
+	float center_dist = DotProduct(convex.GetRigidBody()->GetCenter(), plane.GetNormal());
+	if (center_dist <= plane.GetOffset())
+		return 0;
+
+	if (c_data->m_collision_left <= 0) 
+		return 0;
+
+	Collision* collision = c_data->m_collision;
+	uint contactAcc = 0;
+	for (int i = 0; i < convex.GetVertNum(); ++i)
+	{
+		// this is unit vert
+		//const Vector3& unit_vert_pos = convex.GetUnitVert(i);
+		
+		// ...need to transform it to world space
+		//Vector3 world_vert = convex.GetTransformMat4() * unit_vert_pos;
+		Vector3 world_vert = convex.GetWorldVert(i);
+
+		// get its distance to plane 
+		float vert_dist = DotProduct(world_vert, plane.GetNormal());
+
+		// if the vert goes beyond the plane, consider it an overlap
+		if (vert_dist <= plane.GetOffset())
+		{
+			collision->m_pos = world_vert;
+			collision->m_normal = plane.GetNormal();
+			collision->m_penetration = plane.GetOffset() - vert_dist;
+
+			collision->SetBodies(convex.GetRigidBody(), nullptr);
+
+			collision->SetFriction(c_data->m_global_friction);
+			collision->SetRestitution(c_data->m_global_restitution);
+
+			// to the next contact
+			collision++;
+			contactAcc++;
+			if (contactAcc == (uint)c_data->m_collision_left)
+				return contactAcc;
+		}
+	}
+
+	c_data->NotifyAddedCollisions(contactAcc);
+
+	return contactAcc;
+}
+
+uint CollisionSensor::ConvexVsBox(const CollisionConvexObject& convex, const CollisionBox& box, CollisionKeep* c_data)
+{
+	if (c_data->m_collision_left <= 0)
+		return 0;
+
+	Vector3 disp = convex.GetBasisAndPosition(3) - box.GetBasisAndPosition(3);
+
+	float pen = FLT_MAX;
+	unsigned best = 0xffffff;
+	int idx = 0;
+
+	Vector3 box_min, convex_min = Vector3(FLT_MAX);
+	Vector3 box_max, convex_max = Vector3(FLT_MIN);
+
+	// box basis
+	bool passed = SATTestBoxVsConvex(box, convex, box.GetBasisAndPosition(0), 
+		disp, idx, pen, best, box_min, box_max, convex_min, convex_max);
+	if (!passed)
+		return 0;
+	idx++;
+
+	passed = SATTestBoxVsConvex(box, convex, box.GetBasisAndPosition(1), 
+		disp, idx, pen, best, box_min, box_max, convex_min, convex_max);
+	if (!passed)
+		return 0;
+	idx++;
+
+	passed = SATTestBoxVsConvex(box, convex, box.GetBasisAndPosition(2), 
+		disp, idx, pen, best, box_min, box_max, convex_min, convex_max);
+	if (!passed)
+		return 0;
+	idx++;
+
+	// convex face normals
+	std::vector<Vector3> axes = convex.GetAxes();
+	for (int i = 0; i < axes.size(); ++i)
+	{
+		passed = SATTestBoxVsConvex(box, convex, axes[i], 
+			disp, idx, pen, best, box_min, box_max, convex_min, convex_max);
+		if (!passed)
+			return 0;
+		idx++;
+	}
+
+	// the best idx not considering cross product axes
+	unsigned best_axis_record = best;
+
+	// cross product axes
+	// for those cross with 0 axis of box
+	for (int i = 0; i < axes.size(); ++i)
+	{
+		const Vector3& box_axis_0 = box.GetBasisAndPosition(0);
+		const Vector3& convex_face_n = axes[i];
+
+		Vector3 cross = box_axis_0.Cross(convex_face_n);
+
+		passed = SATTestBoxVsConvex(box, convex, cross,
+			disp, idx, pen, best, box_min, box_max, convex_min, convex_max);
+		if (!passed)
+			return 0;
+		idx++;
+	}
+
+	// for those cross with 1 axis of box
+	for (int i = 0; i < axes.size(); ++i)
+	{
+		const Vector3& box_axis_1 = box.GetBasisAndPosition(1);
+		const Vector3& convex_face_n = axes[i];
+
+		Vector3 cross = box_axis_1.Cross(convex_face_n);
+
+		passed = SATTestBoxVsConvex(box, convex, cross, 
+			disp, idx, pen, best, box_min, box_max, convex_min, convex_max);
+		if (!passed)
+			return 0;
+		idx++;
+	}
+
+	// for those cross with 2 axis of box
+	for (int i = 0; i < axes.size(); ++i)
+	{
+		const Vector3& box_axis_2 = box.GetBasisAndPosition(2);
+		const Vector3& convex_face_n = axes[i];
+
+		Vector3 cross = box_axis_2.Cross(convex_face_n);
+
+		passed = SATTestBoxVsConvex(box, convex, cross,
+			disp, idx, pen, best, box_min, box_max, convex_min, convex_max);
+		if (!passed)
+			return 0;
+		idx++;
+	}
+
+	ASSERT_OR_DIE(best != 0xffffff, "should have penetration");
+
+	int box_idx_milestone = 2;
+	int convex_idx_milestone = box_idx_milestone + convex.GetPolyNum();
+	// axis is box's basis
+	if (best <= box_idx_milestone)
+	{
+		FillPointFaceBoxConvex(box, convex, disp, c_data, 
+			best, pen, box_min, box_max, convex_min, convex_max);
+		c_data->NotifyAddedCollisions(1);
+		return 1;
+	}
+	// axis is convex normals
+	else if (best <= convex_idx_milestone)
+	{
+		FillPointFaceConvexBox(convex, box, -disp, c_data, 
+			best, pen, box_min, box_max, convex_min, convex_max);
+		c_data->NotifyAddedCollisions(1);
+		return 1;
+	}
+	// axis is cross product
+	else
+	{
+		/*
+		int ee_idx = best - (convex_idx_milestone + 1);
+		unsigned idx1 = ee_idx / convex.GetPolyNum();	 // box edge
+		unsigned idx2 = ee_idx % convex.GetPolyNum();	 // convex edge
+		const Vector3& axis1 = box.GetBasisAndPosition(idx1);
+		const Vector3& axis2 = convex.GetPoly(idx2).m_normal;
+		Vector3 sep_axis = axis1.Cross(axis2);
+		sep_axis.Normalize();
+
+		// disp is toward convex, and we set the first collision body as box and the other convex (box to convex)
+		if (DotProduct(sep_axis, disp) < 0.f)
+			sep_axis *= -1.f;
+
+		Collision* collision = c_data->m_collision;
+
+		collision->m_penetration = pen;
+		collision->m_normal = sep_axis;
+		collision->m_pos = convex_min;
+		collision->SetBodies(box.GetRigidBody(), convex.GetRigidBody());
+		collision->SetFriction(c_data->m_global_friction);
+		collision->SetRestitution(c_data->m_global_restitution);
+
+		c_data->NotifyAddedCollisions(1);
+		return 1;
+		*/
+
+		return 0;
+	}
+
+	return 0;
+}
+
+uint CollisionSensor::ConvexVsSphere(const CollisionConvexObject& convex, const CollisionSphere& sph, CollisionKeep* c_data)
+{
+	if (c_data->m_collision_left <= 0) 
+		return 0;
+
+	Collision* collision = c_data->m_collision;
+
+	float best = FLT_MAX;
+	Vector3 best_vert = Vector3::INVALID;
+	Vector3 best_norm = Vector3::INVALID;
+
+	const std::vector<ConvexPolygon>& poly_refs = convex.GetPolyRefs();
+	for (int i = 0; i < poly_refs.size(); ++i)
+	{
+		const ConvexPolygon& poly = poly_refs[i];
+		const int& idx0 = poly.m_vert_idx[0];
+		const int& idx1 = poly.m_vert_idx[1];
+		const int& idx2 = poly.m_vert_idx[2];
+		const Vector3& world_vert_0 = convex.GetWorldVert(idx0);
+		const Vector3& world_vert_1 = convex.GetWorldVert(idx1);
+		const Vector3& world_vert_2 = convex.GetWorldVert(idx2);
+		Vector3 e0to2 = world_vert_2 - world_vert_0;
+		Vector3 e0to1 = world_vert_1 - world_vert_0;
+		Vector3 n = e0to2.Cross(e0to1);			// we are in left-handed system
+		//n *= -1.f;
+		n.Normalize();
+		//const Vector3& n = poly.m_normal;
+
+		float ext = DotProduct(world_vert_0, n);
+
+		// get sphere projection on to the axis
+		const Vector3& sph_center = sph.GetCenter();
+		const float& sph_rad = sph.GetRadius();
+		float ext_sph_center = DotProduct(sph_center, n);
+
+		if (ext_sph_center - sph_rad > ext)
+			return 0;
+
+		// this axis pass, update best case if the overlap is shallower
+		float overlap = (ext - (ext_sph_center - sph_rad));
+		if (overlap < best)
+		{
+			best = overlap;
+			best_vert = sph_center - (n * sph_rad);
+			best_norm = n;
+		}
+	}
+
+	collision->m_pos = best_vert;
+	collision->m_normal = best_norm;
+	collision->m_penetration = best;
+
+	collision->SetBodies(convex.GetRigidBody(), sph.GetRigidBody());
+
+	collision->SetFriction(c_data->m_global_friction);
+	collision->SetRestitution(c_data->m_global_restitution);
+
+	// limit sph vs convex case to 1 contact at a time
 	c_data->NotifyAddedCollisions(1);
 
 	return 1;

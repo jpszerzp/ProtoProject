@@ -41,6 +41,7 @@ ConvexPolyhedron::ConvexPolyhedron(ConvexHull* hull)
 	const Plane& p4 = m_hull->GetPlane(3);
 
 	// samples
+	/*
 	DebugRenderPoint(10000.f, 10.f, Vector3(0.f, 0.f, 0.f)     , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
 	DebugRenderPoint(10000.f, 10.f, Vector3(5.f, 0.f, 0.f)     , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
 	DebugRenderPoint(10000.f, 10.f, Vector3(-5.f, 0.f, 0.f)    , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
@@ -71,6 +72,7 @@ ConvexPolyhedron::ConvexPolyhedron(ConvexHull* hull)
 	DebugRenderPoint(10000.f, 10.f, Vector3(13.f, -4.1f, -9.f) , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
 	DebugRenderPoint(10000.f, 10.f, Vector3(-13.f, -4.1f, -9.f), Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
 	DebugRenderPoint(10000.f, 10.f, Vector3(0.f, -2.5f, 7.5f)  , Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+	*/
 	//m_hull->AddSample( Vector3(0.f, 0.f, 0.f)      );
 	//m_hull->AddSample( Vector3(5.f, 0.f, 0.f)      );
 	//m_hull->AddSample( Vector3(-5.f, 0.f, 0.f)     );

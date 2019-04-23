@@ -1610,6 +1610,110 @@ bool IsPointOutwardPlane(const Vector3& pt, const Plane& plane)
 	return DistPointToPlaneSigned(pt, plane) > 0.f;
 }
 
+bool SATTestBoxVsBox(const CollisionBox& b1, const CollisionBox& b2, Vector3 axis, const Vector3& disp, unsigned index, float& smallest_pen, unsigned& smallest_index)
+{
+	if (axis.GetLengthSquared() < .0001f)
+		return true;
+
+	axis.Normalize();
+
+	float penetration = SATTestPenetrationBoxVsBox(b1, b2, axis, disp);
+
+	if (penetration < 0.f)
+		return false;
+
+	if (penetration < smallest_pen)
+	{
+		smallest_pen = penetration;
+		smallest_index = index;
+	}
+
+	return true;
+}
+
+float SATTestPenetrationBoxVsBox(const CollisionBox& b1, const CollisionBox& b2, const Vector3& axis, const Vector3& disp)
+{
+	float half_project_1 = SATHalfProjectionBox(b1, axis);
+	float half_project_2 = SATHalfProjectionBox(b2, axis);
+
+	float dist = abs(DotProduct(disp, axis));
+
+	return (half_project_1 + half_project_2 - dist);
+}
+
+float SATHalfProjectionBox(const CollisionBox& b, const Vector3& axis)
+{
+	float x = b.GetHalfSize().x * abs(DotProduct(axis, b.GetBasisAndPosition(0)));
+	float y = b.GetHalfSize().y * abs(DotProduct(axis, b.GetBasisAndPosition(1)));
+	float z = b.GetHalfSize().z * abs(DotProduct(axis, b.GetBasisAndPosition(2)));
+
+	return x + y + z;
+}
+
+// test of box and convex shapes along the given axis
+bool SATTestBoxVsConvex(const CollisionBox& b1, const CollisionConvexObject& cobj, Vector3 axis, const Vector3& disp, unsigned idx, float& smallest_pen, unsigned& smallest_idx,
+	Vector3& box_min, Vector3& box_max, Vector3& convex_min, Vector3& convex_max)
+{
+	// axes was parallel, ignore
+	if (axis.GetLengthSquared() < .0001f)
+		return true;
+
+	axis.Normalize();
+
+	float tmin_b, tmax_b, tmin_c, tmax_c; 
+	Vector3 vmin_b, vmax_b, vmin_c, vmax_c;
+
+	// intervals, all v are in world space
+	b1.ProjectToAxisForInterval(axis, tmin_b, tmax_b, vmin_b, vmax_b);
+	cobj.ProjectToAxisForInterval(axis, tmin_c, tmax_c, vmin_c, vmax_c);
+
+	if (!(tmin_c < tmax_b) && (tmax_c > tmin_b))
+		return false;
+
+	// get penetration
+	float pen;
+	if (tmax_c > tmax_b) 
+		pen = tmax_b - tmin_c;
+	else if (tmin_c < tmin_b)
+		pen = tmax_c - tmin_b;
+	else
+	{
+		if ((tmax_b - tmin_b) < (tmax_c - tmin_c))
+			pen = tmax_b - tmin_b;
+		else
+			pen = tmax_c - tmin_c;
+	}
+	//ASSERT_OR_DIE(pen > 0, "penetration should be larger than 0");
+
+	if (pen < smallest_pen)
+	{
+		smallest_pen = pen;
+		smallest_idx = idx;
+
+		box_min = vmin_b;
+		box_max = vmax_b;
+
+		convex_min = vmin_c;
+		convex_max = vmax_c;
+	}
+	
+	return true;
+}
+
+/*
+// penetration along the given axis
+float SATTestPenetrationBoxVsConvex(const CollisionBox& b1, const CollisionConvexObject& cobj, const Vector3& axis, const Vector3& disp)
+{
+	float tmin_b, tmax_b, tmin_c, tmax_c; 
+	Vector3 vmin_b, vmax_b, vmin_c, vmax_c;
+
+	// intervals
+	b1.ProjectToAxisForInterval(axis, tmin_b, tmax_b, vmin_b, vmax_b);
+	cobj.ProjectToAxisForInterval(axis, tmin_c, tmax_c, vmin_c, vmax_c);
+
+}
+*/
+
 float DistPointToPlaneUnsigned(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3)
 {
 	return abs(DistPointToPlaneSigned(pt, vert1, vert2, vert3));
@@ -1812,9 +1916,9 @@ Vector3 GetPolygonCentroid(const std::vector<Vector3>& verts, const ConvexPolygo
 		centroid += verts[vert_indices[i]];
 	}
 
-	uint vert_num = vert_indices.size();
+	uint vert_num = (uint)vert_indices.size();
 
-	centroid /= vert_num;
+	centroid /= (float)vert_num;
 
 	return centroid;
 }
@@ -1848,4 +1952,9 @@ Matrix33 TranslateCovariance(const Matrix33& cov, const Vector3& com, const floa
 	float dot3 = DotProduct(offset, offset);
 
 	return (cov + mass * (dot1 + dot2 + dot3));
+}
+
+bool AreFloatsCloseEnough(const float& f1, const float& f2)
+{	
+	return (abs(f1 - f2) < 0.01f);
 }

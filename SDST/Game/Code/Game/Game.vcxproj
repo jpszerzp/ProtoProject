@@ -308,6 +308,7 @@
     <ClCompile Include="CameraAnchor.cpp" />
     <ClCompile Include="Collision3State.cpp" />
     <ClCompile Include="ControlGroup.cpp" />
+    <ClCompile Include="ControlState3.cpp" />
     <ClCompile Include="DelegateTest.cpp" />
     <ClCompile Include="Fireworks.cpp" />
     <ClCompile Include="GameCommon.cpp" />
@@ -345,6 +346,7 @@
     <ClInclude Include="CameraAnchor.hpp" />
     <ClInclude Include="Collision3State.hpp" />
     <ClInclude Include="ControlGroup.hpp" />
+    <ClInclude Include="ControlState3.hpp" />
     <ClInclude Include="DelegateTest.hpp" />
     <ClInclude Include="EngineBuildPreferences.hpp" />
     <ClInclude Include="Fireworks.hpp" />

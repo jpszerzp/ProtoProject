@@ -23,22 +23,11 @@ public:
 
 	void SolveCollision(Collision* collisions, uint collision_num, float duration);
 
-	void SetIterations(uint v_itr, uint p_itr)
-	{
-		m_vel_iterations = v_itr;
-		m_pos_iterations = p_itr;
-	}
+	void SetIterations(uint v_itr, uint p_itr);
 
-	void SetIterations(uint itr)
-	{
-		SetIterations(itr, itr);
-	}
+	void SetIterations(uint itr);
 
-	void SetThresholds(const float& v_thres, const float& p_thres)
-	{
-		m_vel_threshold = v_thres;
-		m_pos_threshold = p_thres;
-	}
+	void SetThresholds(const float& v_thres, const float& p_thres);
 
 protected:
 	void PrepareCollision(Collision* collisions, uint collision_num, float duration);

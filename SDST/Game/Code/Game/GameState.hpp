@@ -24,9 +24,8 @@ public:
 	ForwardRenderPath* m_forwardPath;
 	RenderSceneGraph*  m_sceneGraph;
 
+	// after rf, this is a little different from physics object
 	std::vector<GameObject*> m_gameObjects;
-
-	//ePrimitiveControl m_control;
 
 public:
 	GameState(){}

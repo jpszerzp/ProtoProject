@@ -46,10 +46,10 @@ public:
 	virtual void CacheData(){}
 
 	virtual void SetAwake(bool){}
-	virtual void SetAngularVelocity(const Vector3&) { ASSERT_OR_DIE(false, "entity does not have angular velocity"); }
-	virtual void SetTensor(const Matrix33&){ ASSERT_OR_DIE(false, "entity does not have tensor"); }
-	virtual void SetInvTensor(const Matrix33&){ ASSERT_OR_DIE(false, "entity does not have inverse tensor"); }
-	virtual void SetInvTensorWorld(const Matrix33&){ ASSERT_OR_DIE(false, "entity does not have inverse tensor world"); }
+	virtual void SetAngularVelocity(const Vector3&) { ASSERT_OR_DIE(false, "general entity does not have angular velocity"); }
+	virtual void SetTensor(const Matrix33&){ ASSERT_OR_DIE(false, "general entity does not have tensor"); }
+	virtual void SetInvTensor(const Matrix33&){ ASSERT_OR_DIE(false, "general entity does not have inverse tensor"); }
+	virtual void SetInvTensorWorld(const Matrix33&){ ASSERT_OR_DIE(false, "general entity does not have inverse tensor world"); }
 
 	Matrix44 GetTransformMat4() const { return m_transform_mat; }
 	Vector3 GetCenter() const { return m_center; }
@@ -59,8 +59,9 @@ public:
 	Vector3 GetLastFrameLinearAcc() const { return m_last_lin_acc; }
 	bool IsAwake() const { return m_awake; }
 	bool IsSleepable() const { return m_sleepable; }
-	virtual Vector3 GetAngularVelocity() const { ASSERT_OR_DIE(false, "entity does not have angular velocity"); }
+	virtual Vector3 GetAngularVelocity() const { ASSERT_OR_DIE(false, "general entity does not have angular velocity"); }
 	virtual float GetRealTimeMotion() const;
+	virtual Matrix33 GetTensor() const { ASSERT_OR_DIE(false, "general entity does not have tensor"); }
 
 	void AddLinearVelocity(const Vector3& v);
 	void AddForce(const Vector3& f);
@@ -109,6 +110,7 @@ public:
 	void GetIITWorld(Matrix33* iitw) const;
 	Vector3 GetAngularVelocity() const override { return m_ang_vel; }
 	float GetRealTimeMotion() const override;
+	Matrix33 GetTensor() const override { return m_tensor; }
 
 	void AddAngularVelocity(const Vector3& v);
 };
