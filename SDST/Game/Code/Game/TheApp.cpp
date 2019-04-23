@@ -19,6 +19,21 @@
 #include "Engine/Net/NetAddress.hpp"
 #include "Engine/Physics/3D/RF/PhysTime.hpp"
 
+PhysAllocator gAllocator;
+PhysErrorCallback gErrorCallback;
+
+PxFoundation* gFoundation = NULL;
+PxPhysics*				gPhysics	= NULL;
+
+PxDefaultCpuDispatcher*	gDispatcher = NULL;
+PxScene*				gScene		= NULL;
+
+PxMaterial*				gMaterial	= NULL;
+
+PxPvd*                  gPvd        = NULL;
+
+PxReal stackZ = 10.0f;
+
 TheApp::TheApp()
 {
 	TimeStartup();
@@ -32,7 +47,6 @@ TheApp::TheApp()
 	BlackboardStartup();
 	PhysxStartup();
 }
-
 
 TheApp::~TheApp()
 {
@@ -271,12 +285,10 @@ void TheApp::StateStartup()
 {
 	Physics3State* phys3 = new Physics3State();
 	ControlState3* control = new ControlState3();
-	//Collision3State* collision = new Collision3State();
 	StateMachine* states = new StateMachine();
 	phys3->PostConstruct();
 	states->AppendState(phys3);
 	states->AppendState(control);
-	//states->AppendState(collision);
 	g_theGame = new TheGame();
 	g_theGame->SetStateMachine(states);
 	g_theGame->UseDefaultState();			// set default state as state at index 0 
@@ -309,25 +321,7 @@ void TheApp::BlackboardStartup()
 
 void TheApp::PhysxStartup()
 {
-	//// create physx foundation
-	//m_foundation = PxCreateFoundation(PX_PHYSICS_VERSION, m_DefaultAllocatorCallback, m_DefaultErrorCallback);
-	//if (!m_foundation)
-	//	ASSERT_OR_DIE(false, "PxCreateFoundation failed!");
-
-	//// create top-level physx object
-	//bool recordMemoryAllocations = true;
-
 	/*
-	// optional pvd instance
-	m_pvd = PxCreatePvd(*m_foundation);
-	PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 10);
-	m_pvd->connect(*transport, PxPvdInstrumentationFlag::eALL);
-	*/
-
-	//m_physics = PxCreatePhysics(PX_PHYSICS_VERSION, *m_foundation, PxTolerancesScale(), recordMemoryAllocations, m_pvd);
-	//if (!m_physics)
-	//	ASSERT_OR_DIE(false, "PxCreatePhysics failed!");
-
 	static PhysErrorCallback gErrorCB;
 	static PhysAllocator gAllocator;
 
@@ -339,25 +333,36 @@ void TheApp::PhysxStartup()
 	// create top-level physx object
 	bool recordMemoryAllocations = true;
 
-	/*
-	// optional pvd instance, need a HOST
-	m_pvd = PxCreatePvd(*m_foundation);
-	PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 10);
-	m_pvd->connect(*transport, PxPvdInstrumentationFlag::eALL);
-	*/
-
 	m_physics = PxCreatePhysics(PX_PHYSICS_VERSION, *m_foundation, PxTolerancesScale(), recordMemoryAllocations, m_pvd);
 	if (!m_physics)
 		ASSERT_OR_DIE(false, "PxCreatePhysics failed!");
 
 	TODO("optional startups: cooking, extensions, articulations, height fields");
+	*/
+
+	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
+
+	//gPvd = PxCreatePvd(*gFoundation);
+	//PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate("127.0.0.1", 5425, 10);
+	//gPvd->connect(*transport,PxPvdInstrumentationFlag::eALL);
+
+	gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, PxTolerancesScale(),true,gPvd);
+
+	PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
+	sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
+	//gDispatcher = PxDefaultCpuDispatcherCreate(2);
+	//sceneDesc.cpuDispatcher	= gDispatcher;
+	//sceneDesc.filterShader	= PxDefaultSimulationFilterShader;
+	//gScene = gPhysics->createScene(sceneDesc);
 }
 
 void TheApp::PhysxShutdown()
 {
+	/*
 	// release PxPhysics object
 	m_physics->release();
 
 	// release foundation
 	m_foundation->release();
+	*/
 }
