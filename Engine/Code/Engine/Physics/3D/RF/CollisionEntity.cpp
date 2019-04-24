@@ -68,10 +68,10 @@ void CollisionRigidBody::Integrate(float deltaTime)
 		float bias = powf(0.5, deltaTime);
 		m_motion = bias * m_motion + (1 - bias) * currentMotion;
 
-		if (m_motion < SLEEP_THRESHOLD) 
+		if (m_motion < m_sleep) 
 			SetAwake(false);
-		else if (m_motion > 10 * SLEEP_THRESHOLD) 
-			m_motion = 10 * SLEEP_THRESHOLD;
+		else if (m_motion > 10 * m_sleep) 
+			m_motion = 10 * m_sleep;
 	}
 }
 
@@ -108,10 +108,10 @@ void CollisionRigidBody::IntegrateEulerParticle(float dt)
 			float lerp = powf(0.5, dt);
 			m_motion = lerp * m_motion + (1 - lerp) * currentMotion;	// lerp to real time motion
 
-			if (m_motion < SLEEP_THRESHOLD) 
+			if (m_motion < m_sleep) 
 				SetAwake(false);
-			else if (m_motion > 10 * SLEEP_THRESHOLD) 
-				m_motion = 10 * SLEEP_THRESHOLD;
+			else if (m_motion > 10 * m_sleep) 
+				m_motion = 10 * m_sleep;
 		}
 	}
 	else
@@ -167,10 +167,10 @@ void CollisionRigidBody::IntegrateVerletParticle(float dt)
 			float lerp = powf(0.5, dt);
 			m_motion = lerp * m_motion + (1 - lerp) * currentMotion;	// lerp to real time motion
 
-			if (m_motion < SLEEP_THRESHOLD) 
+			if (m_motion < m_sleep) 
 				SetAwake(false);
-			else if (m_motion > 10 * SLEEP_THRESHOLD) 
-				m_motion = 10 * SLEEP_THRESHOLD;
+			else if (m_motion > 10 * m_sleep) 
+				m_motion = 10 * m_sleep;
 		}
 	}
 	else
@@ -251,7 +251,7 @@ void CollisionRigidBody::SetAwake(bool awake)
 		m_awake = true;
 
 		// Add a bit of motion to avoid it falling asleep immediately.
-		m_motion = SLEEP_THRESHOLD * 1.05f;
+		m_motion = m_sleep * 1.05f;
 	} 
 	else 
 	{

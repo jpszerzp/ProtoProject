@@ -1272,7 +1272,8 @@ void Physics3State::SpawnRandomBox(WrapAround* wpa, uint num, const Vector3& min
 		Vector3 rand_scale = Vector3(scale_x, scale_y, scale_z);
 
 		const Vector3& rand_pos = GetRandomLocationWithin(bound);
-		WrapAroundTestBox(wpa, true, false, true, rand_pos, Vector3::ZERO, rand_scale, true, true);
+		CollisionBox* b = WrapAroundTestBox(wpa, true, false, true, rand_pos, Vector3::ZERO, rand_scale, true, true);
+		b->GetRigidBody()->SetSleepThreshold(.3f);
 	}
 }
 

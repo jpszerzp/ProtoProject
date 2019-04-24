@@ -44,6 +44,8 @@ protected:
 	Vector3 m_last_center = Vector3::ZERO;
 	Vector3 m_half_step_vel = Vector3::ZERO;
 
+	float m_sleep = 5.5;
+
 public:
 	virtual void Integrate(float deltaTime);
 	virtual void ClearAcc();
@@ -57,6 +59,7 @@ public:
 	void SetBaseLinearAcceleration(const Vector3& acc) { m_lin_acc = acc; }
 	void SetSlow(const float& slow) { m_slow = slow; }
 	void SetFrozen(bool val) { m_frozen = val; }
+	void SetSleepThreshold(float val) { m_sleep = val; }
 
 	virtual void CacheData(){}
 

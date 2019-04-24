@@ -136,6 +136,8 @@ void CollisionSphere::AttachToRigidBody(CollisionRigidBody* rb)
 	// use same transform mat for primitive
 	Matrix44 transform_mat = rb->GetTransformMat4() * Matrix44::MakeScale3D(m_radius, m_radius, m_radius);
 	SetPrimitiveTransformMat4(transform_mat);
+
+	GetRigidBody()->SetSleepThreshold(.3f);
 }
 
 void CollisionSphere::SetRigidBodyPosition(const Vector3& pos)
@@ -584,6 +586,8 @@ void CollisionConvexObject::AttachToRigidBody(CollisionRigidBody* rb)
 
 	// align gameobject transform with rigidbody's
 	SetPrimitiveTransformMat4(rb->GetTransformMat4());
+
+	GetRigidBody()->SetSleepThreshold(.3f);
 }
 
 void CollisionConvexObject::BuildVerticesAndPolygons(const ConvexHull& hull)
