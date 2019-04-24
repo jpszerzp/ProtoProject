@@ -107,6 +107,7 @@ bool HandleMsg(unsigned int msg, size_t wparam, size_t)
 void Initialize( HINSTANCE )
 {
 	g_theApp = new TheApp();
+	g_gameConfigBlackboard->app_h = g_theApp;		// app hook to engine common blackboard
 	Window* theWindow = Window::GetInstance();
 	theWindow->RegisterHandler(HandleMsg);
 

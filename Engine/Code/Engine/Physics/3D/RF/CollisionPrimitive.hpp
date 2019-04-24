@@ -67,6 +67,7 @@ public:
 	void SetRigidBodyPositionOnly(const Vector3& pos);
 	void SetFrozen(bool val) { m_rigid_body->SetFrozen(val); }
 	void SetContinuity(eCCD val) { m_ccd = val; }
+	virtual void SetPhysTest(){}
 	virtual void SetRigidBodyPosition(const Vector3&){}		// ...need to consider scale in general case when this is implemented 
 	PhysXObject* m_cmp = nullptr;
 
@@ -112,22 +113,27 @@ class CollisionBox : public CollisionPrimitive
 {
 	Vector3 m_half_size;
 	std::vector<Vector3> m_world_verts;
+	bool m_stack = false;
 
 public:
-	CollisionBox(const Vector3& half, const std::string& fp = "default", const std::string& tx = "Data/Images/perspective_test.png");
+	CollisionBox(const Vector3& half, const std::string& fp = "default", 
+		const std::string& tx = "Data/Images/perspective_test.png");
+	CollisionBox(const float& scale, const std::string& fp = "default", 
+		const std::string& tx = "Data/Images/perspective_test.png");		// uniform half size
 	~CollisionBox(){}
 
 	void Update(float deltaTime) override;
-	//void CacheWorldVerts();
 
 	void AttachToRigidBody(CollisionRigidBody* rb) override;
 
+	void SetStack(bool value) { m_stack = value; }
+
 	Vector3 GetHalfSize() const { return m_half_size; }
 
-	// SAT
 	float ProjectVertToAxis(const Vector3& axis, const int& idx) const;
 	float ProjectCenterToAxis(const Vector3& axis) const;
 	void ProjectToAxisForInterval(const Vector3& axis, float& tmin, float& tmax, Vector3& vmin, Vector3& vmax) const;
+	void SetPhysTest();
 };
 
 class CollisionPlane : public CollisionPrimitive

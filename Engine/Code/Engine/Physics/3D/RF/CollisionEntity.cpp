@@ -1,7 +1,7 @@
 #include "Engine/Physics/3D/RF/CollisionEntity.hpp"
 #include "Engine/Math/MathUtils.hpp"
 
-#define SLEEP_THRESHOLD 1.5f
+#define SLEEP_THRESHOLD 5.5f
 
 void CollisionEntity::Integrate(float)
 {

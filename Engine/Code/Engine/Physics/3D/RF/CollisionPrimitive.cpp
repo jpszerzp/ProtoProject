@@ -2,6 +2,8 @@
 #include "Engine/Renderer/DebugRenderer.hpp"
 #include "Engine/Math/MathUtils.hpp"
 #include "Engine/Input/InputSystem.hpp"
+#include "Engine/Core/EngineCommon.hpp"
+#include "Engine/Core/Blackboard.hpp"
 
 void CollisionPrimitive::BuildCommon(const std::string& shader, const std::string& tx)
 {
@@ -190,8 +192,30 @@ CollisionBox::CollisionBox(const Vector3& half, const std::string& fp, const std
 	SetTint(tintV4);
 }
 
+CollisionBox::CollisionBox(const float& scale, 
+	const std::string& fp, const std::string& tx)
+	: m_half_size(Vector3(scale))
+{
+	Renderer* renderer = Renderer::GetInstance();
+
+	SetMesh(renderer->CreateOrGetMesh("cube_pcu"));
+	SetShader(renderer->CreateOrGetShader(fp));
+	SetTexture(renderer->CreateOrGetTexture(tx));
+
+	Vector4 tintV4;
+	Rgba tint = Rgba::WHITE;
+	tint.GetAsFloats(tintV4.x, tintV4.y, tintV4.z, tintV4.w);
+	SetTint(tintV4);
+	SetPhysTest();
+}
+
 void CollisionBox::Update(float deltaTime)
 {
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_5) && m_stack)
+	{
+		GetRigidBody()->SetAwake(false);
+	}
+
 	if (GetRigidBody() != nullptr)
 	{
 		// take rigid body and integrate
@@ -205,41 +229,6 @@ void CollisionBox::Update(float deltaTime)
 		SetPrimitiveTransformMat4(transform_mat);
 	}
 }
-
-/*
-void CollisionBox::CacheWorldVerts()
-{
-	const Vector3& centre = GetRigidBody()->GetCenter();
-	const Vector3& xdir = GetBasisAndPosition(0);
-	const Vector3& ydir = GetBasisAndPosition(1);
-	const Vector3& zdir = GetBasisAndPosition(2);
-
-	float x_sqr = xdir.GetLengthSquared();
-	float y_sqr = ydir.GetLengthSquared();
-	float z_sqr = zdir.GetLengthSquared();
-
-	ASSERT_OR_DIE(AreFloatsCloseEnough(x_sqr, 1.f), "basis should be unit vector");
-	ASSERT_OR_DIE(AreFloatsCloseEnough(y_sqr, 1.f), "basis should be unit vector");
-	ASSERT_OR_DIE(AreFloatsCloseEnough(z_sqr, 1.f), "basis should be unit vector");
-
-	Vector3 v1 = centre + xdir * m_half_size.x + ydir * m_half_size.y + zdir * m_half_size.z;
-	Vector3 v2 = centre - xdir * m_half_size.x + ydir * m_half_size.y + zdir * m_half_size.z;
-	Vector3 v3 = centre + xdir * m_half_size.x - ydir * m_half_size.y + zdir * m_half_size.z;
-	Vector3 v4 = centre + xdir * m_half_size.x + ydir * m_half_size.y - zdir * m_half_size.z;
-	Vector3 v5 = centre - xdir * m_half_size.x - ydir * m_half_size.y + zdir * m_half_size.z;
-	Vector3 v6 = centre + xdir * m_half_size.x - ydir * m_half_size.y - zdir * m_half_size.z;
-	Vector3 v7 = centre - xdir * m_half_size.x + ydir * m_half_size.y - zdir * m_half_size.z;
-	Vector3 v8 = centre - xdir * m_half_size.x - ydir * m_half_size.y - zdir * m_half_size.z;
-	m_world_verts.push_back(v1);
-	m_world_verts.push_back(v2);
-	m_world_verts.push_back(v3);
-	m_world_verts.push_back(v4);
-	m_world_verts.push_back(v5);
-	m_world_verts.push_back(v6);
-	m_world_verts.push_back(v7);
-	m_world_verts.push_back(v8);
-}
-*/
 
 void CollisionBox::AttachToRigidBody(CollisionRigidBody* rb)
 {
@@ -320,6 +309,17 @@ void CollisionBox::ProjectToAxisForInterval(const Vector3& axis, float& tmin, fl
 
 	vmin = min_v;
 	vmax = max_v;
+}
+
+void CollisionBox::SetPhysTest()
+{
+	float stat_friction = .8f;
+	float dyn_friction = .8f;
+	float rest = .55f;
+
+	m_cmp = g_gameConfigBlackboard->app_h->SpawnPhysxBox(Vector3::ZERO, stat_friction, dyn_friction, rest);
+	m_cmp->SetDirected(true);
+	m_cmp->DisableGravity();
 }
 
 CollisionPlane::CollisionPlane(const Vector2& bound, const Vector3& normal, const float& offset, const std::string& fp, const std::string& tx)

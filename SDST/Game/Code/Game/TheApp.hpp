@@ -72,6 +72,7 @@ public:
 	void PhysxUpdateDelete();
 	void PhysxRender(Renderer* rdr);
 	PhysXObject* SpawnPhysxBox(const Vector3& pos);
+	PhysXObject* SpawnPhysxBox(const Vector3& pos, float stat_friction, float dyn_friction, float rest);
 };
 
 extern TheApp* g_theApp;

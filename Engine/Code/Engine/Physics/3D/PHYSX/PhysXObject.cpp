@@ -97,6 +97,29 @@ void PhysXObject::RenderActor(Renderer* rdr)
 	}
 }
 
+void PhysXObject::RenderActor(Renderer* rdr, const std::string& shader, const std::string& tex)
+{
+	PxShape* shapes[MAX_NUM_ACTOR_SHAPES_OBJ];
+
+	const PxU32 nb_shapes = m_ra->getNbShapes();
+	PX_ASSERT(nb_shapes <= MAX_NUM_ACTOR_SHAPES_OBJ);
+	m_ra->getShapes(shapes, nb_shapes);
+
+	for (PxU32 i = 0; i < nb_shapes; ++i)
+	{
+		const PxMat44 shape_pose(PxShapeExt::getGlobalPose(*shapes[i], *m_ra));
+		PxGeometryHolder h = shapes[i]->getGeometry();
+
+		// render config
+		const std::string& mesh_name = ChooseMesh(h);
+
+		// at this point, for static bodies, do not render, treat it as a block of fixed "air"
+		bool is_dynamic = m_ra->is<PxRigidDynamic>();
+		if (is_dynamic)
+			rdr->RenderPhysxGeometry(mesh_name, shader, tex, shape_pose);
+	}
+}
+
 std::string PhysXObject::ChooseMesh(const PxGeometryHolder& h)
 {
 	switch (h.getType())

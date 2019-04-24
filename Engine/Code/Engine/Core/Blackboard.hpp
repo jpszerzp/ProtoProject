@@ -3,11 +3,11 @@
 #include "TinyXml2/tinyxml2.h"
 #include "Engine/Core/Rgba.hpp"
 #include "Engine/Core/Profiler/ProfilerNode.hpp"
-//#include "Engine/Core/Util/DataUtils.hpp"
 #include "Engine/Math/Vector2.hpp"
 #include "Engine/Math/FloatRange.hpp"
 #include "Engine/Math/IntVector2.hpp"
 #include "Engine/Math/IntRange.hpp"
+#include "Game/TheApp.hpp"
 
 #include <map>
 #include <stack>
@@ -20,15 +20,8 @@ class Blackboard
 private:
 	std::map<std::string, std::string>		 m_keyValuePairs;
 
-//public:
-//	std::map<ProfilerNode*, UInt64Vector2>		m_functionHpcInfoPairs;
-//	float										m_lastFrameTime = -INFINITY;
-//	float										m_largestTime = -INFINITY;
-//
-//	ProfilerNode*								m_profiledFunctionTree[MAX_PROFILER_TREE_NODE];
-//	std::deque<ProfilerHistory>					m_history;
-//	int											m_profiledFunctionIdx = 0;
-//	int											m_scopeIdx = 0;
+public:
+	TheApp* app_h = nullptr;
 
 public:
 	Blackboard();
@@ -46,9 +39,4 @@ public:
 	IntVector2		GetValue( const std::string& keyName, const IntVector2& defaultValue ) const;
 	FloatRange		GetValue( const std::string& keyName, const FloatRange& defaultValue ) const;
 	IntRange		GetValue( const std::string& keyName, const IntRange& defaultValue ) const;
-
-	//void MarkEndFrame();
-	//void ClearMap();
-	//void ClearIndex();
-	//void ClearTreeArray();
 };

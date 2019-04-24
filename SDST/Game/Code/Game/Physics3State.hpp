@@ -141,7 +141,7 @@ public:
 	const Vector3 CORNER_CASE_POS_FE_1 = Vector3(25.f, 305.f, 0.f);
 	const Vector3 CORNER_CASE_POS_FF_2 = Vector3(35.f, 305.f, 0.f);
 	const Vector3 CORNER_CASE_POS_FP_2 = Vector3(35.f, 305.f, 0.f);
-	const Vector3 CORNER_CASE_POS_PP_2 = Vector3(35.f, 315.f, 5.f);
+	const Vector3 CORNER_CASE_POS_PP_2 = Vector3(35.0005f, 315.f, 5.f);
 	const Vector3 CORNER_CASE_POS_EE_2 = Vector3(35.f, 305.f, 0.f);
 	const Vector3 CORNER_CASE_POS_PE_2 = Vector3(35.f, 305.9625f, 0.f);
 	const Vector3 CORNER_CASE_POS_FE_2 = Vector3(35.f, 305.f, 0.f);
@@ -185,35 +185,38 @@ public:
 
 	const Vector3 CORNER_CASE_LIN_VEL_FF_1 = Vector3(3.f, 0.f, 0.f);
 	const Vector3 CORNER_CASE_LIN_VEL_FP_1 = Vector3(3.f, 0.f, 0.f);
-	const Vector3 CORNER_CASE_LIN_VEL_PP_1 = Vector3(1.f);
+	const Vector3 CORNER_CASE_LIN_VEL_PP_1 = Vector3(3.f);
 	const Vector3 CORNER_CASE_LIN_VEL_EE_1 = Vector3(3.f, 0.f, 0.f);
 	const Vector3 CORNER_CASE_LIN_VEL_PE_1 = Vector3(3.f, 0.f, 0.f);
 	const Vector3 CORNER_CASE_LIN_VEL_FE_1 = Vector3(3.f, 0.f, 0.f);
 	const Vector3 CORNER_CASE_LIN_VEL_FF_2 = Vector3(-3.f, 0.f, 0.f);
 	const Vector3 CORNER_CASE_LIN_VEL_FP_2 = Vector3(-3.f, 0.f, 0.f);
-	const Vector3 CORNER_CASE_LIN_VEL_PP_2 = Vector3(-1.f);
+	const Vector3 CORNER_CASE_LIN_VEL_PP_2 = Vector3(-3.f);
 	const Vector3 CORNER_CASE_LIN_VEL_EE_2 = Vector3(-3.f, 0.f, 0.f);
 	const Vector3 CORNER_CASE_LIN_VEL_PE_2 = Vector3(-3.f, 0.f, 0.f);
 	const Vector3 CORNER_CASE_LIN_VEL_FE_2 = Vector3(-3.f, 0.f, 0.f);
 	const Vector3 CORNER_CASE_LIN_VEL_FF_3 = Vector3(3.f, 0.f, 0.f);
 	const Vector3 CORNER_CASE_LIN_VEL_FP_3 = Vector3(3.f, 0.f, 0.f);
 	const Vector3 CORNER_CASE_LIN_VEL_FE_3 = Vector3(3.f, 0.f, 0.f);
-	const Vector3 CORNER_CASE_LIN_VEL_PP_3 = Vector3(1.f);
+	const Vector3 CORNER_CASE_LIN_VEL_PP_3 = Vector3(3.f);
 	const Vector3 CORNER_CASE_LIN_VEL_EE_3 = Vector3(3.f, 0.f, 0.f);
 	const Vector3 CORNER_CASE_LIN_VEL_PE_3 = Vector3(3.f, 0.f, 0.f);
 	const Vector3 CORNER_CASE_LIN_VEL_FF_4 = Vector3(-3.f, 0.f, 0.f);
 	const Vector3 CORNER_CASE_LIN_VEL_FP_4 = Vector3(-3.f, 0.f, 0.f);
 	const Vector3 CORNER_CASE_LIN_VEL_FE_4 = Vector3(-3.f, 0.f, 0.f);
-	const Vector3 CORNER_CASE_LIN_VEL_PP_4 = Vector3(-1.f);
+	const Vector3 CORNER_CASE_LIN_VEL_PP_4 = Vector3(-3.f);
 	const Vector3 CORNER_CASE_LIN_VEL_EE_4 = Vector3(-3.f, 0.f, 0.f);
 	const Vector3 CORNER_CASE_LIN_VEL_PE_4 = Vector3(-3.f, 0.f, 0.f);
 
 	const static Vector3 ORIGIN_CAMERA;
+	Vector3 m_corner_case_demo_pos;
 
+	// stack
 	std::vector<CollisionBox*> m_my_stack;
 
 	CollisionBox* m_corner_case_1 = nullptr;
 	CollisionBox* m_corner_case_2 = nullptr;
+	std::vector<CollisionBox*> m_corner_boxes;
 
 	// force
 	ParticleForceRegistry* m_particleRegistry = nullptr;

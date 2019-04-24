@@ -119,6 +119,7 @@ Physics3State::Physics3State()
 
 	// phsx demo
 	m_wraparound_demo_1 = new WrapAround(Vector3(60.f, 300.f, -10.f), Vector3(80.f, 320.f, 10.f));
+	m_corner_case_demo_pos = Vector3(50.f, 305.f, -30.f);
 
 	// verlet
 	m_wraparound_verlet = new WrapAround(Vector3(-10.f, 200.f, -10.f), Vector3(0.f, 250.f, 0.f));
@@ -133,6 +134,7 @@ Physics3State::Physics3State()
 
 	// inspection
 	m_inspection.push_back(m_cameraInitialPos);
+	m_inspection.push_back(m_corner_case_demo_pos);
 	m_inspection.push_back(Vector3(-5.f, 220.f, -20.f));
 	m_inspection.push_back(Vector3(200.f, 200.f, -20.f));
 
@@ -321,26 +323,20 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		m_camera->GetTransform().SetLocalRotation(Vector3::ZERO);
 		m_camera->GetTransform().SetLocalScale(Vector3::ONE);
 	}
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_R))
+	{
+		m_camera->GetTransform().SetLocalPosition(m_corner_case_demo_pos);
+		m_camera->GetTransform().SetLocalRotation(Vector3::ZERO);
+		m_camera->GetTransform().SetLocalScale(Vector3::ONE);
+	}
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_F))
 	{
-		DebugRenderTasksFlush();
-	}
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_X) && DebugRenderOn())
-	{
-		eDebugDrawMode mode = DEBUG_RENDER_USE_DEPTH;
-		float lifetime = 1000.f;
-		float lineThickness = 5.f;
+		delete m_corner_case_1;
+		m_corner_case_1 = nullptr;
 
-		DebugRenderBasis(lifetime, Vector3::ZERO, Vector3(1.f, 0.f, 0.f), 
-			Vector3(0.f, 1.f, 0.f), Vector3(0.f, 0.f, 1.f), 
-			lineThickness, mode);
-
-		Vector3 gridBL = Vector3(-100.f, 0.f, -100.f);
-		Vector3 gridBR = Vector3(100.f, 0.f,-100.f);
-		Vector3 gridTL = Vector3(-100.f, 0.f, 100.f);
-		Vector3 gridTR = Vector3(100.f, 0.f, 100.f);
-		DebugRenderPlaneGrid(lifetime, gridBL, gridTL, gridTR, gridBR, 10.f, 10.f, 2.5f, mode);
+		delete m_corner_case_2;
+		m_corner_case_2 = nullptr;
 	}
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_7))
@@ -522,42 +518,42 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		m_wraparound_plane->m_primitives.clear();
 	}
 
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_U))
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_I))
 	{
 		// to fire the corner case test, give opposite velocities
 		if (m_corner_case_1 != nullptr && m_corner_case_2 != nullptr && m_ff_test)
 		{
-			m_corner_case_1->GetRigidBody()->SetLinearVelocity(CORNER_CASE_LIN_VEL_FF_1);
-			m_corner_case_2->GetRigidBody()->SetLinearVelocity(CORNER_CASE_LIN_VEL_FF_2);
+			m_corner_case_1->m_cmp->SetLinearVel(CORNER_CASE_LIN_VEL_FF_1);
+			m_corner_case_2->m_cmp->SetLinearVel(CORNER_CASE_LIN_VEL_FF_2);
 		}
 		else if (m_corner_case_1 != nullptr && m_corner_case_2 != nullptr && m_fp_test)
 		{
-			m_corner_case_1->GetRigidBody()->SetLinearVelocity(CORNER_CASE_LIN_VEL_FP_1);
-			m_corner_case_2->GetRigidBody()->SetLinearVelocity(CORNER_CASE_LIN_VEL_FP_2);
+			m_corner_case_1->m_cmp->SetLinearVel(CORNER_CASE_LIN_VEL_FP_1);
+			m_corner_case_2->m_cmp->SetLinearVel(CORNER_CASE_LIN_VEL_FP_2);
 		}
 		else if (m_corner_case_1 != nullptr && m_corner_case_2 != nullptr && m_pp_test)
 		{
-			m_corner_case_1->GetRigidBody()->SetLinearVelocity(CORNER_CASE_LIN_VEL_PP_1);
-			m_corner_case_2->GetRigidBody()->SetLinearVelocity(CORNER_CASE_LIN_VEL_PP_2);
+			m_corner_case_1->m_cmp->SetLinearVel(CORNER_CASE_LIN_VEL_PP_1);
+			m_corner_case_2->m_cmp->SetLinearVel(CORNER_CASE_LIN_VEL_PP_2);
 		}
 		else if (m_corner_case_1 != nullptr && m_corner_case_2 != nullptr && m_ee_test)
 		{
-			m_corner_case_1->GetRigidBody()->SetLinearVelocity(CORNER_CASE_LIN_VEL_EE_1);
-			m_corner_case_2->GetRigidBody()->SetLinearVelocity(CORNER_CASE_LIN_VEL_EE_2);
+			m_corner_case_1->m_cmp->SetLinearVel(CORNER_CASE_LIN_VEL_EE_1);
+			m_corner_case_2->m_cmp->SetLinearVel(CORNER_CASE_LIN_VEL_EE_2);
 		}
 		else if (m_corner_case_1 != nullptr && m_corner_case_2 != nullptr && m_pe_test)
 		{
-			m_corner_case_1->GetRigidBody()->SetLinearVelocity(CORNER_CASE_LIN_VEL_PE_1);
-			m_corner_case_2->GetRigidBody()->SetLinearVelocity(CORNER_CASE_LIN_VEL_PE_2);
+			m_corner_case_1->m_cmp->SetLinearVel(CORNER_CASE_LIN_VEL_PE_1);
+			m_corner_case_2->m_cmp->SetLinearVel(CORNER_CASE_LIN_VEL_PE_2);
 		}
 		else if (m_corner_case_1 != nullptr && m_corner_case_2 != nullptr && m_fe_test)
 		{
-			m_corner_case_1->GetRigidBody()->SetLinearVelocity(CORNER_CASE_LIN_VEL_FE_1);
-			m_corner_case_2->GetRigidBody()->SetLinearVelocity(CORNER_CASE_LIN_VEL_FE_2);
+			m_corner_case_1->m_cmp->SetLinearVel(CORNER_CASE_LIN_VEL_FE_1);
+			m_corner_case_2->m_cmp->SetLinearVel(CORNER_CASE_LIN_VEL_FE_2);
 		}
 	}
 
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_I))
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_U))
 	{
 		if (m_phys_corner_case == FCC_FF)
 		{
@@ -1265,6 +1261,7 @@ void Physics3State::SpawnStack(const Vector3& origin , uint sideLength, uint sta
 				Vector3 stack_pos = Vector3(stack_x, stack_pos_origin.y, stack_z);
 
 				CollisionBox* box = WrapAroundTestBox(m_wraparound_plane, false, false, true, stack_pos, Vector3::ZERO, Vector3::ONE, true, true);
+				box->SetStack(true);
 				m_my_stack.push_back(box);
 			}
 		}
@@ -1318,58 +1315,56 @@ void Physics3State::SpawnRandomConvex(WrapAround* wpa, uint num, const Vector3& 
 
 void Physics3State::ShootSphere(WrapAround* wpa)
 {
-	// handle_0 is a sphere rb
-	CollisionSphere* sph = WrapAroundTestSphere(wpa, true, false, true, m_camera->GetWorldPosition(), Vector3::ZERO, Vector3::ONE);
-	sph->GetRigidBody()->SetLinearVelocity(m_camera->GetWorldForward().GetNormalized() * 50.f);
+	if (wpa == m_wraparound_plane)
+	{
+		// handle_0 is a sphere rb
+		CollisionSphere* sph = WrapAroundTestSphere(wpa, true, false, true, m_camera->GetWorldPosition(), Vector3::ZERO, Vector3::ONE);
+		sph->GetRigidBody()->SetLinearVelocity(m_camera->GetWorldForward().GetNormalized() * 50.f);
+	}
 }
 
 void Physics3State::ShootBox(WrapAround* wpa)
 {
-	CollisionBox* bx = WrapAroundTestBox(wpa, true, false, true, m_camera->GetWorldPosition(), Vector3::ZERO, Vector3::ONE, true, true);
-	bx->GetRigidBody()->SetLinearVelocity(m_camera->GetWorldForward().GetNormalized() * 50.f);		// give it a speed boost
+	if (wpa == m_wraparound_plane)
+	{
+		CollisionBox* bx = WrapAroundTestBox(wpa, true, false, true, m_camera->GetWorldPosition(), Vector3::ZERO, Vector3::ONE, true, true);
+		bx->GetRigidBody()->SetLinearVelocity(m_camera->GetWorldForward().GetNormalized() * 50.f);		// give it a speed boost
+	}
 }
 
 void Physics3State::ResetCollisionCornerCase(const Vector3& pos1, const Vector3& pos2, const Vector3& rot1, const Vector3& rot2)
 {
 	if (!m_corner_case_1 && !m_corner_case_2)
 	{
-		m_corner_case_1 = new CollisionBox(Vector3(.5f));
+		m_corner_case_1 = new CollisionBox(.5f);
 		CollisionRigidBody* rb = new CollisionRigidBody(1.f, pos1, rot1);
 		rb->SetAwake(true);
 		rb->SetSleepable(false);
 
 		m_corner_case_1->AttachToRigidBody(rb);
-		m_boxes.push_back(m_corner_case_1);
-		m_wraparound_demo_0->m_primitives.push_back(m_corner_case_1);
-		m_focus = m_corner_case_1;
+		m_corner_case_1->m_cmp->SetPosAndOrient(pos1, Quaternion::FromEuler(rot1));
+		m_wraparound_demo_0->m_phys_obj.push_back(m_corner_case_1->m_cmp);
 
-		m_corner_case_2 = new CollisionBox(Vector3(.5f));
+		m_corner_case_2 = new CollisionBox(.5f);
 		rb = new CollisionRigidBody(1.f, pos2, rot2);
 		rb->SetAwake(true);
 		rb->SetSleepable(false);
 
 		m_corner_case_2->AttachToRigidBody(rb);
-		m_boxes.push_back(m_corner_case_2);
-		m_wraparound_demo_0->m_primitives.push_back(m_corner_case_2);
+		m_corner_case_2->m_cmp->SetPosAndOrient(pos2, Quaternion::FromEuler(rot2));
+		m_wraparound_demo_0->m_phys_obj.push_back(m_corner_case_2->m_cmp);
 	}
 
-	if (m_corner_case_1 != nullptr && m_corner_case_2 != nullptr)
+	else if (m_corner_case_1 && m_corner_case_2)
 	{
-		// to restore FF corner case, restore position, reset velocity, set orient, make sure gravity is null
-		m_corner_case_1->GetRigidBody()->SetCenter(pos1);
-		m_corner_case_2->GetRigidBody()->SetCenter(pos2);
+		m_corner_case_1->m_cmp->SetPosAndOrient(pos1, Quaternion::FromEuler(rot1));
+		m_corner_case_2->m_cmp->SetPosAndOrient(pos2, Quaternion::FromEuler(rot2));
 
-		m_corner_case_1->GetRigidBody()->SetOrientation(Quaternion::FromEuler(rot1));
-		m_corner_case_2->GetRigidBody()->SetOrientation(Quaternion::FromEuler(rot2));
+		m_corner_case_1->m_cmp->SetLinearVel(Vector3::ZERO);
+		m_corner_case_2->m_cmp->SetLinearVel(Vector3::ZERO);
 
-		m_corner_case_1->GetRigidBody()->SetAngularVelocity(Vector3::ZERO);
-		m_corner_case_2->GetRigidBody()->SetAngularVelocity(Vector3::ZERO);
-
-		m_corner_case_1->GetRigidBody()->SetLinearVelocity(Vector3::ZERO);
-		m_corner_case_2->GetRigidBody()->SetLinearVelocity(Vector3::ZERO);
-
-		m_corner_case_1->GetRigidBody()->SetBaseLinearAcceleration(Vector3::ZERO);
-		m_corner_case_2->GetRigidBody()->SetBaseLinearAcceleration(Vector3::ZERO);
+		m_corner_case_1->m_cmp->SetAngularVel(Vector3::ZERO);
+		m_corner_case_2->m_cmp->SetAngularVel(Vector3::ZERO);
 	}
 }
 
@@ -1391,6 +1386,7 @@ std::pair<PhysXObject*, PhysXObject*> Physics3State::ResetCollisionCornerCasePhy
 		g_theApp->m_corner_case_3->DisableGravity();
 		m_pair.first = g_theApp->m_corner_case_3;
 	}
+
 	if (g_theApp->m_corner_case_4 != nullptr)
 	{
 		g_theApp->m_corner_case_4->SetPosAndOrient(pos2, Quaternion::FromEuler(rot2));

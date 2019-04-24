@@ -64,6 +64,7 @@ PxDefaultCpuDispatcher*	gDispatcher = NULL;
 PxScene*				gScene		= NULL;
 
 PxMaterial*				gMaterial	= NULL;
+//PxMaterial*				gMaterialBackup = NULL;
 
 PxPvd*                  gPvd        = NULL;
 
@@ -382,7 +383,8 @@ void TheApp::PhysxStartup()
 		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
 	}
 
-	gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
+	gMaterial = gPhysics->createMaterial(.5f, .5f, .6f);
+	//gMaterialBackup = gPhysics->createMaterial(.4f, .4f, .5f);
 }
 
 void TheApp::PhysxShutdown()
@@ -458,7 +460,7 @@ void TheApp::PhysxUpdate(float dt)
 	//deltaTime = 1.f / 60.f;
 	gScene->simulate(dt);
 	gScene->fetchResults(true);
-	DebuggerPrintf("%d contact reports\n", PxU32(gContactPositions.size()));
+	//DebuggerPrintf("%d contact reports\n", PxU32(gContactPositions.size()));
 
 	PhysxUpdateDelete();
 }
@@ -515,7 +517,13 @@ void TheApp::PhysxUpdateDelete()
 void TheApp::PhysxRender(Renderer* rdr)
 {
 	for (int i = 0; i < m_physx_objs.size(); ++i)
-		m_physx_objs[i]->RenderActor(rdr);
+	{
+		PhysXObject* p_obj = m_physx_objs[i];
+		if (p_obj->IsDirected())
+			p_obj->RenderActor(rdr, "default", "Data/Images/perspective_test.png");
+		else
+			p_obj->RenderActor(rdr);
+	}
 }
 
 PhysXObject* TheApp::SpawnPhysxBox(const Vector3& pos)
@@ -541,5 +549,38 @@ PhysXObject* TheApp::SpawnPhysxBox(const Vector3& pos)
 
 	// shape release
 	shape->release();
+	return px_obj;
+}
+
+PhysXObject* TheApp::SpawnPhysxBox(const Vector3& pos,
+	float stat_friction, float dyn_friction, float rest)
+{
+	PxMaterial* mat = gPhysics->createMaterial(stat_friction, dyn_friction, rest);
+
+	PxVec3 pxp = PxVec3(pos.x, pos.y, pos.z);
+	PxTransform pxt = PxTransform(pxp);
+	PxReal half_ext = .5f;
+	PxShape* shape = gPhysics->createShape(PxBoxGeometry(half_ext, half_ext, half_ext), *mat);
+
+	// offset
+	PxVec3 offset = PxVec3(0.f, 0.f, 0.f);
+	PxTransform local = PxTransform(offset);
+
+	// dynamic rigidbody
+	PxRigidDynamic* body = gPhysics->createRigidDynamic(pxt.transform(local));
+	body->attachShape(*shape);
+	PxRigidBodyExt::updateMassAndInertia(*body, 1.f);
+	gScene->addActor(*body);
+
+	// encapsulation
+	PhysXObject* px_obj = new PhysXObject(body);
+	m_physx_objs.push_back(px_obj);
+
+	// shape release
+	shape->release();
+
+	// mat release
+	mat->release();
+
 	return px_obj;
 }

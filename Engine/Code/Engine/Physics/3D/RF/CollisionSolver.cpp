@@ -136,7 +136,7 @@ void CollisionSolver::SolvePositions(Collision* collisions, uint collision_num, 
 	m_p_itr_used = 0;
 	while (m_p_itr_used < m_pos_iterations)
 	{
-		// Find biggest penetration
+		// find biggest penetration
 		max = m_pos_threshold;
 		index = collision_num;
 		for (i=0; i<collision_num; i++)
@@ -150,23 +150,20 @@ void CollisionSolver::SolvePositions(Collision* collisions, uint collision_num, 
 		if (index == collision_num) 
 			break;
 
-		// Match the awake state at the contact
 		collisions[index].CheckAwake();
 
-		// Resolve the penetration.
+		// resolve the penetration
 		collisions[index].ApplyPositionChange(linearChange, angularChange, max);
 
-		// Again this action may have changed the penetration of other
-		// bodies, so we update contacts.
+		// chain resolution to other involved contacts
 		for (i = 0; i < collision_num; i++)
 		{
-			// Check each body in the contact
+			// check each body in the contact
 			for (unsigned b = 0; b < 2; b++) 
 			{
 				if (collisions[i].m_bodies[b])
 				{
-					// Check for a match with each body in the newly
-					// resolved contact
+					// if this is the same rigid body
 					for (unsigned d = 0; d < 2; d++)
 					{
 						if (collisions[i].m_bodies[b] == collisions[index].m_bodies[d])
@@ -174,10 +171,6 @@ void CollisionSolver::SolvePositions(Collision* collisions, uint collision_num, 
 							deltaPosition = linearChange[d] + angularChange[d].Cross(
 								collisions[i].m_relative_pos[b]);
 
-							// The sign of the change is positive if we're
-							// dealing with the second body in a contact
-							// and negative otherwise (because we're
-							// subtracting the resolution)..
 							collisions[i].m_penetration += DotProduct(
 								deltaPosition, collisions[i].m_normal) * (b?1:-1);
 						}
