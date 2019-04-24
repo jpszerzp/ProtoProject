@@ -66,6 +66,7 @@ public:
 	void SetShouldDelete(const bool& value) { m_delete = value; }
 	void SetRigidBodyPositionOnly(const Vector3& pos);
 	void SetFrozen(bool val) { m_rigid_body->SetFrozen(val); }
+	void SetContinuity(eCCD val) { m_ccd = val; }
 	virtual void SetRigidBodyPosition(const Vector3&){}		// ...need to consider scale in general case when this is implemented 
 	PhysXObject* m_cmp = nullptr;
 

@@ -305,6 +305,37 @@ uint CollisionSensor::SphereVsPlane(const CollisionSphere& sphere, const Collisi
 	return 1;
 }
 
+uint CollisionSensor::SphereVsPlaneContinuous(const CollisionSphere& sph, const CollisionPlane& pl, const Vector3& v, float& t, Vector3& hit, CollisionKeep* c_data)
+{
+	// sph to plane distance
+	float dist = DotProduct(pl.GetNormal(), sph.GetCenter());
+	dist -= pl.GetOffset();
+
+	if (abs(dist) <= sph.GetRadius())
+	{
+		// sph already intersects the plane 
+		t = 0.f;
+		hit = sph.GetCenter();
+		return 1;
+	}
+	else
+	{
+		float denom = DotProduct(pl.GetNormal(), v);
+		if (denom * dist >= 0.f)
+			// sph moving parallel
+			return 0;
+		else
+		{
+			// sph moving to the plane
+			// +r if sphere in front of plane, -r otherwise
+			float r = dist > 0.f ? sph.GetRadius() : -sph.GetRadius();
+			t = (r - dist) / denom;
+			hit = sph.GetCenter() + v * t - pl.GetNormal() * r;
+			return 1;
+		}
+	}
+}
+
 uint CollisionSensor::BoxVsHalfPlane(const CollisionBox& box, const CollisionPlane& plane, CollisionKeep* c_data)
 {
 	// since it is half space, do not consider collisions if box is in negative space of plane

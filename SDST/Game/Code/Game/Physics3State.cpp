@@ -134,7 +134,7 @@ Physics3State::Physics3State()
 	// inspection
 	m_inspection.push_back(m_cameraInitialPos);
 	m_inspection.push_back(Vector3(-5.f, 220.f, -20.f));
-	//m_inspection.push_back(Vector3(200.f, 200.f, -20.f));
+	m_inspection.push_back(Vector3(200.f, 200.f, -20.f));
 
 	// force registry 
 	m_particleRegistry = new ParticleForceRegistry();
@@ -177,6 +177,30 @@ Physics3State::Physics3State()
 	m_rigidRegistry->Register(attached_rb, grg);
 	m_rigidRegistry->Register(attached_rb, asrfg);
 
+	// continuity demo
+	m_wraparound_ccd = new WrapAround(Vector3(190.f, 190.f, -10.f), Vector3(210.f, 210.f, 10.f));
+	m_wraparound_ccd->m_particle = true;					// just so the primitive will wrap around
+	m_discrete_ball_pos = Vector3(195.f, 195.f, 0.f);
+	m_discrete_ball = WrapAroundTestSphere(m_wraparound_ccd, false, false, false, 
+		m_discrete_ball_pos, Vector3::ZERO, Vector3(.5f), 1.f, 
+		"wireframe", "Data/Images/white.png");
+	m_discrete_ball->GetRigidBody()->SetFrozen(true);
+
+	m_ccd_ball_pos = Vector3(195.f, 205.f, 0.f);
+	m_ccd_ball = WrapAroundTestSphere(m_wraparound_ccd, false, false, false,
+		m_ccd_ball_pos, Vector3::ZERO, Vector3(.5f), 1.f, 
+		"wireframe", "Data/Images/white.png");
+	m_ccd_ball->SetContinuity(COL_CCD);
+	m_ccd_ball->GetRigidBody()->SetFrozen(true);
+
+	CollisionPlane* plane_ccd = new CollisionPlane(Vector2(20.f), Vector3(-1.f, 0.f, 0.f), -205.f, "wireframe", "Data/Images/white.png");
+	CollisionRigidBody* pl_rb_ccd = new CollisionRigidBody(1.f, Vector3(205.f, 200.f, 0.f), Vector3(0.f, 90.f, 0.f));
+	pl_rb_ccd->SetAwake(true);
+	pl_rb_ccd->SetSleepable(true);
+	plane_ccd->AttachToRigidBody(pl_rb_ccd);
+	m_planes.push_back(plane_ccd);
+	// no need to include the plane in this wraparound
+
 	// debug
 	DebugRenderSet3DCamera(m_camera);
 	DebugRenderSet2DCamera(m_UICamera);
@@ -196,6 +220,9 @@ Physics3State::~Physics3State()
 	delete m_wraparound_verlet;
 	m_wraparound_verlet = nullptr;
 
+	delete m_wraparound_ccd;
+	m_wraparound_ccd = nullptr;
+
 	delete m_rigidRegistry;
 	m_rigidRegistry = nullptr;
 
@@ -209,6 +236,7 @@ void Physics3State::PostConstruct()
 	m_wraparound_demo_0->m_physState = this;
 	m_wraparound_demo_1->m_physState = this;
 	m_wraparound_verlet->m_physState = this;
+	m_wraparound_ccd->m_physState = this;
 }
 
 void Physics3State::Update(float deltaTime)
@@ -563,6 +591,29 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		}
 	}
 
+	// ccd demo
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_L))
+	{
+		m_discrete_ball->SetRigidBodyPosition(m_discrete_ball_pos);
+		m_discrete_ball->GetRigidBody()->SetLinearVelocity(Vector3::ZERO);
+		m_discrete_ball->GetRigidBody()->SetAngularVelocity(Vector3::ZERO);
+		m_discrete_ball->SetFrozen(true);
+
+		m_ccd_ball->SetRigidBodyPosition(m_ccd_ball_pos);
+		m_ccd_ball->GetRigidBody()->SetLinearVelocity(Vector3::ZERO);
+		m_ccd_ball->GetRigidBody()->SetAngularVelocity(Vector3::ZERO);
+		m_ccd_ball->SetFrozen(true);
+	}
+
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_N))
+	{
+		m_discrete_ball->GetRigidBody()->SetLinearVelocity(Vector3(500.f, 0.f, 0.f));
+		m_discrete_ball->SetFrozen(false);
+
+		m_ccd_ball->GetRigidBody()->SetLinearVelocity(Vector3(500.f, 0.f, 0.f));
+		m_ccd_ball->SetFrozen(false);
+	}
+
 	// camera update from input
 	Vector3 camForward = m_camera->GetLocalForward(); 
 	Vector3 camUp = m_camera->GetLocalUp(); 
@@ -607,6 +658,7 @@ void Physics3State::UpdateWrapArounds()
 	m_wraparound_demo_0->Update();
 	m_wraparound_demo_1->Update();
 	m_wraparound_verlet->Update();
+	m_wraparound_ccd->Update();
 }
 
 
@@ -805,12 +857,33 @@ void Physics3State::UpdateContactGeneration()
 		// sphere vs plane
 		for (std::vector<CollisionPlane*>::size_type idx1 = 0; idx1 < m_planes.size(); ++idx1)
 		{
-			if (!m_keep.AllowMoreCollision())
-				return;
+			if (sph0->GetContinuity() != COL_CCD)
+			{
+				if (!m_keep.AllowMoreCollision())
+					return;
 
-			CollisionPlane* pl = m_planes[idx1];
+				CollisionPlane* pl = m_planes[idx1];
 
-			CollisionSensor::SphereVsPlane(*sph0, *pl, &m_keep);
+				CollisionSensor::SphereVsPlane(*sph0, *pl, &m_keep);
+			}
+			else
+			{
+				// we do not put data into keep here, we want the ccd ball to get stuck
+				CollisionPlane* pl = m_planes[idx1];
+
+				// hit time and position
+				// t is normalized 0 to 1, p is on the plane
+				float t = 0.f;
+				Vector3 p = Vector3::ZERO;
+				const Vector3& v = sph0->GetRigidBody()->GetLinearVelocity();
+				uint collided_ccd = CollisionSensor::SphereVsPlaneContinuous(*sph0, *pl, v, t, p, &m_keep);
+
+				if (collided_ccd != 0)
+				{
+					Vector3 next_frame = sph0->GetCenter() + v * t;
+					sph0->SetNextFrameTeleport(next_frame);
+				}
+			}
 		}
 	}
 
@@ -944,6 +1017,7 @@ void Physics3State::RenderWrapArounds(Renderer* renderer)
 	m_wraparound_demo_0->Render(renderer);
 	m_wraparound_demo_1->Render(renderer);
 	m_wraparound_verlet->Render(renderer);
+	m_wraparound_ccd->Render(renderer);
 }
 
 void Physics3State::RenderForwardPath(Renderer*)

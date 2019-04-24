@@ -123,6 +123,7 @@ public:
 	WrapAround* m_wraparound_demo_0;
 	WrapAround* m_wraparound_demo_1;
 	WrapAround* m_wraparound_verlet;
+	WrapAround* m_wraparound_ccd;
 
 	bool m_ff_test = true;
 	bool m_fp_test = false;
@@ -228,4 +229,11 @@ public:
 	GeneralRigidAnchorSpring* m_rigidAnchorSpring;
 	CollisionPoint* m_spr_anchor;
 	CollisionSphere* m_spr_attach;
+
+	// continuous
+	Vector3 m_discrete_ball_pos;
+	Vector3 m_ccd_ball_pos;
+	CollisionSphere* m_discrete_ball;
+	CollisionSphere* m_ccd_ball;
+	CollisionPlane*  m_omni_plane;
 };
