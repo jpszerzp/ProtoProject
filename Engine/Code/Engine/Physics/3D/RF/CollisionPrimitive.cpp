@@ -73,7 +73,7 @@ Vector3 CollisionPrimitive::GetBasisAndPosition(uint index) const
 	else if (index == 3)
 		res = m_transform_mat.GetTranslation();
 	else 
-		ASSERT_OR_DIE(false, "Invalid index for axis");
+		res = m_transform_mat.GetRight();
 
 	return res;
 }

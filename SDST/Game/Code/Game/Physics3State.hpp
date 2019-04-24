@@ -99,11 +99,10 @@ public:
 	const static uint MAX_CONTACT_NUM = 256;
 
 	// ui
-	Mesh* m_time_ui;
-	Mesh* m_motion_ui;
-	Mesh* m_vel_ui;
-	Mesh* m_mass_ui;
-	std::vector<Mesh*> m_tensor_ui;
+	float m_txt_height;
+	Mesh* m_fps_text;
+	Mesh* m_my_count;
+	Mesh* m_slp_count;
 
 	// refactor
 	std::vector<CollisionSphere*> m_spheres;
@@ -111,9 +110,6 @@ public:
 	std::vector<CollisionPlane*> m_planes;
 	std::vector<CollisionConvexObject*> m_convex_objs;
 	std::vector<CollisionPoint*> m_points;
-
-	// focus
-	CollisionPrimitive* m_focus;
 
 	Collision m_storage[MAX_CONTACT_NUM];
 	CollisionKeep m_keep;

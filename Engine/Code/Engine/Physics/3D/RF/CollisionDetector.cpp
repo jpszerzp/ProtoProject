@@ -202,7 +202,7 @@ uint CollisionSensor::BoxVsBox(const CollisionBox& b1, const CollisionBox& b2, C
 	if (!SATTestBoxVsBox(b1, b2, cross, disp, 14, pen, best))
 		return 0;
 
-	ASSERT_OR_DIE(best != 0xffffff, "should have penetration");
+	//ASSERT_OR_DIE(best != 0xffffff, "should have penetration");
 
 	// axis is one of b1's basis
 	if (best < 3)

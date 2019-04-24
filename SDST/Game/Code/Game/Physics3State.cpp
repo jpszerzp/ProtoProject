@@ -78,41 +78,10 @@ Physics3State::Physics3State()
 	rb->SetSleepable(false);
 	plane->AttachToRigidBody(rb);
 	m_planes.push_back(plane);
-	m_focus = plane;
 	// do not include plane in wraparound
 
 	// UI
-	// local tensor is fixed
-	// the format is motion - mass - tensor - velocity (to be modified)
-	BitmapFont* font = theRenderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
-	float txtHeight = height / 50.f;
-	Vector2 titleMin = Vector2(-width/ 2.f, height / 2.f - txtHeight);
-	titleMin -= Vector2(0.f, txtHeight);
-	titleMin -= Vector2(0.f, txtHeight);
-
-	std::string tensor_ui = Stringf("Local Tensor:");
-	Mesh* t_mesh = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, tensor_ui, VERT_PCU);
-	m_tensor_ui.push_back(t_mesh);
-	titleMin -= Vector2(0.f, txtHeight);
-
-	if (m_focus)
-	{
-		const Matrix33& tensor_mat = m_focus->GetRigidBody()->GetTensor();
-		tensor_ui = Stringf("%f, %f, %f", tensor_mat.GetI().x, tensor_mat.GetJ().x, tensor_mat.GetK().x);
-		t_mesh = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, tensor_ui, VERT_PCU);
-		m_tensor_ui.push_back(t_mesh);
-		titleMin -= Vector2(0.f, txtHeight);
-
-		tensor_ui = Stringf("%f, %f, %f", tensor_mat.GetI().y, tensor_mat.GetJ().y, tensor_mat.GetK().y);
-		t_mesh = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, tensor_ui, VERT_PCU);
-		m_tensor_ui.push_back(t_mesh);
-		titleMin -= Vector2(0.f, txtHeight);
-
-		tensor_ui = Stringf("%f, %f, %f", tensor_mat.GetI().z, tensor_mat.GetJ().z, tensor_mat.GetK().z);
-		t_mesh = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, tensor_ui, VERT_PCU);
-		m_tensor_ui.push_back(t_mesh);
-		titleMin -= Vector2(0.f, txtHeight);
-	}
+	m_txt_height = height / 50.f;
 
 	// my demo
 	m_wraparound_demo_0 = new WrapAround(Vector3(20.f, 300.f, -10.f), Vector3(40.f, 320.f, 10.f));
@@ -126,7 +95,7 @@ Physics3State::Physics3State()
 	m_wraparound_verlet->m_particle = true;
 	CollisionPoint* free = WrapAroundTestPoint(m_wraparound_verlet, false, false, true, Vector3(-7.f, 240.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
 	CollisionPoint* verlet_vel = WrapAroundTestPoint(m_wraparound_verlet, false, false, true, Vector3(-3.f, 240.f, -5.f), Vector3::ZERO, Vector3(10.f), true, false);
-	free->GetRigidBody()->SetVerlet(false);		// no verlet scheme for it as it is not verlet particle
+	free->GetRigidBody()->SetVerlet(false);					// no verlet scheme for it as it is not verlet particle
 	free->GetRigidBody()->SetFrozen(true);
 	verlet_vel->GetRigidBody()->SetVerlet(true);
 	verlet_vel->GetRigidBody()->SetVerletScheme(VERLET_VEL_P);
@@ -660,47 +629,74 @@ void Physics3State::UpdateWrapArounds()
 
 void Physics3State::UpdateUI()
 {
-	// motion
 	Renderer* theRenderer = Renderer::GetInstance();
-	Window* window = Window::GetInstance();
-	float window_height = window->GetWindowHeight();
-	float window_width = window->GetWindowWidth();
 	BitmapFont* font = theRenderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
-	float txtHeight = window_height / 70.f;
-	Vector2 titleMin = Vector2(-window_width / 2.f, window_height / 2.f - txtHeight);
+	Window* window = Window::GetInstance();
+	float width = window->GetWindowWidth();
+	float height = window->GetWindowHeight();
+	PhysTimeSystem& time = PhysTimeSystem::GetTimeSystem();
 
-	delete m_motion_ui;
-	m_motion_ui = nullptr;
+	// fps
+	Vector2 titleMin = Vector2(-width/ 2.f, height / 2.f - m_txt_height);
+	float fps = time.m_fps;
+	std::string fps_text = Stringf("FPS: %.3f", fps);
 
-	if (m_focus)
+	delete m_fps_text;
+	m_fps_text = nullptr;
+
+	m_fps_text = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, m_txt_height, .5f, fps_text, VERT_PCU);
+	titleMin -= Vector2(0.f, m_txt_height);
+
+	// body count
+	int sph_count = m_spheres.size();
+	int box_count = m_boxes.size();
+	int pt_count = m_points.size();
+	int pl_count = m_points.size();
+	int conv_count = m_convex_objs.size();
+	int total = sph_count + box_count + pt_count + pl_count + conv_count;
+	std::string my_text = Stringf("Sphere:%i, Box:%i, Point:%i, Plane:%i, Convex:%i, Total:%i",
+		sph_count, box_count, pt_count, pl_count, conv_count, total);
+
+	delete m_my_count;
+	m_my_count = nullptr;
+
+	m_my_count = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, m_txt_height, .5f, my_text, VERT_PCU);
+	titleMin -= Vector2(0.f, m_txt_height);
+
+	// sleep system
+	int sleep_count = 0;
+	for (int i = 0; i < m_spheres.size(); ++i)
 	{
-		std::string motion_ui = Stringf("Motion of focused: %f", m_focus->GetRigidBody()->GetRealTimeMotion());
-		m_motion_ui = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, motion_ui, VERT_PCU);
-		titleMin -= Vector2(0.f, txtHeight);
-
-		// mass
-		delete m_mass_ui;
-		m_mass_ui = nullptr;
-
-		std::string mass_ui = Stringf("Mass: %f", m_focus->GetRigidBody()->GetMass());
-		m_mass_ui = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, mass_ui, VERT_PCU);
-		titleMin -= Vector2(0.f, txtHeight);
-
-		// considering tensor takes 4 lines
-		for (int i = 0; i < 4; ++i)
-			titleMin -= Vector2(0.f, txtHeight);
-
-		// velocity
-		delete m_vel_ui;
-		m_vel_ui = nullptr;
-
-		const Vector3& lin_vel = m_focus->GetRigidBody()->GetLinearVelocity();
-		const Vector3& ang_vel = m_focus->GetRigidBody()->GetAngularVelocity();
-		std::string vel_ui = Stringf("Linear and angular velocity of the focused: (%f, %f, %f), (%f, %f, %f)", 
-			lin_vel.x, lin_vel.y, lin_vel.z, ang_vel.x, ang_vel.y, ang_vel.z);
-		m_vel_ui = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, txtHeight, .5f, vel_ui, VERT_PCU);
-		titleMin -= Vector2(0.f, txtHeight);
+		if (!m_spheres[i]->GetRigidBody()->IsAwake())
+			sleep_count++;
 	}
+	for (int i = 0; i < m_boxes.size(); ++i)
+	{
+		if (!m_boxes[i]->GetRigidBody()->IsAwake())
+			sleep_count++;
+	}
+	for (int i = 0; i < m_points.size(); ++i)
+	{
+		if (!m_points[i]->GetRigidBody()->IsAwake())
+			sleep_count++;
+	}
+	for (int i = 0; i < m_planes.size(); ++i)
+	{
+		if (!m_planes[i]->GetRigidBody()->IsAwake())
+			sleep_count++;
+	}
+	for (int i = 0; i < m_convex_objs.size(); ++i)
+	{
+		if (!m_convex_objs[i]->GetRigidBody()->IsAwake())
+			sleep_count++;
+	}
+	std::string slp_text = Stringf("Slept:%i. Percentage:%f", sleep_count, (float)(sleep_count) / (float)(total));
+
+	delete m_slp_count;
+	m_slp_count = nullptr;
+
+	m_slp_count = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, m_txt_height, .5f, slp_text, VERT_PCU);
+	titleMin -= Vector2(0.f, m_txt_height);
 }
 
 void Physics3State::UpdateDelete()
@@ -732,10 +728,6 @@ void Physics3State::UpdateDelete()
 					break;		// deleted box found in stack, abort
 				}
 			}
-
-			// is focused?
-			if (m_focus == box)
-				m_focus = nullptr;
 
 			// if corner case
 			if (m_corner_case_1 == box)
@@ -1023,13 +1015,9 @@ void Physics3State::RenderForwardPath(Renderer*)
 
 void Physics3State::RenderUI(Renderer*)
 {
-	DrawTextCut(m_motion_ui);
-	DrawTextCut(m_mass_ui);
-
-	for (int i = 0; i < m_tensor_ui.size(); ++i)
-		DrawTextCut(m_tensor_ui[i]);
-
-	DrawTextCut(m_vel_ui);
+	DrawTextCut(m_fps_text);
+	DrawTextCut(m_my_count);
+	DrawTextCut(m_slp_count);
 }
 
 CollisionSphere* Physics3State::WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, 
