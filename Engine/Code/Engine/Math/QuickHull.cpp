@@ -2374,8 +2374,7 @@ void QuickHull::RenderHull(Renderer* renderer)
 		if (m_gen_step == COMPLETE)
 		{
 			// non-unit hull
-			//RenderFaces(renderer);
-			RenderCentroid(renderer);
+			//RenderCentroid(renderer);
 
 			// unit hull
 			RenderUnitFaces(renderer);

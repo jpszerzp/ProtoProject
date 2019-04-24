@@ -891,7 +891,7 @@ void ControlState3::UpdateDebugDraw(float deltaTime)
 		Vector3 pt_end = pt + n * pen;
 
 		DebugRenderLine(.1f, pt, pt_end, 5.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
-		DebugRenderLine(.1f, pt_end, pt_end + n * pen, 5.f, Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
+		DebugRenderLine(.1f, pt_end, pt_end + n * 5 * pen, 2.f, Rgba::RED, Rgba::RED, DEBUG_RENDER_USE_DEPTH);
 
 		count++;
 		current = m_keep.m_collision_head + count;
