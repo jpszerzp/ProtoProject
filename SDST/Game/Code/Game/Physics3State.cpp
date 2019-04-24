@@ -151,10 +151,10 @@ Physics3State::Physics3State()
 		Vector3(15.f, 235.f, -5.f), Vector3::ZERO, Vector3(10.f), true, true);
 	// setting up registrations in the registry
 	// A. springs
-	m_spring = SetupSpring(sp_point_0, sp_point_1, 2.f, 9.5f);		
+	m_spring = SetupSpring(sp_point_1, sp_point_0, 2.f, 9.5f);		
 	// two points initialized to be 5 units away, constraint by a spring system with rest length of 3
-	// B. anchored spring
-	m_anchorSpring = SetupAnchorSpring(asp_point_0, asp_point_1, 2.f, 9.5f);
+	// B. anchored spring, attched then anchor
+	m_anchorSpring = SetupAnchorSpring(asp_point_0, asp_point_1, 3.f, 8.f);
 
 	// anchor
 	m_spr_anchor = WrapAroundTestPoint(nullptr, false, false, false, Vector3(20.f, 235.f, -5.f), Vector3::ZERO, Vector3(10.f), true, true);
@@ -167,12 +167,12 @@ Physics3State::Physics3State()
 	CollisionRigidBody* anchor_rb = m_spr_anchor->GetRigidBody();
 	CollisionRigidBody* attached_rb = m_spr_attach->GetRigidBody();
 	// set up anchor spring
-	m_rigidAnchorSpring = new GeneralRigidAnchorSpring(anchor_rb, attached_rb, 80.f, 9.5f);
+	m_rigidAnchorSpring = new GeneralRigidAnchorSpring(attached_rb, anchor_rb, 50.f, 11.f);
 	// force generator
 	Vector3 attach_local = Vector3::ZERO;
 	ProjectPlaneToSphere(Vector2(.01f, .01f), m_spr_attach->GetRadius(), attach_local);
-	GravityRigidForceGenerator* grg = new GravityRigidForceGenerator(Vector3::GRAVITY / 5.f);
-	AnchorSpringRigidForceGenerator* asrfg = new AnchorSpringRigidForceGenerator(m_spr_anchor->GetCenter(), attached_rb, attach_local, 80.f, 9.5f);
+	GravityRigidForceGenerator* grg = new GravityRigidForceGenerator(Vector3::GRAVITY / 80.f);
+	AnchorSpringRigidForceGenerator* asrfg = new AnchorSpringRigidForceGenerator(m_spr_anchor->GetCenter(), attached_rb, attach_local, 50.f, 11.f);
 	// force registration
 	m_rigidRegistry->Register(attached_rb, grg);
 	m_rigidRegistry->Register(attached_rb, asrfg);
