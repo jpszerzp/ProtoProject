@@ -331,6 +331,8 @@ CollisionPlane::CollisionPlane(const Vector2& bound, const Vector3& normal, cons
 		SetMesh(renderer->CreateOrGetMesh("quad_pcu_110"));
 	else if (bound == Vector2(20.f))
 		SetMesh(renderer->CreateOrGetMesh("quad_pcu_20"));
+	else if (bound == Vector2(500.f))
+		SetMesh(renderer->CreateOrGetMesh("quad_pcu_500"));
 
 	SetShader(renderer->CreateOrGetShader(fp));
 	SetTexture(renderer->CreateOrGetTexture(tx));

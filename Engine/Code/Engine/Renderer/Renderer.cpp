@@ -581,6 +581,8 @@ Mesh* Renderer::CreateOrGetMesh(std::string meshName)
 			mesh = Mesh::CreateQuad20(VERT_PCU);
 		else if (meshName == "quad_pcu_110")
 			mesh = Mesh::CreateQuad110(VERT_PCU);
+		else if (meshName == "quad_pcu_500")
+			mesh = Mesh::CreateQuad500(VERT_PCU);
 		else if (meshName == "sphere_pcu")
 			mesh = Mesh::CreateUVSphere(VERT_PCU, 18, 36);
 		else if (meshName == "ship_pcu")
