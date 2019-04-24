@@ -305,7 +305,7 @@ uint CollisionSensor::SphereVsPlane(const CollisionSphere& sphere, const Collisi
 	return 1;
 }
 
-uint CollisionSensor::SphereVsPlaneContinuous(const CollisionSphere& sph, const CollisionPlane& pl, const Vector3& v, float& t, Vector3& hit, CollisionKeep* c_data)
+uint CollisionSensor::SphereVsPlaneContinuous(const CollisionSphere& sph, const CollisionPlane& pl, const Vector3& v, float& t, Vector3& hit, CollisionKeep*)
 {
 	// sph to plane distance
 	float dist = DotProduct(pl.GetNormal(), sph.GetCenter());

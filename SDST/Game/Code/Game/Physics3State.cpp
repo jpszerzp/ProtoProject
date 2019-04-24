@@ -648,11 +648,11 @@ void Physics3State::UpdateUI()
 	titleMin -= Vector2(0.f, m_txt_height);
 
 	// body count
-	int sph_count = m_spheres.size();
-	int box_count = m_boxes.size();
-	int pt_count = m_points.size();
-	int pl_count = m_points.size();
-	int conv_count = m_convex_objs.size();
+	int sph_count = (int)m_spheres.size();
+	int box_count = (int)m_boxes.size();
+	int pt_count = (int)m_points.size();
+	int pl_count = (int)m_points.size();
+	int conv_count = (int)m_convex_objs.size();
 	int total = sph_count + box_count + pt_count + pl_count + conv_count;
 	std::string my_text = Stringf("Sphere:%i, Box:%i, Point:%i, Plane:%i, Convex:%i, Total:%i",
 		sph_count, box_count, pt_count, pl_count, conv_count, total);

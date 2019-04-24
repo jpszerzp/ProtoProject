@@ -523,7 +523,7 @@ void ControlState3::UpdateKeyboard(float deltaTime)
 			m_camera->GetTransform().SetLocalPosition(pos);
 			m_camera->GetTransform().SetLocalRotation(Vector3::ZERO);
 
-			int size = m_inspection.size();
+			int size = (int)m_inspection.size();
 			++m_insepction_count;
 			m_insepction_count = (m_insepction_count % size);
 		}
@@ -784,7 +784,7 @@ void ControlState3::UpdateKeyboard(float deltaTime)
 			break;
 			case EPA_DELETE_VISIBLE:
 			{
-				bool deleted = epa_simplex->DeleteVisibleFacesForPt(epa_support_pt_pos);
+				//bool deleted = epa_simplex->DeleteVisibleFacesForPt(epa_support_pt_pos);
 
 				// delete old debug draws
 				if (epa_support_anchor != nullptr)
@@ -917,7 +917,7 @@ void ControlState3::UpdatePair(float deltaTime)
 	}
 }
 
-void ControlState3::UpdateContacts(float deltaTime)
+void ControlState3::UpdateContacts(float)
 {
 	m_keep.Reset(MAX_CONTACT_NUM);
 	m_keep.m_global_friction = .9f;
@@ -1036,8 +1036,8 @@ void ControlState3::UpdateContacts(float deltaTime)
 		LineSegment3 seg_1 = LineSegment3(line_1->GetStart(), line_1->GetEnd());
 
 		Vector3 close_0, close_1;
-		float t0, t1;
-		float close_sqr = LineSegment3::ClosestPointsSegments(seg_0, seg_1, t0, t1, close_0, close_1);
+		//float t0, t1;
+		//float close_sqr = LineSegment3::ClosestPointsSegments(seg_0, seg_1, t0, t1, close_0, close_1);
 		DebugRenderLine(.1f, close_0, close_1, 5.f, Rgba::BLUE, Rgba::BLUE, DEBUG_RENDER_USE_DEPTH);
 	}
 	else if (m_cid_0 == CID_LINE && m_cid_1 == CID_SPHERE)
@@ -1062,7 +1062,7 @@ void ControlState3::UpdateContacts(float deltaTime)
 	}
 }
 
-void ControlState3::UpdateUI(float deltaTime)
+void ControlState3::UpdateUI(float)
 {
 	Renderer* renderer = Renderer::GetInstance();
 	BitmapFont* font = renderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
@@ -1150,7 +1150,7 @@ void ControlState3::Render(Renderer* renderer)
 	if (gjk_simplex_mesh != nullptr)
 		GJK_DrawSimplex(gjk_simplex_mesh, gjk_simplex_stat);
 	if (gjk_normal_base_mesh != nullptr)
-		DrawPoint(gjk_normal_base_mesh, 20.f);
+		DrawPoint(gjk_normal_base_mesh, (uint)(20.f));
 
 	// epa demo
 	if (epa_simplex != nullptr)

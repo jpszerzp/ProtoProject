@@ -52,6 +52,7 @@ public:
 	virtual ~CollisionEntity() {}
 
 	void SetMass(const float& mass) { m_mass = mass; }
+	void Settest(){}
 	void SetInvMass(const float& inv_mass) { m_inv_mass = inv_mass; }
 	void SetCenter(const Vector3& center) { m_center = center; }
 	void SetLinearVelocity(const Vector3& lin_vel) { m_lin_vel = lin_vel; }
