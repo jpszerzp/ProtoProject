@@ -344,7 +344,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 	}
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_7))
-		SpawnRandomConvex(m_wraparound_plane, 10, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 360.f, 100.f));
+		SpawnRandomConvex(m_wraparound_plane, 5, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 360.f, 100.f));
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_8))
 		SpawnRandomSphere(m_wraparound_plane, 5, Vector3(20.f, 345.f, -10.f), Vector3(130.f, 360.f, 100.f));
@@ -1108,7 +1108,8 @@ CollisionBox* Physics3State::WrapAroundTestBox(WrapAround* wpa, bool give_ang_ve
 	return box;
 }
 
-CollisionConvexObject* Physics3State::WrapAroundTestConvex(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, const Vector3& position, const Vector3&, const Vector3&, const bool& awake /*= true*/, const bool& sleepable /*= false*/)
+CollisionConvexObject* Physics3State::WrapAroundTestConvex(WrapAround* wpa, bool give_ang_vel, bool give_lin_vel, bool register_g, 
+	const Vector3& position, const Vector3&, const Vector3&, const bool& awake, const bool& sleepable)
 {
 	Plane p1 = Plane(Vector3(.1f, 0.f, .9f), 1.f);
 	Plane p2 = Plane(Vector3(.1f, 0.f, -.9f), 1.f);
@@ -1116,6 +1117,7 @@ CollisionConvexObject* Physics3State::WrapAroundTestConvex(WrapAround* wpa, bool
 	Plane p4 = Plane(Vector3(.9f, 0.f, -.1f), 1.f);
 	Plane p5 = Plane(Vector3(-.1f, .9f, -.1f), 1.f);
 	Plane p6 = Plane(Vector3(-.05f, -.9f, .1f), 1.f);
+
 	std::vector<Plane> hull_planes;
 	hull_planes.push_back(p1);
 	hull_planes.push_back(p2);
@@ -1310,7 +1312,7 @@ void Physics3State::SpawnRandomConvex(WrapAround* wpa, uint num, const Vector3& 
 	for (uint i = 0; i < num; ++i)
 	{
 		const Vector3& rand_pos = GetRandomLocationWithin(bound);
-		WrapAroundTestConvex(wpa, true, false, true, rand_pos, Vector3::ZERO, Vector3::ONE);
+		WrapAroundTestConvex(wpa, true, false, true, rand_pos, Vector3::ZERO, Vector3::ONE, true, true);
 	}
 }
 

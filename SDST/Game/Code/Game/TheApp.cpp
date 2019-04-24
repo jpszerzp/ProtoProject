@@ -237,14 +237,14 @@ void TheApp::ProcessInput()
 		}
 	}
 
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_7) && !DevConsoleIsOpen())
-	{
-#if defined(PROFILE_ENABLED) 
-		Profiler* profiler = Profiler::GetInstance();
-
-		profiler->m_on = !profiler->m_on;
-#endif
-	}
+//	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_7) && !DevConsoleIsOpen())
+//	{
+//#if defined(PROFILE_ENABLED) 
+//		Profiler* profiler = Profiler::GetInstance();
+//
+//		profiler->m_on = !profiler->m_on;
+//#endif
+//	}
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_1))
 	{
