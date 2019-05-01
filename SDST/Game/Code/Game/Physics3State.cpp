@@ -844,10 +844,10 @@ void Physics3State::UpdateUI()
 		Vector3 lin_vel_3 = g_theApp->m_corner_case_3->GetLinearVel();
 		float lin_spd_3 = lin_vel_3.GetLength();
 		lin_vel_3.Normalize();
-		float lin_spd_cmp = ((lin_spd_3 - lin_spd_1) / lin_spd_1) * 100.f;
-		float lin_vel_cmp_x = ((lin_vel_3.x - lin_vel_1.x) / lin_vel_1.x) * 100.f;
-		float lin_vel_cmp_y = ((lin_vel_3.y - lin_vel_1.y) / lin_vel_1.y) * 100.f;
-		float lin_vel_cmp_z = ((lin_vel_3.z - lin_vel_1.z) / lin_vel_1.z) * 100.f;
+		float lin_spd_cmp = ((lin_spd_3 - lin_spd_1) / lin_spd_1);
+		float lin_vel_cmp_x = ((lin_vel_3.x - lin_vel_1.x) / lin_vel_1.x);
+		float lin_vel_cmp_y = ((lin_vel_3.y - lin_vel_1.y) / lin_vel_1.y);
+		float lin_vel_cmp_z = ((lin_vel_3.z - lin_vel_1.z) / lin_vel_1.z);
 
 		std::string lin_vel_13_amt = Stringf("Difference on LV AMOUNT from 1 to 3 is %f%%", lin_spd_cmp);
 		std::string lin_vel_13_dir = Stringf("Difference on LV DIRECTION from 1 to 3 is (%f%%, %f%%, %f%%)", lin_vel_cmp_x, lin_vel_cmp_y, lin_vel_cmp_z);
@@ -864,10 +864,10 @@ void Physics3State::UpdateUI()
 		Vector3 ang_vel_3 = g_theApp->m_corner_case_3->GetAngularVel();
 		float ang_spd_3 = ang_vel_3.GetLength();
 		ang_vel_3.Normalize();
-		float ang_spd_cmp = ((ang_spd_3 - ang_spd_1) / ang_spd_1) * 100.f;
-		float ang_vel_cmp_x = ((ang_vel_3.x - ang_vel_1.x) / ang_vel_1.x) * 100.f;
-		float ang_vel_cmp_y = ((ang_vel_3.y - ang_vel_1.y) / ang_vel_1.y) * 100.f;
-		float ang_vel_cmp_z = ((ang_vel_3.z - ang_vel_1.z) / ang_vel_1.z) * 100.f;
+		float ang_spd_cmp = ((ang_spd_3 - ang_spd_1) / ang_spd_1);
+		float ang_vel_cmp_x = ((ang_vel_3.x - ang_vel_1.x) / ang_vel_1.x);
+		float ang_vel_cmp_y = ((ang_vel_3.y - ang_vel_1.y) / ang_vel_1.y);
+		float ang_vel_cmp_z = ((ang_vel_3.z - ang_vel_1.z) / ang_vel_1.z);
 
 		std::string ang_vel_13_amt = Stringf("Difference on AV AMOUNT from 1 to 3 is %f%%", ang_spd_cmp);
 		std::string ang_vel_13_dir = Stringf("Difference on AV DIRECTION from 1 to 3 is (%f%%, %f%%, %f%%)", ang_vel_cmp_x, ang_vel_cmp_y, ang_vel_cmp_z);
@@ -895,13 +895,13 @@ void Physics3State::UpdateUI()
 		Vector3 lin_vel_4 = g_theApp->m_corner_case_4->GetLinearVel();
 		float lin_spd_4 = lin_vel_4.GetLength();
 		lin_vel_4.Normalize();
-		float lin_spd_cmp = ((lin_spd_4 - lin_spd_2) / lin_spd_2) * 100.f;
-		float lin_vel_cmp_x = ((lin_vel_4.x - lin_vel_2.x) / lin_vel_2.x) * 100.f;
-		float lin_vel_cmp_y = ((lin_vel_4.y - lin_vel_2.y) / lin_vel_2.y) * 100.f;
-		float lin_vel_cmp_z = ((lin_vel_4.z - lin_vel_2.z) / lin_vel_2.z) * 100.f;
+		float lin_spd_cmp = ((lin_spd_4 - lin_spd_2) / lin_spd_2);
+		float lin_vel_cmp_x = ((lin_vel_4.x - lin_vel_2.x) / lin_vel_2.x);
+		float lin_vel_cmp_y = ((lin_vel_4.y - lin_vel_2.y) / lin_vel_2.y);
+		float lin_vel_cmp_z = ((lin_vel_4.z - lin_vel_2.z) / lin_vel_2.z);
 
 		std::string lin_vel_24_amt = Stringf("Difference on LV AMOUNT from 2 to 4 is %f%%", lin_spd_cmp);
-		std::string lin_vel_24_dir = Stringf("Difference on LV DIRECTION from 1 to 3 is (%f%%, %f%%, %f%%)", lin_vel_cmp_x, lin_vel_cmp_y, lin_vel_cmp_z);
+		std::string lin_vel_24_dir = Stringf("Difference on LV DIRECTION from 2 to 4 is (%f%%, %f%%, %f%%)", lin_vel_cmp_x, lin_vel_cmp_y, lin_vel_cmp_z);
 
 		m_cmp_lin_vel_24_amt = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, m_txt_height, .5f, lin_vel_24_amt, VERT_PCU);
 		titleMin -= Vector2(0.f, m_txt_height);
@@ -915,10 +915,10 @@ void Physics3State::UpdateUI()
 		Vector3 ang_vel_4 = g_theApp->m_corner_case_4->GetAngularVel();
 		float ang_spd_4 = ang_vel_4.GetLength();
 		ang_vel_4.Normalize();
-		float ang_spd_cmp = ((ang_spd_4 - ang_spd_2) / ang_spd_2) * 100.f;
-		float ang_vel_cmp_x = ((ang_vel_4.x - ang_vel_2.x) / ang_vel_2.x) * 100.f;
-		float ang_vel_cmp_y = ((ang_vel_4.y - ang_vel_2.y) / ang_vel_2.y) * 100.f;
-		float ang_vel_cmp_z = ((ang_vel_4.z - ang_vel_2.z) / ang_vel_2.z) * 100.f;
+		float ang_spd_cmp = ((ang_spd_4 - ang_spd_2) / ang_spd_2);
+		float ang_vel_cmp_x = ((ang_vel_4.x - ang_vel_2.x) / ang_vel_2.x);
+		float ang_vel_cmp_y = ((ang_vel_4.y - ang_vel_2.y) / ang_vel_2.y);
+		float ang_vel_cmp_z = ((ang_vel_4.z - ang_vel_2.z) / ang_vel_2.z);
 
 		std::string ang_vel_24_amt = Stringf("Difference on AV AMOUNT from 2 to 4 is %f%%", ang_spd_cmp);
 		std::string ang_vel_24_dir = Stringf("Difference on AV DIRECTION from 2 to 4 is (%f%%, %f%%, %f%%)", ang_vel_cmp_x, ang_vel_cmp_y, ang_vel_cmp_z);
