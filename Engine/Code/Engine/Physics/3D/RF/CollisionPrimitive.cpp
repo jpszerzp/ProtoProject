@@ -201,8 +201,8 @@ CollisionBox::CollisionBox(const float& scale,
 	Renderer* renderer = Renderer::GetInstance();
 
 	SetMesh(renderer->CreateOrGetMesh("cube_pcu"));
-	SetShader(renderer->CreateOrGetShader(fp));
-	SetTexture(renderer->CreateOrGetTexture(tx));
+	SetShader(renderer->CreateOrGetShader(fp));			
+	SetTexture(renderer->CreateOrGetTexture(tx));	
 
 	Vector4 tintV4;
 	Rgba tint = Rgba::WHITE;
@@ -229,7 +229,61 @@ void CollisionBox::Update(float deltaTime)
 		float ext_z = m_half_size.z * 2.f;
 		Matrix44 transform_mat = GetRigidBody()->GetTransformMat4() * Matrix44::MakeScale3D(ext_x, ext_y, ext_z);
 		SetPrimitiveTransformMat4(transform_mat);
+
+		if (!GetRigidBody()->IsAwake())
+			GetRigidBody()->IncrementSlpTime(deltaTime);
 	}
+}
+
+void CollisionBox::Render(Renderer* rdr)
+{
+	if (GetMesh())
+	{
+		if (GetRigidBody()->IsAwake())
+		{
+			SetShader(rdr->CreateOrGetShader("default"));
+			SetTexture(rdr->CreateOrGetTexture("Data/Images/perspective_test.png"));
+
+			Vector4 tintV4;
+			Rgba tint = Rgba::WHITE;
+			tint.GetAsFloats(tintV4.x, tintV4.y, tintV4.z, tintV4.w);
+			SetTint(tintV4);
+		}
+		else 
+		{
+			if (GetRigidBody()->GetSlpTime() > 1.f)
+			{
+				SetShader(rdr->CreateOrGetShader("default"));
+				SetTexture(rdr->CreateOrGetTexture("Data/Images/white.png"));
+
+				Vector4 tintV4;
+				Rgba tint = Rgba::RED;
+				tint.GetAsFloats(tintV4.x, tintV4.y, tintV4.z, tintV4.w);
+				SetTint(tintV4);
+			}
+			else
+			{
+				SetShader(rdr->CreateOrGetShader("default"));
+				SetTexture(rdr->CreateOrGetTexture("Data/Images/perspective_test.png"));
+
+				Vector4 tintV4;
+				Rgba tint = Rgba::WHITE;
+				tint.GetAsFloats(tintV4.x, tintV4.y, tintV4.z, tintV4.w);
+				SetTint(tintV4);
+			}
+		}
+
+		rdr->UseShader(GetShader());
+		rdr->SetTexture2D(0, GetTexture());
+		rdr->SetSampler2D(0, GetTexture()->GetSampler());
+	}
+
+	// ubo
+	rdr->m_colorData.rgba = GetTint();
+	rdr->m_objectData.model = GetTransformMat4();
+
+	// draw
+	rdr->DrawMesh(GetMesh());
 }
 
 void CollisionBox::AttachToRigidBody(CollisionRigidBody* rb)

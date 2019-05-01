@@ -44,7 +44,8 @@ protected:
 	Vector3 m_last_center = Vector3::ZERO;
 	Vector3 m_half_step_vel = Vector3::ZERO;
 
-	float m_sleep = 5.5;
+	float m_sleep = 20.f;
+	float m_slp_time = 0.f;
 
 public:
 	virtual void Integrate(float deltaTime);
@@ -61,6 +62,7 @@ public:
 	void SetSlow(const float& slow) { m_slow = slow; }
 	void SetFrozen(bool val) { m_frozen = val; }
 	void SetSleepThreshold(float val) { m_sleep = val; }
+	void IncrementSlpTime(float dt) { m_slp_time += dt; }
 
 	virtual void CacheData(){}
 
@@ -74,6 +76,7 @@ public:
 	Vector3 GetCenter() const { return m_center; }
 	float GetMass() const { return m_mass; }
 	float GetInvMass() const { return m_inv_mass; }
+	float GetSlpTime() const { return m_slp_time; }
 	Vector3 GetLinearVelocity() const { return m_lin_vel; }
 	Vector3 GetLastFrameLinearAcc() const { return m_last_lin_acc; }
 	bool IsAwake() const { return m_awake; }

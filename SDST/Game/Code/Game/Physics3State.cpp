@@ -1575,6 +1575,7 @@ void Physics3State::ResetCollisionCornerCase(const Vector3& pos1, const Vector3&
 {
 	if (!m_corner_case_1 && !m_corner_case_2)
 	{
+		// demo case using my API makes objects NOT sleepable
 		m_corner_case_1 = new CollisionBox(.5f);
 		CollisionRigidBody* rb = new CollisionRigidBody(1.f, pos1, rot1);
 		rb->SetAwake(true);
@@ -1584,6 +1585,7 @@ void Physics3State::ResetCollisionCornerCase(const Vector3& pos1, const Vector3&
 		m_corner_case_1->m_cmp->SetPosAndOrient(pos1, Quaternion::FromEuler(rot1));
 		m_wraparound_demo_0->m_phys_obj.push_back(m_corner_case_1->m_cmp);
 
+		// demo case using my API makes objects NOT sleepable
 		m_corner_case_2 = new CollisionBox(.5f);
 		rb = new CollisionRigidBody(1.f, pos2, rot2);
 		rb->SetAwake(true);

@@ -251,7 +251,10 @@ void CollisionRigidBody::SetAwake(bool awake)
 		m_awake = true;
 
 		// Add a bit of motion to avoid it falling asleep immediately.
-		m_motion = m_sleep * 1.05f;
+		m_motion = m_sleep * 1.04f;
+
+		// slp time
+		m_slp_time = 0.f;
 	} 
 	else 
 	{

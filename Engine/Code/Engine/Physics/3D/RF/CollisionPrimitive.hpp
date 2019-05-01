@@ -115,6 +115,7 @@ class CollisionBox : public CollisionPrimitive
 	Vector3 m_half_size;
 	std::vector<Vector3> m_world_verts;
 	bool m_stack = false;
+	//float m_sleep_time = 0.f;
 
 public:
 	CollisionBox(const Vector3& half, const std::string& fp = "default", 
@@ -124,6 +125,7 @@ public:
 	~CollisionBox(){}
 
 	void Update(float deltaTime) override;
+	void Render(Renderer* rdr) override;
 
 	void AttachToRigidBody(CollisionRigidBody* rb) override;
 
