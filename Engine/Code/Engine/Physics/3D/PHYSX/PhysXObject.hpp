@@ -19,6 +19,8 @@ public:
 	~PhysXObject();
 
 	PxRigidActor* GetRigidActor() const { return m_ra; }
+	Vector3 GetLinearVel() const;
+	Vector3 GetAngularVel() const;
 	bool ShouldDelete() const { return m_delete; }
 	bool IsDirected() const { return m_directed; }
 	Vector3 GetPos() const;

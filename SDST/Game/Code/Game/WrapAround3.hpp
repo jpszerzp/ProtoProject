@@ -38,7 +38,8 @@ public:
 		const Vector3& p7 = Vector3::ZERO, const Vector3& p8 = Vector3::ZERO);
 	~WrapAround();
 
-	void Update();
+	void Update(bool mark = false);
+	void UpdateDeleteMark();
 	void UpdateWraparound();
 
 	void Render(Renderer* renderer);

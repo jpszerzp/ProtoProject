@@ -87,6 +87,7 @@ public:
 	bool IsFrozen() const { return m_rigid_body->IsFrozen(); }
 	eCCD GetContinuity() const { return m_ccd; }
 	Vector3 GetNextFrameTeleport() const { return m_ccd_teleport; }
+	PhysXObject* GetCmp() { return m_cmp; }
 
 	Vector3 GetPrimitiveRight() const;
 	Vector3 GetPrimitiveUp() const;

@@ -99,10 +99,30 @@ public:
 	const static uint MAX_CONTACT_NUM = 256;
 
 	// ui
+	bool m_cc_1_on = false;
+	bool m_cc_2_on = false;
 	float m_txt_height;
 	Mesh* m_fps_text;
 	Mesh* m_my_count;
 	Mesh* m_slp_count;
+	Mesh* m_lin_vel_1;
+	Mesh* m_ang_vel_1;
+	Mesh* m_lin_vel_2;
+	Mesh* m_ang_vel_2;
+	Mesh* m_lin_vel_3;
+	Mesh* m_ang_vel_3;
+	Mesh* m_lin_vel_4;
+	Mesh* m_ang_vel_4;
+	Mesh* m_sep_vel;
+	Mesh* m_sep_cmp;
+	Mesh* m_cmp_lin_vel_13_amt;
+	Mesh* m_cmp_lin_vel_13_dir;
+	Mesh* m_cmp_ang_vel_13_amt;
+	Mesh* m_cmp_ang_vel_13_dir;
+	Mesh* m_cmp_lin_vel_24_amt;
+	Mesh* m_cmp_lin_vel_24_dir;
+	Mesh* m_cmp_ang_vel_24_amt;
+	Mesh* m_cmp_ang_vel_24_dir;
 
 	// refactor
 	std::vector<CollisionSphere*> m_spheres;

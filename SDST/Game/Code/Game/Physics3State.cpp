@@ -616,16 +616,14 @@ void Physics3State::UpdateDebugDraw(float deltaTime)
 	DebugRenderUpdate(deltaTime);
 }
 
-
 void Physics3State::UpdateWrapArounds()
 {
-	m_wraparound_plane->Update();
-	m_wraparound_demo_0->Update();
-	m_wraparound_demo_1->Update();
-	m_wraparound_verlet->Update();
-	m_wraparound_ccd->Update();
+	m_wraparound_plane->Update(false);
+	m_wraparound_demo_0->Update(true);
+	m_wraparound_demo_1->Update(false);
+	m_wraparound_verlet->Update(false);
+	m_wraparound_ccd->Update(false);
 }
-
 
 void Physics3State::UpdateUI()
 {
@@ -697,6 +695,240 @@ void Physics3State::UpdateUI()
 
 	m_slp_count = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, m_txt_height, .5f, slp_text, VERT_PCU);
 	titleMin -= Vector2(0.f, m_txt_height);
+
+	std::string sep_vel = "==========VElOCITY==========";
+
+	delete m_sep_vel;
+	m_sep_vel = nullptr;
+
+	m_sep_vel = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, m_txt_height, .5f, sep_vel, VERT_PCU);
+	titleMin -= Vector2(0.f, m_txt_height);
+
+	delete m_lin_vel_1;
+	m_lin_vel_1 = nullptr;
+	delete m_ang_vel_1;
+	m_ang_vel_1 = nullptr;
+	// corner case 1 & 2
+	if (m_corner_case_1)
+	{
+		if (m_cc_1_on)
+		{
+			Vector3 lin_vel_1 = m_corner_case_1->GetCmp()->GetLinearVel();
+			float lin_spd_1 = lin_vel_1.GetLength();			// amount
+			lin_vel_1.Normalize();								// direction
+			Vector3 ang_vel_1 = m_corner_case_1->GetCmp()->GetAngularVel();
+			float ang_spd_1 = ang_vel_1.GetLength();
+			ang_vel_1.Normalize();
+			std::string lin_vel_1_text = Stringf("Linear Velocity of 1 has direction (%f, %f, %f), amount %f", lin_vel_1.x, lin_vel_1.y, lin_vel_1.z, lin_spd_1);
+			std::string ang_vel_1_text = Stringf("Angular Velocity of 1 has direction (%f, %f, %f), amount %f", ang_vel_1.x, ang_vel_1.y, ang_vel_1.z, ang_spd_1);
+
+			//delete m_lin_vel_1;
+			//m_lin_vel_1 = nullptr;
+			//delete m_ang_vel_1;
+			//m_ang_vel_1 = nullptr;
+
+			m_lin_vel_1 = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, m_txt_height, .5f, lin_vel_1_text, VERT_PCU);
+			titleMin -= Vector2(0.f, m_txt_height);
+
+			m_ang_vel_1 = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, m_txt_height, .5f, ang_vel_1_text, VERT_PCU);
+			titleMin -= Vector2(0.f, m_txt_height);
+		}
+	}
+
+
+	delete m_lin_vel_2;
+	m_lin_vel_2 = nullptr;
+	delete m_ang_vel_2;
+	m_ang_vel_2 = nullptr;
+	if (m_corner_case_2)
+	{
+		if (m_cc_2_on)
+		{
+			Vector3 lin_vel_2 = m_corner_case_2->GetCmp()->GetLinearVel();
+			float lin_spd_2 = lin_vel_2.GetLength();			// amount
+			lin_vel_2.Normalize();								// direction
+			Vector3 ang_vel_2 = m_corner_case_2->GetCmp()->GetAngularVel();
+			float ang_spd_2 = ang_vel_2.GetLength();
+			ang_vel_2.Normalize();
+			std::string lin_vel_2_text = Stringf("Linear Velocity of 2 has direction (%f, %f, %f), amount %f", lin_vel_2.x, lin_vel_2.y, lin_vel_2.z, lin_spd_2);
+			std::string ang_vel_2_text = Stringf("Angular Velocity of 2 has direction (%f, %f, %f), amount %f", ang_vel_2.x, ang_vel_2.y, ang_vel_2.z, ang_spd_2);
+
+			//delete m_lin_vel_2;
+			//m_lin_vel_2 = nullptr;
+			//delete m_ang_vel_2;
+			//m_ang_vel_2 = nullptr;
+
+			m_lin_vel_2 = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, m_txt_height, .5f, lin_vel_2_text, VERT_PCU);
+			titleMin -= Vector2(0.f, m_txt_height);
+
+			m_ang_vel_2 = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, m_txt_height, .5f, ang_vel_2_text, VERT_PCU);
+			titleMin -= Vector2(0.f, m_txt_height);
+		}
+	}
+
+	delete m_lin_vel_3;
+	m_lin_vel_3 = nullptr;
+	delete m_ang_vel_3;
+	m_ang_vel_3 = nullptr;
+	if (g_theApp->m_corner_case_3)
+	{
+		Vector3 lin_vel_3 = g_theApp->m_corner_case_3->GetLinearVel();
+		float lin_spd_3 = lin_vel_3.GetLength();			// amount
+		lin_vel_3.Normalize();								// direction
+		Vector3 ang_vel_3 = g_theApp->m_corner_case_3->GetAngularVel();
+		float ang_spd_3 = ang_vel_3.GetLength();
+		ang_vel_3.Normalize();
+		std::string lin_vel_3_text = Stringf("Linear Velocity of 3 has direction (%f, %f, %f), amount %f", lin_vel_3.x, lin_vel_3.y, lin_vel_3.z, lin_spd_3);
+		std::string ang_vel_3_text = Stringf("Angular Velocity of 3 has direction (%f, %f, %f), amount %f", ang_vel_3.x, ang_vel_3.y, ang_vel_3.z, ang_spd_3);
+
+		//delete m_lin_vel_3;
+		//m_lin_vel_3 = nullptr;
+		//delete m_ang_vel_3;
+		//m_ang_vel_3 = nullptr;
+
+		m_lin_vel_3 = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, m_txt_height, .5f, lin_vel_3_text, VERT_PCU);
+		titleMin -= Vector2(0.f, m_txt_height);
+
+		m_ang_vel_3 = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, m_txt_height, .5f, ang_vel_3_text, VERT_PCU);
+		titleMin -= Vector2(0.f, m_txt_height);
+	}
+
+	delete m_lin_vel_4;
+	m_lin_vel_4 = nullptr;
+	delete m_ang_vel_4;
+	m_ang_vel_4 = nullptr;
+	if (g_theApp->m_corner_case_4)
+	{
+		Vector3 lin_vel_4 = g_theApp->m_corner_case_4->GetLinearVel();
+		float lin_spd_4 = lin_vel_4.GetLength();			// amount
+		lin_vel_4.Normalize();								// direction
+		Vector3 ang_vel_4 = g_theApp->m_corner_case_4->GetAngularVel();
+		float ang_spd_4 = ang_vel_4.GetLength();
+		ang_vel_4.Normalize();
+		std::string lin_vel_4_text = Stringf("Linear Velocity of 4 has direction (%f, %f, %f), amount %f", lin_vel_4.x, lin_vel_4.y, lin_vel_4.z, lin_spd_4);
+		std::string ang_vel_4_text = Stringf("Angular Velocity of 4 has direction (%f, %f, %f), amount %f", ang_vel_4.x, ang_vel_4.y, ang_vel_4.z, ang_spd_4);
+
+		//delete m_lin_vel_4;
+		//m_lin_vel_4 = nullptr;
+		//delete m_ang_vel_4;
+		//m_ang_vel_4 = nullptr;
+
+		m_lin_vel_4 = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, m_txt_height, .5f, lin_vel_4_text, VERT_PCU);
+		titleMin -= Vector2(0.f, m_txt_height);
+
+		m_ang_vel_4 = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, m_txt_height, .5f, ang_vel_4_text, VERT_PCU);
+		titleMin -= Vector2(0.f, m_txt_height);
+	}
+
+	std::string sep_cmp = "==========COMPARISON==========";
+
+	delete m_sep_cmp;
+	m_sep_cmp = nullptr;
+
+	m_sep_cmp = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, m_txt_height, .5f, sep_cmp, VERT_PCU);
+	titleMin -= Vector2(0.f, m_txt_height);
+
+	delete m_cmp_lin_vel_13_amt;
+	m_cmp_lin_vel_13_amt = nullptr;
+	delete m_cmp_lin_vel_13_dir;
+	m_cmp_lin_vel_13_dir = nullptr;
+	delete m_cmp_ang_vel_13_amt;
+	m_cmp_ang_vel_13_amt = nullptr;
+	delete m_cmp_ang_vel_13_dir;
+	m_cmp_ang_vel_13_dir = nullptr;
+	if ((m_corner_case_1 && m_cc_1_on) && g_theApp->m_corner_case_3)
+	{
+		Vector3 lin_vel_1 = m_corner_case_1->GetCmp()->GetLinearVel();
+		float lin_spd_1 = lin_vel_1.GetLength();
+		lin_vel_1.Normalize();
+		Vector3 lin_vel_3 = g_theApp->m_corner_case_3->GetLinearVel();
+		float lin_spd_3 = lin_vel_3.GetLength();
+		lin_vel_3.Normalize();
+		float lin_spd_cmp = ((lin_spd_3 - lin_spd_1) / lin_spd_1) * 100.f;
+		float lin_vel_cmp_x = ((lin_vel_3.x - lin_vel_1.x) / lin_vel_1.x) * 100.f;
+		float lin_vel_cmp_y = ((lin_vel_3.y - lin_vel_1.y) / lin_vel_1.y) * 100.f;
+		float lin_vel_cmp_z = ((lin_vel_3.z - lin_vel_1.z) / lin_vel_1.z) * 100.f;
+
+		std::string lin_vel_13_amt = Stringf("Difference on LV AMOUNT from 1 to 3 is %f%%", lin_spd_cmp);
+		std::string lin_vel_13_dir = Stringf("Difference on LV DIRECTION from 1 to 3 is (%f%%, %f%%, %f%%)", lin_vel_cmp_x, lin_vel_cmp_y, lin_vel_cmp_z);
+
+		m_cmp_lin_vel_13_amt = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, m_txt_height, .5f, lin_vel_13_amt, VERT_PCU);
+		titleMin -= Vector2(0.f, m_txt_height);
+
+		m_cmp_lin_vel_13_dir = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, m_txt_height, .5f, lin_vel_13_dir, VERT_PCU);
+		titleMin -= Vector2(0.f, m_txt_height);
+
+		Vector3 ang_vel_1 = m_corner_case_1->GetCmp()->GetAngularVel();
+		float ang_spd_1 = ang_vel_1.GetLength();
+		ang_vel_1.Normalize();
+		Vector3 ang_vel_3 = g_theApp->m_corner_case_3->GetAngularVel();
+		float ang_spd_3 = ang_vel_3.GetLength();
+		ang_vel_3.Normalize();
+		float ang_spd_cmp = ((ang_spd_3 - ang_spd_1) / ang_spd_1) * 100.f;
+		float ang_vel_cmp_x = ((ang_vel_3.x - ang_vel_1.x) / ang_vel_1.x) * 100.f;
+		float ang_vel_cmp_y = ((ang_vel_3.y - ang_vel_1.y) / ang_vel_1.y) * 100.f;
+		float ang_vel_cmp_z = ((ang_vel_3.z - ang_vel_1.z) / ang_vel_1.z) * 100.f;
+
+		std::string ang_vel_13_amt = Stringf("Difference on AV AMOUNT from 1 to 3 is %f%%", ang_spd_cmp);
+		std::string ang_vel_13_dir = Stringf("Difference on AV DIRECTION from 1 to 3 is (%f%%, %f%%, %f%%)", ang_vel_cmp_x, ang_vel_cmp_y, ang_vel_cmp_z);
+
+		m_cmp_ang_vel_13_amt = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, m_txt_height, .5f, ang_vel_13_amt, VERT_PCU);
+		titleMin -= Vector2(0.f, m_txt_height);
+
+		m_cmp_ang_vel_13_dir = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, m_txt_height, .5f, ang_vel_13_dir, VERT_PCU);
+		titleMin -= Vector2(0.f, m_txt_height);
+	}
+
+	delete m_cmp_lin_vel_24_amt;
+	m_cmp_lin_vel_24_amt = nullptr;
+	delete m_cmp_lin_vel_24_dir;
+	m_cmp_lin_vel_24_dir = nullptr;
+	delete m_cmp_ang_vel_24_amt;
+	m_cmp_ang_vel_24_amt = nullptr;
+	delete m_cmp_ang_vel_24_dir;
+	m_cmp_ang_vel_24_dir = nullptr;
+	if ((m_corner_case_2 && m_cc_2_on) && g_theApp->m_corner_case_4)
+	{
+		Vector3 lin_vel_2 = m_corner_case_2->GetCmp()->GetLinearVel();
+		float lin_spd_2 = lin_vel_2.GetLength();
+		lin_vel_2.Normalize();
+		Vector3 lin_vel_4 = g_theApp->m_corner_case_4->GetLinearVel();
+		float lin_spd_4 = lin_vel_4.GetLength();
+		lin_vel_4.Normalize();
+		float lin_spd_cmp = ((lin_spd_4 - lin_spd_2) / lin_spd_2) * 100.f;
+		float lin_vel_cmp_x = ((lin_vel_4.x - lin_vel_2.x) / lin_vel_2.x) * 100.f;
+		float lin_vel_cmp_y = ((lin_vel_4.y - lin_vel_2.y) / lin_vel_2.y) * 100.f;
+		float lin_vel_cmp_z = ((lin_vel_4.z - lin_vel_2.z) / lin_vel_2.z) * 100.f;
+
+		std::string lin_vel_24_amt = Stringf("Difference on LV AMOUNT from 2 to 4 is %f%%", lin_spd_cmp);
+		std::string lin_vel_24_dir = Stringf("Difference on LV DIRECTION from 1 to 3 is (%f%%, %f%%, %f%%)", lin_vel_cmp_x, lin_vel_cmp_y, lin_vel_cmp_z);
+
+		m_cmp_lin_vel_24_amt = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, m_txt_height, .5f, lin_vel_24_amt, VERT_PCU);
+		titleMin -= Vector2(0.f, m_txt_height);
+
+		m_cmp_lin_vel_24_dir = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, m_txt_height, .5f, lin_vel_24_dir, VERT_PCU);
+		titleMin -= Vector2(0.f, m_txt_height);
+
+		Vector3 ang_vel_2 = m_corner_case_2->GetCmp()->GetAngularVel();
+		float ang_spd_2 = ang_vel_2.GetLength();
+		ang_vel_2.Normalize();
+		Vector3 ang_vel_4 = g_theApp->m_corner_case_4->GetAngularVel();
+		float ang_spd_4 = ang_vel_4.GetLength();
+		ang_vel_4.Normalize();
+		float ang_spd_cmp = ((ang_spd_4 - ang_spd_2) / ang_spd_2) * 100.f;
+		float ang_vel_cmp_x = ((ang_vel_4.x - ang_vel_2.x) / ang_vel_2.x) * 100.f;
+		float ang_vel_cmp_y = ((ang_vel_4.y - ang_vel_2.y) / ang_vel_2.y) * 100.f;
+		float ang_vel_cmp_z = ((ang_vel_4.z - ang_vel_2.z) / ang_vel_2.z) * 100.f;
+
+		std::string ang_vel_24_amt = Stringf("Difference on AV AMOUNT from 2 to 4 is %f%%", ang_spd_cmp);
+		std::string ang_vel_24_dir = Stringf("Difference on AV DIRECTION from 2 to 4 is (%f%%, %f%%, %f%%)", ang_vel_cmp_x, ang_vel_cmp_y, ang_vel_cmp_z);
+
+		m_cmp_ang_vel_24_amt = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, m_txt_height, .5f, ang_vel_24_amt, VERT_PCU);
+		titleMin -= Vector2(0.f, m_txt_height);
+
+		m_cmp_ang_vel_24_dir = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, m_txt_height, .5f, ang_vel_24_dir, VERT_PCU);
+		titleMin -= Vector2(0.f, m_txt_height);
+	}
 }
 
 void Physics3State::UpdateDelete()
@@ -1018,6 +1250,24 @@ void Physics3State::RenderUI(Renderer*)
 	DrawTextCut(m_fps_text);
 	DrawTextCut(m_my_count);
 	DrawTextCut(m_slp_count);
+	DrawTextCut(m_sep_vel);
+	DrawTextCut(m_lin_vel_1);
+	DrawTextCut(m_ang_vel_1);
+	DrawTextCut(m_lin_vel_2);
+	DrawTextCut(m_ang_vel_2);
+	DrawTextCut(m_lin_vel_3);
+	DrawTextCut(m_ang_vel_3);
+	DrawTextCut(m_lin_vel_4);
+	DrawTextCut(m_ang_vel_4);
+	DrawTextCut(m_sep_cmp);
+	DrawTextCut(m_cmp_lin_vel_13_amt);
+	DrawTextCut(m_cmp_lin_vel_13_dir);
+	DrawTextCut(m_cmp_ang_vel_13_amt);
+	DrawTextCut(m_cmp_ang_vel_13_dir);
+	DrawTextCut(m_cmp_lin_vel_24_amt);
+	DrawTextCut(m_cmp_lin_vel_24_dir);
+	DrawTextCut(m_cmp_ang_vel_24_amt);
+	DrawTextCut(m_cmp_ang_vel_24_dir);
 }
 
 CollisionSphere* Physics3State::WrapAroundTestSphere(WrapAround* wpa, bool give_ang_vel, 
@@ -1355,6 +1605,9 @@ void Physics3State::ResetCollisionCornerCase(const Vector3& pos1, const Vector3&
 		m_corner_case_1->m_cmp->SetAngularVel(Vector3::ZERO);
 		m_corner_case_2->m_cmp->SetAngularVel(Vector3::ZERO);
 	}
+
+	m_cc_1_on = true;
+	m_cc_2_on = true;
 }
 
 std::pair<PhysXObject*, PhysXObject*> Physics3State::ResetCollisionCornerCasePhysX(const Vector3& pos1, const Vector3& pos2, const Vector3& rot1, const Vector3& rot2)

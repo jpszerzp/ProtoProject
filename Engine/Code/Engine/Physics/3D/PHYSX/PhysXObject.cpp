@@ -14,6 +14,20 @@ PhysXObject::~PhysXObject()
 	// ...
 }
 
+Vector3 PhysXObject::GetLinearVel() const
+{
+	PxRigidDynamic* dyn = static_cast<PxRigidDynamic*>(m_ra);
+	PxVec3 vel = dyn->getLinearVelocity();
+	return Vector3(vel.x, vel.y, vel.z);
+}
+
+Vector3 PhysXObject::GetAngularVel() const
+{
+	PxRigidDynamic* dyn = static_cast<PxRigidDynamic*>(m_ra);
+	PxVec3 vel = dyn->getAngularVelocity();
+	return Vector3(vel.x, vel.y, vel.z);
+}
+
 Vector3 PhysXObject::GetPos() const
 {
 	PxVec3 pos = m_ra->getGlobalPose().p;

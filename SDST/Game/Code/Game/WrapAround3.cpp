@@ -38,11 +38,65 @@ WrapAround::~WrapAround()
 
 }
 
-void WrapAround::Update()
+void WrapAround::Update(bool mark)
 {
-	UpdateWraparound();
+	if (!mark)
+		UpdateWraparound();
+	else
+		UpdateDeleteMark();
 }
 
+
+void WrapAround::UpdateDeleteMark()
+{
+	if (!m_particle)
+	{
+		for (PhysXObject* px_obj : m_phys_obj)
+		{
+			bool delete_this = false;
+
+			if (px_obj->GetPos().x < m_bounds.m_min.x)
+			{
+				px_obj->SetShouldDelete(true);
+				delete_this = true;
+			}
+			else if (px_obj->GetPos().x > m_bounds.m_max.x)
+			{
+				px_obj->SetShouldDelete(true);
+				delete_this = true;
+			}
+			else if (px_obj->GetPos().y < m_bounds.m_min.y)
+			{
+				px_obj->SetShouldDelete(true);
+				delete_this = true;
+			}
+			else if (px_obj->GetPos().y > m_bounds.m_max.y)
+			{
+				px_obj->SetShouldDelete(true);
+				delete_this = true;
+			}
+			else if (px_obj->GetPos().z < m_bounds.m_min.z)
+			{
+				px_obj->SetShouldDelete(true);
+				delete_this = true;
+			}
+			else if (px_obj->GetPos().z > m_bounds.m_max.z)
+			{
+				px_obj->SetShouldDelete(true);
+				delete_this = true;
+			}
+
+			if (delete_this)
+			{
+				if (px_obj == g_physState->m_corner_case_1->GetCmp())
+					g_physState->m_cc_1_on = false;
+
+				else if (px_obj == g_physState->m_corner_case_2->GetCmp())
+					g_physState->m_cc_2_on = false;
+			}
+		}
+	}
+}
 
 void WrapAround::UpdateWraparound()
 {
