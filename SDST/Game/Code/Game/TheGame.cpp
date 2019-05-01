@@ -95,7 +95,7 @@ void TheGame::Update()
 	m_states->Update(m_deltaTime);
 
 	// Update rcs
-	g_rcs->Update(m_deltaTime);
+	//g_rcs->Update(m_deltaTime);
 }
 
 

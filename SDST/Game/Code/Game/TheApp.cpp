@@ -76,7 +76,7 @@ TheApp::TheApp()
 	RendererStartup();
 	InputSystemStartup();
 	AudioSystemStartup();
-	NetStartup();
+	//NetStartup();
 	StateStartup();
 	ProfilerStartup();
 	ConsoleStartup();
@@ -96,9 +96,9 @@ TheApp::~TheApp()
 	delete g_theGame;
 	g_theGame = nullptr;
 
-	// destroy rcs
-	RCS::DestroyInstance();
-	Net::Shutdown();
+	//// destroy rcs
+	//RCS::DestroyInstance();
+	//Net::Shutdown();
 
 	AudioSystem::DestroyInstance();
 
@@ -247,13 +247,13 @@ void TheApp::ProcessInput()
 //#endif
 //	}
 
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_1))
-	{
-		MathTest::RunMathTest();
-		TransformTest::RunTransformTest();
-		NetTest::RunNetTest();
-		RunDelegateTest();
-	}
+	//if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_1))
+	//{
+	//	MathTest::RunMathTest();
+	//	TransformTest::RunTransformTest();
+	//	NetTest::RunNetTest();
+	//	RunDelegateTest();
+	//}
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_M) && !IsProfilerOn())
 	{
