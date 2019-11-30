@@ -220,7 +220,7 @@ void Physics3State::Update(float deltaTime)
 	UpdateUI();
 	UpdateDelete();
 
-	g_theApp->PhysxUpdate(deltaTime);
+	//g_theApp->PhysxUpdate(deltaTime);
 }
 
 void Physics3State::UpdateMouse(float deltaTime)
@@ -341,6 +341,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 			primitive->GetRigidBody()->SetSlow(1.f);
 	}
 
+	/*
 	// physx stack
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_MINUS))
 		g_theApp->SpawnPhysxStack(Vector3(100.f, 342.5f, 45.f), 5, 5);
@@ -351,6 +352,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 			g_theApp->m_physx_stack[i]->SetShouldDelete(true);
 		g_theApp->m_physx_stack.clear();
 	}
+	*/
 
 	// anchor rigid spring
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_1))
@@ -370,6 +372,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		m_my_stack.clear();
 	}
 
+	/*
 	// physx corner case demo
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_NUMPAD_0))
 	{
@@ -425,7 +428,9 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		if (obj_pair.second != nullptr)
 			m_wraparound_demo_1->m_phys_obj.push_back(obj_pair.second);
 	}
+	*/
 
+	/*
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_1))
 	{
 		m_ff_test = true; m_fp_test = false; m_pp_test = false; m_ee_test = false; m_pe_test = false; m_fe_test = false;
@@ -461,6 +466,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		m_fe_test = true; m_pe_test = false; m_ee_test = false; m_pp_test = false; m_ff_test = false; m_fp_test = false; 
 		ResetCollisionCornerCase(CORNER_CASE_POS_FE_1, CORNER_CASE_POS_FE_2, CORNER_CASE_ORIENT_FE_1, CORNER_CASE_ORIENT_FE_2);
 	}
+	*/
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_TAB))
 	{
@@ -487,6 +493,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 		m_wraparound_plane->m_primitives.clear();
 	}
 
+	/*
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_I))
 	{
 		// to fire the corner case test, give opposite velocities
@@ -555,6 +562,7 @@ void Physics3State::UpdateKeyboard(float deltaTime)
 			g_theApp->m_corner_case_4->SetLinearVel(CORNER_CASE_LIN_VEL_PE_4);
 		}
 	}
+	*/
 
 	// ccd demo
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_L))
@@ -709,6 +717,7 @@ void Physics3State::UpdateUI()
 	delete m_ang_vel_1;
 	m_ang_vel_1 = nullptr;
 	// corner case 1 & 2
+	/*
 	if (m_corner_case_1)
 	{
 		if (m_cc_1_on)
@@ -734,12 +743,13 @@ void Physics3State::UpdateUI()
 			titleMin -= Vector2(0.f, m_txt_height);
 		}
 	}
-
+	*/
 
 	delete m_lin_vel_2;
 	m_lin_vel_2 = nullptr;
 	delete m_ang_vel_2;
 	m_ang_vel_2 = nullptr;
+	/*
 	if (m_corner_case_2)
 	{
 		if (m_cc_2_on)
@@ -765,11 +775,13 @@ void Physics3State::UpdateUI()
 			titleMin -= Vector2(0.f, m_txt_height);
 		}
 	}
+	*/
 
 	delete m_lin_vel_3;
 	m_lin_vel_3 = nullptr;
 	delete m_ang_vel_3;
 	m_ang_vel_3 = nullptr;
+	/*
 	if (g_theApp->m_corner_case_3)
 	{
 		Vector3 lin_vel_3 = g_theApp->m_corner_case_3->GetLinearVel();
@@ -792,11 +804,13 @@ void Physics3State::UpdateUI()
 		m_ang_vel_3 = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, m_txt_height, .5f, ang_vel_3_text, VERT_PCU);
 		titleMin -= Vector2(0.f, m_txt_height);
 	}
+	*/
 
 	delete m_lin_vel_4;
 	m_lin_vel_4 = nullptr;
 	delete m_ang_vel_4;
 	m_ang_vel_4 = nullptr;
+	/*
 	if (g_theApp->m_corner_case_4)
 	{
 		Vector3 lin_vel_4 = g_theApp->m_corner_case_4->GetLinearVel();
@@ -819,6 +833,7 @@ void Physics3State::UpdateUI()
 		m_ang_vel_4 = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, m_txt_height, .5f, ang_vel_4_text, VERT_PCU);
 		titleMin -= Vector2(0.f, m_txt_height);
 	}
+	*/
 
 	std::string sep_cmp = "==========COMPARISON==========";
 
@@ -836,6 +851,7 @@ void Physics3State::UpdateUI()
 	m_cmp_ang_vel_13_amt = nullptr;
 	delete m_cmp_ang_vel_13_dir;
 	m_cmp_ang_vel_13_dir = nullptr;
+	/*
 	if ((m_corner_case_1 && m_cc_1_on) && g_theApp->m_corner_case_3)
 	{
 		Vector3 lin_vel_1 = m_corner_case_1->GetCmp()->GetLinearVel();
@@ -878,6 +894,7 @@ void Physics3State::UpdateUI()
 		m_cmp_ang_vel_13_dir = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, m_txt_height, .5f, ang_vel_13_dir, VERT_PCU);
 		titleMin -= Vector2(0.f, m_txt_height);
 	}
+	*/
 
 	delete m_cmp_lin_vel_24_amt;
 	m_cmp_lin_vel_24_amt = nullptr;
@@ -887,6 +904,7 @@ void Physics3State::UpdateUI()
 	m_cmp_ang_vel_24_amt = nullptr;
 	delete m_cmp_ang_vel_24_dir;
 	m_cmp_ang_vel_24_dir = nullptr;
+	/*
 	if ((m_corner_case_2 && m_cc_2_on) && g_theApp->m_corner_case_4)
 	{
 		Vector3 lin_vel_2 = m_corner_case_2->GetCmp()->GetLinearVel();
@@ -929,6 +947,7 @@ void Physics3State::UpdateUI()
 		m_cmp_ang_vel_24_dir = Mesh::CreateTextImmediate(Rgba::WHITE, titleMin, font, m_txt_height, .5f, ang_vel_24_dir, VERT_PCU);
 		titleMin -= Vector2(0.f, m_txt_height);
 	}
+	*/
 }
 
 void Physics3State::UpdateDelete()
@@ -1210,7 +1229,7 @@ void Physics3State::Render(Renderer* renderer)
 
 	RenderWrapArounds(renderer);
 
-	g_theApp->PhysxRender(renderer);
+	//g_theApp->PhysxRender(renderer);
 }
 
 void Physics3State::RenderGameobjects(Renderer* renderer)
@@ -1571,6 +1590,7 @@ void Physics3State::ShootBox(WrapAround* wpa)
 	}
 }
 
+/*
 void Physics3State::ResetCollisionCornerCase(const Vector3& pos1, const Vector3& pos2, const Vector3& rot1, const Vector3& rot2)
 {
 	if (!m_corner_case_1 && !m_corner_case_2)
@@ -1611,7 +1631,9 @@ void Physics3State::ResetCollisionCornerCase(const Vector3& pos1, const Vector3&
 	m_cc_1_on = true;
 	m_cc_2_on = true;
 }
+*/
 
+/*
 std::pair<PhysXObject*, PhysXObject*> Physics3State::ResetCollisionCornerCasePhysX(const Vector3& pos1, const Vector3& pos2, const Vector3& rot1, const Vector3& rot2)
 {
 	std::pair<PhysXObject*, PhysXObject*> m_pair;
@@ -1647,3 +1669,4 @@ std::pair<PhysXObject*, PhysXObject*> Physics3State::ResetCollisionCornerCasePhy
 
 	return m_pair;
 }
+*/

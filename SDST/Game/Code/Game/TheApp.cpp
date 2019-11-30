@@ -20,9 +20,10 @@
 #include "Engine/Net/NetAddress.hpp"
 #include "Engine/Physics/3D/RF/PhysTime.hpp"
 
-std::vector<PxVec3> gContactPositions;
-std::vector<PxVec3> gContactImpulses;
+//std::vector<PxVec3> gContactPositions;
+//std::vector<PxVec3> gContactImpulses;
 
+/*
 class ContactReportCallback: public PxSimulationEventCallback
 {
 	void onConstraintBreak(PxConstraintInfo* constraints, PxU32 count)	{ PX_UNUSED(constraints); PX_UNUSED(count); }
@@ -52,7 +53,9 @@ class ContactReportCallback: public PxSimulationEventCallback
 		}
 	}
 };
+*/
 
+/*
 ContactReportCallback gContactReportCallback;
 
 PhysAllocator gAllocator;
@@ -70,6 +73,7 @@ PxMaterial*				gMaterial	= NULL;
 PxPvd*                  gPvd        = NULL;
 
 PxReal stackZ = 10.0f;
+*/
 
 TheApp::TheApp()
 {
@@ -82,7 +86,7 @@ TheApp::TheApp()
 	ProfilerStartup();
 	ConsoleStartup();
 	BlackboardStartup();
-	PhysxStartup();
+	//PhysxStartup();
 }
 
 TheApp::~TheApp()
@@ -110,7 +114,7 @@ TheApp::~TheApp()
 	delete g_masterClock;
 	g_masterClock = nullptr;
 
-	PhysxShutdown();
+	//PhysxShutdown();
 }
 
 
@@ -364,6 +368,7 @@ void TheApp::BlackboardStartup()
 	g_gameConfigBlackboard->PopulateFromXmlElementAttributes(*(gameConfigDoc.FirstChildElement()));
 }
 
+/*
 void TheApp::PhysxStartup()
 {
 	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
@@ -393,7 +398,9 @@ void TheApp::PhysxStartup()
 	gMaterial = gPhysics->createMaterial(.5f, .5f, .6f);
 	//gMaterialBackup = gPhysics->createMaterial(.4f, .4f, .5f);
 }
+*/
 
+/*
 void TheApp::PhysxShutdown()
 {
 	PX_UNUSED(true);
@@ -406,7 +413,9 @@ void TheApp::PhysxShutdown()
 
 	gFoundation->release();
 }
+*/
 
+/*
 void TheApp::SpawnPhysxStack(const Vector3& origin, uint sideLength, uint stackHeight)
 {
 	// plane
@@ -457,7 +466,9 @@ void TheApp::SpawnPhysxStack(const Vector3& origin, uint sideLength, uint stackH
 
 	shape->release();
 }
+*/
 
+/*
 void TheApp::PhysxUpdate(float dt)
 {
 	gContactPositions.clear();
@@ -471,7 +482,9 @@ void TheApp::PhysxUpdate(float dt)
 
 	PhysxUpdateDelete();
 }
+*/
 
+/*
 void TheApp::PhysxUpdateDelete()
 {
 	// stack vector has already been emptied, objs are already marked as deleted
@@ -520,7 +533,9 @@ void TheApp::PhysxUpdateDelete()
 		}
 	}
 }
+*/
 
+/*
 void TheApp::PhysxRender(Renderer* rdr)
 {
 	for (int i = 0; i < m_physx_objs.size(); ++i)
@@ -532,7 +547,9 @@ void TheApp::PhysxRender(Renderer* rdr)
 			p_obj->RenderActor(rdr);
 	}
 }
+*/
 
+/*
 PhysXObject* TheApp::SpawnPhysxBox(const Vector3& pos)
 {
 	PxVec3 pxp = PxVec3(pos.x, pos.y, pos.z);
@@ -558,7 +575,9 @@ PhysXObject* TheApp::SpawnPhysxBox(const Vector3& pos)
 	shape->release();
 	return px_obj;
 }
+*/
 
+/*
 PhysXObject* TheApp::SpawnPhysxBox(const Vector3& pos,
 	float stat_friction, float dyn_friction, float rest)
 {
@@ -591,3 +610,4 @@ PhysXObject* TheApp::SpawnPhysxBox(const Vector3& pos,
 
 	return px_obj;
 }
+*/

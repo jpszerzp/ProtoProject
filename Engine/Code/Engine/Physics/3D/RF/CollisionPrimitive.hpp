@@ -69,7 +69,7 @@ public:
 	void SetContinuity(eCCD val) { m_ccd = val; }
 	virtual void SetPhysTest(){}
 	virtual void SetRigidBodyPosition(const Vector3&){}		// ...need to consider scale in general case when this is implemented 
-	PhysXObject* m_cmp = nullptr;
+	//PhysXObject* m_cmp = nullptr;
 
 	virtual void Update(float deltaTime);
 	virtual void Render(Renderer* renderer);
@@ -87,7 +87,7 @@ public:
 	bool IsFrozen() const { return m_rigid_body->IsFrozen(); }
 	eCCD GetContinuity() const { return m_ccd; }
 	Vector3 GetNextFrameTeleport() const { return m_ccd_teleport; }
-	PhysXObject* GetCmp() { return m_cmp; }
+	//PhysXObject* GetCmp() { return m_cmp; }
 
 	Vector3 GetPrimitiveRight() const;
 	Vector3 GetPrimitiveUp() const;

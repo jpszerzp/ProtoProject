@@ -1,3 +1,4 @@
+/*
 #include "Engine/Physics/3D/PHYSX/PhysXObject.hpp"
 
 #define MAX_NUM_ACTOR_SHAPES_OBJ 128
@@ -205,3 +206,4 @@ void PhysXObject::DisableGravity()
 {
 	m_ra->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, true);
 }
+*/

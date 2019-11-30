@@ -373,9 +373,9 @@ void CollisionBox::SetPhysTest()
 	float dyn_friction = .8f;
 	float rest = .55f;
 
-	m_cmp = g_gameConfigBlackboard->app_h->SpawnPhysxBox(Vector3::ZERO, stat_friction, dyn_friction, rest);
-	m_cmp->SetDirected(true);
-	m_cmp->DisableGravity();
+	//m_cmp = g_gameConfigBlackboard->app_h->SpawnPhysxBox(Vector3::ZERO, stat_friction, dyn_friction, rest);
+	//m_cmp->SetDirected(true);
+	//m_cmp->DisableGravity();
 }
 
 CollisionPlane::CollisionPlane(const Vector2& bound, const Vector3& normal, const float& offset, const std::string& fp, const std::string& tx)

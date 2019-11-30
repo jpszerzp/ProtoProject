@@ -90,10 +90,10 @@ public:
 	void ShootSphere(WrapAround* wpa);
 	void ShootBox(WrapAround* wpa);
 
-	void ResetCollisionCornerCase(const Vector3& pos1, const Vector3& pos2,
-		const Vector3& rot1, const Vector3& rot2);
-	std::pair<PhysXObject*, PhysXObject*> ResetCollisionCornerCasePhysX(const Vector3& pos1, 
-		const Vector3& pos2, const Vector3& rot1, const Vector3& rot2);
+	//void ResetCollisionCornerCase(const Vector3& pos1, const Vector3& pos2,
+	//	const Vector3& rot1, const Vector3& rot2);
+	//std::pair<PhysXObject*, PhysXObject*> ResetCollisionCornerCasePhysX(const Vector3& pos1, 
+	//	const Vector3& pos2, const Vector3& rot1, const Vector3& rot2);
 
 public:
 	const static uint MAX_CONTACT_NUM = 256;

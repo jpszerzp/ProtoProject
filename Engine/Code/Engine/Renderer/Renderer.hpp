@@ -19,8 +19,8 @@
 #include "Engine/Core/Rgba.hpp"
 #include "Engine/Core/Vertex.hpp"
 
-#include "PxPhysicsAPI.h"
-using namespace physx;
+//#include "PxPhysicsAPI.h"
+//using namespace physx;
 
 #include <string>
 #include <map>
@@ -326,7 +326,7 @@ public:
 	void SetStencilMask(GLuint mask);
 
 	// physx
-	void RenderPhysxGeometry(const std::string& mn, const std::string sn, const std::string tn, const PxMat44& mm);
+	//void RenderPhysxGeometry(const std::string& mn, const std::string sn, const std::string tn, const PxMat44& mm);
 
 	void SetPointSize(float size);
 

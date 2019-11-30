@@ -26,7 +26,7 @@ public:
 	int m_pos_idx = 0;
 
 	std::vector<CollisionPrimitive*> m_primitives;
-	std::vector<PhysXObject*> m_phys_obj;
+	//std::vector<PhysXObject*> m_phys_obj;
 
 	Physics3State* m_physState = nullptr;
 	
@@ -46,5 +46,5 @@ public:
 	void RenderWraparounds(Renderer* renderer);
 
 	void RemovePrimitive(CollisionPrimitive* prim);
-	void RemovePhysXObj(PhysXObject* px);
+	//void RemovePhysXObj(PhysXObject* px);
 };

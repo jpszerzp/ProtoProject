@@ -1,3 +1,4 @@
+/*
 #pragma once
 
 #include "PxPhysicsAPI.h"
@@ -21,3 +22,4 @@ public:
 		::free(ptr);
 	}
 };
+*/

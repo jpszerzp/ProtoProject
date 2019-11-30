@@ -1500,31 +1500,31 @@ void Renderer::SetStencilMask(GLuint mask)
 	glStencilMask(mask);
 }
 
-void Renderer::RenderPhysxGeometry(const std::string& mn, const std::string sn, const std::string tn, const PxMat44& mm)
-{
-	Mesh* mesh = CreateOrGetMesh(mn);
-	Shader* shader = CreateOrGetShader(sn);
-	Texture* tex = CreateOrGetTexture(tn);
-
-	if (mesh)
-	{
-		UseShader(shader);
-		SetTexture2D(0, tex);
-		SetSampler2D(0, tex->GetSampler());
-	}
-
-	// color
-	Vector4 tintV4;
-	Rgba tint = Rgba::WHITE;
-	tint.GetAsFloats(tintV4.x, tintV4.y, tintV4.z, tintV4.w);
-	m_colorData.rgba = tintV4;
-
-	// matrix
-	m_objectData.model = mm;
-
-	// draw
-	DrawMesh(mesh);
-}
+//void Renderer::RenderPhysxGeometry(const std::string& mn, const std::string sn, const std::string tn, const PxMat44& mm)
+//{
+//	Mesh* mesh = CreateOrGetMesh(mn);
+//	Shader* shader = CreateOrGetShader(sn);
+//	Texture* tex = CreateOrGetTexture(tn);
+//
+//	if (mesh)
+//	{
+//		UseShader(shader);
+//		SetTexture2D(0, tex);
+//		SetSampler2D(0, tex->GetSampler());
+//	}
+//
+//	// color
+//	Vector4 tintV4;
+//	Rgba tint = Rgba::WHITE;
+//	tint.GetAsFloats(tintV4.x, tintV4.y, tintV4.z, tintV4.w);
+//	m_colorData.rgba = tintV4;
+//
+//	// matrix
+//	m_objectData.model = mm;
+//
+//	// draw
+//	DrawMesh(mesh);
+//}
 
 void Renderer::SetPointSize(float size)
 {

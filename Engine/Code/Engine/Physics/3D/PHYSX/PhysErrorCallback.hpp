@@ -1,3 +1,4 @@
+/*
 #pragma once
 
 #include "Engine/Core/ErrorWarningAssert.hpp"
@@ -25,3 +26,4 @@ public:
 		DebuggerPrintf(err_str.c_str());
 	}
 };
+*/

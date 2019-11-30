@@ -6,9 +6,9 @@
 #include "Engine/Audio/AudioSystem.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/Net/Socket.hpp"
-#include "Engine/Physics/3D/PHYSX/PhysErrorCallback.hpp"
-#include "Engine/Physics/3D/PHYSX/PhysAllocator.hpp"
-#include "Engine/Physics/3D/PHYSX/PhysXObject.hpp"
+//#include "Engine/Physics/3D/PHYSX/PhysErrorCallback.hpp"
+//#include "Engine/Physics/3D/PHYSX/PhysAllocator.hpp"
+//#include "Engine/Physics/3D/PHYSX/PhysXObject.hpp"
 
 class TheApp
 {
@@ -21,11 +21,11 @@ class TheApp
 	int m_frames;
 
 public:
-	std::vector<PhysXObject*> m_physx_objs;
-	std::vector<PhysXObject*> m_physx_stack;
+	//std::vector<PhysXObject*> m_physx_objs;
+	//std::vector<PhysXObject*> m_physx_stack;
 
-	PhysXObject* m_corner_case_3 = nullptr;
-	PhysXObject* m_corner_case_4 = nullptr;
+	//PhysXObject* m_corner_case_3 = nullptr;
+	//PhysXObject* m_corner_case_4 = nullptr;
 
 public:
 	TheApp();
@@ -65,14 +65,14 @@ public:
 	void BlackboardStartup();
 
 	// physx
-	void PhysxStartup();
-	void PhysxShutdown();
-	void SpawnPhysxStack(const Vector3& origin, uint sideLength, uint stackHeight);
-	void PhysxUpdate(float dt);
-	void PhysxUpdateDelete();
-	void PhysxRender(Renderer* rdr);
-	PhysXObject* SpawnPhysxBox(const Vector3& pos);
-	PhysXObject* SpawnPhysxBox(const Vector3& pos, float stat_friction, float dyn_friction, float rest);
+	//void PhysxStartup();
+	//void PhysxShutdown();
+	//void SpawnPhysxStack(const Vector3& origin, uint sideLength, uint stackHeight);
+	//void PhysxUpdate(float dt);
+	//void PhysxUpdateDelete();
+	//void PhysxRender(Renderer* rdr);
+	//PhysXObject* SpawnPhysxBox(const Vector3& pos);
+	//PhysXObject* SpawnPhysxBox(const Vector3& pos, float stat_friction, float dyn_friction, float rest);
 };
 
 extern TheApp* g_theApp;
