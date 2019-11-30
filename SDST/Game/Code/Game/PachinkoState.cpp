@@ -126,6 +126,7 @@ void PachinkoState::UpdateKeyboard(float)
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_B))
 	{
+		// boost velocity
 		for each (DiscEntity* se in m_dynamicDiscs)
 		{
 			se->m_velocity *= 2.f;
@@ -295,7 +296,7 @@ void PachinkoState::Render(Renderer* renderer)
 
 void PachinkoState::DrawImmediateTitles(Mesh* mesh)
 {
-	if ( mesh != nullptr )
+	if (mesh != nullptr)
 	{
 		Renderer* renderer = Renderer::GetInstance();
 		Shader* shader = renderer->CreateOrGetShader("cutout_nonmodel");

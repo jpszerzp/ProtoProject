@@ -100,6 +100,9 @@
     <ClCompile Include="ControlState3.cpp">
       <Filter>General</Filter>
     </ClCompile>
+    <ClCompile Include="AIPrototype2D.cpp">
+      <Filter>General\States</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameCommon.hpp">
@@ -168,6 +171,9 @@
       <Filter>General\States\Gallery</Filter>
     </ClInclude>
     <ClInclude Include="ControlState3.hpp" />
+    <ClInclude Include="AIPrototype2D.hpp">
+      <Filter>General\States</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="..\..\Run_Win32\Data\Definitions\IsoSprite.xml" />

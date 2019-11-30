@@ -13,7 +13,6 @@
 #include "Engine/Renderer/DebugRenderer.hpp"
 #include "Engine/Net/Socket.hpp"
 
-
 TheGame::TheGame()
 {
 	InitializeClock();
@@ -25,7 +24,6 @@ TheGame::TheGame()
 	//ProfilerSystemInitialize();
 }
 
-
 TheGame::~TheGame()
 {
 	DebugRenderShutdown();
@@ -34,7 +32,6 @@ TheGame::~TheGame()
 	delete m_states;
 	m_states = nullptr;
 }
-
 
 void TheGame::UseGameState(GameState* state)
 {
@@ -51,7 +48,6 @@ void TheGame::UseDefaultState()
 	m_states->SetStateIndex(0);
 }
 
-
 void TheGame::UseDefaultState(GameState* defaultState)
 {
 	m_states->SetDefaultState(defaultState);
@@ -63,18 +59,15 @@ void TheGame::InitializeGeneralGameData()
 	m_developerMode = false;
 }
 
-
 void TheGame::InitializeBitMapFont()
 {
 	g_renderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
 }
 
-
 void TheGame::InitializeTextures()
 {
 
 }
-
 
 void TheGame::InitializeClock()
 {
@@ -87,7 +80,6 @@ void TheGame::InitializeClock()
 	m_deltaTime = 0.f;
 }
 
-
 void TheGame::Update()
 {
 	//UpdateTime();
@@ -98,13 +90,11 @@ void TheGame::Update()
 	//g_rcs->Update(m_deltaTime);
 }
 
-
 void TheGame::UpdateTime()
 {
 	//PassTimeToRenderer();
 	//m_deltaTime = m_clock->frame.seconds;
 }
-
 
 void TheGame::PassTimeToRenderer()
 {

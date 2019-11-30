@@ -910,12 +910,12 @@ void Contact3::ResolveVelocity(float deltaTime)
 		e2_acc = m_e2->GetLinearAcceleration();
 	Vector3 rel_acc = e1_acc - e2_acc;
 	float rel_vel = DotProduct(rel_acc, m_normal) * deltaTime;
-	// If we’ve got a closing velocity due to acceleration build-up,
+	// If weï¿½ve got a closing velocity due to acceleration build-up,
 	// remove it from the new separating velocity.
 	if (rel_vel < 0.f)
 	{
 		new_separate += m_restitution * rel_vel;
-		// Make sure we haven’t removed more than was there to remove.
+		// Make sure we havenï¿½t removed more than was there to remove.
 		if (new_separate < 0) 
 			new_separate = 0;
 	}
@@ -954,7 +954,7 @@ void Contact3::ResolveVelocity(float deltaTime)
 
 void Contact3::ResolvePenetration(float)
 {
-	// If we don’t have any penetration, skip this step.
+	// If we donï¿½t have any penetration, skip this step.
 	if (m_penetration <= 0) 
 		return;
 	// The movement of each object is based on its inverse mass, so

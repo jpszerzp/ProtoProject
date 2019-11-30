@@ -3,6 +3,7 @@
 #include "Game/Physics3State.hpp"
 #include "Game/Collision3State.hpp"
 #include "Game/ControlState3.hpp"
+#include "Game/AIPrototype2D.hpp"
 #include "Game/TransformTest.hpp"
 #include "Game/MathTest.hpp"
 #include "Game/DelegateTest.hpp"
@@ -318,19 +319,25 @@ void TheApp::NetStartup()
 
 void TheApp::StateStartup()
 {
+	// some states
 	Physics3State* phys3 = new Physics3State();
 	g_physState = phys3;
 	phys3->PostConstruct();
 	
 	ControlState3* control = new ControlState3();
+
+	AIPrototypeState* AIPropState = new AIPrototypeState();
+	
+	// the game-wise state machine
 	StateMachine* states = new StateMachine();
 
 	states->AppendState(phys3);
 	states->AppendState(control);
+	states->AppendState(AIPropState);
 
 	g_theGame = new TheGame();
 	g_theGame->SetStateMachine(states);
-	g_theGame->UseDefaultState();			// set default state as state at index 0 
+	g_theGame->UseDefaultState(AIPropState);
 	g_theGame->UseGameState(nullptr);
 }
 

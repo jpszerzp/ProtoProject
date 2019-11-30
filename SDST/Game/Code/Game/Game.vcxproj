@@ -306,6 +306,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AIPrototype2D.cpp" />
     <ClCompile Include="Ballistics.cpp" />
     <ClCompile Include="CameraAnchor.cpp" />
     <ClCompile Include="Collision3State.cpp" />
@@ -344,6 +345,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AIPrototype2D.hpp" />
     <ClInclude Include="Ballistics.hpp" />
     <ClInclude Include="CameraAnchor.hpp" />
     <ClInclude Include="Collision3State.hpp" />
