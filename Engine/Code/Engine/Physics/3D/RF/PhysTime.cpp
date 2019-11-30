@@ -39,7 +39,6 @@ unsigned long PhysTimeSystem::GetClock()
 
 float PhysTimeSystem::GetTimeSeconds()
 {
-	
 	return (float)(theTime->m_frame_stamp * .001f);
 }
 
