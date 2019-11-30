@@ -117,13 +117,11 @@ TheApp::~TheApp()
 	//PhysxShutdown();
 }
 
-
 void TheApp::SetInstantFPS()
 {
 	float theFps = 1.f / m_deltaSeconds;
 	g_theGame->SetFPS(theFps);
 }
-
 
 void TheApp::SetDelayedFPS()
 {
@@ -138,7 +136,6 @@ void TheApp::SetDelayedFPS()
 		m_frames = 0;
 	}
 }
-
 
 void TheApp::Update()
 {
@@ -163,7 +160,6 @@ void TheApp::Update()
 	profiler->Update();
 }
 
-
 void TheApp::UpdateTime()
 {
 	//m_deltaSeconds = g_masterClock->frame.seconds;
@@ -178,7 +174,6 @@ void TheApp::UpdateTime()
 	g_theGame->SetDeltaTime(m_deltaSeconds);
 }
 
-
 void TheApp::Render()
 {
 	g_theGame->Render(g_renderer);
@@ -190,7 +185,6 @@ void TheApp::Render()
 	Profiler* profiler = Profiler::GetInstance();
 	profiler->Render(g_renderer);
 }
-
 
 void TheApp::RunFrame()
 {
@@ -213,12 +207,10 @@ void TheApp::RunFrame()
 	//::SwitchToThread();
 }
 
-
 void TheApp::OnQuitRequested()
 {
 	m_isQuitting = true;
 }
-
 
 void TheApp::ProcessInput()
 {
