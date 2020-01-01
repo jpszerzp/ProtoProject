@@ -2,8 +2,6 @@
 
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Renderer/IsoSprite.hpp"
-#include "Engine/Animation/IsoAnim.hpp"
-#include "Engine/Animation/IsoAnimation.hpp"
 #include "Engine/Net/RemoteCommandService.hpp"
 #include "Game/ProtoState.hpp"
 #include "Game/PachinkoState.hpp"

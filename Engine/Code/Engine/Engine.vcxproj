@@ -398,8 +398,6 @@
     <ClCompile Include="Renderer\FrameBuffer.cpp" />
     <ClCompile Include="Renderer\GLFunctions.cpp" />
     <ClCompile Include="Renderer\InputLayout.cpp" />
-    <ClCompile Include="Animation\IsoAnim.cpp" />
-    <ClCompile Include="Animation\IsoAnimation.cpp" />
     <ClCompile Include="Renderer\IsoSprite.cpp" />
     <ClCompile Include="Renderer\Material.cpp" />
     <ClCompile Include="Renderer\MaterialProperty.cpp" />
@@ -415,11 +413,6 @@
     <ClCompile Include="Renderer\ShaderProgram.cpp" />
     <ClCompile Include="Renderer\ShaderProperties.cpp" />
     <ClCompile Include="Renderer\Sprite.cpp" />
-    <ClCompile Include="Animation\SpriteAnim.cpp" />
-    <ClCompile Include="Animation\SpriteAnimation.cpp" />
-    <ClCompile Include="Animation\SpriteAnimDef.cpp" />
-    <ClCompile Include="Animation\SpriteAnimSet.cpp" />
-    <ClCompile Include="Animation\SpriteAnimSetDef.cpp" />
     <ClCompile Include="Renderer\SpriteSheet.cpp" />
     <ClCompile Include="Renderer\Submesh.cpp" />
     <ClCompile Include="Renderer\Texture.cpp" />
@@ -582,8 +575,6 @@
     <ClInclude Include="Renderer\FrameBuffer.hpp" />
     <ClInclude Include="Renderer\GLFunctions.hpp" />
     <ClInclude Include="Renderer\InputLayout.hpp" />
-    <ClInclude Include="Animation\IsoAnim.hpp" />
-    <ClInclude Include="Animation\IsoAnimation.hpp" />
     <ClInclude Include="Renderer\IsoSprite.hpp" />
     <ClInclude Include="Renderer\Material.hpp" />
     <ClInclude Include="Renderer\MaterialProperty.hpp" />
@@ -599,11 +590,6 @@
     <ClInclude Include="Renderer\ShaderProgram.hpp" />
     <ClInclude Include="Renderer\ShaderProperties.hpp" />
     <ClInclude Include="Renderer\Sprite.hpp" />
-    <ClInclude Include="Animation\SpriteAnim.hpp" />
-    <ClInclude Include="Animation\SpriteAnimation.hpp" />
-    <ClInclude Include="Animation\SpriteAnimDef.hpp" />
-    <ClInclude Include="Animation\SpriteAnimSet.hpp" />
-    <ClInclude Include="Animation\SpriteAnimSetDef.hpp" />
     <ClInclude Include="Renderer\SpriteSheet.hpp" />
     <ClInclude Include="Renderer\Submesh.hpp" />
     <ClInclude Include="Renderer\Texture.hpp" />
