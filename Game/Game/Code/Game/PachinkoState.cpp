@@ -52,17 +52,6 @@ PachinkoState::PachinkoState()
 	m_physicsScene->AddDiscPhysicsEntity(m_d1);
 	m_d1->m_scene = m_physicsScene;
 
-	/*
-	// const obb
-	Vector2 obbCenter = Vector2(1.5f * width / 4.f, -height / 4.f);
-	float obbRotation = 45.f;
-	Vector2 obbScale = Vector2(256.f, 32.f);
-	OBB2 obb = OBB2(obbCenter, obbRotation, obbScale);
-	RectangleEntity* r0 = new RectangleEntity(obb, true);
-	m_physicsScene->AddRectanglePhysicsEntity(r0);
-	r0->m_scene = m_physicsScene;
-	*/
-
 	Vector2 titleTextMin = Vector2(-width / 2.f, height / 2.f - 32.f);
 	float titleHeight = height / 50.f;
 	Rgba titleTextTint = Rgba::WHITE;

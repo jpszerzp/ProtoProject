@@ -8,18 +8,6 @@
     <Filter Include="General\States">
       <UniqueIdentifier>{8db46a50-e7d7-4bd0-afaa-5d11e8aca3f0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="General\Units">
-      <UniqueIdentifier>{e22851ee-24a2-4429-a830-f7957b66cd8b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="General\States\Game">
-      <UniqueIdentifier>{378a528b-fc78-42c1-a1f8-f76d058aea6f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="General\States\Physics3">
-      <UniqueIdentifier>{029c33a6-9fee-4f67-8b17-a718f344d40c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="General\States\Gallery">
-      <UniqueIdentifier>{7386ca9b-1cf2-48da-bc4f-f505082d2884}</UniqueIdentifier>
-    </Filter>
     <Filter Include="General\States\Physics2">
       <UniqueIdentifier>{a3ea2afa-b4c7-41fc-a44c-e21784afef25}</UniqueIdentifier>
     </Filter>
@@ -43,17 +31,8 @@
     <ClCompile Include="GameState.cpp">
       <Filter>General\States</Filter>
     </ClCompile>
-    <ClCompile Include="Skybox.cpp">
-      <Filter>General</Filter>
-    </ClCompile>
     <ClCompile Include="CameraAnchor.cpp">
       <Filter>General</Filter>
-    </ClCompile>
-    <ClCompile Include="Ship.cpp">
-      <Filter>General\Units</Filter>
-    </ClCompile>
-    <ClCompile Include="ProtoState.cpp">
-      <Filter>General\States\Gallery</Filter>
     </ClCompile>
     <ClCompile Include="PachinkoState.cpp">
       <Filter>General\States\Physics2</Filter>
@@ -64,38 +43,11 @@
     <ClCompile Include="MathTest.cpp">
       <Filter>General\Test</Filter>
     </ClCompile>
-    <ClCompile Include="Physics3State.cpp">
-      <Filter>General\States\Physics3</Filter>
-    </ClCompile>
     <ClCompile Include="DelegateTest.cpp">
       <Filter>General\Test</Filter>
     </ClCompile>
     <ClCompile Include="TransformTest.cpp">
       <Filter>General\Test</Filter>
-    </ClCompile>
-    <ClCompile Include="Ballistics.cpp">
-      <Filter>General\Units</Filter>
-    </ClCompile>
-    <ClCompile Include="Fireworks.cpp">
-      <Filter>General\Units</Filter>
-    </ClCompile>
-    <ClCompile Include="Spring.cpp">
-      <Filter>General\Units</Filter>
-    </ClCompile>
-    <ClCompile Include="Links.cpp">
-      <Filter>General\Units</Filter>
-    </ClCompile>
-    <ClCompile Include="WrapAround3.cpp">
-      <Filter>General</Filter>
-    </ClCompile>
-    <ClCompile Include="ControlGroup.cpp">
-      <Filter>General</Filter>
-    </ClCompile>
-    <ClCompile Include="Collision3State.cpp">
-      <Filter>General\States\Gallery</Filter>
-    </ClCompile>
-    <ClCompile Include="ControlState3.cpp">
-      <Filter>General</Filter>
     </ClCompile>
     <ClCompile Include="AIPrototype2D.cpp">
       <Filter>General\States</Filter>
@@ -103,9 +55,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameCommon.hpp">
-      <Filter>General</Filter>
-    </ClInclude>
-    <ClInclude Include="EngineBuildPreferences.hpp">
       <Filter>General</Filter>
     </ClInclude>
     <ClInclude Include="TheApp.hpp">
@@ -117,17 +66,8 @@
     <ClInclude Include="GameState.hpp">
       <Filter>General\States</Filter>
     </ClInclude>
-    <ClInclude Include="Skybox.hpp">
-      <Filter>General</Filter>
-    </ClInclude>
     <ClInclude Include="CameraAnchor.hpp">
       <Filter>General</Filter>
-    </ClInclude>
-    <ClInclude Include="Ship.hpp">
-      <Filter>General\Units</Filter>
-    </ClInclude>
-    <ClInclude Include="ProtoState.hpp">
-      <Filter>General\States\Gallery</Filter>
     </ClInclude>
     <ClInclude Include="PachinkoState.hpp">
       <Filter>General\States\Physics2</Filter>
@@ -138,40 +78,14 @@
     <ClInclude Include="MathTest.hpp">
       <Filter>General\Test</Filter>
     </ClInclude>
-    <ClInclude Include="Physics3State.hpp">
-      <Filter>General\States\Physics3</Filter>
-    </ClInclude>
     <ClInclude Include="DelegateTest.hpp">
       <Filter>General\Test</Filter>
     </ClInclude>
     <ClInclude Include="TransformTest.hpp">
       <Filter>General\Test</Filter>
     </ClInclude>
-    <ClInclude Include="Ballistics.hpp">
-      <Filter>General\Units</Filter>
-    </ClInclude>
-    <ClInclude Include="Fireworks.hpp">
-      <Filter>General\Units</Filter>
-    </ClInclude>
-    <ClInclude Include="Spring.hpp">
-      <Filter>General\Units</Filter>
-    </ClInclude>
-    <ClInclude Include="Links.hpp">
-      <Filter>General\Units</Filter>
-    </ClInclude>
-    <ClInclude Include="WrapAround3.hpp" />
-    <ClInclude Include="ControlGroup.hpp" />
-    <ClInclude Include="Collision3State.hpp">
-      <Filter>General\States\Gallery</Filter>
-    </ClInclude>
-    <ClInclude Include="ControlState3.hpp" />
     <ClInclude Include="AIPrototype2D.hpp">
       <Filter>General\States</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Xml Include="..\..\Run_Win32\Data\Definitions\IsoSprite.xml" />
-    <Xml Include="..\..\Run_Win32\Data\Definitions\IsoAnims.xml" />
-    <Xml Include="..\..\Run_Win32\Data\Definitions\SpriteSheet.xml" />
   </ItemGroup>
 </Project>

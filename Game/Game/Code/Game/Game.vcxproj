@@ -307,16 +307,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AIPrototype2D.cpp" />
-    <ClCompile Include="Ballistics.cpp" />
     <ClCompile Include="CameraAnchor.cpp" />
-    <ClCompile Include="Collision3State.cpp" />
-    <ClCompile Include="ControlGroup.cpp" />
-    <ClCompile Include="ControlState3.cpp" />
     <ClCompile Include="DelegateTest.cpp" />
-    <ClCompile Include="Fireworks.cpp" />
     <ClCompile Include="GameCommon.cpp" />
     <ClCompile Include="GameState.cpp" />
-    <ClCompile Include="Links.cpp" />
     <ClCompile Include="Main_Win32.cpp">
       <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ShowIncludes>
       <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='DebugInline|Win32'">false</ShowIncludes>
@@ -327,16 +321,10 @@
     </ClCompile>
     <ClCompile Include="MathTest.cpp" />
     <ClCompile Include="PachinkoState.cpp" />
-    <ClCompile Include="Physics3State.cpp" />
-    <ClCompile Include="ProtoState.cpp" />
-    <ClCompile Include="Ship.cpp" />
-    <ClCompile Include="Skybox.cpp" />
-    <ClCompile Include="Spring.cpp" />
     <ClCompile Include="StateMachine.cpp" />
     <ClCompile Include="TheApp.cpp" />
     <ClCompile Include="TheGame.cpp" />
     <ClCompile Include="TransformTest.cpp" />
-    <ClCompile Include="WrapAround3.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Engine\Code\Engine\Engine.vcxproj">
@@ -345,40 +333,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AIPrototype2D.hpp" />
-    <ClInclude Include="Ballistics.hpp" />
     <ClInclude Include="CameraAnchor.hpp" />
-    <ClInclude Include="Collision3State.hpp" />
-    <ClInclude Include="ControlGroup.hpp" />
-    <ClInclude Include="ControlState3.hpp" />
     <ClInclude Include="DelegateTest.hpp" />
-    <ClInclude Include="EngineBuildPreferences.hpp" />
-    <ClInclude Include="Fireworks.hpp" />
     <ClInclude Include="GameCommon.hpp" />
     <ClInclude Include="GameState.hpp" />
-    <ClInclude Include="Links.hpp" />
     <ClInclude Include="MathTest.hpp" />
     <ClInclude Include="PachinkoState.hpp" />
-    <ClInclude Include="Physics3State.hpp" />
-    <ClInclude Include="ProtoState.hpp" />
-    <ClInclude Include="Ship.hpp" />
-    <ClInclude Include="Skybox.hpp" />
-    <ClInclude Include="Spring.hpp" />
     <ClInclude Include="StateMachine.hpp" />
     <ClInclude Include="TheApp.hpp" />
     <ClInclude Include="TheGame.hpp" />
     <ClInclude Include="TransformTest.hpp" />
-    <ClInclude Include="WrapAround3.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Xml Include="..\..\Run_Win32\Data\Definitions\IsoAnims.xml">
-      <SubType>Designer</SubType>
-    </Xml>
-    <Xml Include="..\..\Run_Win32\Data\Definitions\IsoSprite.xml">
-      <SubType>Designer</SubType>
-    </Xml>
-    <Xml Include="..\..\Run_Win32\Data\Definitions\SpriteSheet.xml">
-      <SubType>Designer</SubType>
-    </Xml>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

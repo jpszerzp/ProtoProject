@@ -57,7 +57,6 @@ public:
 	void RendererStartup();
 	void InputSystemStartup();
 	void AudioSystemStartup();
-	void NetStartup();
 	void StateStartup();
 	void ProfilerStartup();
 	void ConsoleStartup();

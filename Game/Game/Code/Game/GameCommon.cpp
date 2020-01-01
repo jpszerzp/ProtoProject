@@ -3,7 +3,6 @@
 Renderer* g_renderer = nullptr;
 InputSystem* g_input = nullptr;
 TheGame* g_theGame = nullptr;
-Physics3State* g_physState = nullptr;
 AudioSystem* g_audio = nullptr;
 
 SpriteSheet* g_atlas = nullptr;

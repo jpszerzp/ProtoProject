@@ -2,8 +2,6 @@
 
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Renderer/IsoSprite.hpp"
-#include "Game/ProtoState.hpp"
-#include "Game/PachinkoState.hpp"
 #include "Game/GameState.hpp"
 #include "Game/StateMachine.hpp"
 
