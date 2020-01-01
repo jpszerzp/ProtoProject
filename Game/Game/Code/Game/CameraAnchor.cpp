@@ -7,7 +7,7 @@
 
 CameraAnchor::CameraAnchor()
 {
-
+ 
 }
 
 
