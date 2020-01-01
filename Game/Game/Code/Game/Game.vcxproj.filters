@@ -1,91 +1,76 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="General">
+    <Filter Include="Source">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="General\States">
-      <UniqueIdentifier>{8db46a50-e7d7-4bd0-afaa-5d11e8aca3f0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="General\States\Physics2">
-      <UniqueIdentifier>{a3ea2afa-b4c7-41fc-a44c-e21784afef25}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="General\Test">
-      <UniqueIdentifier>{126fdeef-4c28-43f2-b37b-e7ec6f95d594}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main_Win32.cpp">
-      <Filter>General</Filter>
+      <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="GameCommon.cpp">
-      <Filter>General</Filter>
+      <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="TheApp.cpp">
-      <Filter>General</Filter>
+      <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="TheGame.cpp">
-      <Filter>General</Filter>
-    </ClCompile>
-    <ClCompile Include="GameState.cpp">
-      <Filter>General\States</Filter>
-    </ClCompile>
-    <ClCompile Include="CameraAnchor.cpp">
-      <Filter>General</Filter>
-    </ClCompile>
-    <ClCompile Include="PachinkoState.cpp">
-      <Filter>General\States\Physics2</Filter>
-    </ClCompile>
-    <ClCompile Include="StateMachine.cpp">
-      <Filter>General\States</Filter>
-    </ClCompile>
-    <ClCompile Include="MathTest.cpp">
-      <Filter>General\Test</Filter>
-    </ClCompile>
-    <ClCompile Include="DelegateTest.cpp">
-      <Filter>General\Test</Filter>
-    </ClCompile>
-    <ClCompile Include="TransformTest.cpp">
-      <Filter>General\Test</Filter>
+      <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="AIPrototype2D.cpp">
-      <Filter>General\States</Filter>
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="GameState.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="PachinkoState.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="StateMachine.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="DelegateTest.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="MathTest.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="TransformTest.cpp">
+      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameCommon.hpp">
-      <Filter>General</Filter>
+      <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="TheApp.hpp">
-      <Filter>General</Filter>
+      <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="TheGame.hpp">
-      <Filter>General</Filter>
-    </ClInclude>
-    <ClInclude Include="GameState.hpp">
-      <Filter>General\States</Filter>
-    </ClInclude>
-    <ClInclude Include="CameraAnchor.hpp">
-      <Filter>General</Filter>
-    </ClInclude>
-    <ClInclude Include="PachinkoState.hpp">
-      <Filter>General\States\Physics2</Filter>
-    </ClInclude>
-    <ClInclude Include="StateMachine.hpp">
-      <Filter>General\States</Filter>
-    </ClInclude>
-    <ClInclude Include="MathTest.hpp">
-      <Filter>General\Test</Filter>
-    </ClInclude>
-    <ClInclude Include="DelegateTest.hpp">
-      <Filter>General\Test</Filter>
-    </ClInclude>
-    <ClInclude Include="TransformTest.hpp">
-      <Filter>General\Test</Filter>
+      <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="AIPrototype2D.hpp">
-      <Filter>General\States</Filter>
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="GameState.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="PachinkoState.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="StateMachine.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="DelegateTest.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="MathTest.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformTest.hpp">
+      <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

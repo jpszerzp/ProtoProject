@@ -1,4 +1,4 @@
-#include "Game/DelegateTest.hpp"
+#include "Game/Test/DelegateTest.hpp"
 #include "Engine/Core/Delegate.hpp"
 
 void FreeFunc(int value)

@@ -1,4 +1,4 @@
-#include "Game/GameCommon.hpp"
+#include "Game/Util/GameCommon.hpp"
 #include "Engine/Core/Primitive/Point.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
 #include "Engine/Input/InputSystem.hpp"

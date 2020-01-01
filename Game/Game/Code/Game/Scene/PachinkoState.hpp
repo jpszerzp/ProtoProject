@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Game/GameState.hpp"
+#include "Game/Scene/GameState.hpp"
 #include "Engine/Physics/2D/DiscEntity.hpp"
 #include "Engine/Physics/2D/RectangleEntity.hpp"
 #include "Engine/Physics/2D/QuadEntity.hpp"

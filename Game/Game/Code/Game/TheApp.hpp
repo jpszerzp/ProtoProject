@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Game/TheGame.hpp"
-#include "Game/GameCommon.hpp"
+#include "Game/Util/GameCommon.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Audio/AudioSystem.hpp"
 #include "Engine/Input/InputSystem.hpp"

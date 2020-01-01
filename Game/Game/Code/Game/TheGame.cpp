@@ -1,5 +1,5 @@
 #include "Game/TheGame.hpp"
-#include "Game/GameCommon.hpp"
+#include "Game/Util/GameCommon.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/Math/MathUtils.hpp"
 #include "Engine/Core/Blackboard.hpp"

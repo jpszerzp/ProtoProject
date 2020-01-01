@@ -1,5 +1,5 @@
-#include "Game/StateMachine.hpp"
-#include "Game/GameCommon.hpp"
+#include "Game/Scene/StateMachine.hpp"
+#include "Game/Util/GameCommon.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/Core/Console/DevConsole.hpp"
 

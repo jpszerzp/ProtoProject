@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Game/GameState.hpp"
+#include "Game/Scene/GameState.hpp"
 
 class AIPrototypeState : public GameState
 {

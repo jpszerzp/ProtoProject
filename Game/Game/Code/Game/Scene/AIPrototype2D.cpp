@@ -1,4 +1,4 @@
-#include "Game/AIPrototype2D.hpp"
+#include "Game/Scene/AIPrototype2D.hpp"
 #include "Engine/Renderer/Window.hpp"
 
 AIPrototypeState::AIPrototypeState()

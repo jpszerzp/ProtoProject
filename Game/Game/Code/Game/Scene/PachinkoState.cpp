@@ -1,5 +1,5 @@
-#include "Game/PachinkoState.hpp"
-#include "Game/GameCommon.hpp"
+#include "Game/Scene/PachinkoState.hpp"
+#include "Game/Util/GameCommon.hpp"
 #include "Engine/Renderer/Window.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/Math/MathUtils.hpp"

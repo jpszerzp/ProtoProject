@@ -4,7 +4,7 @@
 #include "Engine/Core/Util/StringUtils.hpp"
 #include "Engine/Math/Plane.hpp"
 #include "Engine/Math/MathUtils.hpp"
-#include "Game/MathTest.hpp"
+#include "Game/Test/MathTest.hpp"
 
 void MathTest::RunMathTest()
 {

@@ -2,8 +2,8 @@
 
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Renderer/IsoSprite.hpp"
-#include "Game/GameState.hpp"
-#include "Game/StateMachine.hpp"
+#include "Game/Scene/GameState.hpp"
+#include "Game/Scene/StateMachine.hpp"
 
 enum eGameMode
 {
