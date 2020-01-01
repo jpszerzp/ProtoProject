@@ -343,13 +343,6 @@
     <ClCompile Include="Math\Vector2.cpp" />
     <ClCompile Include="Math\Vector3.cpp" />
     <ClCompile Include="Math\Vector4.cpp" />
-    <ClCompile Include="Net\BytePacker.cpp" />
-    <ClCompile Include="Net\Endianness.cpp" />
-    <ClCompile Include="Net\Net.cpp" />
-    <ClCompile Include="Net\NetAddress.cpp" />
-    <ClCompile Include="Net\RemoteCommandService.cpp" />
-    <ClCompile Include="Net\Socket.cpp" />
-    <ClCompile Include="Net\TCPSocket.cpp" />
     <ClCompile Include="Physics\2D\DiscEntity.cpp" />
     <ClCompile Include="Physics\2D\QuadEntity.cpp" />
     <ClCompile Include="Physics\3D\BoundingVolume3.cpp" />
@@ -516,13 +509,6 @@
     <ClInclude Include="Math\Vector2.hpp" />
     <ClInclude Include="Math\Vector3.hpp" />
     <ClInclude Include="Math\Vector4.hpp" />
-    <ClInclude Include="Net\BytePacker.hpp" />
-    <ClInclude Include="Net\Endianness.hpp" />
-    <ClInclude Include="Net\Net.hpp" />
-    <ClInclude Include="Net\NetAddress.hpp" />
-    <ClInclude Include="Net\RemoteCommandService.hpp" />
-    <ClInclude Include="Net\Socket.hpp" />
-    <ClInclude Include="Net\TCPSocket.hpp" />
     <ClInclude Include="Physics\2D\DiscEntity.hpp" />
     <ClInclude Include="Physics\2D\QuadEntity.hpp" />
     <ClInclude Include="Physics\3D\BoundingVolume3.hpp" />

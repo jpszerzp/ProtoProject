@@ -326,7 +326,6 @@
       <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ShowIncludes>
     </ClCompile>
     <ClCompile Include="MathTest.cpp" />
-    <ClCompile Include="NetTest.cpp" />
     <ClCompile Include="PachinkoState.cpp" />
     <ClCompile Include="Physics3State.cpp" />
     <ClCompile Include="ProtoState.cpp" />
@@ -358,7 +357,6 @@
     <ClInclude Include="GameState.hpp" />
     <ClInclude Include="Links.hpp" />
     <ClInclude Include="MathTest.hpp" />
-    <ClInclude Include="NetTest.hpp" />
     <ClInclude Include="PachinkoState.hpp" />
     <ClInclude Include="Physics3State.hpp" />
     <ClInclude Include="ProtoState.hpp" />

@@ -7,7 +7,6 @@
 #include "Game/TransformTest.hpp"
 #include "Game/MathTest.hpp"
 #include "Game/DelegateTest.hpp"
-#include "Game/NetTest.hpp"
 #include "Engine/Core/Blackboard.hpp"
 #include "Engine/Core/Time/Clock.hpp"
 #include "Engine/Core/EngineCommon.hpp"
@@ -16,64 +15,6 @@
 #include "Engine/Core/Console/DevConsole.hpp"
 #include "Engine/Core/Profiler/ProfileSystem.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
-#include "Engine/Net/Net.hpp"
-#include "Engine/Net/NetAddress.hpp"
-#include "Engine/Physics/3D/RF/PhysTime.hpp"
-
-//std::vector<PxVec3> gContactPositions;
-//std::vector<PxVec3> gContactImpulses;
-
-/*
-class ContactReportCallback: public PxSimulationEventCallback
-{
-	void onConstraintBreak(PxConstraintInfo* constraints, PxU32 count)	{ PX_UNUSED(constraints); PX_UNUSED(count); }
-	void onWake(PxActor** actors, PxU32 count)							{ PX_UNUSED(actors); PX_UNUSED(count); }
-	void onSleep(PxActor** actors, PxU32 count)							{ PX_UNUSED(actors); PX_UNUSED(count); }
-	void onTrigger(PxTriggerPair* pairs, PxU32 count)					{ PX_UNUSED(pairs); PX_UNUSED(count); }
-	void onAdvance(const PxRigidBody*const*, const PxTransform*, const PxU32) {}
-	void onContact(const PxContactPairHeader& pairHeader, const PxContactPair* pairs, PxU32 nbPairs) 
-	{
-		PX_UNUSED((pairHeader));
-		std::vector<PxContactPairPoint> contactPoints;
-
-		for(PxU32 i=0;i<nbPairs;i++)
-		{
-			PxU32 contactCount = pairs[i].contactCount;
-			if(contactCount)
-			{
-				contactPoints.resize(contactCount);
-				pairs[i].extractContacts(&contactPoints[0], contactCount);
-
-				for(PxU32 j=0;j<contactCount;j++)
-				{
-					gContactPositions.push_back(contactPoints[j].position);
-					gContactImpulses.push_back(contactPoints[j].impulse);
-				}
-			}
-		}
-	}
-};
-*/
-
-/*
-ContactReportCallback gContactReportCallback;
-
-PhysAllocator gAllocator;
-PhysErrorCallback gErrorCallback;
-
-PxFoundation* gFoundation = NULL;
-PxPhysics*				gPhysics	= NULL;
-
-PxDefaultCpuDispatcher*	gDispatcher = NULL;
-PxScene*				gScene		= NULL;
-
-PxMaterial*				gMaterial	= NULL;
-//PxMaterial*				gMaterialBackup = NULL;
-
-PxPvd*                  gPvd        = NULL;
-
-PxReal stackZ = 10.0f;
-*/
 
 TheApp::TheApp()
 {
@@ -81,12 +22,10 @@ TheApp::TheApp()
 	RendererStartup();
 	InputSystemStartup();
 	AudioSystemStartup();
-	//NetStartup();
 	StateStartup();
 	ProfilerStartup();
 	ConsoleStartup();
 	BlackboardStartup();
-	//PhysxStartup();
 }
 
 TheApp::~TheApp()
@@ -101,10 +40,6 @@ TheApp::~TheApp()
 	delete g_theGame;
 	g_theGame = nullptr;
 
-	//// destroy rcs
-	//RCS::DestroyInstance();
-	//Net::Shutdown();
-
 	AudioSystem::DestroyInstance();
 
 	InputSystem::DestroyInstance();
@@ -113,8 +48,6 @@ TheApp::~TheApp()
 
 	delete g_masterClock;
 	g_masterClock = nullptr;
-
-	//PhysxShutdown();
 }
 
 void TheApp::SetInstantFPS()
@@ -162,14 +95,7 @@ void TheApp::Update()
 
 void TheApp::UpdateTime()
 {
-	//m_deltaSeconds = g_masterClock->frame.seconds;
-
-	PhysTimeSystem& time = PhysTimeSystem::GetTimeSystem();
-	m_deltaSeconds = time.GetTimeDurationSeconds();			// ms to s
-	if (m_deltaSeconds <= 0.0f) 
-		return;
-	else if (m_deltaSeconds > 0.05f)
-		m_deltaSeconds = 0.05f;
+	m_deltaSeconds = g_masterClock->frame.seconds;
 
 	g_theGame->SetDeltaTime(m_deltaSeconds);
 }
@@ -188,9 +114,7 @@ void TheApp::Render()
 
 void TheApp::RunFrame()
 {
-	//ClockSystemBeginFrame();
-	PhysTimeSystem& time = PhysTimeSystem::GetTimeSystem();
-	time.UpdateTime();
+	ClockSystemBeginFrame();
 
 	g_renderer->BeginFrame();
 	g_input->BeginFrame();
@@ -234,23 +158,6 @@ void TheApp::ProcessInput()
 			g_input->MouseLockCursor(false);
 		}
 	}
-
-//	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_7) && !DevConsoleIsOpen())
-//	{
-//#if defined(PROFILE_ENABLED) 
-//		Profiler* profiler = Profiler::GetInstance();
-//
-//		profiler->m_on = !profiler->m_on;
-//#endif
-//	}
-
-	//if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_1))
-	//{
-	//	MathTest::RunMathTest();
-	//	TransformTest::RunTransformTest();
-	//	NetTest::RunNetTest();
-	//	RunDelegateTest();
-	//}
 
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_M) && !IsProfilerOn())
 	{
@@ -303,16 +210,6 @@ void TheApp::AudioSystemStartup()
 	g_audio = AudioSystem::GetInstance();
 }
 
-void TheApp::NetStartup()
-{
-	// set up net work
-	Net::Startup();
-
-	// set instance of rcs
-	g_rcs = RCS::GetInstance();
-	g_rcs->Startup();
-}
-
 void TheApp::StateStartup()
 {
 	// some states
@@ -359,247 +256,3 @@ void TheApp::BlackboardStartup()
 	g_gameConfigBlackboard = new Blackboard();
 	g_gameConfigBlackboard->PopulateFromXmlElementAttributes(*(gameConfigDoc.FirstChildElement()));
 }
-
-/*
-void TheApp::PhysxStartup()
-{
-	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
-
-	gPvd = PxCreatePvd(*gFoundation);
-	PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate("127.0.0.1", 5425, 10);
-	gPvd->connect(*transport,PxPvdInstrumentationFlag::eALL);
-
-	gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, PxTolerancesScale(),true,gPvd);
-
-	PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
-	sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
-	gDispatcher = PxDefaultCpuDispatcherCreate(2);
-	sceneDesc.cpuDispatcher	= gDispatcher;
-	sceneDesc.filterShader	= PxDefaultSimulationFilterShader;
-	sceneDesc.simulationEventCallback = &gContactReportCallback;
-	gScene = gPhysics->createScene(sceneDesc);
-
-	PxPvdSceneClient* pvdClient = gScene->getScenePvdClient();
-	if(pvdClient)
-	{
-		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS, true);
-		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
-		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
-	}
-
-	gMaterial = gPhysics->createMaterial(.5f, .5f, .6f);
-	//gMaterialBackup = gPhysics->createMaterial(.4f, .4f, .5f);
-}
-*/
-
-/*
-void TheApp::PhysxShutdown()
-{
-	PX_UNUSED(true);
-	gScene->release();
-	gDispatcher->release();
-	gPhysics->release();	
-	PxPvdTransport* transport = gPvd->getTransport();
-	gPvd->release();
-	transport->release();
-
-	gFoundation->release();
-}
-*/
-
-/*
-void TheApp::SpawnPhysxStack(const Vector3& origin, uint sideLength, uint stackHeight)
-{
-	// plane
-	PxRigidStatic* pl = PxCreatePlane(*gPhysics, PxPlane(0, 1, 0, -342), *gMaterial);
-	gScene->addActor(*pl);
-
-	// interface with my API
-	PhysXObject* pl_obj = new PhysXObject(pl);
-	m_physx_objs.push_back(pl_obj);
-	m_physx_stack.push_back(pl_obj);
-
-	PxVec3 stack_offset = PxVec3(0.f);
-	PxVec3 stack_origin = PxVec3(origin.x, origin.y, origin.z);
-	PxTransform pxt = PxTransform(stack_origin);
-	PxReal half_ext = .5f;
-
-	PxShape* shape = gPhysics->createShape(PxBoxGeometry(half_ext, half_ext, half_ext), *gMaterial);
-
-	for (PxU32 k = 0; k < stackHeight; ++k)
-	{
-		for (PxU32 i = 0; i < sideLength; ++i)
-		{
-			// * 2.f is why we use half_ext when setting up local transform
-			PxReal stack_x = stack_offset.x + i * 2.f;			
-			for (uint j = 0; j < sideLength; ++j)
-			{
-				PxReal stack_z = stack_offset.z + j * 2.f;
-				PxVec3 offset = PxVec3(stack_x, stack_offset.y, stack_z);
-				PxTransform local_t(offset * half_ext);
-
-				PxRigidDynamic* body = gPhysics->createRigidDynamic(pxt.transform(local_t));
-
-				body->attachShape(*shape);
-				PxRigidBodyExt::updateMassAndInertia(*body, 10.f);
-
-				gScene->addActor(*body);
-
-				PhysXObject* phys_obj = new PhysXObject(body);
-				m_physx_objs.push_back(phys_obj);
-				m_physx_stack.push_back(phys_obj);
-			}
-		}
-
-		sideLength--;
-		stack_origin = PxVec3(stack_origin.x + .5f, stack_origin.y + 1.f, stack_origin.z + .5f);
-		pxt = PxTransform(stack_origin);
-	}
-
-	shape->release();
-}
-*/
-
-/*
-void TheApp::PhysxUpdate(float dt)
-{
-	gContactPositions.clear();
-	gContactImpulses.clear();
-
-	// in sample code, this is forced to be 60 fps...
-	//deltaTime = 1.f / 60.f;
-	gScene->simulate(dt);
-	gScene->fetchResults(true);
-	//DebuggerPrintf("%d contact reports\n", PxU32(gContactPositions.size()));
-
-	PhysxUpdateDelete();
-}
-*/
-
-/*
-void TheApp::PhysxUpdateDelete()
-{
-	// stack vector has already been emptied, objs are already marked as deleted
-	// delete those obj prescence in general vector
-	// remove those actors in physx scene
-	for (int i = 0; i < m_physx_objs.size(); ++i)
-	{
-		PhysXObject* phys_obj = m_physx_objs[i];
-		if (phys_obj->ShouldDelete())
-		{
-			// obj vector
-			std::vector<PhysXObject*>::iterator it = m_physx_objs.begin() + i;
-			m_physx_objs.erase(it);
-
-			// we do not know which vector of physx obj is affected, so we check all
-			// still check those in stacks just to be safe
-			for (int j = 0; j < m_physx_stack.size(); ++j)
-			{
-				if (m_physx_stack[j] == phys_obj)
-				{
-					std::vector<PhysXObject*>::iterator it_del = m_physx_stack.begin() + j;
-					m_physx_stack.erase(it_del);
-					j--;
-				}
-			}
-			// check those in wraparounds
-			g_physState->m_wraparound_demo_0->RemovePhysXObj(phys_obj);
-			g_physState->m_wraparound_demo_1->RemovePhysXObj(phys_obj);
-
-			// todo: check those in plane wraparound after they are actually added to it...
-			//m_wraparound_plane...
-
-			// check corner case place holder
-			if (m_corner_case_3 == phys_obj)
-				m_corner_case_3 = nullptr;
-			else if (m_corner_case_4 == phys_obj)
-				m_corner_case_4 = nullptr;
-
-			// scene actor
-			PxRigidActor* ra = phys_obj->GetRigidActor();
-			gScene->removeActor(*ra);
-			ra->release();
-
-			delete phys_obj;
-			i = i - 1;
-		}
-	}
-}
-*/
-
-/*
-void TheApp::PhysxRender(Renderer* rdr)
-{
-	for (int i = 0; i < m_physx_objs.size(); ++i)
-	{
-		PhysXObject* p_obj = m_physx_objs[i];
-		if (p_obj->IsDirected())
-			p_obj->RenderActor(rdr, "default", "Data/Images/perspective_test.png");
-		else
-			p_obj->RenderActor(rdr);
-	}
-}
-*/
-
-/*
-PhysXObject* TheApp::SpawnPhysxBox(const Vector3& pos)
-{
-	PxVec3 pxp = PxVec3(pos.x, pos.y, pos.z);
-	PxTransform pxt = PxTransform(pxp);
-	PxReal half_ext = .5f;
-	PxShape* shape = gPhysics->createShape(PxBoxGeometry(half_ext, half_ext, half_ext), *gMaterial);
-
-	// offset
-	PxVec3 offset = PxVec3(0.f, 0.f, 0.f);
-	PxTransform local = PxTransform(offset);
-
-	// dynamic rigidbody
-	PxRigidDynamic* body = gPhysics->createRigidDynamic(pxt.transform(local));
-	body->attachShape(*shape);
-	PxRigidBodyExt::updateMassAndInertia(*body, 1.f);
-	gScene->addActor(*body);
-
-	// encapsulation
-	PhysXObject* px_obj = new PhysXObject(body);
-	m_physx_objs.push_back(px_obj);
-
-	// shape release
-	shape->release();
-	return px_obj;
-}
-*/
-
-/*
-PhysXObject* TheApp::SpawnPhysxBox(const Vector3& pos,
-	float stat_friction, float dyn_friction, float rest)
-{
-	PxMaterial* mat = gPhysics->createMaterial(stat_friction, dyn_friction, rest);
-
-	PxVec3 pxp = PxVec3(pos.x, pos.y, pos.z);
-	PxTransform pxt = PxTransform(pxp);
-	PxReal half_ext = .5f;
-	PxShape* shape = gPhysics->createShape(PxBoxGeometry(half_ext, half_ext, half_ext), *mat);
-
-	// offset
-	PxVec3 offset = PxVec3(0.f, 0.f, 0.f);
-	PxTransform local = PxTransform(offset);
-
-	// dynamic rigidbody
-	PxRigidDynamic* body = gPhysics->createRigidDynamic(pxt.transform(local));
-	body->attachShape(*shape);
-	PxRigidBodyExt::updateMassAndInertia(*body, 1.f);
-	gScene->addActor(*body);
-
-	// encapsulation
-	PhysXObject* px_obj = new PhysXObject(body);
-	m_physx_objs.push_back(px_obj);
-
-	// shape release
-	shape->release();
-
-	// mat release
-	mat->release();
-
-	return px_obj;
-}
-*/

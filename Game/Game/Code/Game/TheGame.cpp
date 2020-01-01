@@ -11,7 +11,6 @@
 #include "Engine/Renderer/Window.hpp"
 #include "Engine/Renderer/SpriteSheet.hpp"
 #include "Engine/Renderer/DebugRenderer.hpp"
-#include "Engine/Net/Socket.hpp"
 
 TheGame::TheGame()
 {

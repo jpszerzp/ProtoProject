@@ -79,9 +79,6 @@
     <ClCompile Include="Fireworks.cpp">
       <Filter>General\Units</Filter>
     </ClCompile>
-    <ClCompile Include="NetTest.cpp">
-      <Filter>General\Test</Filter>
-    </ClCompile>
     <ClCompile Include="Spring.cpp">
       <Filter>General\Units</Filter>
     </ClCompile>
@@ -155,9 +152,6 @@
     </ClInclude>
     <ClInclude Include="Fireworks.hpp">
       <Filter>General\Units</Filter>
-    </ClInclude>
-    <ClInclude Include="NetTest.hpp">
-      <Filter>General\Test</Filter>
     </ClInclude>
     <ClInclude Include="Spring.hpp">
       <Filter>General\Units</Filter>

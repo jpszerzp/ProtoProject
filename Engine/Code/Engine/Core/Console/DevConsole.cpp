@@ -4,7 +4,6 @@
 #include "Engine/Core/Console/DevConsole.hpp"
 #include "Engine/Core/Util/StringUtils.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
-#include "Engine/Net/RemoteCommandService.hpp"
 
 #include <math.h>
 #include <ctype.h>
@@ -608,13 +607,11 @@ void DevConsole::Render(Renderer* renderer)
 		}
 
 		// render rcs status
-		RCS* rcs = RCS::GetInstance();
 		shader = renderer->CreateOrGetShader("cutout_nonmodel");
 		texture = renderer->CreateOrGetTexture("Data/Fonts/SquirrelFixedFont.png");
 		renderer->UseShader(shader);
 		renderer->SetTexture2D(0, texture);
 		renderer->SetSampler2D(0, texture->GetSampler());
-		rcs->Render(renderer);
 
 		// Render cursor
 		if (m_cursorTimer >= 0.f)
@@ -655,104 +652,6 @@ void DevConsole::Render(Renderer* renderer)
 		renderer->DrawMesh(m_backgroundMesh);
 	}
 }
-
-
-//void DevConsole::RenderAutoComplete(Renderer* renderer)
-//{
-//	//renderer->UseShaderProgram(renderer->CreateOrGetShaderProgram("projection_color"));
-//	renderer->UseShader(renderer->CreateOrGetShader("mp_color"));
-//	renderer->DrawAABB(m_autoCompleteBox, Rgba::BLACK);
-//
-//	//renderer->UseShaderProgram(renderer->CreateOrGetShaderProgram("projection_textured"));
-//	renderer->UseShader(renderer->CreateOrGetShader("mp_tex"));
-//	for (std::vector<std::string>::size_type matchedCmdCount = 0; matchedCmdCount < m_autoCompleteList.size(); ++matchedCmdCount)
-//	{
-//		std::string cmdName = m_autoCompleteList[matchedCmdCount];
-//		std::string cmdDoc = FindCmdDocWithName(cmdName);
-//
-//		AABB2 nameBox = AABB2(Vector2(0.f, m_uniformCellHeight * (matchedCmdCount + 1)), Vector2(m_font->GetStringWidth(cmdName, m_uniformCellHeight, ASPECT_SCALE), m_uniformCellHeight * (matchedCmdCount + 2)));
-//		float docStrWidth = m_font->GetStringWidth(cmdDoc, m_uniformCellHeight, ASPECT_SCALE);
-//		Vector2 docBoxMax = Vector2(Window::GetInstance()->GetWindowWidth(), m_uniformCellHeight * (matchedCmdCount + 2));
-//		Vector2 docBoxMin = Vector2(Window::GetInstance()->GetWindowWidth() - docStrWidth, m_uniformCellHeight * (matchedCmdCount + 1));
-//		
-//		if (m_autoCompleteCounter == matchedCmdCount)
-//		{
-//			renderer->DrawTextInBox2D(cmdName, 0.f, 0.f, m_uniformCellHeight, nameBox, TEXT_DRAW_OVERRUN, Rgba::YELLOW, ASPECT_SCALE, m_font);
-//			renderer->DrawTextInBox2D(cmdDoc, 0.f, 0.f, m_uniformCellHeight, AABB2(docBoxMin, docBoxMax), TEXT_DRAW_OVERRUN, Rgba::WHITE, ASPECT_SCALE, m_font);
-//
-//			// auto alignment/complete of characters
-//			int incompleteNameLength = static_cast<int>(m_inputBuffer.length());
-//			int cmdNameLength = static_cast<int>(m_autoCompleteList[m_autoCompleteCounter].length());
-//			std::string completedName = m_autoCompleteList[m_autoCompleteCounter].substr(incompleteNameLength, cmdNameLength - incompleteNameLength);
-//			Vector2 hintBoxMin = Vector2(m_font->GetStringWidth(m_inputBuffer, m_uniformCellHeight, ASPECT_SCALE), 0.f);
-//			Vector2 hintBoxMax = Vector2(m_font->GetStringWidth(completedName, m_uniformCellHeight, ASPECT_SCALE) + hintBoxMin.x, m_uniformCellHeight);
-//			AABB2 hintBox = AABB2(hintBoxMin, hintBoxMax);
-//
-//			//renderer->UseShaderProgram(renderer->CreateOrGetShaderProgram("projection_color"));
-//			renderer->UseShader(renderer->CreateOrGetShader("mp_color"));
-//			renderer->DrawAABB(hintBox, Rgba::WHITE_HALF_OPACITY);
-//			//renderer->UseShaderProgram(renderer->CreateOrGetShaderProgram("projection_textured"));
-//			renderer->UseShader(renderer->CreateOrGetShader("mp_tex"));
-//			renderer->DrawTextInBox2D(completedName, 0.f, 0.f, m_uniformCellHeight, hintBox, TEXT_DRAW_OVERRUN, Rgba::WHITE, ASPECT_SCALE, m_font);
-//		}
-//		else
-//		{
-//			renderer->DrawTextInBox2D(cmdName, 0.f, 0.f, m_uniformCellHeight, nameBox, TEXT_DRAW_OVERRUN, Rgba::WHITE_HALF_OPACITY, ASPECT_SCALE, m_font);
-//			renderer->DrawTextInBox2D(cmdDoc, 0.f, 0.f, m_uniformCellHeight, AABB2(docBoxMin, docBoxMax), TEXT_DRAW_OVERRUN, Rgba::WHITE_HALF_OPACITY, ASPECT_SCALE, m_font);
-//		}
-//	}
-//}
-
-
-void DevConsole::RenderFormatOutput(Renderer*)
-{
-	Vector2 highestLineDrawMin = m_outputBox.mins + Vector2(0.f, (m_outputText.size() - 1) * m_uniformCellHeight);				// height of input box is height of one line
-
-	for(std::vector<std::string>::size_type textLineCount = 0; textLineCount < m_outputText.size(); ++textLineCount)
-	{
-		std::string content = m_outputText[textLineCount];
-		//Rgba color = m_outputColors[textLineCount];
-
-		//Vector2 lineDrawMin = Vector2(HighestLineDrawMin.x, HighestLineDrawMin.y - textLineCount * m_uniformCellHeight);
-
-		//if (m_lastCmdNameValid.find("help") != std::string::npos)
-		//{
-		//	if (content != "help error: INVALID COMMAND")
-		//	{
-		//		size_t indexFirstSpace = nth_match_str(content, " ", 1);
-		//		std::string cmdName = content.substr(0, indexFirstSpace);
-		//		size_t indexSecondSpace = nth_match_str(content, " ", 2);
-		//		std::string argList = content.substr(indexFirstSpace, indexSecondSpace - 1 - indexFirstSpace);
-		//		std::string cmdDoc = content.substr(indexSecondSpace - 1);
-
-		//		Vector2 argListDrawmin = lineDrawMin + Vector2(m_font->GetStringWidth(cmdName, m_uniformCellHeight, ASPECT_SCALE), 0.f);
-		//		renderer->DrawTextInBox2D(cmdName, 0.f, 0.f, m_uniformCellHeight, AABB2(lineDrawMin, argListDrawmin + Vector2(0.f, m_uniformCellHeight)), TEXT_DRAW_OVERRUN,
-		//			color, ASPECT_SCALE, m_font);
-		//		Vector2 cmdDocDrawmin = argListDrawmin + Vector2(m_font->GetStringWidth(argList, m_uniformCellHeight, ASPECT_SCALE), 0.f);
-		//		renderer->DrawTextInBox2D(argList, 0.f, 0.f, m_uniformCellHeight, AABB2(argListDrawmin, cmdDocDrawmin + Vector2(0.f, m_uniformCellHeight)), TEXT_DRAW_OVERRUN,
-		//			Rgba::CYAN, ASPECT_SCALE, m_font);
-		//		renderer->DrawTextInBox2D(cmdDoc, 0.f, 0.f, m_uniformCellHeight, AABB2(cmdDocDrawmin, cmdDocDrawmin + Vector2(m_font->GetStringWidth(cmdDoc, m_uniformCellHeight, ASPECT_SCALE), m_uniformCellHeight)), 
-		//			TEXT_DRAW_OVERRUN, Rgba::MEGENTA, ASPECT_SCALE, m_font);
-		//	}
-		//	else
-		//	{
-		//		renderer->DrawTextInBox2D(content, 0.f, 0.f, m_uniformCellHeight, AABB2(lineDrawMin, lineDrawMin + Vector2(m_font->GetStringWidth(content, m_uniformCellHeight, ASPECT_SCALE), m_uniformCellHeight)), 
-		//			TEXT_DRAW_OVERRUN, color, ASPECT_SCALE, m_font);
-		//	}
-		//}
-		//else
-		//{
-		//	renderer->DrawTextInBox2D(content, 0.f, 0.f, m_uniformCellHeight, AABB2(lineDrawMin, lineDrawMin + Vector2(m_font->GetStringWidth(content, m_uniformCellHeight, ASPECT_SCALE), m_uniformCellHeight)), 
-		//		TEXT_DRAW_OVERRUN, color, ASPECT_SCALE, m_font);
-		//}
-
-		//Vector2 lineDrawMin = Vector2(highestLineDrawMin.x,
-		//	highestLineDrawMin.y - textLineCount * m_uniformCellHeight);
-		//renderer->DrawText2D(lineDrawMin, content, m_uniformCellHeight,
-		//	Rgba::WHITE, ASPECT_SCALE, m_font);
-	}
-}
-
 
 void DevConsole::DestroyConsole()
 {
@@ -882,18 +781,6 @@ void ConsolePrintfUnit(Rgba color, const char* format, ...)
 	console->AppendFormatToOutputBuffer(formatted);
 
 	console->FillOutputBufferUnit(color);
-
-	if (g_rcs->m_echo == 1)
-	{
-		if (g_rcs->m_rcsState == RCS_CLIENT)
-		{
-			g_rcs->SendMsg(0, 2, formatted.c_str());	// host is at idx 0
-		}
-		else if (g_rcs->m_rcsState == RCS_HOST)
-		{
-
-		}
-	}
 }
 
 
@@ -912,7 +799,6 @@ void ConsolePrintfThreadSafe(Rgba color, const char* format, ...)
 	// add into thread safe queue
 	DevConsole* console = DevConsole::GetInstance();
 	console->m_threadSafeMsg.Enqueue(formatted);
-	//console->ClearOutputBufferFormat();
 }
 
 
