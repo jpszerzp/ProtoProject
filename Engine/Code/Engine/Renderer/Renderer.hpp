@@ -19,9 +19,6 @@
 #include "Engine/Core/Rgba.hpp"
 #include "Engine/Core/Vertex.hpp"
 
-//#include "PxPhysicsAPI.h"
-//using namespace physx;
-
 #include <string>
 #include <map>
 #include <vector>
@@ -157,7 +154,6 @@ struct sGameTime
 };
 ////////////////////////////////////// UBO DATA END /////////////////////////////////
 
-class AssimpLoader;
 class Mesh;
 class Light;
 class Renderable;
@@ -314,9 +310,6 @@ public:
 
 	// shadows
 	bool SetupShadowTarget();
-
-	// assimp
-	void DrawModel(AssimpLoader* loader);
 
 	// REFACTOR
 	Shader*			MakeShader(std::string shaderName);

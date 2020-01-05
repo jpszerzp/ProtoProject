@@ -3,11 +3,7 @@
 #include "Game/TheGame.hpp"
 #include "Game/Util/GameCommon.hpp"
 #include "Engine/Renderer/Renderer.hpp"
-#include "Engine/Audio/AudioSystem.hpp"
 #include "Engine/Input/InputSystem.hpp"
-//#include "Engine/Physics/3D/PHYSX/PhysErrorCallback.hpp"
-//#include "Engine/Physics/3D/PHYSX/PhysAllocator.hpp"
-//#include "Engine/Physics/3D/PHYSX/PhysXObject.hpp"
 
 class TheApp
 {
@@ -18,13 +14,6 @@ class TheApp
 	float m_deltaSeconds;
 	float m_accTimer;
 	int m_frames;
-
-public:
-	//std::vector<PhysXObject*> m_physx_objs;
-	//std::vector<PhysXObject*> m_physx_stack;
-
-	//PhysXObject* m_corner_case_3 = nullptr;
-	//PhysXObject* m_corner_case_4 = nullptr;
 
 public:
 	TheApp();
@@ -50,27 +39,14 @@ public:
 
 	void Render();
 
-	void PlayAudio(std::string clipName);
-
 	// module startups
 	void TimeStartup();
 	void RendererStartup();
 	void InputSystemStartup();
-	void AudioSystemStartup();
 	void StateStartup();
 	void ProfilerStartup();
 	void ConsoleStartup();
 	void BlackboardStartup();
-
-	// physx
-	//void PhysxStartup();
-	//void PhysxShutdown();
-	//void SpawnPhysxStack(const Vector3& origin, uint sideLength, uint stackHeight);
-	//void PhysxUpdate(float dt);
-	//void PhysxUpdateDelete();
-	//void PhysxRender(Renderer* rdr);
-	//PhysXObject* SpawnPhysxBox(const Vector3& pos);
-	//PhysXObject* SpawnPhysxBox(const Vector3& pos, float stat_friction, float dyn_friction, float rest);
 };
 
 extern TheApp* g_theApp;

@@ -13,7 +13,6 @@
 #include "Engine/Core/Light/PointLight.hpp"
 #include "Engine/Core/Light/DirectionalLight.hpp"
 #include "Engine/Core/Light/SpotLight.hpp"
-#include "Engine/Core/AssimpLoader.hpp"
 #include "Engine/Math/MathUtils.hpp"
 
 //#define STB_IMAGE_IMPLEMENTATION    
@@ -2324,13 +2323,6 @@ bool Renderer::SetupShadowTarget()
 
 	return true;
 }
-
-void Renderer::DrawModel(AssimpLoader* loader)
-{
-	for (uint i = 0; i < loader->m_meshes.size(); ++i)
-		DrawMesh(loader->m_meshes[i]);
-}
-
 
 void Renderer::BindMaterial(const Drawcall& dc)
 {

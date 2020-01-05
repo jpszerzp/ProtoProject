@@ -17,9 +17,6 @@
     <Filter Include="Core">
       <UniqueIdentifier>{d36a1b1d-a711-4107-b384-8604fca00d2f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Audio">
-      <UniqueIdentifier>{621309e5-87eb-469b-ab6a-c95f31280dc1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Renderer\Sprite">
       <UniqueIdentifier>{c3cd1ec5-1ae0-4ded-845d-408799e2c3fe}</UniqueIdentifier>
     </Filter>
@@ -111,9 +108,6 @@
     </ClCompile>
     <ClCompile Include="..\ThirdParty\stb\stb_image.c">
       <Filter>Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="Audio\AudioSystem.cpp">
-      <Filter>Audio</Filter>
     </ClCompile>
     <ClCompile Include="Core\ErrorWarningAssert.cpp">
       <Filter>Core</Filter>
@@ -289,27 +283,6 @@
     <ClCompile Include="Core\Light\SpotLight.cpp">
       <Filter>Core\Lights</Filter>
     </ClCompile>
-    <ClCompile Include="Animation\IsoAnim.cpp">
-      <Filter>Renderer\Animation</Filter>
-    </ClCompile>
-    <ClCompile Include="Animation\IsoAnimation.cpp">
-      <Filter>Renderer\Animation</Filter>
-    </ClCompile>
-    <ClCompile Include="Animation\SpriteAnim.cpp">
-      <Filter>Renderer\Animation\NonIso</Filter>
-    </ClCompile>
-    <ClCompile Include="Animation\SpriteAnimation.cpp">
-      <Filter>Renderer\Animation\NonIso</Filter>
-    </ClCompile>
-    <ClCompile Include="Animation\SpriteAnimDef.cpp">
-      <Filter>Renderer\Animation\NonIso</Filter>
-    </ClCompile>
-    <ClCompile Include="Animation\SpriteAnimSet.cpp">
-      <Filter>Renderer\Animation\NonIso</Filter>
-    </ClCompile>
-    <ClCompile Include="Animation\SpriteAnimSetDef.cpp">
-      <Filter>Renderer\Animation\NonIso</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Time\Stopwatch.cpp">
       <Filter>Core</Filter>
     </ClCompile>
@@ -355,9 +328,6 @@
     <ClCompile Include="Math\OBB3.cpp">
       <Filter>Math</Filter>
     </ClCompile>
-    <ClCompile Include="Audio\AudioGroup.cpp">
-      <Filter>Audio</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Profiler\ProfileLogScoped.cpp">
       <Filter>Core\Profiler</Filter>
     </ClCompile>
@@ -398,9 +368,6 @@
       <Filter>General</Filter>
     </ClCompile>
     <ClCompile Include="Physics\PhysicsPhase.cpp">
-      <Filter>General</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\AssimpLoader.cpp">
       <Filter>General</Filter>
     </ClCompile>
     <ClCompile Include="Math\OBB2.cpp">
@@ -448,28 +415,10 @@
     <ClCompile Include="Physics\3D\QuadEntity3.cpp">
       <Filter>General</Filter>
     </ClCompile>
-    <ClCompile Include="Net\Net.cpp">
-      <Filter>General</Filter>
-    </ClCompile>
-    <ClCompile Include="Net\NetAddress.cpp">
-      <Filter>General</Filter>
-    </ClCompile>
-    <ClCompile Include="Net\TCPSocket.cpp">
-      <Filter>General</Filter>
-    </ClCompile>
     <ClCompile Include="Physics\3D\PointEntity3.cpp">
       <Filter>General</Filter>
     </ClCompile>
     <ClCompile Include="Math\Particle.cpp">
-      <Filter>General</Filter>
-    </ClCompile>
-    <ClCompile Include="Net\Endianness.cpp">
-      <Filter>General</Filter>
-    </ClCompile>
-    <ClCompile Include="Net\BytePacker.cpp">
-      <Filter>General</Filter>
-    </ClCompile>
-    <ClCompile Include="Net\RemoteCommandService.cpp">
       <Filter>General</Filter>
     </ClCompile>
     <ClCompile Include="Physics\3D\ForceGenerator.cpp">
@@ -479,9 +428,6 @@
       <Filter>General</Filter>
     </ClCompile>
     <ClCompile Include="Physics\3D\ContactResolver.cpp">
-      <Filter>General</Filter>
-    </ClCompile>
-    <ClCompile Include="Net\Socket.cpp">
       <Filter>General</Filter>
     </ClCompile>
     <ClCompile Include="Physics\3D\Rigidbody3.cpp">
@@ -611,33 +557,6 @@
     </ClInclude>
     <ClInclude Include="..\ThirdParty\stb\stb_image.h">
       <Filter>Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="Audio\AudioSystem.hpp">
-      <Filter>Audio</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ThirdParty\fmod\fmod.h">
-      <Filter>Audio</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ThirdParty\fmod\fmod.hpp">
-      <Filter>Audio</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ThirdParty\fmod\fmod_codec.h">
-      <Filter>Audio</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ThirdParty\fmod\fmod_common.h">
-      <Filter>Audio</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ThirdParty\fmod\fmod_dsp.h">
-      <Filter>Audio</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ThirdParty\fmod\fmod_dsp_effects.h">
-      <Filter>Audio</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ThirdParty\fmod\fmod_errors.h">
-      <Filter>Audio</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ThirdParty\fmod\fmod_output.h">
-      <Filter>Audio</Filter>
     </ClInclude>
     <ClInclude Include="Core\ErrorWarningAssert.hpp">
       <Filter>Core</Filter>
@@ -812,27 +731,6 @@
     <ClInclude Include="Core\Light\SpotLight.hpp">
       <Filter>Core\Lights</Filter>
     </ClInclude>
-    <ClInclude Include="Animation\IsoAnim.hpp">
-      <Filter>Renderer\Animation</Filter>
-    </ClInclude>
-    <ClInclude Include="Animation\IsoAnimation.hpp">
-      <Filter>Renderer\Animation</Filter>
-    </ClInclude>
-    <ClInclude Include="Animation\SpriteAnim.hpp">
-      <Filter>Renderer\Animation\NonIso</Filter>
-    </ClInclude>
-    <ClInclude Include="Animation\SpriteAnimation.hpp">
-      <Filter>Renderer\Animation\NonIso</Filter>
-    </ClInclude>
-    <ClInclude Include="Animation\SpriteAnimDef.hpp">
-      <Filter>Renderer\Animation\NonIso</Filter>
-    </ClInclude>
-    <ClInclude Include="Animation\SpriteAnimSet.hpp">
-      <Filter>Renderer\Animation\NonIso</Filter>
-    </ClInclude>
-    <ClInclude Include="Animation\SpriteAnimSetDef.hpp">
-      <Filter>Renderer\Animation\NonIso</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Time\Stopwatch.hpp">
       <Filter>Core</Filter>
     </ClInclude>
@@ -876,9 +774,6 @@
     <ClInclude Include="Math\OBB3.hpp">
       <Filter>Math</Filter>
     </ClInclude>
-    <ClInclude Include="Audio\AudioGroup.hpp">
-      <Filter>Audio</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Profiler\ProfileLogScoped.hpp">
       <Filter>Core\Profiler</Filter>
     </ClInclude>
@@ -911,8 +806,6 @@
     <ClInclude Include="Physics\PhysicsMaterial.hpp" />
     <ClInclude Include="Math\Quadtree.hpp" />
     <ClInclude Include="Physics\PhysicsPhase.hpp" />
-    <ClInclude Include="..\Assimp\assimp\types.h" />
-    <ClInclude Include="Core\AssimpLoader.hpp" />
     <ClInclude Include="Math\OBB2.hpp" />
     <ClInclude Include="Physics\2D\DiscEntity.hpp" />
     <ClInclude Include="Physics\2D\Manifold.hpp" />
@@ -928,19 +821,12 @@
     <ClInclude Include="Core\Delegate.hpp" />
     <ClInclude Include="Math\Plane.hpp" />
     <ClInclude Include="Physics\3D\QuadEntity3.hpp" />
-    <ClInclude Include="Net\Net.hpp" />
-    <ClInclude Include="Net\NetAddress.hpp" />
-    <ClInclude Include="Net\TCPSocket.hpp" />
     <ClInclude Include="Core\WindowsCommon.hpp" />
     <ClInclude Include="Physics\3D\PointEntity3.hpp" />
     <ClInclude Include="Math\Particle.hpp" />
-    <ClInclude Include="Net\Endianness.hpp" />
-    <ClInclude Include="Net\BytePacker.hpp" />
-    <ClInclude Include="Net\RemoteCommandService.hpp" />
     <ClInclude Include="Physics\3D\ForceGenerator.hpp" />
     <ClInclude Include="Physics\3D\ForceRegistry.hpp" />
     <ClInclude Include="Physics\3D\ContactResolver.hpp" />
-    <ClInclude Include="Net\Socket.hpp" />
     <ClInclude Include="Physics\3D\Rigidbody3.hpp" />
     <ClInclude Include="Physics\3D\RigidForceGenerator.hpp" />
     <ClInclude Include="Physics\3D\BVH3.hpp" />

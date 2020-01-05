@@ -1,6 +1,5 @@
 #pragma once
 
-//#include "Engine/Core/AssimpLoader.hpp"
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Core/SurfacePatch.hpp"
 #include "Engine/Renderer/Renderer.hpp"
@@ -83,8 +82,6 @@ public:
 	eVertexType m_type;
 
 	bool m_immediate = false;
-
-	std::vector<Texture*> m_texFromAssimp;		// does not fall in the "create or get" pattern
 
 public:
 	// text mesh properties

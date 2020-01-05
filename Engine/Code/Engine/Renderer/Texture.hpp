@@ -21,7 +21,6 @@ class Texture
 {
 	friend class Renderer; // Textures are managed by a Renderer instance
 	friend class SpriteAnimSetDef;
-	friend class AssimpLoader;
 
 private:
 	Texture();

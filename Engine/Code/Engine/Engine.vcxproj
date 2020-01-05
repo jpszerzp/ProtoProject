@@ -261,9 +261,6 @@
   <ItemGroup>
     <ClCompile Include="..\ThirdParty\stb\stb_image.c" />
     <ClCompile Include="..\TinyXml2\tinyxml2.cpp" />
-    <ClCompile Include="Audio\AudioGroup.cpp" />
-    <ClCompile Include="Audio\AudioSystem.cpp" />
-    <ClCompile Include="Core\AssimpLoader.cpp" />
     <ClCompile Include="Core\Blackboard.cpp" />
     <ClCompile Include="Core\Delegate.cpp" />
     <ClCompile Include="Core\HullObject.cpp" />
@@ -413,20 +410,8 @@
     <ClCompile Include="Renderer\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Assimp\assimp\types.h" />
-    <ClInclude Include="..\ThirdParty\fmod\fmod.h" />
-    <ClInclude Include="..\ThirdParty\fmod\fmod.hpp" />
-    <ClInclude Include="..\ThirdParty\fmod\fmod_codec.h" />
-    <ClInclude Include="..\ThirdParty\fmod\fmod_common.h" />
-    <ClInclude Include="..\ThirdParty\fmod\fmod_dsp.h" />
-    <ClInclude Include="..\ThirdParty\fmod\fmod_dsp_effects.h" />
-    <ClInclude Include="..\ThirdParty\fmod\fmod_errors.h" />
-    <ClInclude Include="..\ThirdParty\fmod\fmod_output.h" />
     <ClInclude Include="..\ThirdParty\stb\stb_image.h" />
     <ClInclude Include="..\TinyXml2\tinyxml2.h" />
-    <ClInclude Include="Audio\AudioGroup.hpp" />
-    <ClInclude Include="Audio\AudioSystem.hpp" />
-    <ClInclude Include="Core\AssimpLoader.hpp" />
     <ClInclude Include="Core\Blackboard.hpp" />
     <ClInclude Include="Core\Delegate.hpp" />
     <ClInclude Include="Core\GameInstance.hpp" />

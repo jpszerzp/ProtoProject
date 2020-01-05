@@ -18,7 +18,6 @@ TheApp::TheApp()
 	TimeStartup();
 	RendererStartup();
 	InputSystemStartup();
-	AudioSystemStartup();
 	StateStartup();
 	ProfilerStartup();
 	ConsoleStartup();
@@ -36,8 +35,6 @@ TheApp::~TheApp()
 
 	delete g_theGame;
 	g_theGame = nullptr;
-
-	AudioSystem::DestroyInstance();
 
 	InputSystem::DestroyInstance();
 
@@ -115,12 +112,10 @@ void TheApp::RunFrame()
 
 	g_renderer->BeginFrame();
 	g_input->BeginFrame();
-	g_audio->BeginFrame();
 
 	Update();
 	Render();
 
-	g_audio->EndFrame();
 	g_input->EndFrame();
 	g_renderer->EndFrame();
 
@@ -175,12 +170,6 @@ void TheApp::ProcessInput()
 	}
 }
 
-void TheApp::PlayAudio(std::string clipName)
-{
-	SoundID testSound = g_audio->CreateOrGetSound( clipName );
-	g_audio->PlaySound( testSound );
-}
-
 void TheApp::TimeStartup()
 {
 	// master clock forced to be null
@@ -200,11 +189,6 @@ void TheApp::InputSystemStartup()
 	g_input = InputSystem::GetInstance();
 	g_input->MouseShowCursor(false);
 	g_input->MouseLockCursor(true);
-}
-
-void TheApp::AudioSystemStartup()
-{
-	g_audio = AudioSystem::GetInstance();
 }
 
 void TheApp::StateStartup()
