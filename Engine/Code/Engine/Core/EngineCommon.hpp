@@ -1,14 +1,14 @@
 #pragma once
 
-#include "Engine/Core/Profiler/ProfileLogScoped.hpp"
+//#include "Engine/Core/Profiler/ProfileLogScoped.hpp"
 #include "Engine/Core/Util/StringUtils.hpp"
 
 #define UNUSED(x) (void)(x);
-#define PROFILE_LOG_SCOPED(tag) ProfileLogScoped var(tag);
-#define PROFILE_LOG_SCOPED_FUNCTION() ProfileLogScoped var(__FUNCTION__);
-#define PROFILE_LOG_SCOPED_PUSH() ProfilePush()
-#define PROFILE_LOG_SCOPED_POP() ProfilePop()
-#define PROFILE_ENABLED
+//#define PROFILE_LOG_SCOPED(tag) ProfileLogScoped var(tag);
+//#define PROFILE_LOG_SCOPED_FUNCTION() ProfileLogScoped var(__FUNCTION__);
+//#define PROFILE_LOG_SCOPED_PUSH() ProfilePush()
+//#define PROFILE_LOG_SCOPED_POP() ProfilePop()
+//#define PROFILE_ENABLED
 
 class Blackboard;
 class Clock;

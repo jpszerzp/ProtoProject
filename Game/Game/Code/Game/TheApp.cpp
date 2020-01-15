@@ -10,7 +10,7 @@
 #include "Engine/Core/ErrorWarningAssert.hpp"
 #include "Engine/Core/Console/Command.hpp"
 #include "Engine/Core/Console/DevConsole.hpp"
-#include "Engine/Core/Profiler/ProfileSystem.hpp"
+//#include "Engine/Core/Profiler/ProfileSystem.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
 
 TheApp::TheApp()
@@ -19,7 +19,7 @@ TheApp::TheApp()
 	RendererStartup();
 	InputSystemStartup();
 	StateStartup();
-	ProfilerStartup();
+	//ProfilerStartup();
 	ConsoleStartup();
 	BlackboardStartup();
 }
@@ -31,7 +31,7 @@ TheApp::~TheApp()
 
 	DevConsole::DestroyConsole();
 
-	Profiler::DestroyInstance();
+	//Profiler::DestroyInstance();
 
 	delete g_theGame;
 	g_theGame = nullptr;
@@ -83,8 +83,8 @@ void TheApp::Update()
 	// If it turns out problematic to put profiler update inside run_frame of app
 	// use game's process_input for input detection instead.
 	// Disable profiler update/update_input accordingly.
-	Profiler* profiler = Profiler::GetInstance();
-	profiler->Update();
+	//Profiler* profiler = Profiler::GetInstance();
+	//profiler->Update();
 }
 
 void TheApp::UpdateTime()
@@ -102,8 +102,8 @@ void TheApp::Render()
 	console->Render(g_renderer);
 	
 	// profiler render
-	Profiler* profiler = Profiler::GetInstance();
-	profiler->Render(g_renderer);
+	//Profiler* profiler = Profiler::GetInstance();
+	//profiler->Render(g_renderer);
 }
 
 void TheApp::RunFrame()
@@ -151,7 +151,7 @@ void TheApp::ProcessInput()
 		}
 	}
 
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_M) && !IsProfilerOn())
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_M) /*&& !IsProfilerOn()*/)
 	{
 		if (g_input->m_mouseLock)
 		{
@@ -206,11 +206,11 @@ void TheApp::StateStartup()
 	g_theGame->UseGameState(nullptr);
 }
 
-void TheApp::ProfilerStartup()
-{
-	// set up profiler
-	Profiler::GetInstance();
-}
+//void TheApp::ProfilerStartup()
+//{
+//	// set up profiler
+//	Profiler::GetInstance();
+//}
 
 void TheApp::ConsoleStartup()
 {

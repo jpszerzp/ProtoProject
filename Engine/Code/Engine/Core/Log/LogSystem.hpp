@@ -8,6 +8,8 @@
 #define DEFAULT_LOG_NAME "Data/Logs/log.txt"
 #define DEFAULT_DUP_DIR "Data/Logs/log_"
 
+#include <vector>
+
 struct sLog
 {
 	std::string m_tag;

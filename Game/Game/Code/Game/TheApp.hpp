@@ -44,7 +44,7 @@ public:
 	void RendererStartup();
 	void InputSystemStartup();
 	void StateStartup();
-	void ProfilerStartup();
+	//void ProfilerStartup();
 	void ConsoleStartup();
 	void BlackboardStartup();
 };
