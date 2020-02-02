@@ -331,9 +331,6 @@
     <ClCompile Include="Core\Profiler\ProfileLogScoped.cpp">
       <Filter>Core\Profiler</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Profiler\ProfileSystem.cpp">
-      <Filter>Core\Profiler</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Util\DataUtils.cpp">
       <Filter>Core</Filter>
     </ClCompile>
@@ -342,9 +339,6 @@
     </ClCompile>
     <ClCompile Include="Core\Thread\Thread.cpp">
       <Filter>Core\Thread</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Log\LogSystem.cpp">
-      <Filter>Core\Log</Filter>
     </ClCompile>
     <ClCompile Include="Core\Thread\ThreadSafeQueue.cpp">
       <Filter>Core\Thread</Filter>
@@ -460,16 +454,7 @@
     <ClCompile Include="Math\Line3.cpp">
       <Filter>General</Filter>
     </ClCompile>
-    <ClCompile Include="Math\QuickHull.cpp">
-      <Filter>General</Filter>
-    </ClCompile>
     <ClCompile Include="Physics\3D\QuadRB3.cpp">
-      <Filter>General</Filter>
-    </ClCompile>
-    <ClCompile Include="Physics\3D\GJK3.cpp">
-      <Filter>General</Filter>
-    </ClCompile>
-    <ClCompile Include="Math\HalfEdge.cpp">
       <Filter>General</Filter>
     </ClCompile>
     <ClCompile Include="Core\Util\RenderUtil.cpp">
@@ -481,22 +466,10 @@
     <ClCompile Include="Core\Primitive\Cone.cpp">
       <Filter>Core\GameObject\Primitives</Filter>
     </ClCompile>
-    <ClCompile Include="Core\HullObject.cpp">
-      <Filter>Core\GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="Physics\3D\GJK3Simplex.cpp">
-      <Filter>General</Filter>
-    </ClCompile>
-    <ClCompile Include="Physics\3D\EPA3.cpp">
-      <Filter>General</Filter>
-    </ClCompile>
     <ClCompile Include="Physics\3D\RF\CollisionEntity.cpp">
       <Filter>General</Filter>
     </ClCompile>
     <ClCompile Include="Physics\3D\RF\CollisionPrimitive.cpp">
-      <Filter>General</Filter>
-    </ClCompile>
-    <ClCompile Include="Physics\3D\RF\PhysTime.cpp">
       <Filter>General</Filter>
     </ClCompile>
     <ClCompile Include="Physics\3D\RF\CollisionKeep.cpp">
@@ -777,9 +750,6 @@
     <ClInclude Include="Core\Profiler\ProfileLogScoped.hpp">
       <Filter>Core\Profiler</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Profiler\ProfileSystem.hpp">
-      <Filter>Core\Profiler</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Util\DataUtils.hpp">
       <Filter>Core</Filter>
     </ClInclude>
@@ -788,9 +758,6 @@
     </ClInclude>
     <ClInclude Include="Core\Thread\Thread.hpp">
       <Filter>Core\Thread</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Log\LogSystem.hpp">
-      <Filter>Core\Log</Filter>
     </ClInclude>
     <ClInclude Include="Core\Thread\ThreadSafeQueue.hpp">
       <Filter>Core\Thread</Filter>
@@ -837,11 +804,8 @@
     <ClInclude Include="Physics\3D\BoxRB3.hpp" />
     <ClInclude Include="Physics\3D\BoxEntity3.hpp" />
     <ClInclude Include="Math\Line3.hpp" />
-    <ClInclude Include="Math\QuickHull.hpp" />
     <ClInclude Include="Physics\3D\QuadRB3.hpp" />
     <ClInclude Include="Core\GameInstance.hpp" />
-    <ClInclude Include="Math\HalfEdge.hpp" />
-    <ClInclude Include="Physics\3D\GJK3.hpp" />
     <ClInclude Include="Core\Util\RenderUtil.hpp" />
     <ClInclude Include="Physics\3D\CCDResolver.hpp" />
     <ClInclude Include="Core\Interval.hpp">
@@ -850,14 +814,8 @@
     <ClInclude Include="Core\Primitive\Cone.hpp">
       <Filter>Core\GameObject\Primitives</Filter>
     </ClInclude>
-    <ClInclude Include="Core\HullObject.hpp">
-      <Filter>Core\GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="Physics\3D\GJK3Simplex.hpp" />
-    <ClInclude Include="Physics\3D\EPA3.hpp" />
     <ClInclude Include="Physics\3D\RF\CollisionEntity.hpp" />
     <ClInclude Include="Physics\3D\RF\CollisionPrimitive.hpp" />
-    <ClInclude Include="Physics\3D\RF\PhysTime.hpp" />
     <ClInclude Include="Physics\3D\RF\CollisionKeep.hpp" />
     <ClInclude Include="Physics\3D\RF\TheCollision.hpp" />
     <ClInclude Include="Physics\3D\RF\CollisionDetector.hpp" />

@@ -10,7 +10,6 @@
 #include "Engine/Core/ErrorWarningAssert.hpp"
 #include "Engine/Core/Console/Command.hpp"
 #include "Engine/Core/Console/DevConsole.hpp"
-//#include "Engine/Core/Profiler/ProfileSystem.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
 
 TheApp::TheApp()
@@ -19,19 +18,16 @@ TheApp::TheApp()
 	RendererStartup();
 	InputSystemStartup();
 	StateStartup();
-	//ProfilerStartup();
 	ConsoleStartup();
 	BlackboardStartup();
 }
 
 TheApp::~TheApp()
 {
-	delete g_gameConfigBlackboard;
-	g_gameConfigBlackboard = nullptr;
+	delete g_config_blackboard;
+	g_config_blackboard = nullptr;
 
 	DevConsole::DestroyConsole();
-
-	//Profiler::DestroyInstance();
 
 	delete g_theGame;
 	g_theGame = nullptr;
@@ -79,12 +75,6 @@ void TheApp::Update()
 	{
 		OnQuitRequested();
 	}
-
-	// If it turns out problematic to put profiler update inside run_frame of app
-	// use game's process_input for input detection instead.
-	// Disable profiler update/update_input accordingly.
-	//Profiler* profiler = Profiler::GetInstance();
-	//profiler->Update();
 }
 
 void TheApp::UpdateTime()
@@ -100,10 +90,6 @@ void TheApp::Render()
 
 	DevConsole* console = DevConsole::GetInstance();
 	console->Render(g_renderer);
-	
-	// profiler render
-	//Profiler* profiler = Profiler::GetInstance();
-	//profiler->Render(g_renderer);
 }
 
 void TheApp::RunFrame()
@@ -206,12 +192,6 @@ void TheApp::StateStartup()
 	g_theGame->UseGameState(nullptr);
 }
 
-//void TheApp::ProfilerStartup()
-//{
-//	// set up profiler
-//	Profiler::GetInstance();
-//}
-
 void TheApp::ConsoleStartup()
 {
 	DevConsole* theConsole = DevConsole::GetInstance();
@@ -225,6 +205,6 @@ void TheApp::BlackboardStartup()
 {
 	XMLDocument gameConfigDoc;
 	gameConfigDoc.LoadFile("Data/GameConfig.xml");
-	g_gameConfigBlackboard = new Blackboard();
-	g_gameConfigBlackboard->PopulateFromXmlElementAttributes(*(gameConfigDoc.FirstChildElement()));
+	g_config_blackboard = new Blackboard();
+	g_config_blackboard->PopulateFromXmlElementAttributes(*(gameConfigDoc.FirstChildElement()));
 }

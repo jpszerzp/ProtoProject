@@ -4,9 +4,7 @@
 #include "Engine/Core/Util/StringUtils.hpp"
 #include "Engine/Core/Thread/Thread.hpp"
 #include "Engine/Core/EngineCommon.hpp"
-#include "Engine/Core/Log/LogSystem.hpp"
 #include "Engine/Renderer/DebugRenderer.hpp"
-#include "Engine/Math/QuickHull.hpp"
 
 #include <limits.h>
 #include <stdexcept>      // std::invalid_argument
@@ -171,45 +169,6 @@ void NonThreadTestCommand(Command&)
 	ThreadTest(nullptr);
 }
 
-void LogTestCommand(Command&)
-{
-	LogTest(4);
-}
-
-void LogFlushCommand(Command&)
-{
-	LogFlushTest();
-}
-
-void LogShowAllCommand(Command&)
-{
-	LogShowAll();
-}
-
-void LogHideAllCommand(Command&)
-{
-	LogHideAll();
-}
-
-void LogShowTagCommand(Command& cmd)
-{
-	//DevConsole::GetInstance()->ClearOutputBufferFormat();
-	std::string subStr = cmd.GetNextString();
-	LogShowTag(subStr.c_str());
-}
-
-void LogHideTagCommand(Command& cmd)
-{
-	//DevConsole::GetInstance()->ClearOutputBufferFormat();
-	std::string subStr = cmd.GetNextString();
-	LogHideTag(subStr.c_str());
-}
-
-void ThreadPrintCommand(Command&)
-{
-	LogConsoleTest();
-}
-
 void SpawnProcessCommand(Command& cmd)
 {
 	int usedNum = 1;
@@ -263,28 +222,6 @@ void SpawnProcessCommand(Command& cmd)
 	}
 }
 
-void BroadPhaseCommand(Command& cmd)
-{
-	std::string subStr = cmd.GetNextString();
-	Rgba outputColor;
-
-	if (subStr == "true")
-	{
-		g_broadphase = true;
-		ConsolePrintfUnit(Rgba::GREEN, "broad phase on!");
-	}
-	else if (subStr == "false")
-	{
-		g_broadphase = false;
-		ConsolePrintfUnit(Rgba::YELLOW, "broad phase off!");
-	}
-	else
-		ConsolePrintfUnit(Rgba::RED, "Unknown arg!");
-}
-
-void EncounterCommand(Command&)
-{
-}
 
 Command::Command(const char* str)
 {
@@ -379,25 +316,10 @@ void CommandStartup()
 	CommandRegister("quit", QuitCommand, "{}", "Quit the application.");
 	CommandRegister("save_log", SaveLogCommand, "{string}", "Takes a filename, and saves a copy of current console output to the file.");
 	CommandRegister("history", HistoryCommand, "{}", "Prints input history recorded in history log.");
-
-	CommandRegister("load_encounter", EncounterCommand, "{string}", "Receive encounter name data to load an encounter.");
 	CommandRegister("render_debug", DebugRenderCommand, "{bool}", "Turn on Debug Render mode if true; turn off otherwise.");
-
 	CommandRegister("thread_test", ThreadTestCommand, "{}", "Test thread with a slow operation by having no hitch");
 	CommandRegister("non_thread_test", NonThreadTestCommand, "{}", "Test thread with a slow operation by having hitch");
-	CommandRegister("log_test", LogTestCommand, "{}", "Test threaded log system");
-	CommandRegister("log_flush", LogFlushCommand, "{}", "Testing flush on log message queue");
-	CommandRegister("log_show_all", LogShowAllCommand, "{}", "Show logs with tags");
-	CommandRegister("log_hide_all", LogHideAllCommand, "{}", "Hide logs with tags");
-	CommandRegister("log_show", LogShowTagCommand, "{string}", "Always show logs with specified tag");
-	CommandRegister("log_hide", LogHideTagCommand, "{string}", "Always hide logs with specified tag");
-	CommandRegister("thread_print", ThreadPrintCommand, "{}", "Demonstrate threaded console print");
-
 	CommandRegister("spawn_process", SpawnProcessCommand, "{}", "Spawn a copy of current process");
-
-	// physics
-	CommandRegister("broadphase", BroadPhaseCommand, "{bool}", "Turn on/off broadphase");
-	//CommandRegister("qh_draw_normal", QHNormalDrawCommand, "{true}", "Draw face normal of a convex hull");
 }
 
 

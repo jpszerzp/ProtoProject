@@ -1,6 +1,5 @@
 #include "Engine/Math/MathUtils.hpp"
 #include "Engine/Core/Transform.hpp"
-#include "Engine/Core/Profiler/ProfileSystem.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
 
 float ConvertDegreesToRadians(float degrees)
@@ -1729,136 +1728,136 @@ float DistPointToPlaneUnsigned(const Vector3& pt, const Vector3& vert1, const Ve
 * @param closest: reference to the closest point 
 * @return the closest feature
 */
-QHFeature* DistPointToTriangleHull(const Vector3& pt, const Vector3& a, 
-	const Vector3& b, const Vector3& c, float& dist, Vector3& closest)
-{
-	// see p139 of real time collision detection
-	// in my case, I want the distance and feature info
-	Vector3 ab = b - a;
-	Vector3 ac = c - a;
-	Vector3 bc = c - b;
-
-	// Voronoi related to ab
-	float snom = DotProduct(pt - a, ab);
-	float sdenom = DotProduct(pt - b, a - b);
-
-	// Voronoi related to ac
-	float tnom = DotProduct(pt - a, ac);
-	float tdenom = DotProduct(pt - c, a - c);
-
-	if (snom <= 0.f && tnom <= 0.f)
-	{
-		closest = a;
-		dist = (pt - a).GetLength();
-		QHVert* feature = new QHVert(a);
-
-		return feature;
-	}
-
-	// Voronoi related to bc
-	float unom = DotProduct(pt - b, bc);
-	float udenom = DotProduct(pt - c, b - c);
-	
-	if (sdenom <= 0.f && unom <= 0.f)
-	{
-		closest = b;
-		dist = (pt - b).GetLength();
-		QHVert* feature = new QHVert(b);
-
-		return feature;
-	}
-
-	if (tdenom <= 0.f && udenom <= 0.f)
-	{
-		closest = c;
-		dist = (pt - c).GetLength();
-		QHVert* feature = new QHVert(c);
-		
-		return feature;
-	}
-
-	// investigate edge features with barycentric methods
-	// ab
-	Vector3 n = ab.Cross(ac);
-	Vector3 toA = a - pt;
-	Vector3 toB = b - pt;
-	float vc = DotProduct(n, toA.Cross(toB));
-	if (vc <= 0.f && snom >= 0.f && sdenom >= 0.f)
-	{
-		// closest feature is edge ab
-		Vector3 dev = ab * (snom / (snom + sdenom));
-		closest = a + dev;
-		dist = (-toA - dev).GetLength();
-		QHEdge* feature = new QHEdge(a, b);
-
-		return feature;
-	}
-
-	// bc
-	Vector3 toC = c - pt;
-	float va = DotProduct(n, toB.Cross(toC));
-	if (va <= 0.f && unom >= 0.f && udenom >= 0.f)
-	{
-		// closest feature is edge bc
-		Vector3 dev = bc * (unom / (unom + udenom));
-		closest = b + dev;
-		dist = (-toB - dev).GetLength();
-		QHEdge* feature = new QHEdge(b, c);
-
-		return feature;
-	}
-
-	// ac
-	float vb = DotProduct(n, toC.Cross(toA));
-	if (vb <= 0.f && tnom >= 0.f && tdenom >= 0.f)
-	{
-		// closest feature is edge ac
-		Vector3 dev = ac * (tnom / (tnom + tdenom));
-		closest = a + dev;
-		dist = (-toA - dev).GetLength();
-		QHEdge* feature = new QHEdge(a, c);
-
-		return feature;
-	}
-
-	// in this case pt project within the triangle 
-	float u = va / (va + vb + vc);
-	float v = vb / (va + vb + vc);
-	float w = 1.f - u - v;
-	closest = a * u + b * v + c * w;
-	dist = (pt - closest).GetLength();
-	QHFace* feature = new QHFace(a, b, c);
-
-	return feature;
-}
-
-QHFeature* DistPointToQuadHull(const Vector3& pt, const Vector3& vert1, 
-	const Vector3& vert2, const Vector3& vert3, const Vector3& vert4,
-	float& dist, Vector3& closest)
-{
-	// 1-2-3
-	float dist123;
-	Vector3 closest123;
-	QHFeature* feature123 = DistPointToTriangleHull(pt, vert1, vert2, vert3, dist123, closest123);
-
-	// 1-3-4
-	float dist134;
-	Vector3 closest134;
-	QHFeature* feature134 = DistPointToTriangleHull(pt, vert1, vert3, vert4, dist134, closest134);
-
-	if (dist123 < dist134)
-	{
-		closest = closest123;
-		dist = dist123;
-		return feature123;
-	}
-	else
-	{
-		closest = closest134;
-		dist = dist134;
-		return feature134;
-	}
-}
+//QHFeature* DistPointToTriangleHull(const Vector3& pt, const Vector3& a, 
+//	const Vector3& b, const Vector3& c, float& dist, Vector3& closest)
+//{
+//	// see p139 of real time collision detection
+//	// in my case, I want the distance and feature info
+//	Vector3 ab = b - a;
+//	Vector3 ac = c - a;
+//	Vector3 bc = c - b;
+//
+//	// Voronoi related to ab
+//	float snom = DotProduct(pt - a, ab);
+//	float sdenom = DotProduct(pt - b, a - b);
+//
+//	// Voronoi related to ac
+//	float tnom = DotProduct(pt - a, ac);
+//	float tdenom = DotProduct(pt - c, a - c);
+//
+//	if (snom <= 0.f && tnom <= 0.f)
+//	{
+//		closest = a;
+//		dist = (pt - a).GetLength();
+//		QHVert* feature = new QHVert(a);
+//
+//		return feature;
+//	}
+//
+//	// Voronoi related to bc
+//	float unom = DotProduct(pt - b, bc);
+//	float udenom = DotProduct(pt - c, b - c);
+//	
+//	if (sdenom <= 0.f && unom <= 0.f)
+//	{
+//		closest = b;
+//		dist = (pt - b).GetLength();
+//		QHVert* feature = new QHVert(b);
+//
+//		return feature;
+//	}
+//
+//	if (tdenom <= 0.f && udenom <= 0.f)
+//	{
+//		closest = c;
+//		dist = (pt - c).GetLength();
+//		QHVert* feature = new QHVert(c);
+//		
+//		return feature;
+//	}
+//
+//	// investigate edge features with barycentric methods
+//	// ab
+//	Vector3 n = ab.Cross(ac);
+//	Vector3 toA = a - pt;
+//	Vector3 toB = b - pt;
+//	float vc = DotProduct(n, toA.Cross(toB));
+//	if (vc <= 0.f && snom >= 0.f && sdenom >= 0.f)
+//	{
+//		// closest feature is edge ab
+//		Vector3 dev = ab * (snom / (snom + sdenom));
+//		closest = a + dev;
+//		dist = (-toA - dev).GetLength();
+//		QHEdge* feature = new QHEdge(a, b);
+//
+//		return feature;
+//	}
+//
+//	// bc
+//	Vector3 toC = c - pt;
+//	float va = DotProduct(n, toB.Cross(toC));
+//	if (va <= 0.f && unom >= 0.f && udenom >= 0.f)
+//	{
+//		// closest feature is edge bc
+//		Vector3 dev = bc * (unom / (unom + udenom));
+//		closest = b + dev;
+//		dist = (-toB - dev).GetLength();
+//		QHEdge* feature = new QHEdge(b, c);
+//
+//		return feature;
+//	}
+//
+//	// ac
+//	float vb = DotProduct(n, toC.Cross(toA));
+//	if (vb <= 0.f && tnom >= 0.f && tdenom >= 0.f)
+//	{
+//		// closest feature is edge ac
+//		Vector3 dev = ac * (tnom / (tnom + tdenom));
+//		closest = a + dev;
+//		dist = (-toA - dev).GetLength();
+//		QHEdge* feature = new QHEdge(a, c);
+//
+//		return feature;
+//	}
+//
+//	// in this case pt project within the triangle 
+//	float u = va / (va + vb + vc);
+//	float v = vb / (va + vb + vc);
+//	float w = 1.f - u - v;
+//	closest = a * u + b * v + c * w;
+//	dist = (pt - closest).GetLength();
+//	QHFace* feature = new QHFace(a, b, c);
+//
+//	return feature;
+//}
+//
+//QHFeature* DistPointToQuadHull(const Vector3& pt, const Vector3& vert1, 
+//	const Vector3& vert2, const Vector3& vert3, const Vector3& vert4,
+//	float& dist, Vector3& closest)
+//{
+//	// 1-2-3
+//	float dist123;
+//	Vector3 closest123;
+//	QHFeature* feature123 = DistPointToTriangleHull(pt, vert1, vert2, vert3, dist123, closest123);
+//
+//	// 1-3-4
+//	float dist134;
+//	Vector3 closest134;
+//	QHFeature* feature134 = DistPointToTriangleHull(pt, vert1, vert3, vert4, dist134, closest134);
+//
+//	if (dist123 < dist134)
+//	{
+//		closest = closest123;
+//		dist = dist123;
+//		return feature123;
+//	}
+//	else
+//	{
+//		closest = closest134;
+//		dist = dist134;
+//		return feature134;
+//	}
+//}
 
 Vector3 ComputePlaneIntersectionPointLA(const Plane& p1, const Plane& p2, const Plane& p3)
 {

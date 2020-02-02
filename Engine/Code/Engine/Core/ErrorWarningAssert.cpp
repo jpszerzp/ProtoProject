@@ -13,7 +13,6 @@
 //#include <Windows.h>
 #include "Engine/Core/ErrorWarningAssert.hpp"
 #include "Engine/Core/Util/StringUtils.hpp"
-#include "Engine/Core/Log/LogSystem.hpp"
 #include <stdarg.h>
 #include <iostream>
 

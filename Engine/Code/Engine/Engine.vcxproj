@@ -263,16 +263,13 @@
     <ClCompile Include="..\TinyXml2\tinyxml2.cpp" />
     <ClCompile Include="Core\Blackboard.cpp" />
     <ClCompile Include="Core\Delegate.cpp" />
-    <ClCompile Include="Core\HullObject.cpp" />
     <ClCompile Include="Core\Interval.cpp" />
     <ClCompile Include="Core\Log\FileUtils.cpp" />
-    <ClCompile Include="Core\Log\LogSystem.cpp" />
     <ClCompile Include="Core\MapChunk.cpp" />
     <ClCompile Include="Core\Primitive\Box.cpp" />
     <ClCompile Include="Core\Primitive\Cone.cpp" />
     <ClCompile Include="Core\Profiler\ProfileLogScoped.cpp" />
     <ClCompile Include="Core\Profiler\ProfilerNode.cpp" />
-    <ClCompile Include="Core\Profiler\ProfileSystem.cpp" />
     <ClCompile Include="Core\Quaternion.cpp" />
     <ClCompile Include="Core\Ray3.cpp" />
     <ClCompile Include="Core\SurfacePatch.cpp" />
@@ -318,7 +315,6 @@
     <ClCompile Include="Math\CubicSpline.cpp" />
     <ClCompile Include="Math\Disc2.cpp" />
     <ClCompile Include="Math\FloatRange.cpp" />
-    <ClCompile Include="Math\HalfEdge.cpp" />
     <ClCompile Include="Math\IntRange.cpp" />
     <ClCompile Include="Math\IntVector2.cpp" />
     <ClCompile Include="Math\IntVector3.cpp" />
@@ -332,7 +328,6 @@
     <ClCompile Include="Math\Plane.cpp" />
     <ClCompile Include="Math\Primitive3.cpp" />
     <ClCompile Include="Math\Quadtree.cpp" />
-    <ClCompile Include="Math\QuickHull.cpp" />
     <ClCompile Include="Math\RawNoise.cpp" />
     <ClCompile Include="Math\SmoothNoise.cpp" />
     <ClCompile Include="Math\Sphere3.cpp" />
@@ -352,11 +347,8 @@
     <ClCompile Include="Physics\2D\Entity.cpp" />
     <ClCompile Include="Physics\2D\Manifold.cpp" />
     <ClCompile Include="Physics\3D\Entity3.cpp" />
-    <ClCompile Include="Physics\3D\EPA3.cpp" />
     <ClCompile Include="Physics\3D\ForceGenerator.cpp" />
     <ClCompile Include="Physics\3D\ForceRegistry.cpp" />
-    <ClCompile Include="Physics\3D\GJK3.cpp" />
-    <ClCompile Include="Physics\3D\GJK3Simplex.cpp" />
     <ClCompile Include="Physics\3D\PHYSX\PhysXObject.cpp" />
     <ClCompile Include="Physics\3D\PointEntity3.cpp" />
     <ClCompile Include="Physics\3D\PointRB3.cpp" />
@@ -369,7 +361,6 @@
     <ClCompile Include="Physics\3D\RF\CollisionSolver.cpp" />
     <ClCompile Include="Physics\3D\RF\ConvexHull.cpp" />
     <ClCompile Include="Physics\3D\RF\ConvexPolyhedron.cpp" />
-    <ClCompile Include="Physics\3D\RF\PhysTime.cpp" />
     <ClCompile Include="Physics\3D\RF\TheCollision.cpp" />
     <ClCompile Include="Physics\3D\Rigidbody3.cpp" />
     <ClCompile Include="Physics\3D\RigidForceGenerator.cpp" />
@@ -415,16 +406,13 @@
     <ClInclude Include="Core\Blackboard.hpp" />
     <ClInclude Include="Core\Delegate.hpp" />
     <ClInclude Include="Core\GameInstance.hpp" />
-    <ClInclude Include="Core\HullObject.hpp" />
     <ClInclude Include="Core\Interval.hpp" />
     <ClInclude Include="Core\Log\FileUtils.hpp" />
-    <ClInclude Include="Core\Log\LogSystem.hpp" />
     <ClInclude Include="Core\MapChunk.hpp" />
     <ClInclude Include="Core\Primitive\Box.hpp" />
     <ClInclude Include="Core\Primitive\Cone.hpp" />
     <ClInclude Include="Core\Profiler\ProfileLogScoped.hpp" />
     <ClInclude Include="Core\Profiler\ProfilerNode.hpp" />
-    <ClInclude Include="Core\Profiler\ProfileSystem.hpp" />
     <ClInclude Include="Core\Quaternion.hpp" />
     <ClInclude Include="Core\Ray3.hpp" />
     <ClInclude Include="Core\SurfacePatch.hpp" />
@@ -472,7 +460,6 @@
     <ClInclude Include="Math\CubicSpline.hpp" />
     <ClInclude Include="Math\Disc2.hpp" />
     <ClInclude Include="Math\FloatRange.hpp" />
-    <ClInclude Include="Math\HalfEdge.hpp" />
     <ClInclude Include="Math\IntRange.hpp" />
     <ClInclude Include="Math\IntVector2.hpp" />
     <ClInclude Include="Math\IntVector3.hpp" />
@@ -486,7 +473,6 @@
     <ClInclude Include="Math\Plane.hpp" />
     <ClInclude Include="Math\Primitive3.hpp" />
     <ClInclude Include="Math\Quadtree.hpp" />
-    <ClInclude Include="Math\QuickHull.hpp" />
     <ClInclude Include="Math\RawNoise.hpp" />
     <ClInclude Include="Math\SmoothNoise.hpp" />
     <ClInclude Include="Math\Sphere3.hpp" />
@@ -507,11 +493,8 @@
     <ClInclude Include="Physics\2D\Entity.hpp" />
     <ClInclude Include="Physics\2D\Manifold.hpp" />
     <ClInclude Include="Physics\3D\Entity3.hpp" />
-    <ClInclude Include="Physics\3D\EPA3.hpp" />
     <ClInclude Include="Physics\3D\ForceGenerator.hpp" />
     <ClInclude Include="Physics\3D\ForceRegistry.hpp" />
-    <ClInclude Include="Physics\3D\GJK3.hpp" />
-    <ClInclude Include="Physics\3D\GJK3Simplex.hpp" />
     <ClInclude Include="Physics\3D\PHYSX\PhysAllocator.hpp" />
     <ClInclude Include="Physics\3D\PHYSX\PhysErrorCallback.hpp" />
     <ClInclude Include="Physics\3D\PHYSX\PhysXObject.hpp" />
@@ -527,7 +510,6 @@
     <ClInclude Include="Physics\3D\RF\CollisionSolver.hpp" />
     <ClInclude Include="Physics\3D\RF\ConvexHull.hpp" />
     <ClInclude Include="Physics\3D\RF\ConvexPolyhedron.hpp" />
-    <ClInclude Include="Physics\3D\RF\PhysTime.hpp" />
     <ClInclude Include="Physics\3D\RF\TheCollision.hpp" />
     <ClInclude Include="Physics\3D\Rigidbody3.hpp" />
     <ClInclude Include="Physics\3D\RigidForceGenerator.hpp" />

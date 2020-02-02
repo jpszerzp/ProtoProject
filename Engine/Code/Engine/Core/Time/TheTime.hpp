@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-// Gets raw performance counter
+// gets raw performance counter
 uint64_t GetPerformanceCounter(); 
 
 // converts a performance count the seconds it represents

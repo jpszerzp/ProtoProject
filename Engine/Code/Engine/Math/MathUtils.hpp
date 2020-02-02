@@ -11,7 +11,6 @@
 #include "Engine/Math/Sphere3.hpp"
 #include "Engine/Math/OBB3.hpp"
 #include "Engine/Math/Plane.hpp"
-#include "Engine/Math/QuickHull.hpp"
 #include "Engine/Math/Line3.hpp"
 #include "Engine/Core/Interval.hpp"
 #include "Engine/Physics/3D/RF/ConvexPolyhedron.hpp"
@@ -90,13 +89,13 @@ std::vector<uint8_t> BinaryFromDecimal16(size_t decimal);
 uint16_t BufferSizeHardCode16(std::string str);
 
 // easing function
-float	SmoothStart2( float t ); // 2nd-degree smooth start (a.k.a. “quadratic ease in”)
-float	SmoothStart3( float t ); // 3rd-degree smooth start (a.k.a. “cubic ease in”)
-float	SmoothStart4( float t ); // 4th-degree smooth start (a.k.a. “quartic ease in”)
-float	SmoothStop2( float t ); // 2nd-degree smooth start (a.k.a. “quadratic ease out”)
-float	SmoothStop3( float t ); // 3rd-degree smooth start (a.k.a. “cubic ease out”)
-float	SmoothStop4( float t ); // 4th-degree smooth start (a.k.a. “quartic ease out”)
-float	SmoothStep3( float t ); // 3rd-degree smooth start/stop (a.k.a. “smoothstep”)
+float	SmoothStart2( float t ); // 2nd-degree smooth start (a.k.a. ï¿½quadratic ease inï¿½)
+float	SmoothStart3( float t ); // 3rd-degree smooth start (a.k.a. ï¿½cubic ease inï¿½)
+float	SmoothStart4( float t ); // 4th-degree smooth start (a.k.a. ï¿½quartic ease inï¿½)
+float	SmoothStop2( float t ); // 2nd-degree smooth start (a.k.a. ï¿½quadratic ease outï¿½)
+float	SmoothStop3( float t ); // 3rd-degree smooth start (a.k.a. ï¿½cubic ease outï¿½)
+float	SmoothStop4( float t ); // 4th-degree smooth start (a.k.a. ï¿½quartic ease outï¿½)
+float	SmoothStep3( float t ); // 3rd-degree smooth start/stop (a.k.a. ï¿½smoothstepï¿½)
 
 // interpolation
 int			  Interpolate( int start, int end, float fractionTowardEnd );
@@ -164,8 +163,8 @@ bool SATTestBoxVsConvex(const CollisionBox& b1, const CollisionConvexObject& cob
 //float SATTestPenetrationBoxVsConvex(const CollisionBox& b1, const CollisionConvexObject& cobj, const Vector3& axis, const Vector3& disp);
 
 // qh
-QHFeature* DistPointToTriangleHull(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3, float& dist, Vector3& closest);
-QHFeature* DistPointToQuadHull(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3, const Vector3& vert4, float& dist, Vector3& closest);
+//QHFeature* DistPointToTriangleHull(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3, float& dist, Vector3& closest);
+//QHFeature* DistPointToQuadHull(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3, const Vector3& vert4, float& dist, Vector3& closest);
 Vector3 ComputePlaneIntersectionPointLA(const Plane& p1, const Plane& p2, const Plane& p3);
 bool ComputePlaneIntersectionPoint(const Plane& p1, const Plane& p2, const Plane& p3, Vector3& p);
 Vector3 GetPolygonCentroid(const std::vector<Vector3>& verts, const ConvexPolygon& polygon);

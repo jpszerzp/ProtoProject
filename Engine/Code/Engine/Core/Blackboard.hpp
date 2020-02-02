@@ -21,7 +21,7 @@ private:
 	std::map<std::string, std::string>		 m_keyValuePairs;
 
 public:
-	TheApp* app_h = nullptr;
+	TheApp* app = nullptr;
 
 public:
 	Blackboard();

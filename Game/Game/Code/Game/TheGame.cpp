@@ -7,7 +7,6 @@
 #include "Engine/Core/Console/DevConsole.hpp"
 #include "Engine/Core/Time/Clock.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
-#include "Engine/Core/Profiler/ProfileSystem.hpp"
 #include "Engine/Renderer/Window.hpp"
 #include "Engine/Renderer/SpriteSheet.hpp"
 #include "Engine/Renderer/DebugRenderer.hpp"
@@ -20,13 +19,11 @@ TheGame::TheGame()
 	InitializeTextures();
 
 	DebugRenderStartup();
-	//ProfilerSystemInitialize();
 }
 
 TheGame::~TheGame()
 {
 	DebugRenderShutdown();
-	//ProfilerSystemShutDown();
 
 	delete m_states;
 	m_states = nullptr;
@@ -84,9 +81,6 @@ void TheGame::Update()
 	//UpdateTime();
 	
 	m_states->Update(m_deltaTime);
-
-	// Update rcs
-	//g_rcs->Update(m_deltaTime);
 }
 
 void TheGame::UpdateTime()

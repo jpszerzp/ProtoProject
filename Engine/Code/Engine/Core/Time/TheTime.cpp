@@ -11,9 +11,7 @@ class LocalTimeData
 public:
 	LocalTimeData() 
 	{
-		::QueryPerformanceFrequency( (LARGE_INTEGER*) &m_hpc_per_second ); 
-
-		// do the divide now, to not pay the cost later
+		::QueryPerformanceFrequency((LARGE_INTEGER*)&m_hpc_per_second); 
 		m_seconds_per_hpc = 1.0 / (double)m_hpc_per_second; 
 	}
 
@@ -23,9 +21,7 @@ public:
 }; 
 
 //------------------------------------------------------------------------
-// Declaring on the global scope - will 
-// cause constructor to be called before 
-// our entry function. 
+// Declaring on the global scope - will cause constructor to be called before our entry function. 
 static LocalTimeData gLocalTimeData;
 
 
@@ -34,20 +30,19 @@ static LocalTimeData gLocalTimeData;
 uint64_t GetPerformanceCounter() 
 {
 	uint64_t hpc;
-	::QueryPerformanceCounter( (LARGE_INTEGER*)&hpc ); 
+	::QueryPerformanceCounter((LARGE_INTEGER*)&hpc); 
 	return hpc; 
 }
 
 
 //------------------------------------------------------------------------
-// Converting to seconds; 
-// relies on gLocalTimeData existing;
-double PerformanceCountToSeconds( uint64_t hpc ) 
+// Converting to seconds; relies on gLocalTimeData existing;
+double PerformanceCountToSeconds(uint64_t hpc) 
 {
 	return (double)(hpc * gLocalTimeData.m_seconds_per_hpc); 
 }
 
-
+// Converting to hpc
 uint64_t SecondsToPerformanceCount(double seconds)
 {
 	return (uint64_t)(seconds * gLocalTimeData.m_hpc_per_second);

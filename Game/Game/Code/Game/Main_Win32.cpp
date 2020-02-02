@@ -4,11 +4,8 @@
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Core/Util/StringUtils.hpp"
 #include "Engine/Core/Time/TheTime.hpp"
-#include "Engine/Core/Profiler/ProfileSystem.hpp"
-#include "Engine/Core/Log/LogSystem.hpp"
 #include "Engine/Renderer/GLFunctions.hpp"
 #include "Engine/Renderer/Window.hpp"
-#include "Engine/Physics/3D/RF/PhysTime.hpp"
 
 #include <math.h>
 #include <cassert>
@@ -107,40 +104,18 @@ bool HandleMsg(unsigned int msg, size_t wparam, size_t)
 void Initialize( HINSTANCE )
 {
 	g_theApp = new TheApp();
-	g_gameConfigBlackboard->app_h = g_theApp;		// app hook to engine common blackboard
+
 	Window* theWindow = Window::GetInstance();
 	theWindow->RegisterHandler(HandleMsg);
 
-	LogSystemStartup();
-
-	PhysTimeSystem::InitTimeSystem();
-	
-	/*
-	LogHideTag("test");			// by default filter has blacklist
-	LogTaggedPrintf("test", "Helloworld");
-	LogTaggedPrintf("test", "%i, %s, %f", 1, "yesss", 0.1f);
-
-	DisableAll();				// white list; "false" to not clear filter to show hide tag works as the mode toggles
-	LogHideTag("test");			// since now list is white list, and we still hide "test", it needs to be removed
-	LogShowTag("warning");
-	LogShowTag("error");
-	LogTaggedPrintf("test", "Test is still filtered");
-	LogWarningf("warning is fine");
-	LogErrorf("error fine too");
-
-	LogShowAll();				// comment this and tests will be hidden as required above,
-								// regardless of white or blacklist mode
-	*/
+	// app hook to engine common blackboard
+	g_config_blackboard->app = g_theApp;
 }
-
 
 //-----------------------------------------------------------------------------------------------
 void Shutdown()
 {
-	PhysTimeSystem::DestroyTimeSystem();
-
 	GLShutdown();
-	LogSystemShutdown();
 
 	Window::DestroyWindow();
 
@@ -152,23 +127,15 @@ void Shutdown()
 //-----------------------------------------------------------------------------------------------
 int WINAPI WinMain( HINSTANCE applicationInstanceHandle, HINSTANCE, LPSTR commandLineString, int )
 {
-	UNUSED( commandLineString );
-	srand( (unsigned int) time( NULL ) );
+	UNUSED(commandLineString);
+	srand((unsigned int)time( NULL ));
 
-	Initialize( applicationInstanceHandle );
+	Initialize(applicationInstanceHandle);
 
 	// Program main loop; keep running frames until it's time to quit
-	while( !g_theApp->IsQuitting() )
+	while(!g_theApp->IsQuitting())
 	{
-		//Profiler* profiler = Profiler::GetInstance();
-		//profiler->ProfileMarkFrame();
-
-		// update last frame hpc duration for profiling
-		//std::string appFrameTag = "TheApp::RunFrame";
-		//PROFILE_LOG_SCOPED(appFrameTag.c_str());
 		g_theApp->RunFrame();
-
-		//profiler->ProfileMarkEndFrame();
 	}
 
 	Shutdown();
