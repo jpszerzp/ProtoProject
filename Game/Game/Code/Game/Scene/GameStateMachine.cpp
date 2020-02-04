@@ -1,14 +1,14 @@
-#include "Game/Scene/StateMachine.hpp"
+#include "Game/Scene/GameStateMachine.hpp"
 #include "Game/Util/GameCommon.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/Core/Console/DevConsole.hpp"
 
-StateMachine::StateMachine()
+GameStateMachine::GameStateMachine()
 {
 
 }
 
-StateMachine::~StateMachine()
+GameStateMachine::~GameStateMachine()
 {
 	for each (GameState* state in m_states)
 	{
@@ -19,13 +19,13 @@ StateMachine::~StateMachine()
 	m_states.clear();
 }
 
-void StateMachine::Update(float deltaTime)
+void GameStateMachine::Update(float deltaTime)
 {
 	UpdateInput();
 	UpdateState(deltaTime);
 }
 
-void StateMachine::UpdateInput()
+void GameStateMachine::UpdateInput()
 {
 	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_OEM_COMMA) && !DevConsoleIsOpen())
 	{
@@ -52,27 +52,27 @@ void StateMachine::UpdateInput()
 	}
 }
 
-void StateMachine::UpdateState(float deltaTime)
+void GameStateMachine::UpdateState(float deltaTime)
 {
 	m_currentState->Update(deltaTime);
 }
 
-void StateMachine::Render(Renderer* renderer)
+void GameStateMachine::Render(Renderer* renderer)
 {
 	m_currentState->Render(renderer);
 }
 
-void StateMachine::SetStateIndex(int idx)
+void GameStateMachine::SetStateIndex(int idx)
 {
 	m_stateIdx = idx;
 }
 
-void StateMachine::AppendState(GameState* state)
+void GameStateMachine::AppendState(GameState* state)
 {
 	m_states.push_back(state);
 }
 
-void StateMachine::SetCurrentState(GameState* state)
+void GameStateMachine::SetCurrentState(GameState* state)
 {
 	// if the input state is nullptr, meaning that user does not know which state to use
 	// just use the default state as the current state
@@ -89,7 +89,7 @@ void StateMachine::SetCurrentState(GameState* state)
 	// state idx updated already
 }
 
-void StateMachine::SetDefaultState(GameState* state)
+void GameStateMachine::SetDefaultState(GameState* state)
 {
 	m_defaultState = state;
 }

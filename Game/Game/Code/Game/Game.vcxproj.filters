@@ -16,7 +16,7 @@
     <ClCompile Include="TheGame.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="Scene/AIPrototype2D.cpp">
+    <ClCompile Include="Scene/ProtoState.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Scene/GameState.cpp">
@@ -31,7 +31,7 @@
     <ClCompile Include="Scene/PachinkoState.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="Scene/StateMachine.cpp">
+    <ClCompile Include="Scene/GameStateMachine.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Test/MathTest.cpp">

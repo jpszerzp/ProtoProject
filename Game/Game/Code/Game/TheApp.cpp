@@ -1,6 +1,6 @@
 #include "Game/TheApp.hpp"
-#include "Game/Scene/StateMachine.hpp"
-#include "Game/Scene/AIPrototype2D.hpp"
+#include "Game/Scene/GameStateMachine.hpp"
+#include "Game/Scene/ProtoState.hpp"
 #include "Game/Test/TransformTest.hpp"
 #include "Game/Test/MathTest.hpp"
 #include "Game/Test/DelegateTest.hpp"
@@ -24,69 +24,33 @@ TheApp::TheApp()
 
 TheApp::~TheApp()
 {
-	delete g_config_blackboard;
-	g_config_blackboard = nullptr;
-
-	DevConsole::DestroyConsole();
-
-	delete g_theGame;
-	g_theGame = nullptr;
-
-	InputSystem::DestroyInstance();
-
-	Renderer::DestroyInstance();
-
-	delete g_masterClock;
-	g_masterClock = nullptr;
-}
-
-void TheApp::SetInstantFPS()
-{
-	float theFps = 1.f / m_deltaSeconds;
-	g_theGame->SetFPS(theFps);
-}
-
-void TheApp::SetDelayedFPS()
-{
-	m_accTimer += m_deltaSeconds;
-	m_frames++;
-
-	if (m_accTimer >= 1.f)
-	{
-		float theFps = static_cast<float>(m_frames) / m_accTimer;
-		g_theGame->SetFPS(theFps);				
-		m_accTimer = 0.f;
-		m_frames = 0;
-	}
+	// reverse order to startups
+	BlackboardShutdown();
+	ConsoleShutdown();
+	StateShutdown();
+	InputSystemShutdown();
+	RendererShutdown();
+	TimeShutdown();
 }
 
 void TheApp::Update()
 {
-	UpdateTime();
-
 	g_input->Update();
 	ProcessInput();
 
-	g_theGame->Update();
+	game->Update();
 
 	DevConsole* console = DevConsole::GetInstance();
-	console->Update(g_input, m_deltaSeconds);
+	console->Update(g_input, (float)g_masterClock->GetFPS());
 	if (console->GetAppShouldQuit())
 	{
 		OnQuitRequested();
 	}
 }
 
-void TheApp::UpdateTime()
-{
-	m_deltaSeconds = g_masterClock->frame.seconds;
-
-	g_theGame->SetDeltaTime(m_deltaSeconds);
-}
-
 void TheApp::Render()
 {
-	g_theGame->Render(g_renderer);
+	game->Render(g_renderer);
 
 	DevConsole* console = DevConsole::GetInstance();
 	console->Render(g_renderer);
@@ -94,24 +58,30 @@ void TheApp::Render()
 
 void TheApp::RunFrame()
 {
-	ClockSystemBeginFrame();
-
-	g_renderer->BeginFrame();
-	g_input->BeginFrame();
-
+	BeginFrame();
 	Update();
 	Render();
+	EndFrame();
+}
 
+void TheApp::BeginFrame()
+{
+	ClockSystemBeginFrame();
+	g_renderer->BeginFrame();
+	g_input->BeginFrame();
+}
+
+void TheApp::EndFrame()
+{
 	g_input->EndFrame();
 	g_renderer->EndFrame();
-
 	//Sleep(1);
 	//::SwitchToThread();
 }
 
 void TheApp::OnQuitRequested()
 {
-	m_isQuitting = true;
+	m_quitting = true;
 }
 
 void TheApp::ProcessInput()
@@ -137,7 +107,8 @@ void TheApp::ProcessInput()
 		}
 	}
 
-	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_M) /*&& !IsProfilerOn()*/)
+	// mouse cursor lock
+	if (g_input->WasKeyJustPressed(InputSystem::KEYBOARD_M))
 	{
 		if (g_input->m_mouseLock)
 		{
@@ -156,13 +127,14 @@ void TheApp::ProcessInput()
 	}
 }
 
+/*
+ * Startups
+ */
 void TheApp::TimeStartup()
 {
-	// master clock forced to be null
+	// parent of master clock forced to be null
 	g_masterClock = new Clock();
 	g_masterClock->SetParent(nullptr);
-	m_accTimer = 0.f;
-	m_frames = 0;
 }
 
 void TheApp::RendererStartup()
@@ -179,17 +151,17 @@ void TheApp::InputSystemStartup()
 
 void TheApp::StateStartup()
 {
-	AIPrototypeState* AIPropState = new AIPrototypeState();
+	PrototypeState* ProtoState = new PrototypeState();
 	
-	// the game-wise state machine
-	StateMachine* states = new StateMachine();
+	// the gamewise state machine
+	GameStateMachine* states = new GameStateMachine();
 
-	states->AppendState(AIPropState);
+	states->AppendState(ProtoState);
 
-	g_theGame = new TheGame();
-	g_theGame->SetStateMachine(states);
-	g_theGame->UseDefaultState(AIPropState);
-	g_theGame->UseGameState(nullptr);
+	game = new TheGame();
+	game->SetStateMachine(states);
+	game->UseDefaultState(ProtoState);
+	game->UseGameState(nullptr);
 }
 
 void TheApp::ConsoleStartup()
@@ -207,4 +179,40 @@ void TheApp::BlackboardStartup()
 	gameConfigDoc.LoadFile("Data/GameConfig.xml");
 	g_config_blackboard = new Blackboard();
 	g_config_blackboard->PopulateFromXmlElementAttributes(*(gameConfigDoc.FirstChildElement()));
+}
+
+/*
+ * Shutdowns
+ */
+void TheApp::TimeShutdown()
+{
+	delete g_masterClock;
+	g_masterClock = nullptr;
+}
+
+void TheApp::RendererShutdown()
+{
+	Renderer::DestroyInstance();
+}
+
+void TheApp::InputSystemShutdown()
+{
+	InputSystem::DestroyInstance();
+}
+
+void TheApp::StateShutdown()
+{
+	delete game;
+	game = nullptr;
+}
+
+void TheApp::ConsoleShutdown()
+{
+	DevConsole::DestroyConsole();
+}
+
+void TheApp::BlackboardShutdown()
+{
+	delete g_config_blackboard;
+	g_config_blackboard = nullptr;
 }

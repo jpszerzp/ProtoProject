@@ -12,7 +12,6 @@
 #include <map>
 #include <stack>
 
-//#define MAX_PROFILER_TREE_NODE 100
 using namespace tinyxml2;
 
 class Blackboard 

@@ -306,7 +306,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Scene/AIPrototype2D.cpp" />
+    <ClCompile Include="Scene/ProtoState.cpp" />
     <ClCompile Include="Scene/GameState.cpp" />
     <ClCompile Include="Test/DelegateTest.cpp" />
     <ClCompile Include="Util/GameCommon.cpp" />
@@ -319,7 +319,7 @@
       <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ShowIncludes>
     </ClCompile>
     <ClCompile Include="Scene/PachinkoState.cpp" />
-    <ClCompile Include="Scene/StateMachine.cpp" />
+    <ClCompile Include="Scene/GameStateMachine.cpp" />
     <ClCompile Include="Test/MathTest.cpp" />
     <ClCompile Include="Test/TransformTest.cpp" />
     <ClCompile Include="TheApp.cpp" />
@@ -331,9 +331,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Scene/AIPrototype2D.hpp" />
+    <ClInclude Include="Scene/ProtoState.hpp" />
     <ClInclude Include="Scene/PachinkoState.hpp" />
-    <ClInclude Include="Scene/StateMachine.hpp" />
+    <ClInclude Include="Scene/GameStateMachine.hpp" />
     <ClInclude Include="Scene/GameState.hpp" />
     <ClInclude Include="Test/DelegateTest.hpp" />
     <ClInclude Include="Test/TransformTest.hpp" />

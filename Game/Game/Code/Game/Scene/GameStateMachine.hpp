@@ -2,7 +2,7 @@
 
 #include "Game/Scene/GameState.hpp"
 
-class StateMachine
+class GameStateMachine
 {
 private:
 	int m_stateIdx = 0;
@@ -11,8 +11,8 @@ private:
 	std::vector<GameState*> m_states;
 
 public:
-	StateMachine();
-	~StateMachine();
+	GameStateMachine();
+	~GameStateMachine();
 
 	void Update(float deltaTime);
 	void UpdateInput();

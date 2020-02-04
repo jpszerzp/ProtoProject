@@ -7,30 +7,18 @@
 
 class TheApp
 {
-	bool m_isQuitting = false;
-	bool m_isPaused = false;
-	bool m_slowed = false;
+private:
+	bool m_quitting = false;
 
-	float m_deltaSeconds;
-	float m_accTimer;
-	int m_frames;
+	TheGame* game;
 
 public:
 	TheApp();
 	~TheApp();
 
-	bool IsQuitting() { return m_isQuitting; }
-	bool IsPaused() { return m_isPaused; }
-	bool IsSlowed() { return m_slowed; }
-
-	void SetPaused (bool value) { m_isPaused = value; }
-	void SetSlowed (bool value) { m_slowed = value; }
-	void SetIsQuitting(bool value) { m_isQuitting = value; }
-	void SetDeltaSeconds(float value) { m_deltaSeconds = value; }
-	void SetInstantFPS();
-	void SetDelayedFPS();
-	
 	void RunFrame();
+	void BeginFrame();
+	void EndFrame();
 
 	void Update();
 	void UpdateTime();
@@ -46,6 +34,17 @@ public:
 	void StateStartup();
 	void ConsoleStartup();
 	void BlackboardStartup();
+
+	// module shutdowns
+	void TimeShutdown();
+	void RendererShutdown();
+	void InputSystemShutdown();
+	void StateShutdown();
+	void ConsoleShutdown();
+	void BlackboardShutdown();
+
+	bool IsQuitting() { return m_quitting; }
+	void SetIsQuitting(bool value) { m_quitting = value; }
 };
 
 extern TheApp* g_theApp;

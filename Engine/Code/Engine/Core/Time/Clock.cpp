@@ -17,7 +17,6 @@ Clock::Clock(Clock* parent)
 	}
 }
 
-
 Clock::~Clock()
 {
 	if (!m_children.empty())
@@ -36,12 +35,24 @@ Clock::~Clock()
 	}
 }
 
-
 void Clock::AddChild(Clock* child)
 {
 	m_children.push_back(child);
 }
 
+//float Clock::GetLerpedFPS()
+//{
+//	if (m_lerped_ms <= 0.0)
+//	{
+//		m_lerped_ms = frame.mseconds;
+//	}
+//	else
+//	{
+//		m_lerped_ms *= 0.99;
+//		m_lerped_ms += 0.01 * frame.mseconds;
+//		m_lerped_ms =
+//	}
+//}
 
 //------------------------------------------------------------------------
 // resets the clock (called in constructor after
@@ -56,8 +67,10 @@ void Clock::Reset()
 
 	// no need to reset children (why?)
 	m_frameCount = 0;
-}
 
+	m_lerped_ms = 0.0;
+	m_fps = 0.0;
+}
 
 //------------------------------------------------------------------------
 // only gets called on clocks that have no parent (are root clocks)
@@ -67,13 +80,12 @@ void Clock::BeginFrame()
 	uint64_t hpc = GetPerformanceCounter(); 
 	uint64_t delta = hpc - m_lastFrameHpc; 
 	m_lastFrameHpc = hpc;
-	Advance( delta ); 
+	Advance(delta); 
 }
-
 
 //------------------------------------------------------------------------
 // advance the clock
-void Clock::Advance( uint64_t delta ) 
+void Clock::Advance(uint64_t delta)
 {
 	// Step 0: Update frame count
 	// I personally increment frame_count whether it is paused or notas I 
@@ -99,11 +111,23 @@ void Clock::Advance( uint64_t delta )
 	double elapsed_seconds = PerformanceCountToSeconds(delta);
 	frame.seconds = static_cast<float>(elapsed_seconds);
 	frame.hpc = delta;
-	frame.hpSeconds = elapsed_seconds * 1000.f;
+	frame.mseconds = elapsed_seconds * 1000.f;
 
 	total.seconds += frame.seconds;
 	total.hpc +=  frame.hpc;
-	total.hpSeconds += frame.hpSeconds;
+	total.mseconds += frame.mseconds;
+
+	// fps update
+	if (m_lerped_ms <= 0.0)
+	{
+		m_lerped_ms = frame.mseconds;
+	}
+	else
+	{
+		m_lerped_ms *= 0.99;
+		m_lerped_ms += 0.01 * frame.mseconds;
+		m_fps = 1000.0 / m_lerped_ms;
+	}
 
 	// Step 3: Call advance on all children 
 	// ...
@@ -113,33 +137,26 @@ void Clock::Advance( uint64_t delta )
 	}
 }
 
-
 Clock* GetMasterClock()
 {
 	return g_masterClock;
 }
-
 
 void ClockSystemBeginFrame()
 {
 	g_masterClock->BeginFrame();
 }
 
-
 double GetClockCurrentTime()
 {
-	return g_masterClock->total.hpSeconds;
+	return g_masterClock->total.mseconds;
 }
 
-
-// optional
 float GetDeltaTime()
 {
 	return g_masterClock->frame.seconds;
 }
 
-
-// optional
 float GetFrameStartTime()
 {
 	float startTime = static_cast<float>(PerformanceCountToSeconds(g_masterClock->GetLastFrameHpc()));

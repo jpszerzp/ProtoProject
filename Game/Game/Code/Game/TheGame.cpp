@@ -14,11 +14,21 @@
 TheGame::TheGame()
 {
 	InitializeClock();
-	InitializeGeneralGameData();
 	InitializeBitMapFont();
 	InitializeTextures();
 
 	DebugRenderStartup();
+
+	Renderer* renderer = Renderer::GetInstance();
+	Window* window = Window::GetInstance();
+	float width = window->GetWindowWidth();
+	float height = window->GetWindowHeight();
+	Vector2 titleTextMin = Vector2(-width / 2.f, height / 2.f - 64.f);
+	float titleHeight = height / 50.f;
+	Rgba titleTextTint = Rgba::WHITE;
+	BitmapFont* font = renderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
+	std::string fps_str = Stringf("FPS:%f", m_clock->GetFPS());
+	m_fps_mesh = Mesh::CreateTextImmediate(titleTextTint, titleTextMin, font, titleHeight, 1.f, fps_str, VERT_PCU);
 }
 
 TheGame::~TheGame()
@@ -27,6 +37,9 @@ TheGame::~TheGame()
 
 	delete m_states;
 	m_states = nullptr;
+
+	delete m_fps_mesh;
+	m_fps_mesh = nullptr;
 }
 
 void TheGame::UseGameState(GameState* state)
@@ -49,12 +62,6 @@ void TheGame::UseDefaultState(GameState* defaultState)
 	m_states->SetDefaultState(defaultState);
 }
 
-void TheGame::InitializeGeneralGameData()
-{
-	m_fps = 0.f;
-	m_developerMode = false;
-}
-
 void TheGame::InitializeBitMapFont()
 {
 	g_renderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
@@ -67,26 +74,40 @@ void TheGame::InitializeTextures()
 
 void TheGame::InitializeClock()
 {
+	// clock hierarchy
 	m_clock = new Clock();
-	
-	// set hierarchy
 	m_clock->SetParent(g_masterClock);
 	g_masterClock->AddChild(m_clock);
 
-	m_deltaTime = 0.f;
+	//m_dt = 0.f;
 }
 
 void TheGame::Update()
 {
-	//UpdateTime();
+	UpdateTime();
 	
-	m_states->Update(m_deltaTime);
+	m_states->Update(m_clock->frame.seconds);
+
+	if (m_fps_mesh)
+	{
+		delete m_fps_mesh;
+		Renderer* renderer = Renderer::GetInstance();
+		Window* window = Window::GetInstance();
+		float width = window->GetWindowWidth();
+		float height = window->GetWindowHeight();
+		Vector2 titleTextMin = Vector2(-width / 2.f, height / 2.f - 64.f);
+		float titleHeight = height / 50.f;
+		Rgba titleTextTint = Rgba::WHITE;
+		BitmapFont* font = renderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
+		std::string fps_str = Stringf("FPS:%f", m_clock->GetFPS());
+		m_fps_mesh = Mesh::CreateTextImmediate(titleTextTint, titleTextMin, font, titleHeight, 1.f, fps_str, VERT_PCU);
+	}
 }
 
 void TheGame::UpdateTime()
 {
-	//PassTimeToRenderer();
-	//m_deltaTime = m_clock->frame.seconds;
+	PassTimeToRenderer();
+	//m_dt = m_clock->frame.seconds;
 }
 
 void TheGame::PassTimeToRenderer()
@@ -98,4 +119,16 @@ void TheGame::PassTimeToRenderer()
 void TheGame::Render(Renderer* renderer)
 {
 	m_states->Render(renderer);
+
+	if (m_fps_mesh != nullptr)
+	{
+		//Renderer* renderer = Renderer::GetInstance();
+		Shader* shader = renderer->CreateOrGetShader("cutout_nonmodel");
+		Texture* texture = renderer->CreateOrGetTexture("Data/Fonts/SquirrelFixedFont.png");
+		renderer->UseShader(shader);
+		renderer->SetTexture2D(0, texture);
+		renderer->SetSampler2D(0, texture->GetSampler());
+
+		renderer->DrawMesh(m_fps_mesh);
+	}
 }

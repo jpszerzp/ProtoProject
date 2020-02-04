@@ -1,7 +1,7 @@
-#include "Game/Scene/AIPrototype2D.hpp"
+#include "Game/Scene/ProtoState.hpp"
 #include "Engine/Renderer/Window.hpp"
 
-AIPrototypeState::AIPrototypeState()
+PrototypeState::PrototypeState()
 {
 	Renderer* renderer = Renderer::GetInstance();
 
@@ -34,41 +34,41 @@ AIPrototypeState::AIPrototypeState()
 	float titleHeight = height / 50.f;
 	Rgba titleTextTint = Rgba::WHITE;
 	BitmapFont* font = renderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
-	std::string title = "Welcome to AIPrototype!";
-	m_titleMesh = Mesh::CreateTextImmediate(titleTextTint, titleTextMin, font, titleHeight, 1.f, title, VERT_PCU);
+	std::string title = "Welcome to ProtoState!";
+	m_title_mesh = Mesh::CreateTextImmediate(titleTextTint, titleTextMin, font, titleHeight, 1.f, title, VERT_PCU);
 }
 
-AIPrototypeState::~AIPrototypeState()
+PrototypeState::~PrototypeState()
 {
-	delete m_titleMesh;
-	m_titleMesh = nullptr;
+	delete m_title_mesh;
+	m_title_mesh = nullptr;
 }
 
-void AIPrototypeState::Update(float dt)
+void PrototypeState::Update(float dt)
 {
 	UpdateKeyboard(dt);
 	UpdateMouse(dt);
 }
 
-void AIPrototypeState::UpdateMouse(float dt)
+void PrototypeState::UpdateMouse(float dt)
 {
 
 }
 
-void AIPrototypeState::UpdateKeyboard(float dt)
+void PrototypeState::UpdateKeyboard(float dt)
 {
 
 }
 
-void AIPrototypeState::Render(Renderer* renderer)
+void PrototypeState::Render(Renderer* renderer)
 {
 	renderer->SetCamera(m_camera);
 	renderer->ClearScreen(Rgba::BLACK);
 
-	DrawImmediateTitles(m_titleMesh);
+	DrawImmediateTitles(m_title_mesh);
 }
 
-void AIPrototypeState::DrawImmediateTitles(Mesh* mesh)
+void PrototypeState::DrawImmediateTitles(Mesh* mesh)
 {
 	if (mesh != nullptr)
 	{

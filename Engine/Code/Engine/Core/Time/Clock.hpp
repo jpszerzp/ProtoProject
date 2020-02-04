@@ -9,7 +9,7 @@
 struct sTimeUnit
 {
 	uint64_t hpc; 
-	double hpSeconds;   // high precision seconds
+	double mseconds;   // high precision seconds
 	float seconds;      // convenience float seconds
 
 	void Reset()
@@ -59,12 +59,9 @@ public:
 	// add whatever other convenience methods you may want; 
 	// ...
 	uint64_t GetLastFrameHpc() const { return total.hpc; }
+	double GetFPS() const { return m_fps; }
 
 public:
-	// I don't use "m_" here as 
-	// the intended usage is to be able to go 
-	// clock->total.seconds -or- clock->frame.seconds; 
-	// these are only updated at begin_frame.
 	sTimeUnit frame; 
 	sTimeUnit total; 
 
@@ -80,6 +77,10 @@ private:
 	// For the hierarchy 
 	Clock* m_parent;
 	std::vector<Clock*> m_children; 
+
+	// fps
+	double m_lerped_ms = 0.0;
+	double m_fps = 0.0;
 }; 
 
 

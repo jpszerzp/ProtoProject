@@ -2,11 +2,11 @@
 
 #include "Game/Scene/GameState.hpp"
 
-class AIPrototypeState : public GameState
+class PrototypeState : public GameState
 {
 public:
-	AIPrototypeState();
-	~AIPrototypeState();
+	PrototypeState();
+	~PrototypeState();
 
 	void Update(float dt) override;
 	void UpdateMouse(float dt) override;
@@ -17,5 +17,5 @@ public:
 	void DrawImmediateTitles(Mesh* mesh);
 
 public:
-	Mesh* m_titleMesh = nullptr;
+	Mesh* m_title_mesh = nullptr;
 };

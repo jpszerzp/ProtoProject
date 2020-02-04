@@ -3,28 +3,17 @@
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Renderer/IsoSprite.hpp"
 #include "Game/Scene/GameState.hpp"
-#include "Game/Scene/StateMachine.hpp"
-
-enum eGameMode
-{
-	GALLERY,
-	MAIN,
-	ENCOUNTER,
-	NON,
-	NUM_OF_MODE
-};
+#include "Game/Scene/GameStateMachine.hpp"
 
 class TheGame
 {
 private:
-	float m_fps;
-	float m_deltaTime;
-	bool m_developerMode;
+	//float m_fps;
+	//float m_dt;
 
-	StateMachine* m_states;
-
-public:
+	GameStateMachine* m_states;
 	Clock* m_clock;
+	Mesh* m_fps_mesh = nullptr;
 
 public:
 	TheGame();
@@ -34,7 +23,6 @@ public:
 	void UseDefaultState();
 	void UseDefaultState(GameState* defaultState);
 
-	void InitializeGeneralGameData();
 	void InitializeBitMapFont();
 	void InitializeTextures();
 	void InitializeClock();
@@ -47,14 +35,9 @@ public:
 	void Render(Renderer* renderer);
 
 	// setters
-	void SetFPS(float fps) { m_fps = fps; }
-	void SetDeveloperMode (bool value) { m_developerMode = value; }
-	void SetStateMachine(StateMachine* states) {m_states = states;}
-	void SetDeltaTime(const float& delta) { m_deltaTime = delta; }
+	void SetStateMachine(GameStateMachine* states) {m_states = states;}
 
 	// getters
-	float			GetFPS() const { return m_fps; }
-	bool			GetDeveloperMode() const { return m_developerMode; }
-	Clock*			GetClock() { return m_clock; }
-	StateMachine*	GetStateMachine() { return m_states; }
+	GameStateMachine*	GetStateMachine() { return m_states; }
+	//float GetDt() const;
 };
