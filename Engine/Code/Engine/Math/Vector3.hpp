@@ -14,7 +14,7 @@ public:
 	// Construction/Destruction
 	~Vector3() {}											
 	Vector3() {}						
-	Vector3( const Vector3& copyFrom );						
+	Vector3(const Vector3& copyFrom);						
 	explicit Vector3( float initialX, float initialY, float initialZ );		
 	explicit Vector3(float initial);
 
@@ -61,8 +61,6 @@ public:
 	static const Vector3 ZERO;
 	static const Vector3 ONE;
 	static const Vector3 UP;
-	static const Vector3 GRAVITY;
-	static const Vector3 HIGH_GRAVITY;
 	static const Vector3 INVALID;
 };
 

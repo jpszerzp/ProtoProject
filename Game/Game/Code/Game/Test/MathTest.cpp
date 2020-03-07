@@ -8,16 +8,10 @@
 
 void MathTest::RunMathTest()
 {
-	VoidMathTest();
 	QuaternionTest();
 	MatrixTest();
+	VectorTest();
 	PlaneTest();
-}
-
-void MathTest::VoidMathTest()
-{
-	ASSERT_OR_DIE(true, "this test always passes");
-	DebuggerPrintf("void test passes\n");
 }
 
 void MathTest::QuaternionTest()
@@ -101,6 +95,11 @@ void MathTest::MatrixTest()
 
 	ASSERT_OR_DIE(pass, "euler to rotation matrix3 fails");
 	DebuggerPrintf("euler to rotation matrix3 succeeds\n");
+}
+
+void MathTest::VectorTest()
+{
+
 }
 
 void MathTest::PlaneTest()

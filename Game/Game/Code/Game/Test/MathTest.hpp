@@ -6,13 +6,9 @@ public:
 	static void RunMathTest();
 
 private:
-	static void VoidMathTest();
-
-	// quaternion
 	static void QuaternionTest();
-
 	static void MatrixTest();
-
+	static void VectorTest();
 	static void PlaneTest();
 };
 

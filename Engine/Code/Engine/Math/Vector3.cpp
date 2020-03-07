@@ -8,8 +8,6 @@
 const Vector3 Vector3::ZERO = Vector3(0.f, 0.f, 0.f);
 const Vector3 Vector3::ONE = Vector3(1.f, 1.f, 1.f);
 const Vector3 Vector3::UP = Vector3(0.f, 1.f, 0.f);
-const Vector3 Vector3::GRAVITY = Vector3(0.f, -9.81f, 0.f);
-const Vector3 Vector3::HIGH_GRAVITY = Vector3(0.f, -19.62f, 0.f);
 const Vector3 Vector3::INVALID = Vector3(-INFINITY);
 
 //-----------------------------------------------------------------------------------------------
