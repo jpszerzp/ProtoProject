@@ -1,7 +1,6 @@
 #include "Engine/Renderer/Camera.hpp"
 #include "Engine/Math/MathUtils.hpp"
 
-
 Camera::Camera(Vector3 pos)
 {
 	m_view = Matrix44();
@@ -13,12 +12,10 @@ Camera::Camera(Vector3 pos)
 	m_transform.SetLocalScale(Vector3::ONE);
 }
 
-
 Camera::~Camera()
 {
 
 }
-
 
 void Camera::SetProjectionOrtho( float sizeX, float sizeY, float theNear, float theFar )
 {
@@ -31,7 +28,6 @@ void Camera::SetProjectionOrtho( float sizeX, float sizeY, float theNear, float 
 	// opengl
 	SetProjectionOrtho(bl, tr, theNear, theFar);
 }
-
 
 void Camera::SetProjectionOrtho( Vector2 bl, Vector2 tr, float theNear, float theFar )
 {
@@ -47,7 +43,6 @@ void Camera::SetProjectionOrtho( Vector2 bl, Vector2 tr, float theNear, float th
 	m_proj = res;
 }
 
-
 void Camera::SetPerspectiveProjection(float fovDegrees, float aspect, float nz, float fz)
 {
 	float d = 1.f / tanf(ConvertDegreesToRadians(fovDegrees) / 2.f);
@@ -60,7 +55,6 @@ void Camera::SetPerspectiveProjection(float fovDegrees, float aspect, float nz, 
 
 	m_proj = Matrix44( i, j, k, t ); 
 }
-
 
 void Camera::SetPerspectiveProjection(float t, float b, float l, float r, float nz, float fz)
 {
@@ -78,12 +72,10 @@ void Camera::SetPerspectiveProjection(float t, float b, float l, float r, float 
 	m_proj = res;
 }
 
-
 void Camera::Finalize()
 {
 	m_output.Finalize();
 }
-
 
 Ray3 Camera::ComputeRay() const
 {
@@ -104,7 +96,6 @@ Vector3 Camera::GetLocalForward() const
 	return forward;
 }
 
-
 Vector3 Camera::GetLocalUp() const
 {
 	Matrix44 modelMatrix = m_transform.GetLocalMatrixEulerTranspose();
@@ -112,14 +103,12 @@ Vector3 Camera::GetLocalUp() const
 	return up;
 }
 
-
 Vector3 Camera::GetLocalRight() const
 {
 	Matrix44 modelMatrix = m_transform.GetLocalMatrixEulerTranspose();
 	Vector3 right = Vector3(modelMatrix.Ix, modelMatrix.Iy, modelMatrix.Iz);
 	return right;
 }
-
 
 Vector3 Camera::GetWorldForward() const
 {

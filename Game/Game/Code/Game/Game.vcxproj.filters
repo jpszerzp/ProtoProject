@@ -28,9 +28,6 @@
     <ClCompile Include="Util/GameCommon.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="Scene/PachinkoState.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="Scene/GameStateMachine.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -48,13 +45,12 @@
     <ClInclude Include="TheGame.hpp">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="Scene/AIPrototype2D.hpp" />
-    <ClInclude Include="Scene/PachinkoState.hpp" />
-    <ClInclude Include="Scene/StateMachine.hpp" />
     <ClInclude Include="Scene/GameState.hpp" />
     <ClInclude Include="Test/DelegateTest.hpp" />
     <ClInclude Include="Test/TransformTest.hpp" />
     <ClInclude Include="Test/MathTest.hpp" />
     <ClInclude Include="Util/GameCommon.hpp" />
+    <ClInclude Include="Scene/ProtoState.hpp" />
+    <ClInclude Include="Scene/GameStateMachine.hpp" />
   </ItemGroup>
 </Project>

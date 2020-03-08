@@ -31,9 +31,13 @@ public:
 	void TimeStartup();
 	void RendererStartup();
 	void InputSystemStartup();
-	void StateStartup();
 	void ConsoleStartup();
 	void BlackboardStartup();
+
+	/*
+	 * Function that inserts all game states into the state machine
+	 */
+	void StateStartup();
 
 	// module shutdowns
 	void TimeShutdown();

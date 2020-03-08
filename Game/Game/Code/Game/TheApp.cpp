@@ -75,8 +75,6 @@ void TheApp::EndFrame()
 {
 	g_input->EndFrame();
 	g_renderer->EndFrame();
-	//Sleep(1);
-	//::SwitchToThread();
 }
 
 void TheApp::OnQuitRequested()
@@ -127,9 +125,6 @@ void TheApp::ProcessInput()
 	}
 }
 
-/*
- * Startups
- */
 void TheApp::TimeStartup()
 {
 	// parent of master clock forced to be null
@@ -181,9 +176,6 @@ void TheApp::BlackboardStartup()
 	g_config_blackboard->PopulateFromXmlElementAttributes(*(gameConfigDoc.FirstChildElement()));
 }
 
-/*
- * Shutdowns
- */
 void TheApp::TimeShutdown()
 {
 	delete g_masterClock;

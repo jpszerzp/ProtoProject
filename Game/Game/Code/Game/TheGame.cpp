@@ -78,8 +78,6 @@ void TheGame::InitializeClock()
 	m_clock = new Clock();
 	m_clock->SetParent(g_masterClock);
 	g_masterClock->AddChild(m_clock);
-
-	//m_dt = 0.f;
 }
 
 void TheGame::Update()

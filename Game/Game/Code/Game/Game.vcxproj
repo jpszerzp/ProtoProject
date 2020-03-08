@@ -318,7 +318,6 @@
       <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='DebugInline|x64'">false</ShowIncludes>
       <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ShowIncludes>
     </ClCompile>
-    <ClCompile Include="Scene/PachinkoState.cpp" />
     <ClCompile Include="Scene/GameStateMachine.cpp" />
     <ClCompile Include="Test/MathTest.cpp" />
     <ClCompile Include="Test/TransformTest.cpp" />
@@ -332,7 +331,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Scene/ProtoState.hpp" />
-    <ClInclude Include="Scene/PachinkoState.hpp" />
     <ClInclude Include="Scene/GameStateMachine.hpp" />
     <ClInclude Include="Scene/GameState.hpp" />
     <ClInclude Include="Test/DelegateTest.hpp" />
