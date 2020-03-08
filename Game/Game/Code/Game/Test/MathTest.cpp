@@ -131,7 +131,7 @@ bool IsCloseEnoughFloats(const float& f1, const float& f2)
 {
 	return (abs(f1 - f2) < 0.01f);
 }
-
+ 
 bool IsCloseEnoughVec3(const Vector3& v1, const Vector3& v2)
 {
 	return IsCloseEnoughFloats(v1.x, v2.x) && IsCloseEnoughFloats(v1.y, v2.y) && IsCloseEnoughFloats(v1.z, v2.z);
