@@ -17,19 +17,15 @@ Camera::~Camera()
 
 }
 
-void Camera::SetProjectionOrtho( float sizeX, float sizeY, float theNear, float theFar )
+void Camera::SetProjectionOrtho(float sizeX, float sizeY, float theNear, float theFar)
 {
-	Matrix44 res = Matrix44();
-
 	// center at (0, 0)
-	Vector2 bl = Vector2(-sizeX / 2.f, -sizeY / 2.f);
-	Vector2 tr = Vector2(sizeX / 2.f, sizeY / 2.f);
-
-	// opengl
+	Vector2 bl = Vector2(-sizeX * .5f, -sizeY * .5f);
+	Vector2 tr = Vector2(sizeX * .5f, sizeY * .5f);
 	SetProjectionOrtho(bl, tr, theNear, theFar);
 }
 
-void Camera::SetProjectionOrtho( Vector2 bl, Vector2 tr, float theNear, float theFar )
+void Camera::SetProjectionOrtho(Vector2 bl, Vector2 tr, float theNear, float theFar )
 {
 	Matrix44 res = Matrix44();
 
@@ -43,7 +39,7 @@ void Camera::SetProjectionOrtho( Vector2 bl, Vector2 tr, float theNear, float th
 	m_proj = res;
 }
 
-void Camera::SetPerspectiveProjection(float fovDegrees, float aspect, float nz, float fz)
+void Camera::SetProjectionPerspective(float fovDegrees, float aspect, float nz, float fz)
 {
 	float d = 1.f / tanf(ConvertDegreesToRadians(fovDegrees) / 2.f);
 	float q = 1.f / (fz - nz); 
@@ -56,7 +52,7 @@ void Camera::SetPerspectiveProjection(float fovDegrees, float aspect, float nz, 
 	m_proj = Matrix44( i, j, k, t ); 
 }
 
-void Camera::SetPerspectiveProjection(float t, float b, float l, float r, float nz, float fz)
+void Camera::SetProjectionPerspective(float t, float b, float l, float r, float nz, float fz)
 {
 	Matrix44 res = Matrix44();
 

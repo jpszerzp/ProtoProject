@@ -15,15 +15,15 @@ public:
 	~Camera();
 
 	// will be implemented later
-	void SetColorTarget( Texture* color_target ) { m_output.SetColorTarget(color_target); }
-	void SetDepthStencilTarget( Texture* depth_target ) { m_output.SetDepthStencilTarget(depth_target); }
+	void SetColorTarget(Texture* color_target) { m_output.SetColorTarget(color_target); }
+	void SetDepthStencilTarget(Texture* depth_target) { m_output.SetDepthStencilTarget(depth_target); }
 
 	// projection settings
 	void SetView(Matrix44 view) { m_view = view; }
-	void SetProjectionOrtho( float sizeX, float sizeY, float theNear = 0.f, float theFar = 1.f ); 
-	void SetProjectionOrtho( Vector2 bl, Vector2 tr, float theNear = 0.f, float theFar = 1.f );
-	void SetPerspectiveProjection(float fovDegrees, float aspect, float nz, float fz);
-	void SetPerspectiveProjection(float t, float b, float l, float r, float nz, float fz);
+	void SetProjectionOrtho(float sizeX, float sizeY, float theNear = 0.f, float theFar = 1.f); 
+	void SetProjectionOrtho(Vector2 bl, Vector2 tr, float theNear = 0.f, float theFar = 1.f);
+	void SetProjectionPerspective(float fovDegrees, float aspect, float nz, float fz);
+	void SetProjectionPerspective(float t, float b, float l, float r, float nz, float fz);
 	void SetAspect(float value) { m_aspect = value; }
 	void SetFOV(float value) { m_fov = value; }
 
