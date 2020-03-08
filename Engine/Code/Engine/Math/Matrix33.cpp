@@ -12,6 +12,12 @@ Matrix33::Matrix33()
 	Iz = 0.f;	Jz = 0.f;	Kz = 1.f;	
 }
 
+Matrix33::Matrix33(float entry)
+{
+	Ix = entry; Jx = entry;	Kx = entry;	
+	Iy = entry;	Jy = entry;	Ky = entry;	
+	Iz = entry;	Jz = entry;	Kz = entry;	
+}
 
 Matrix33::Matrix33(const Vector3& i, const Vector3& j, const Vector3& k)
 {
@@ -25,13 +31,6 @@ Matrix33::Matrix33(const float* entries)
 	Ix = entries[0];	Jx = entries[3];	Kx = entries[6];
 	Iy = entries[1];	Jy = entries[4];	Ky = entries[7];
 	Iz = entries[2];	Jz = entries[5];	Kz = entries[8];
-}
-
-Matrix33::Matrix33(float entry)
-{
-	Ix = entry; Jx = entry;	Kx = entry;	
-	Iy = entry;	Jy = entry;	Ky = entry;	
-	Iz = entry;	Jz = entry;	Kz = entry;	
 }
 
 void Matrix33::operator+=(const Matrix33& rhs)

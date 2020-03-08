@@ -4,20 +4,19 @@
 #include "Engine/Math/Vector4.hpp"
 #include "Engine/Math/Matrix33.hpp"
 
-//#include "PxPhysicsAPI.h"
-//using namespace physx;
-
 class Matrix44
 {
 public:
 	float Ix, Iy, Iz, Iw,   Jx, Jy, Jz, Jw,   Kx, Ky, Kz, Kw,   Tx, Ty, Tz, Tw;
 	static const Matrix44 IDENTITY;
+	static const Matrix44 ZERO;
 
 public:
 	Matrix44();
-	explicit Matrix44( const float* entries );
-	explicit Matrix44( const Vector2& iBasis, const Vector2& jBasis, const Vector2& translation = Vector2(0.f,0.f) );
-	explicit Matrix44( const Vector4& i, const Vector4& j, const Vector4& k, const Vector4& t );
+	explicit Matrix44(float entry);
+	explicit Matrix44(const float* entries);
+	explicit Matrix44(const Vector2& iBasis, const Vector2& jBasis, const Vector2& translation = Vector2(0.f,0.f));
+	explicit Matrix44(const Vector4& i, const Vector4& j, const Vector4& k, const Vector4& t);
 	static Matrix44 FromBasis(const Vector3& right, const Vector3& up, const Vector3& forward);
 	static Matrix44 FromBasisTranslation(const Vector3& right, const Vector3& up, const Vector3& forward, const Vector3& translation);
 	~Matrix44();
