@@ -14,8 +14,6 @@ public:
 	
 	void Render(Renderer* renderer) override;
 
-	void DrawImmediateTitles(Mesh* mesh);
-
 public:
 	Mesh* m_title_mesh = nullptr;
 };

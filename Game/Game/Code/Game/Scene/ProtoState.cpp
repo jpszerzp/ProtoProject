@@ -10,14 +10,18 @@ PrototypeState::PrototypeState()
 	float height = window->GetWindowHeight();
 	float aspect = width / height;
 
+	m_cameraInitialPos = Vector3(-110.f, 0.f, -7.f);
+	m_cameraRotationSpd = 50.f;
+
 	if (!m_camera)
 	{
-		m_camera = new Camera();
+		m_camera = new Camera(m_cameraInitialPos);
 		m_camera->SetColorTarget(renderer->GetDefaultColorTarget());
 		m_camera->SetDepthStencilTarget(renderer->GetDefaultDepthTarget());
 		m_camera->SetAspect(aspect);
+		m_camera->SetFOV(45.f);
 
-		m_camera->SetProjectionOrtho(width, height, 0.f, 100.f);
+		m_camera->SetProjectionPerspective(m_camera->GetFOV(), aspect, 1.f, 1000.f);
 	}
 
 	if (!m_UICamera)
@@ -63,14 +67,12 @@ void PrototypeState::UpdateKeyboard(float dt)
 void PrototypeState::Render(Renderer* renderer)
 {
 	renderer->SetCamera(m_camera);
+	// let's go for the gameobject path instead of the forward rendering path for now...
+
+	renderer->SetCamera(m_UICamera);
 	renderer->ClearScreen(Rgba::BLACK);
 
-	DrawImmediateTitles(m_title_mesh);
-}
-
-void PrototypeState::DrawImmediateTitles(Mesh* mesh)
-{
-	if (mesh != nullptr)
+	if (m_title_mesh != nullptr)
 	{
 		Renderer* renderer = Renderer::GetInstance();
 		Shader* shader = renderer->CreateOrGetShader("cutout_nonmodel");
@@ -79,6 +81,6 @@ void PrototypeState::DrawImmediateTitles(Mesh* mesh)
 		renderer->SetTexture2D(0, texture);
 		renderer->SetSampler2D(0, texture->GetSampler());
 
-		renderer->DrawMesh(mesh);
+		renderer->DrawMesh(m_title_mesh);
 	}
 }

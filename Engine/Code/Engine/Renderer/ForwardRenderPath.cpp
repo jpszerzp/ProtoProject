@@ -27,20 +27,6 @@ bool LightIndexDistanceTupleDepthCompare(Vector2 v1, Vector2 v2)
 
 void ForwardRenderPath::RenderScene(RenderSceneGraph* scene)
 {
-	// sort camera by material and state
-	//scene->SortCamera();
-
-	// generate shadow map
-	/*
-	for each (Light* light in scene->m_lights)
-	{
-		if (light->m_shadowCast)
-		{
-			RenderShadowCastForLight(light, scene);
-		}
-	}
-	*/
-
 	for each(Camera* cam in scene->m_cameras)
 		RenderSceneForCamera(cam, scene);
 
@@ -73,9 +59,9 @@ void ForwardRenderPath::RenderSceneForCamera(Camera* camera, RenderSceneGraph* s
 		dcs.push_back(dc);
 	}
 
+	// draw then flush
 	for each (Drawcall* dc in dcs)
 		m_renderer->Draw(*dc);
-
 	for each (Drawcall* dc in dcs)
 	{
 		delete dc;
@@ -83,124 +69,8 @@ void ForwardRenderPath::RenderSceneForCamera(Camera* camera, RenderSceneGraph* s
 	}
 	dcs.clear();
 
-	/*
-	//ClearBasedOnCameraOptions(camera);
-	std::vector<Drawcall*> drawcalls;
-
-	for each(Renderable* renderable in scene->m_renderables)
-	{
-		// Get data from renderable
-		Drawcall* dc = new Drawcall();
-
-		// set up basic info - mesh, mat and model matrix
-		dc->m_mesh = renderable->GetMesh();
-		dc->m_model = renderable->m_transform.GetWorldMatrix();
-		dc->m_material = renderable->GetMaterial();
-		dc->m_tint = renderable->GetTint();
-
-		// setup lights
-		if (renderable->GetMaterial()->UseLight())
-		{
-			// Store most effective lights into drawcall
-			//ComputeMostContributingLights(dc->m_lightCount, dc->m_lightIndices, renderable->GetWorldPosition(), scene);
-			ComputeMostContributingLights(dc->m_lightCount, dc->m_lightIndices, renderable->m_transform.GetWorldPosition(), scene);
-		}
-
-		drawcalls.push_back(dc);
-	}
-
-	// sort draw call
-	std::vector<Drawcall*> sortedDrawcalls = SortDrawcalls(drawcalls);
-
-	// draw call 
-	for each (Drawcall* dc in sortedDrawcalls)
-	{
-		m_renderer->ClearLights();
-
-		// for this draw call update renderer's light array 
-		// considering what are the most contributing lights
-		for (uint idx = 0; idx < MAX_LIGHTS; ++idx)
-		{
-			uint lightIdx = dc->m_lightIndices[idx];
-
-			// if light is invalid (index is -1), do not consider it
-			if (lightIdx != -1)
-			{
-				Light* light = scene->m_lights[lightIdx];
-				m_renderer->m_lights[idx] = light;
-			}
-		}
-
-		m_renderer->ResetLightDataFlag();			// 0 for light data, NOT light itself
-
-		for (uint idx = 0; idx < MAX_LIGHTS; ++idx)
-		{
-			Light* light = m_renderer->m_lights[idx];
-
-			if (light != nullptr)
-			{
-				Vector3 lightPosition = light->m_renderable->m_transform.GetWorldPosition();
-
-				Rgba lightColor = light->GetColor();
-				Vector4 lightColorVec4;
-				lightColor.GetAsFloats(lightColorVec4.x, lightColorVec4.y, lightColorVec4.z, lightColorVec4.w);
-
-				Vector3 attenuation = light->m_attenuation;
-				Vector3 specAttenuation = light->m_specAttenuation;
-				Vector3 dir = light->m_direction;
-				float innerAng = light->m_innerAngle;
-				float outerAng = light->m_outerAngle;
-				float dirFactor = light->m_directionFac;
-				bool useShadow = light->m_shadowCast;
-				Matrix44 shadowVP = light->m_shadowVP;
-
-				m_renderer->ConfigureLightData(lightPosition, lightColorVec4,
-					attenuation, innerAng, specAttenuation, outerAng,
-					dir, dirFactor, (int)idx, useShadow, shadowVP);
-			}
-		}
-
-		m_renderer->Draw(*dc);		// one drawcall for one renderable
-	}
-
-	for each (Drawcall* dc in sortedDrawcalls)
-	{
-		delete dc;
-		dc = nullptr;
-	}
-	sortedDrawcalls.clear();
-
-	// apply effects with materials
-	//for each (Material* effect in camera->m_effectMats)
-	//{
-	//	m_renderer->ApplyEffect(effect);
-	//}
-	//m_renderer->FinishEffects();
-	*/
-
-	//Camera* debugCamera3D = GetDebugRender3DCamera();
-	//RenderDebug3DObjectsForCamera(debugCamera3D);
 	RenderDebug3DObjectsForCamera(camera);
 }
-
-TODO("shadow");
-/*
-void ForwardRenderPath::RenderShadowCastForLight(Light* light, RenderSceneGraph* scene)
-{
-	Camera camera;
-
-	switch (light->m_type)
-	{
-	case DIRECTIONAL_LIGHT:
-		break;
-	case SPOT_LIGHT:
-	case POINT_LIGHT:
-	default:
-		ASSERT_OR_DIE(false, "Light type not supported for shadows. %u", light->m_type);
-		break;
-	}
-}
-*/
 
 void ForwardRenderPath::RenderDebug3DObjectsForCamera(Camera* camera)
 {
