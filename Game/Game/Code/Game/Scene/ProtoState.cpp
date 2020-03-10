@@ -22,7 +22,7 @@ PrototypeState::PrototypeState()
 		m_camera->SetAspect(aspect);
 		m_camera->SetFOV(45.f);
 
-		m_camera->SetProjectionPerspective(m_camera->GetFOV(), aspect, 1.f, 1000.f);
+		m_camera->SetProjectionPerspective(m_camera->GetFOV(), aspect, 1.f, 100.f);
 	}
 
 	if (!m_UICamera)
@@ -35,7 +35,8 @@ PrototypeState::PrototypeState()
 		m_UICamera->SetProjectionOrtho(width, height, 0.f, 100.f);
 	}
 
-	Vector3 pos = Vector3::ZERO;
+	m_gameObjects.empty();
+	Vector3 pos = Vector3(0.f, 0.f, 7.f);
 	Vector3 rot = Vector3::ZERO;
 	Vector3 scale = Vector3::ONE;
 	Rgba tint = Rgba::WHITE;
@@ -81,6 +82,7 @@ void PrototypeState::UpdateKeyboard(float dt)
 void PrototypeState::Render(Renderer* renderer)
 {
 	renderer->SetCamera(m_camera);
+	renderer->ClearScreen(Rgba::BLACK);
 	// let's go for the gameobject path instead of the forward rendering path for now...
 	for (std::vector<GameObject*>::size_type idx = 0; idx < m_gameObjects.size(); ++idx)
 	{
