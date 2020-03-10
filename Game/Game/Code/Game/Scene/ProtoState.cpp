@@ -1,5 +1,6 @@
 #include "Game/Scene/ProtoState.hpp"
 #include "Engine/Renderer/Window.hpp"
+#include "Engine/Core/Primitive/Box.hpp"
 
 PrototypeState::PrototypeState()
 {
@@ -10,7 +11,7 @@ PrototypeState::PrototypeState()
 	float height = window->GetWindowHeight();
 	float aspect = width / height;
 
-	m_cameraInitialPos = Vector3(-110.f, 0.f, -7.f);
+	m_cameraInitialPos = Vector3(0.f, 0.f, -7.f);
 	m_cameraRotationSpd = 50.f;
 
 	if (!m_camera)
@@ -33,6 +34,19 @@ PrototypeState::PrototypeState()
 
 		m_UICamera->SetProjectionOrtho(width, height, 0.f, 100.f);
 	}
+
+	Vector3 pos = Vector3::ZERO;
+	Vector3 rot = Vector3::ZERO;
+	Vector3 scale = Vector3::ONE;
+	Rgba tint = Rgba::WHITE;
+	eMoveStatus stat = MOVE_KINEMATIC;
+	eBodyIdentity bid = BODY_RIGID;
+	bool multipass = false;
+	eDepthCompare compare = COMPARE_LESS;
+	eCullMode cull = CULLMODE_BACK;
+	eWindOrder wind = WIND_COUNTER_CLOCKWISE;
+	Box* box = new Box(pos, rot, scale, tint, "cube_pcu", "default", stat, bid, multipass, compare, cull, wind);
+	m_gameObjects.push_back(box);
 
 	Vector2 titleTextMin = Vector2(-width / 2.f, height / 2.f - 32.f);
 	float titleHeight = height / 50.f;
@@ -68,6 +82,10 @@ void PrototypeState::Render(Renderer* renderer)
 {
 	renderer->SetCamera(m_camera);
 	// let's go for the gameobject path instead of the forward rendering path for now...
+	for (std::vector<GameObject*>::size_type idx = 0; idx < m_gameObjects.size(); ++idx)
+	{
+		m_gameObjects[idx]->Render(renderer);
+	}
 
 	renderer->SetCamera(m_UICamera);
 	renderer->ClearScreen(Rgba::BLACK);
