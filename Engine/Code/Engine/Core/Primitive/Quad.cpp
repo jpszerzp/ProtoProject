@@ -11,7 +11,6 @@ Quad::Quad()
 
 }
 
-
 Quad::Quad(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint, std::string meshName,
 	std::string materialName, Vector2 uvBL, Vector2 uvBR, Vector2 uvTL, Vector2 uvTR,
 	eMoveStatus moveStat, eBodyIdentity bid, bool multipass, 
@@ -48,7 +47,6 @@ Quad::Quad(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint, std::string meshN
 	m_physEntity->m_scheme = scheme;
 }
 
-
 Quad::Quad(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint, std::string meshName,
 	std::string materialName, eMoveStatus moveStat, eBodyIdentity bid, bool multipass,
 	eDepthCompare compare, eCullMode cull, eWindOrder order, eDynamicScheme scheme)
@@ -84,7 +82,6 @@ Quad::Quad(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint, std::string meshN
 	m_physEntity->m_scheme = scheme;
 }
 
-
 Quad::Quad(const Vector3& pos, const Vector3& rot, const Vector3& scale, const Rgba& tint, std::string fp, std::string sp, bool dp, bool deprecated, std::string tp, bool alpha)
 {
 	Renderer* renderer = Renderer::GetInstance();
@@ -109,7 +106,6 @@ Quad::~Quad()
 	m_renderable = nullptr;
 }
 
-
 void Quad::Update(float deltaTime)
 {
 	if (m_physEntity)
@@ -126,7 +122,6 @@ void Quad::Update(float deltaTime)
 
 	UpdateBasis();
 }
-
 
 void Quad::Render(Renderer* renderer)
 {

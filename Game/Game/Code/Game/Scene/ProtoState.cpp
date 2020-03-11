@@ -1,6 +1,6 @@
 #include "Game/Scene/ProtoState.hpp"
 #include "Engine/Renderer/Window.hpp"
-#include "Engine/Core/Primitive/Box.hpp"
+#include "Engine/Core/Primitive/Quad.hpp"
 
 PrototypeState::PrototypeState()
 {
@@ -46,8 +46,9 @@ PrototypeState::PrototypeState()
 	eDepthCompare compare = COMPARE_LESS;
 	eCullMode cull = CULLMODE_BACK;
 	eWindOrder wind = WIND_COUNTER_CLOCKWISE;
-	Box* box = new Box(pos, rot, scale, tint, "cube_pcu", "default", stat, bid, multipass, compare, cull, wind);
-	m_gameObjects.push_back(box);
+	eDynamicScheme scheme = DISCRETE;
+	Quad* quad = new Quad(pos, rot, scale, tint, "quad_pcu", "default", stat, bid, multipass, compare, cull, wind, scheme);
+	m_gameObjects.push_back(quad);
 
 	Vector2 titleTextMin = Vector2(-width / 2.f, height / 2.f - 32.f);
 	float titleHeight = height / 50.f;
