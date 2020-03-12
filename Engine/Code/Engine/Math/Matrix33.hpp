@@ -39,12 +39,12 @@ public:
 	void SetSkewSymmetric(const Vector3& v);
 
 	// inverse
-	Matrix33 Invert() const;
-	void SetInverse(const Matrix33& mat);
+	Matrix33 GetInverse() const;
+	void AsInverse(const Matrix33& mat);
 
 	// transpose
-	Matrix33 Transpose() const;
-	Vector3 MultiplyTranspose(const Vector3& v) const;
+	Matrix33 GetTranspose() const;
+	Vector3 MultiplyTranspose(const Vector3& v) const;		// why do i even need this...
 
 	static Matrix33 FromEuler(const Vector3& euler);
 

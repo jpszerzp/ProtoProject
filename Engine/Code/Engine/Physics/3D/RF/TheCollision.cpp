@@ -316,7 +316,7 @@ Vector3 Collision::ComputeFrictionalImpulse(Matrix33* iit)
 		inverseMass += m_bodies[1]->GetInvMass();
 	}
 
-	Matrix33 deltaVelocity = m_to_world.Transpose();
+	Matrix33 deltaVelocity = m_to_world.GetTranspose();
 	deltaVelocity *= deltaVelWorld;
 	deltaVelocity *= m_to_world;
 
@@ -324,7 +324,7 @@ Vector3 Collision::ComputeFrictionalImpulse(Matrix33* iit)
 	deltaVelocity.Jy += inverseMass;
 	deltaVelocity.Kz += inverseMass;
 
-	Matrix33 impulseMatrix = deltaVelocity.Invert();
+	Matrix33 impulseMatrix = deltaVelocity.GetInverse();
 
 	Vector3 velKill(m_desired_vel, -m_closing_vel.y, -m_closing_vel.z);
 

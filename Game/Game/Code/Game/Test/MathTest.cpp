@@ -45,7 +45,7 @@ void MathTest::MatrixTest()
 	Vector3 k = Vector3(-6.f, 7.f, -3.f);
 	Matrix33 mat3 = Matrix33(i, j, k);
 
-	Matrix33 inv = mat3.Invert();
+	Matrix33 inv = mat3.GetInverse();
 	const Vector3& inv_i = inv.GetI();
 	const Vector3& inv_j = inv.GetJ();
 	const Vector3& inv_k = inv.GetK();

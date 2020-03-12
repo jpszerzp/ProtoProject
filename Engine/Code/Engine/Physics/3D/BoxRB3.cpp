@@ -45,7 +45,7 @@ BoxRB3::BoxRB3(float mass, const OBB3& primitive, const Vector3& euler, eMoveSta
 
 		// set tensor
 		m_massData.m_tensor = tensor;
-		m_massData.m_invTensor = tensor.Invert();
+		m_massData.m_invTensor = tensor.GetInverse();
 	}
 	else
 	{

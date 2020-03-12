@@ -45,7 +45,7 @@ SphereRB3::SphereRB3(float mass, Sphere3 primitive, Vector3 euler, eMoveStatus m
 
 		// set tensor
 		m_massData.m_tensor = tensor;
-		m_massData.m_invTensor = tensor.Invert();
+		m_massData.m_invTensor = tensor.GetInverse();
 	}
 	else
 	{

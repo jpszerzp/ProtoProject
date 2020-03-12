@@ -233,7 +233,7 @@ Vector3 ConvexPolyhedron::ComputeIntersectionPoint(const Plane& p1, const Plane&
 	
 	Vector3 dv = Vector3(d1, d2, d3);
 	
-	const Matrix33& ns_inv = ns.Invert();
+	const Matrix33& ns_inv = ns.GetInverse();
 	
 	return ns_inv * dv;
 }

@@ -216,7 +216,7 @@ void ContactResolver::ResolveVelocityCoherent(float deltaTime)
 			// other contacts may be reordered, update all
 			Entity3* ent1 = thisContact.m_e1;
 			Entity3* ent2 = thisContact.m_e2;
-			const Matrix33& toContact = thisContact.m_toWorld.Transpose();
+			const Matrix33& toContact = thisContact.m_toWorld.GetTranspose();
 
 			if (ent1 != nullptr)
 			{

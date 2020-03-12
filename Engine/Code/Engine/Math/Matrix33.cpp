@@ -202,7 +202,7 @@ void Matrix33::SetSkewSymmetric(const Vector3& v)
 	Iz = -v.y;   Jz = v.x;    Kz = 0.f;
 }
 
-Matrix33 Matrix33::Invert() const
+Matrix33 Matrix33::GetInverse() const
 {
 	// det
 	Matrix33 res;
@@ -226,15 +226,15 @@ Matrix33 Matrix33::Invert() const
 	return res;
 }
 
-void Matrix33::SetInverse(const Matrix33& mat)
+void Matrix33::AsInverse(const Matrix33& mat)
 {
-	Matrix33 invertedMat = mat.Invert();
+	Matrix33 invertedMat = mat.GetInverse();
 	Ix = invertedMat.Ix;	Jx = invertedMat.Jx;	Kx = invertedMat.Kx;
 	Iy = invertedMat.Iy;	Jy = invertedMat.Jy;	Ky = invertedMat.Ky;
 	Iz = invertedMat.Iz;	Jz = invertedMat.Jz;	Kz = invertedMat.Kz;
 }
 
-Matrix33 Matrix33::Transpose() const
+Matrix33 Matrix33::GetTranspose() const
 {
 	Vector3 newI = Vector3(Ix, Jx, Kx);
 	Vector3 newJ = Vector3(Iy, Jy, Ky);
@@ -244,7 +244,7 @@ Matrix33 Matrix33::Transpose() const
 
 Vector3 Matrix33::MultiplyTranspose(const Vector3& v) const
 {
-	Matrix33 t = this->Transpose();
+	Matrix33 t = this->GetTranspose();
 	return t * v;
 }
 

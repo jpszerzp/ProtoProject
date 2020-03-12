@@ -149,7 +149,7 @@ float Contact3::GetDeltaVel()
 	ASSERT_OR_DIE(false, "GetDeltaVel is deprecated, ignore this function");
 	Matrix33 contactToWorld;
 	//MakeToWorld(contactToWorld);
-	Matrix33 worldToContact = contactToWorld.Transpose();
+	Matrix33 worldToContact = contactToWorld.GetTranspose();
 	Vector3 contactVel = worldToContact * vel;
 
 	float deltaVel = -(1.f + m_restitution) * contactVel.x;
@@ -211,7 +211,7 @@ Vector3 Contact3::ComputeContactImpulseFriction()
 	}
 
 	// convert to contact coord (change of basis)
-	Matrix33 deltaVelocity = m_toWorld.Transpose();
+	Matrix33 deltaVelocity = m_toWorld.GetTranspose();
 	deltaVelocity *= deltaVelWorld;
 	deltaVelocity *= m_toWorld;
 	
@@ -221,7 +221,7 @@ Vector3 Contact3::ComputeContactImpulseFriction()
 	deltaVelocity.Kz += invMass;
 
 	// impulse per velocity
-	Matrix33 impulseMatrix = deltaVelocity.Invert();
+	Matrix33 impulseMatrix = deltaVelocity.GetInverse();
 
 	// velocity to kill by friction
 	Vector3 toKill(m_desiredVelDelta, -m_closingVel.y, -m_closingVel.z);
@@ -319,7 +319,7 @@ Vector3 Contact3::RF_ComputeFrictionalImpulse()
 		im += m_e2->GetInverseMass();
 	}
 
-	Matrix33 del_vel = m_toWorld.Transpose();
+	Matrix33 del_vel = m_toWorld.GetTranspose();
 	del_vel *= del_vel_world;
 	del_vel *= m_toWorld;
 
@@ -327,7 +327,7 @@ Vector3 Contact3::RF_ComputeFrictionalImpulse()
 	del_vel.Jy += im;
 	del_vel.Kz += im;
 
-	Matrix33 impulse_mat = del_vel.Invert();
+	Matrix33 impulse_mat = del_vel.GetInverse();
 
 	Vector3 vel_cancel = Vector3(m_desiredVelDelta, -m_closingVel.y, -m_closingVel.z);
 
@@ -704,7 +704,7 @@ Vector3 Contact3::ComputeContactVelocity(int idx, Entity3* ent, float deltaTime)
 	velocity += ent->GetLinearVelocity();
 
 	// contact coord basis is orthonormal, so we use transpose as inverse 
-	const Matrix33& toContact = m_toWorld.Transpose();
+	const Matrix33& toContact = m_toWorld.GetTranspose();
 	Vector3 contactVelocity = toContact * velocity;	// to contact coord
 
 	// TODO: restore when validating friction pipeline

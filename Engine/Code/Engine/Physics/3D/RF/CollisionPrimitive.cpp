@@ -128,7 +128,7 @@ void CollisionSphere::AttachToRigidBody(CollisionRigidBody* rb)
 	Matrix33 tensor = Matrix33(tensor_i, tensor_j, tensor_k);
 
 	rb->SetTensor(tensor);
-	rb->SetInvTensor(tensor.Invert());
+	rb->SetInvTensor(tensor.GetInverse());
 
 	// so that transform mat and inv tensor world are set 
 	rb->CacheData();
@@ -305,7 +305,7 @@ void CollisionBox::AttachToRigidBody(CollisionRigidBody* rb)
 	Matrix33 tensor = Matrix33(tensor_i, tensor_j, tensor_k);
 
 	rb->SetTensor(tensor);
-	rb->SetInvTensor(tensor.Invert());
+	rb->SetInvTensor(tensor.GetInverse());
 
 	rb->CacheData();
 
@@ -428,7 +428,7 @@ void CollisionPlane::AttachToRigidBody(CollisionRigidBody* rb)
 	Matrix33 tensor = Matrix33(tensor_i, tensor_j, tensor_k);
 
 	rb->SetTensor(tensor);
-	rb->SetInvTensor(tensor.Invert());
+	rb->SetInvTensor(tensor.GetInverse());
 
 	// transform and inv tensor world prepared
 	rb->CacheData();
@@ -633,7 +633,7 @@ void CollisionConvexObject::AttachToRigidBody(CollisionRigidBody* rb)
 	SetRigidBody(rb);
 
 	rb->SetTensor(m_initial_it);
-	rb->SetInvTensor(m_initial_it.Invert());
+	rb->SetInvTensor(m_initial_it.GetInverse());
 
 	// transform computed/cached here
 	rb->CacheData();
@@ -881,7 +881,7 @@ std::vector<TetrahedronBody> CollisionConvexObject::GetTetrahedronBodies(const s
 		// todo: use abs value or not?
 		float abs_det_a = abs(affine.GetDeterminant());
 		//float abs_det_a = affine.GetDeterminant();
-		const Matrix33& affine_transpose = affine.Transpose();
+		const Matrix33& affine_transpose = affine.GetTranspose();
 		Matrix33 c1 = Matrix33::IDENTITY;
 		c1.Append(affine);
 		c1.Append(c_canonical);
