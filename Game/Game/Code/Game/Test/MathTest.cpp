@@ -24,17 +24,6 @@ void MathTest::QuaternionTest()
 	bool pass = rotationRes == rotationRes_true;
 	ASSERT_OR_DIE(pass, "rotation: quaternion rotation of vector based on axis is wrong!");
 	DebuggerPrintf("rotation: quaternion rotation of vector based on axis is correct\n");
-
-	//// from euler to quaternion
-	//Vector3 euler = Vector3(50.f);
-	//Quaternion q = Quaternion::FromEuler(euler);
-	//Quaternion q_correct = Quaternion(.669f, .509f, .185f, .509f);
-	//pass = q == q_correct;
-	//std::string err_msg = Stringf("q converted is: %f, %f, %f, %f; correct q is %f, %f, %f, %f",
-	//	q.m_real, q.m_imaginary.x, q.m_imaginary.y, q.m_imaginary.z,
-	//	q_correct.m_real, q_correct.m_imaginary.x, q_correct.m_imaginary.y, q_correct.m_imaginary.z);
-	//ASSERT_RECOVERABLE(pass, err_msg);
-	//DebuggerPrintf("quaternion from euler passed\n");
 }
 
 void MathTest::MatrixTest()
