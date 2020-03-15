@@ -66,28 +66,6 @@ Sphere::Sphere(const float&, const Vector3& pos, const Vector3& rot, const Vecto
 
 	// orientation
 	Quaternion orientation = Quaternion::FromEuler(rot);
-
-	//m_ent = new CollisionRigidBody(pos, orientation);
-	//
-	//m_ent->SetMass(mass);
-	//m_ent->SetInvMass(1.f / mass);
-
-	//float factor = .4f * mass * scale.x * scale.x;
-	//Vector3 tensor_i = Vector3(factor, 0.f, 0.f);
-	//Vector3 tensor_j = Vector3(0.f, factor, 0.f);
-	//Vector3 tensor_k = Vector3(0.f, 0.f, factor);
-	//Matrix33 tensor = Matrix33(tensor_i, tensor_j, tensor_k);
-
-	//m_ent->SetTensor(tensor);
-	//m_ent->SetInvTensor(tensor.Invert());
-
-	//// set model transform mat for ent
-	//m_ent->CacheData();
-
-	//// make sure the transform of ent (in mat4 form) means same thing as renderable transform above
-	//const Matrix44& verified_transform_mat = m_ent->GetTransformMat4();
-	//Vector3 verified_euler = Matrix44::DecomposeMatrixIntoEuler(verified_transform_mat);
-	//ASSERT_OR_DIE(verified_euler == rot, "euler of game object and rigid body do not match");
 }
 
 
@@ -109,35 +87,18 @@ float Sphere::GetRadius() const
 		Sphere3 s3 = entity->GetSpherePrimitive();
 		res = s3.m_radius;
 	}
-	else if (bid == BODY_RIGID)
-	{
-		SphereRB3* rigid = static_cast<SphereRB3*>(m_physEntity);
-		Sphere3 s3 = rigid->GetSpherePrimitive();
-		res = s3.m_radius;
-	}
+	//else if (bid == BODY_RIGID)
+	//{
+	//	SphereRB3* rigid = static_cast<SphereRB3*>(m_physEntity);
+	//	Sphere3 s3 = rigid->GetSpherePrimitive();
+	//	res = s3.m_radius;
+	//}
 
 	return res;
 }
 
 void Sphere::Update(float)
 {
-	//if (m_physEntity)
-	//{
-	//	if (m_physEntity->GetEntityMoveStatus() != MOVE_STATIC)
-	//	{
-	//		m_physEntity->Integrate(deltaTime);
-	//		m_physEntity->UpdateTransforms();
-	//		m_physEntity->UpdatePrimitives();
-
-	//		m_renderable->m_transform = m_physEntity->GetEntityTransform();
-	//	}
-	//}
-
-	//if (m_ent)
-	//{
-	//	m_ent->Integrate(deltaTime);
-	//}
-
 	UpdateBasis();
 }
 
