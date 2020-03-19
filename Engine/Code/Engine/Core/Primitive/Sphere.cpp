@@ -36,12 +36,12 @@ Sphere::Sphere(const float& mass, const Vector3& pos, const Vector3& rot, const 
 
 	float radius = scale.x;
 	Sphere3 sphere3 = Sphere3(pos, radius);
-	if (bid == BODY_PARTICLE)
-		m_physEntity = new SphereEntity3(sphere3, rot, moveStat);
-	else
-		m_physEntity = new SphereRB3(mass, sphere3, rot, moveStat);
-	m_physEntity->m_scheme = scheme;			// discrete or continuous
-	m_physEntity->SetEntityForPrimitive();
+	//if (bid == BODY_PARTICLE)
+	//	m_physEntity = new SphereEntity3(sphere3, rot, moveStat);
+	//else
+	//	m_physEntity = new SphereRB3(mass, sphere3, rot, moveStat);
+	//m_physEntity->m_scheme = scheme;			// discrete or continuous
+	//m_physEntity->SetEntityForPrimitive();
 }
 
 
