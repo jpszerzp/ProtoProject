@@ -39,12 +39,12 @@ Quad::Quad(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint, std::string meshN
 	Vector3 worldForward = transform.GetWorldForward();				// same as normal
 	float offset = DotProduct(pos, worldForward.GetNormalized());
 	Plane plane = Plane(worldForward, offset);
-	if (bid == BODY_PARTICLE)
-		m_physEntity = new QuadEntity3(plane, moveStat, pos, rot, scale);
-	else
-		m_physEntity = new QuadRB3(4.9f, plane, pos, rot, scale, moveStat);
-	m_physEntity->SetEntityForPrimitive();
-	m_physEntity->m_scheme = scheme;
+	//if (bid == BODY_PARTICLE)
+	//	m_physEntity = new QuadEntity3(plane, moveStat, pos, rot, scale);
+	//else
+	//	m_physEntity = new QuadRB3(4.9f, plane, pos, rot, scale, moveStat);
+	//m_physEntity->SetEntityForPrimitive();
+	//m_physEntity->m_scheme = scheme;
 }
 
 Quad::Quad(Vector3 pos, Vector3 rot, Vector3 scale, Rgba tint, std::string meshName,
