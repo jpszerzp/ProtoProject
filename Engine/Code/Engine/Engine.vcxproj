@@ -338,8 +338,6 @@
     <ClCompile Include="Physics\2D\DiscEntity.cpp" />
     <ClCompile Include="Physics\2D\QuadEntity.cpp" />
     <ClCompile Include="Physics\3D\BoundingVolume3.cpp" />
-    <ClCompile Include="Physics\3D\BoxEntity3.cpp" />
-    <ClCompile Include="Physics\3D\BoxRB3.cpp" />
     <ClCompile Include="Physics\3D\BVH3.cpp" />
     <ClCompile Include="Physics\3D\CollisionDetection.cpp" />
     <ClCompile Include="Physics\3D\ContactResolver.cpp" />
@@ -350,10 +348,6 @@
     <ClCompile Include="Physics\3D\ForceGenerator.cpp" />
     <ClCompile Include="Physics\3D\ForceRegistry.cpp" />
     <ClCompile Include="Physics\3D\PHYSX\PhysXObject.cpp" />
-    <ClCompile Include="Physics\3D\PointEntity3.cpp" />
-    <ClCompile Include="Physics\3D\PointRB3.cpp" />
-    <ClCompile Include="Physics\3D\QuadEntity3.cpp" />
-    <ClCompile Include="Physics\3D\QuadRB3.cpp" />
     <ClCompile Include="Physics\3D\RF\CollisionDetector.cpp" />
     <ClCompile Include="Physics\3D\RF\CollisionEntity.cpp" />
     <ClCompile Include="Physics\3D\RF\CollisionKeep.cpp" />
@@ -364,8 +358,6 @@
     <ClCompile Include="Physics\3D\RF\TheCollision.cpp" />
     <ClCompile Include="Physics\3D\Rigidbody3.cpp" />
     <ClCompile Include="Physics\3D\RigidForceGenerator.cpp" />
-    <ClCompile Include="Physics\3D\SphereEntity3.cpp" />
-    <ClCompile Include="Physics\3D\SphereRB3.cpp" />
     <ClCompile Include="Physics\MassData.cpp" />
     <ClCompile Include="Physics\PhysicsMaterial.cpp" />
     <ClCompile Include="Physics\PhysicsPhase.cpp" />
@@ -483,8 +475,6 @@
     <ClInclude Include="Physics\2D\DiscEntity.hpp" />
     <ClInclude Include="Physics\2D\QuadEntity.hpp" />
     <ClInclude Include="Physics\3D\BoundingVolume3.hpp" />
-    <ClInclude Include="Physics\3D\BoxEntity3.hpp" />
-    <ClInclude Include="Physics\3D\BoxRB3.hpp" />
     <ClInclude Include="Physics\3D\BVH3.hpp" />
     <ClInclude Include="Physics\3D\CCDResolver.hpp" />
     <ClInclude Include="Physics\3D\CollisionDetection.hpp" />
@@ -498,10 +488,6 @@
     <ClInclude Include="Physics\3D\PHYSX\PhysAllocator.hpp" />
     <ClInclude Include="Physics\3D\PHYSX\PhysErrorCallback.hpp" />
     <ClInclude Include="Physics\3D\PHYSX\PhysXObject.hpp" />
-    <ClInclude Include="Physics\3D\PointEntity3.hpp" />
-    <ClInclude Include="Physics\3D\PointRB3.hpp" />
-    <ClInclude Include="Physics\3D\QuadEntity3.hpp" />
-    <ClInclude Include="Physics\3D\QuadRB3.hpp" />
     <ClInclude Include="Physics\3D\RF\CollisionDetector.hpp" />
     <ClInclude Include="Physics\3D\RF\CollisionEntity.hpp" />
     <ClInclude Include="Physics\3D\RF\CollisionKeep.hpp" />
@@ -513,8 +499,6 @@
     <ClInclude Include="Physics\3D\RF\TheCollision.hpp" />
     <ClInclude Include="Physics\3D\Rigidbody3.hpp" />
     <ClInclude Include="Physics\3D\RigidForceGenerator.hpp" />
-    <ClInclude Include="Physics\3D\SphereEntity3.hpp" />
-    <ClInclude Include="Physics\3D\SphereRB3.hpp" />
     <ClInclude Include="Physics\MassData.hpp" />
     <ClInclude Include="Physics\PhysicsMaterial.hpp" />
     <ClInclude Include="Physics\PhysicsPhase.hpp" />

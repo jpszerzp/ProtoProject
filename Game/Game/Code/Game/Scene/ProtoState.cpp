@@ -35,21 +35,6 @@ PrototypeState::PrototypeState()
 		m_UICamera->SetProjectionOrtho(width, height, 0.f, 100.f);
 	}
 
-	m_gameObjects.empty();
-	Vector3 pos = Vector3(0.f, 0.f, 7.f);
-	Vector3 rot = Vector3::ZERO;
-	Vector3 scale = Vector3::ONE;
-	Rgba tint = Rgba::WHITE;
-	eMoveStatus stat = MOVE_KINEMATIC;
-	eBodyIdentity bid = BODY_RIGID;
-	bool multipass = false;
-	eDepthCompare compare = COMPARE_LESS;
-	eCullMode cull = CULLMODE_BACK;
-	eWindOrder wind = WIND_COUNTER_CLOCKWISE;
-	eDynamicScheme scheme = DISCRETE;
-	Quad* quad = new Quad(pos, rot, scale, tint, "quad_pcu", "default", stat, bid, multipass, compare, cull, wind, scheme);
-	m_gameObjects.push_back(quad);
-
 	Vector2 titleTextMin = Vector2(-width / 2.f, height / 2.f - 32.f);
 	float titleHeight = height / 50.f;
 	Rgba titleTextTint = Rgba::WHITE;

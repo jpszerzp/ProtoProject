@@ -251,73 +251,13 @@ DebugRenderTaskQuad::DebugRenderTaskQuad(float lifeTime, const Rgba& startTimeCo
 
 void DebugRenderTaskQuad::SetDebugObject(Vector3 drawmin, Vector3 up, Vector3 right, float width, float height, std::string shaderName, bool isFont)
 {
-	Renderer* renderer = Renderer::GetInstance();
 
-	// given drawmin, up, right, width and height
-	// get center, rot and scale 
-
-	// center/pos
-	up.NormalizeAndGetLength();
-	right.NormalizeAndGetLength();
-	Vector3 center = drawmin + (right * width * 0.5f) + (up * height * 0.5f);
-
-	// rot
-	Vector3 forward = right.Cross(up);
-	Vector2 projectedForward = Vector2(forward.x, forward.z);
-	Vector3 polarFoward = CartesianToPolar(forward);
-	float pitchRotationDeg = ConvertRadiansToDegrees(polarFoward.z);
-	pitchRotationDeg = 90.f - pitchRotationDeg;
-	float yawRotationDeg = projectedForward.GetOrientationDegrees0To360();
-	yawRotationDeg = 270.f - yawRotationDeg;
-	float rollRotationDeg = 0.f;
-	Vector3 rot = Vector3(pitchRotationDeg, yawRotationDeg, rollRotationDeg);
-
-	// scale
-	Vector3 scale = Vector3(width, height, 0.f);
-
-	m_debugObj = new Quad(center, rot, scale, Rgba::WHITE, "quad_pcu", "", MOVE_STATIC, BODY_PARTICLE, false);
-
-	Material* material = m_debugObj->m_renderable->GetMaterial();
-	Shader* shader = renderer->CreateOrGetShader(shaderName);
-	material->m_shader = shader;	
-	material->FillTextures(isFont);
-	material->FillPropertyBlocks();
 }
 
 
 void DebugRenderTaskQuad::SetDebugObject(Vector3 drawmin, Vector3 up, Vector3 right, float width, float height, std::string shaderName, bool isFont, Vector2 uvBL, Vector2 uvBR, Vector2 uvTL, Vector2 uvTR)
 {
-	Renderer* renderer = Renderer::GetInstance();
 
-	// given drawmin, up, right, width and height
-	// get center, rot and scale 
-
-	// center/pos
-	up.NormalizeAndGetLength();
-	right.NormalizeAndGetLength();
-	Vector3 center = drawmin + (right * width * 0.5f) + (up * height * 0.5f);
-
-	// rot
-	Vector3 forward = right.Cross(up);
-	Vector2 projectedForward = Vector2(forward.x, forward.z);
-	Vector3 polarFoward = CartesianToPolar(forward);
-	float pitchRotationDeg = ConvertRadiansToDegrees(polarFoward.z);
-	pitchRotationDeg = 90.f - pitchRotationDeg;
-	float yawRotationDeg = projectedForward.GetOrientationDegrees0To360();
-	yawRotationDeg = 270.f - yawRotationDeg;
-	float rollRotationDeg = 0.f;
-	Vector3 rot = Vector3(pitchRotationDeg, yawRotationDeg, rollRotationDeg);
-
-	// scale
-	Vector3 scale = Vector3(width, height, 0.f);
-
-	m_debugObj = new Quad(center, rot, scale, Rgba::WHITE, "quad_pcu", "", uvBL, uvBR, uvTL, uvTR, MOVE_STATIC, BODY_PARTICLE, false);
-
-	Material* material = m_debugObj->m_renderable->GetMaterial();
-	Shader* shader = renderer->CreateOrGetShader(shaderName);
-	material->m_shader = shader;	
-	material->FillTextures(isFont);
-	material->FillPropertyBlocks();
 }
 
 
@@ -359,16 +299,7 @@ DebugRenderTaskPoint::DebugRenderTaskPoint(float lifeTime, const Rgba& startTime
 
 void DebugRenderTaskPoint::SetDebugObject(Vector3 position, Vector3 rot, float size, std::string shaderName)
 {
-	Renderer* renderer = Renderer::GetInstance();
 
-	m_debugObj = new Point(position, rot, size, Rgba::WHITE, "point_pcu", "", MOVE_STATIC, BODY_PARTICLE);
-	m_debugObj->m_debugOn = true;
-
-	Material* material = m_debugObj->m_renderable->GetMaterial();
-	Shader* shader = renderer->CreateOrGetShader(shaderName);
-	material->m_shader = shader;	
-	material->FillTextures();
-	material->FillPropertyBlocks();			// causing leak potentially
 }
 
 
