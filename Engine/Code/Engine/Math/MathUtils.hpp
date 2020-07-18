@@ -2,7 +2,6 @@
 
 #include "Engine/Math/IntVector2.hpp"
 #include "Engine/Math/Vector2.hpp"
-#include "Engine/Math/Disc2.hpp"
 #include "Engine/Math/AABB2.hpp"
 #include "Engine/Math/Vector3.hpp"
 #include "Engine/Math/Vector4.hpp"
@@ -39,8 +38,8 @@ Vector3 GetRandomVector3();
 // physics
 float GetDistance(const Vector2& a, const Vector2& b);
 float GetDistanceSquared(const Vector2& a, const Vector2& b);
-bool  DoDiscsOverlap (const Disc2& a, const Disc2& b);
-bool  DoDiscsOverlap (const Vector2& aCenter, float aRadius, const Vector2& bCenter, float bRadius);
+//bool  DoDiscsOverlap (const Disc2& a, const Disc2& b);
+//bool  DoDiscsOverlap (const Vector2& aCenter, float aRadius, const Vector2& bCenter, float bRadius);
 bool  DoAABBsOverlap( const AABB2& a, const AABB2& b );
 float GetSquredDistPointVsAABB3(const Vector3& point, const AABB3& aabb3);
 bool  SphereVsAABB3Intersection(const Sphere3& sphere, const AABB3& aabb3);

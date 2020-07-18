@@ -80,18 +80,18 @@ float GetDistanceSquared(const Vector2& a, const Vector2& b)
 }
 
 
-bool DoDiscsOverlap (const Vector2& aCenter, float aRadius, const Vector2& bCenter, float bRadius)
-{
-	float discsDistance = GetDistance(aCenter, bCenter);
-	
-	return (discsDistance <= (aRadius + bRadius));
-}
-
-
-bool DoDiscsOverlap (const Disc2& a, const Disc2& b)
-{
-	return DoDiscsOverlap(a.center, a.radius, b.center, b.radius);
-}
+//bool DoDiscsOverlap (const Vector2& aCenter, float aRadius, const Vector2& bCenter, float bRadius)
+//{
+//	float discsDistance = GetDistance(aCenter, bCenter);
+//	
+//	return (discsDistance <= (aRadius + bRadius));
+//}
+//
+//
+//bool DoDiscsOverlap (const Disc2& a, const Disc2& b)
+//{
+//	return DoDiscsOverlap(a.center, a.radius, b.center, b.radius);
+//}
 
 
 bool DoAABBsOverlap( const AABB2& a, const AABB2& b )
@@ -1252,42 +1252,6 @@ Vector3 TransformBasisPoint(const Vector3& point, const Matrix44& basis)
 
 bool SphereVsOBB3Intersection(const Sphere3&, const OBB3&)
 {
-	/*
-	Vector3 sphereCenter = sphere.m_center;
-	float sphereRadius = sphere.m_radius;
-
-	Vector3 obbCenter = obb3.m_center;
-	Vector3 obbRot = obb3.m_rot;
-	Vector3 obbScale = obb3.m_scale;
-
-	Matrix44 rotMat = Matrix44::MakeRotationDegrees3D(obbRot);
-	Vector3 transformedSphereCenter = TransformBasisPoint(sphereCenter, rotMat);
-	Sphere3 transformedSphere = Sphere3(transformedSphereCenter, sphereRadius);
-
-	Transform transform = Transform(obbCenter, obbRot, obbScale);
-	Matrix44 localModel = transform.GetLocalMatrix();
-	Vector3 localForwardNorm = localModel.GetForward().GetNormalized();
-	Vector3 localRightNorm = localModel.GetRight().GetNormalized();
-	Vector3 localUpNorm = localModel.GetUp().GetNormalized();
-
-	Vector3 halfDim = Vector3(obbScale.x / 2.f, obbScale.y / 2.f, obbScale.z / 2.f);
-	Vector3 halfExtX = localRightNorm * halfDim.x;
-	Vector3 halfExtY = localUpNorm * halfDim.y;
-	Vector3 halfExtZ = localForwardNorm * halfDim.z;
-	
-	Vector3 localMax = obbCenter + halfExtX + halfExtY + halfExtZ;
-	Vector3 localMin = obbCenter - halfExtX - halfExtY - halfExtZ;
-
-	Vector3 transformedMax = TransformBasisPoint(localMax, rotMat);
-	Vector3 transformedMin = TransformBasisPoint(localMin, rotMat);
-	
-	AABB3 transformedOBB3 = AABB3(transformedMin, transformedMax);
-
-	bool intersected = SphereVsAABB3Intersection(transformedSphere, transformedOBB3);
-
-	return intersected;
-	*/
-
 	return false;
 }
 
@@ -1699,165 +1663,10 @@ bool SATTestBoxVsConvex(const CollisionBox& b1, const CollisionConvexObject& cob
 	return true;
 }
 
-/*
-// penetration along the given axis
-float SATTestPenetrationBoxVsConvex(const CollisionBox& b1, const CollisionConvexObject& cobj, const Vector3& axis, const Vector3& disp)
-{
-	float tmin_b, tmax_b, tmin_c, tmax_c; 
-	Vector3 vmin_b, vmax_b, vmin_c, vmax_c;
-
-	// intervals
-	b1.ProjectToAxisForInterval(axis, tmin_b, tmax_b, vmin_b, vmax_b);
-	cobj.ProjectToAxisForInterval(axis, tmin_c, tmax_c, vmin_c, vmax_c);
-
-}
-*/
-
 float DistPointToPlaneUnsigned(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3)
 {
 	return abs(DistPointToPlaneSigned(pt, vert1, vert2, vert3));
 }
-
-/*
-* Return the closest feature on TRIANGLE hull regarding a point.
-* @param pt: position of point of interest
-* @param a: a vertex of the triangle
-* @param b: b vertex of the triangle
-* @param c: c vertex of the triangle
-* @param dist: reference to the closest distance
-* @param closest: reference to the closest point 
-* @return the closest feature
-*/
-//QHFeature* DistPointToTriangleHull(const Vector3& pt, const Vector3& a, 
-//	const Vector3& b, const Vector3& c, float& dist, Vector3& closest)
-//{
-//	// see p139 of real time collision detection
-//	// in my case, I want the distance and feature info
-//	Vector3 ab = b - a;
-//	Vector3 ac = c - a;
-//	Vector3 bc = c - b;
-//
-//	// Voronoi related to ab
-//	float snom = DotProduct(pt - a, ab);
-//	float sdenom = DotProduct(pt - b, a - b);
-//
-//	// Voronoi related to ac
-//	float tnom = DotProduct(pt - a, ac);
-//	float tdenom = DotProduct(pt - c, a - c);
-//
-//	if (snom <= 0.f && tnom <= 0.f)
-//	{
-//		closest = a;
-//		dist = (pt - a).GetLength();
-//		QHVert* feature = new QHVert(a);
-//
-//		return feature;
-//	}
-//
-//	// Voronoi related to bc
-//	float unom = DotProduct(pt - b, bc);
-//	float udenom = DotProduct(pt - c, b - c);
-//	
-//	if (sdenom <= 0.f && unom <= 0.f)
-//	{
-//		closest = b;
-//		dist = (pt - b).GetLength();
-//		QHVert* feature = new QHVert(b);
-//
-//		return feature;
-//	}
-//
-//	if (tdenom <= 0.f && udenom <= 0.f)
-//	{
-//		closest = c;
-//		dist = (pt - c).GetLength();
-//		QHVert* feature = new QHVert(c);
-//		
-//		return feature;
-//	}
-//
-//	// investigate edge features with barycentric methods
-//	// ab
-//	Vector3 n = ab.Cross(ac);
-//	Vector3 toA = a - pt;
-//	Vector3 toB = b - pt;
-//	float vc = DotProduct(n, toA.Cross(toB));
-//	if (vc <= 0.f && snom >= 0.f && sdenom >= 0.f)
-//	{
-//		// closest feature is edge ab
-//		Vector3 dev = ab * (snom / (snom + sdenom));
-//		closest = a + dev;
-//		dist = (-toA - dev).GetLength();
-//		QHEdge* feature = new QHEdge(a, b);
-//
-//		return feature;
-//	}
-//
-//	// bc
-//	Vector3 toC = c - pt;
-//	float va = DotProduct(n, toB.Cross(toC));
-//	if (va <= 0.f && unom >= 0.f && udenom >= 0.f)
-//	{
-//		// closest feature is edge bc
-//		Vector3 dev = bc * (unom / (unom + udenom));
-//		closest = b + dev;
-//		dist = (-toB - dev).GetLength();
-//		QHEdge* feature = new QHEdge(b, c);
-//
-//		return feature;
-//	}
-//
-//	// ac
-//	float vb = DotProduct(n, toC.Cross(toA));
-//	if (vb <= 0.f && tnom >= 0.f && tdenom >= 0.f)
-//	{
-//		// closest feature is edge ac
-//		Vector3 dev = ac * (tnom / (tnom + tdenom));
-//		closest = a + dev;
-//		dist = (-toA - dev).GetLength();
-//		QHEdge* feature = new QHEdge(a, c);
-//
-//		return feature;
-//	}
-//
-//	// in this case pt project within the triangle 
-//	float u = va / (va + vb + vc);
-//	float v = vb / (va + vb + vc);
-//	float w = 1.f - u - v;
-//	closest = a * u + b * v + c * w;
-//	dist = (pt - closest).GetLength();
-//	QHFace* feature = new QHFace(a, b, c);
-//
-//	return feature;
-//}
-//
-//QHFeature* DistPointToQuadHull(const Vector3& pt, const Vector3& vert1, 
-//	const Vector3& vert2, const Vector3& vert3, const Vector3& vert4,
-//	float& dist, Vector3& closest)
-//{
-//	// 1-2-3
-//	float dist123;
-//	Vector3 closest123;
-//	QHFeature* feature123 = DistPointToTriangleHull(pt, vert1, vert2, vert3, dist123, closest123);
-//
-//	// 1-3-4
-//	float dist134;
-//	Vector3 closest134;
-//	QHFeature* feature134 = DistPointToTriangleHull(pt, vert1, vert3, vert4, dist134, closest134);
-//
-//	if (dist123 < dist134)
-//	{
-//		closest = closest123;
-//		dist = dist123;
-//		return feature123;
-//	}
-//	else
-//	{
-//		closest = closest134;
-//		dist = dist134;
-//		return feature134;
-//	}
-//}
 
 Vector3 ComputePlaneIntersectionPointLA(const Plane& p1, const Plane& p2, const Plane& p3)
 {

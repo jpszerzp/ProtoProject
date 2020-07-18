@@ -313,7 +313,6 @@
     <ClCompile Include="Math\AABB2.cpp" />
     <ClCompile Include="Math\AABB3.cpp" />
     <ClCompile Include="Math\CubicSpline.cpp" />
-    <ClCompile Include="Math\Disc2.cpp" />
     <ClCompile Include="Math\FloatRange.cpp" />
     <ClCompile Include="Math\IntRange.cpp" />
     <ClCompile Include="Math\IntVector2.cpp" />
@@ -327,7 +326,6 @@
     <ClCompile Include="Math\Particle.cpp" />
     <ClCompile Include="Math\Plane.cpp" />
     <ClCompile Include="Math\Primitive3.cpp" />
-    <ClCompile Include="Math\Quadtree.cpp" />
     <ClCompile Include="Math\RawNoise.cpp" />
     <ClCompile Include="Math\SmoothNoise.cpp" />
     <ClCompile Include="Math\Sphere3.cpp" />
@@ -335,15 +333,11 @@
     <ClCompile Include="Math\Vector2.cpp" />
     <ClCompile Include="Math\Vector3.cpp" />
     <ClCompile Include="Math\Vector4.cpp" />
-    <ClCompile Include="Physics\2D\DiscEntity.cpp" />
-    <ClCompile Include="Physics\2D\QuadEntity.cpp" />
     <ClCompile Include="Physics\3D\BoundingVolume3.cpp" />
     <ClCompile Include="Physics\3D\BVH3.cpp" />
     <ClCompile Include="Physics\3D\CollisionDetection.cpp" />
     <ClCompile Include="Physics\3D\ContactResolver.cpp" />
     <ClCompile Include="Physics\3D\CubeEntity3.cpp" />
-    <ClCompile Include="Physics\2D\Entity.cpp" />
-    <ClCompile Include="Physics\2D\Manifold.cpp" />
     <ClCompile Include="Physics\3D\Entity3.cpp" />
     <ClCompile Include="Physics\3D\ForceGenerator.cpp" />
     <ClCompile Include="Physics\3D\ForceRegistry.cpp" />
@@ -360,9 +354,6 @@
     <ClCompile Include="Physics\3D\RigidForceGenerator.cpp" />
     <ClCompile Include="Physics\MassData.cpp" />
     <ClCompile Include="Physics\PhysicsMaterial.cpp" />
-    <ClCompile Include="Physics\PhysicsPhase.cpp" />
-    <ClCompile Include="Physics\2D\PhysicsScene.cpp" />
-    <ClCompile Include="Physics\2D\RectangleEntity.cpp" />
     <ClCompile Include="Renderer\BitmapFont.cpp" />
     <ClCompile Include="Renderer\Camera.cpp" />
     <ClCompile Include="Renderer\DebugRenderer.cpp" />
@@ -450,7 +441,6 @@
     <ClInclude Include="Math\AABB2.hpp" />
     <ClInclude Include="Math\AABB3.hpp" />
     <ClInclude Include="Math\CubicSpline.hpp" />
-    <ClInclude Include="Math\Disc2.hpp" />
     <ClInclude Include="Math\FloatRange.hpp" />
     <ClInclude Include="Math\IntRange.hpp" />
     <ClInclude Include="Math\IntVector2.hpp" />
@@ -464,7 +454,6 @@
     <ClInclude Include="Math\Particle.hpp" />
     <ClInclude Include="Math\Plane.hpp" />
     <ClInclude Include="Math\Primitive3.hpp" />
-    <ClInclude Include="Math\Quadtree.hpp" />
     <ClInclude Include="Math\RawNoise.hpp" />
     <ClInclude Include="Math\SmoothNoise.hpp" />
     <ClInclude Include="Math\Sphere3.hpp" />
@@ -472,16 +461,12 @@
     <ClInclude Include="Math\Vector2.hpp" />
     <ClInclude Include="Math\Vector3.hpp" />
     <ClInclude Include="Math\Vector4.hpp" />
-    <ClInclude Include="Physics\2D\DiscEntity.hpp" />
-    <ClInclude Include="Physics\2D\QuadEntity.hpp" />
     <ClInclude Include="Physics\3D\BoundingVolume3.hpp" />
     <ClInclude Include="Physics\3D\BVH3.hpp" />
     <ClInclude Include="Physics\3D\CCDResolver.hpp" />
     <ClInclude Include="Physics\3D\CollisionDetection.hpp" />
     <ClInclude Include="Physics\3D\ContactResolver.hpp" />
     <ClInclude Include="Physics\3D\CubeEntity3.hpp" />
-    <ClInclude Include="Physics\2D\Entity.hpp" />
-    <ClInclude Include="Physics\2D\Manifold.hpp" />
     <ClInclude Include="Physics\3D\Entity3.hpp" />
     <ClInclude Include="Physics\3D\ForceGenerator.hpp" />
     <ClInclude Include="Physics\3D\ForceRegistry.hpp" />
@@ -501,9 +486,6 @@
     <ClInclude Include="Physics\3D\RigidForceGenerator.hpp" />
     <ClInclude Include="Physics\MassData.hpp" />
     <ClInclude Include="Physics\PhysicsMaterial.hpp" />
-    <ClInclude Include="Physics\PhysicsPhase.hpp" />
-    <ClInclude Include="Physics\2D\PhysicsScene.hpp" />
-    <ClInclude Include="Physics\2D\RectangleEntity.hpp" />
     <ClInclude Include="Renderer\BitmapFont.hpp" />
     <ClInclude Include="Renderer\Camera.hpp" />
     <ClInclude Include="Renderer\DebugRenderer.hpp" />

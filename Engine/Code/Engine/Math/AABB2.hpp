@@ -22,14 +22,14 @@ public:
 	explicit AABB2( const Vector2& mins, const Vector2& maxs );
 	explicit AABB2( const Vector2& center, float radiusX, float radiusY );
 
-	void StretchToIncludePoint( float x, float y );														// note: stretch, not move…
-	void StretchToIncludePoint( const Vector2& point );													// note: stretch, not move…
+	void StretchToIncludePoint( float x, float y );														// note: stretch, not moveï¿½
+	void StretchToIncludePoint( const Vector2& point );													// note: stretch, not moveï¿½
 	void AddPaddingToSides( float xPaddingRadius, float yPaddingRadius );
 	void Translate( const Vector2& translation );														// move the box; similar to +=
 	void Translate( float translationX, float translationY );
 
-	bool IsPointInside( float x, float y ) const;														// is “x,y” within box’s interior?
-	bool IsPointInside( const Vector2& point ) const;													// is “point” within box’s interior?
+	bool IsPointInside( float x, float y ) const;														// is ï¿½x,yï¿½ within boxï¿½s interior?
+	bool IsPointInside( const Vector2& point ) const;													// is ï¿½pointï¿½ within boxï¿½s interior?
 	Vector2 GetDimensions() const;																		// return a Vector2 of ( width, height )
 	Vector2 GetCenter() const;																			// return the center position of the box
 	std::vector<Vector2> GetCornersFromBLInCounterClockwise() const;									// return position of four corners of the box from bottom left in counter clockwise direction
