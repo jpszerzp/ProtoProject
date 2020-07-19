@@ -6,14 +6,8 @@
 #include "Engine/Math/Vector3.hpp"
 #include "Engine/Math/Vector4.hpp"
 #include "Engine/Math/Matrix44.hpp"
-#include "Engine/Math/AABB3.hpp"
-#include "Engine/Math/Sphere3.hpp"
 #include "Engine/Math/OBB3.hpp"
-#include "Engine/Math/Plane.hpp"
-#include "Engine/Math/Line3.hpp"
 #include "Engine/Core/Interval.hpp"
-#include "Engine/Physics/3D/RF/ConvexPolyhedron.hpp"
-#include "Engine/Physics/3D/RF/CollisionPrimitive.hpp"
 
 #include <set>
 
@@ -38,18 +32,7 @@ Vector3 GetRandomVector3();
 // physics
 float GetDistance(const Vector2& a, const Vector2& b);
 float GetDistanceSquared(const Vector2& a, const Vector2& b);
-//bool  DoDiscsOverlap (const Disc2& a, const Disc2& b);
-//bool  DoDiscsOverlap (const Vector2& aCenter, float aRadius, const Vector2& bCenter, float bRadius);
 bool  DoAABBsOverlap( const AABB2& a, const AABB2& b );
-float GetSquredDistPointVsAABB3(const Vector3& point, const AABB3& aabb3);
-bool  SphereVsAABB3Intersection(const Sphere3& sphere, const AABB3& aabb3);
-bool  SphereVsOBB3Intersection(const Sphere3& sphere, const OBB3& obb3);
-bool  SphereVsSphereIntersection(const Sphere3& s1, const Sphere3& s2);
-bool  AABB3VsPlaneIntersection(const AABB3& aabb, const Plane& plane);
-bool  AABB3VsAABB3Intersection(const AABB3& aabb_1, const AABB3& aabb_2);
-bool  AABB3VsAABB3Intersection(const AABB3& aabb_1, const AABB3& aabb_2,
-	Vector3& axis, float& overlap);
-DirectionalInterval GetIntervalOfBoxAcrossAxis(const OBB3& obb, const Line3& line);
 float GetIntervalOverlapDirectional(const DirectionalInterval& interval1, const DirectionalInterval& interval2);
 
 // rounding, clamping and range mapping
@@ -114,11 +97,7 @@ Vector3 PolarToCartesian( Vector3 spherical );
 Vector3 CartesianToPolar( Vector3 position );
 void MakeOrthonormalBasis(const Vector3& x, Vector3& y, Vector3& z);
 void MakeOrthonormalBasisOpt(const Vector3& x, Vector3& y, Vector3& z);
-//void MakeOrthonormalBasisStable(const Vector3& x);
 bool ProjectPlaneToSphere(Vector2 pos, float r, Vector3& out_pos);	// a spherical coord operation
-Vector3 ProjectPointToLine(const Vector3& point, const Line3& line, float& dist);
-Vector3 ProjectPointToLineExt(const Vector3& point, const Line3& line, float& ext);
-Vector3 ProjectPointToLineFeature(const Vector3& point, const Line3& line, float& dist);
 Vector3 ProjectPointToPlane(const Vector3& point, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3, float& dist);
 Vector3 ProjectPointToPlaneFeature(const Vector3& point, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3, float& dist);
 Vector3 ProjectPointToTetraFeature(const Vector3& point, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3, const Vector3& vert4, float& dist);
@@ -150,23 +129,7 @@ bool IsPointInCircle(Vector2 pos, float r);
 float DistPointToEdge(const Vector3& pt, const Vector3& vert1, const Vector3& vert2);
 float DistPointToPlaneSigned(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3);
 float DistPointToPlaneUnsigned(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3);
-float DistPointToPlaneSigned(const Vector3& pt, const Plane& plane);
-bool IsPointOutwardPlane(const Vector3& pt, const Plane& plane);
 
-// SAT
-bool SATTestBoxVsBox(const CollisionBox& b1, const CollisionBox& b2, Vector3 axis, const Vector3& disp, unsigned index, float& smallest_pen, unsigned& smallest_index);
-float SATTestPenetrationBoxVsBox(const CollisionBox& b1, const CollisionBox& b2, const Vector3& axis, const Vector3& disp);
-float SATHalfProjectionBox(const CollisionBox& b, const Vector3& axis);
-bool SATTestBoxVsConvex(const CollisionBox& b1, const CollisionConvexObject& cobj, Vector3 axis, const Vector3& disp, unsigned idx, float& smallest_pen, unsigned& smallest_idx,
-	Vector3& box_min, Vector3& box_max, Vector3& convex_min, Vector3& convex_max);
-//float SATTestPenetrationBoxVsConvex(const CollisionBox& b1, const CollisionConvexObject& cobj, const Vector3& axis, const Vector3& disp);
-
-// qh
-//QHFeature* DistPointToTriangleHull(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3, float& dist, Vector3& closest);
-//QHFeature* DistPointToQuadHull(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3, const Vector3& vert4, float& dist, Vector3& closest);
-Vector3 ComputePlaneIntersectionPointLA(const Plane& p1, const Plane& p2, const Plane& p3);
-bool ComputePlaneIntersectionPoint(const Plane& p1, const Plane& p2, const Plane& p3, Vector3& p);
-Vector3 GetPolygonCentroid(const std::vector<Vector3>& verts, const ConvexPolygon& polygon);
 Matrix33 GetCanonicalTetrahedronCovariance();
 Matrix33 GetInertiaTensorFromCovariance(const Matrix33& cov);
 Matrix33 TranslateCovariance(const Matrix33& cov, const Vector3& com, const float& mass, const Vector3& offset);

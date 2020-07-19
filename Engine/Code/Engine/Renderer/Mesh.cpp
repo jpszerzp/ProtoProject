@@ -4,7 +4,6 @@
 #include "Engine/Math/MathUtils.hpp"
 #include "Engine/Core/Rgba.hpp"
 #include "Engine/Core/ModelLoader.hpp"
-#include "Engine/Core/MapChunk.hpp"
 #include "Engine/Core/Util/DataUtils.hpp"
 
 Mesh::Mesh()
@@ -12,12 +11,10 @@ Mesh::Mesh()
 
 }
 
-
 Mesh::~Mesh()
 {
 	
 }
-
 
 void Mesh::SetIndices( uint count, size_t stride )
 {
@@ -25,13 +22,11 @@ void Mesh::SetIndices( uint count, size_t stride )
 	m_ibo.m_indexCount = count;
 }
 
-
 void Mesh::SetVertices( uint count, size_t stride )
 {
 	m_vbo.m_vertexStride = (uint)stride;
 	m_vbo.m_vertexCount = count;
 }
-
 
 void Mesh::SetDrawInstruction( eDrawPrimitiveType type, bool use_indices, 
 	uint start_index, uint elem_count )
@@ -41,7 +36,6 @@ void Mesh::SetDrawInstruction( eDrawPrimitiveType type, bool use_indices,
 	m_instruction.start_index = start_index;
 	m_instruction.elem_count = elem_count;
 }
-
 
 Mesh* Mesh::CreatePoint(eVertexType type)
 {
@@ -61,7 +55,6 @@ Mesh* Mesh::CreatePoint(eVertexType type)
 
 	return mb.CreateMesh(type, DRAW_POINT);
 }
-
 
 Mesh* Mesh::CreatePointImmediate2D(eVertexType type, Vector2 pos, Rgba color)
 {
@@ -106,7 +99,6 @@ Mesh* Mesh::CreateLineImmediate(eVertexType type, const Vector3& startPos,
 	mesh->m_immediate = true;
 	return mesh;
 }
-
 
 Mesh* Mesh::CreatePointImmediate(eVertexType type, const Vector3& pos, const Rgba& color)
 {
@@ -164,7 +156,6 @@ Mesh* Mesh::CreateQuad(eVertexType type)
 
 	return mb.CreateMesh(type, DRAW_TRIANGLE);
 }
-
 
 Mesh* Mesh::CreateQuad20(eVertexType type)
 {
@@ -318,7 +309,6 @@ Mesh* Mesh::CreateQuadTextured(eVertexType type, Vector2 uvBL, Vector2 uvBR, Vec
 	return mb.CreateMesh(type, DRAW_TRIANGLE);
 }
 
-
 Mesh* Mesh::CreateQuadImmediate(eVertexType type, const Vector3& bl, const Vector3& br, 
 	const Vector3& tl, const Vector3& tr, const Rgba& tint)
 {
@@ -421,7 +411,6 @@ Mesh* Mesh::CreateQuadTexturedImmediate(eVertexType type,
 	mesh->m_immediate = true;
 	return mesh;
 }
-
 
 Mesh* Mesh::CreateUnitQuadInLine(eVertexType type, const Rgba& color)
 {
@@ -642,7 +631,6 @@ Mesh* Mesh::CreateCube(eVertexType type)
 	return mesh; 
 }
 
-
 Mesh* Mesh::CreateUVSphere( eVertexType type, uint slices, uint wedges )
 {
 	// (0,0) to (1,1)
@@ -696,7 +684,6 @@ Mesh* Mesh::CreateUVSphere( eVertexType type, uint slices, uint wedges )
 
 	return mb.CreateMesh(type, DRAW_TRIANGLE); 
 }
-
 
 Mesh* Mesh::CreateModel(std::string fp, eVertexType type)
 {
@@ -753,7 +740,6 @@ Mesh* Mesh::CreateModel(std::string fp, eVertexType type)
 	return mb.CreateMesh(type, DRAW_TRIANGLE);
 }
 
-
 Mesh* Mesh::CreateTerrainImmediateFromSurfacePatch(SurfacePatch* patch, eVertexType type)
 {
 	std::vector<Vector3> verts = patch->m_verts;
@@ -808,63 +794,6 @@ Mesh* Mesh::CreateTerrainImmediateFromSurfacePatch(SurfacePatch* patch, eVertexT
 	mesh->m_immediate = true;
 	return mesh;
 }
-
-
-Mesh* Mesh::CreateTerrainImmediateFromChunk(MapChunk* chunk, eVertexType type)
-{
-	std::vector<Vector3> verts = chunk->m_triangleVerts;
-	std::vector<Vector2> uvs = chunk->m_triangleUVs;
-	std::vector<Vector3> normals = chunk->m_triangleNormals;
-
-	MeshBuilder mb;
-
-	mb.Begin(DRAW_TRIANGLE, true);
-	mb.SetColor(Rgba::WHITE);
-
-	// Add face by triangles
-	for (uint vertIdx = 0; vertIdx < verts.size(); vertIdx += 3)
-	{
-		Vector2 uv_0 = uvs[vertIdx];
-		Vector2 uv_1 = uvs[vertIdx + 1];
-		Vector2 uv_2 = uvs[vertIdx + 2];
-
-		Vector3 normal_0 = normals[vertIdx];
-		Vector3 normal_1 = normals[vertIdx + 1];
-		Vector3 normal_2 = normals[vertIdx + 2];
-
-		Vector3 pos_0 = verts[vertIdx];
-		Vector3 pos_1 = verts[vertIdx + 1];
-		Vector3 pos_2 = verts[vertIdx + 2];
-
-		Vector3 e1 = pos_0 - pos_2;
-		Vector3 e2 = pos_1 - pos_2;
-		Vector2 uv1 = uv_0 - uv_2;
-		Vector2 uv2 = uv_1 - uv_2;
-		Vector4 tan = mb.CalcTangent(e1, e2, uv1, uv2);
-		mb.SetTangent(tan);
-
-		mb.SetUV(uv_0);
-		mb.SetNormal(normal_0);
-		mb.PushVertex(pos_0);
-
-		mb.SetUV(uv_1);
-		mb.SetNormal(normal_1);
-		mb.PushVertex(pos_1);
-
-		mb.SetUV(uv_2);
-		mb.SetNormal(normal_2);
-		mb.PushVertex(pos_2);
-
-		mb.AddTriangle(vertIdx, vertIdx + 1, vertIdx + 2);
-	}
-
-	mb.End();
-
-	Mesh* mesh = mb.CreateMesh(type, DRAW_TRIANGLE);
-	mesh->m_immediate = true;
-	return mesh;
-}
-
 
 Mesh* Mesh::CreateTriangleImmediate(eVertexType type, const Rgba& color,
 	const Vector3& v1, const Vector3& v2, const Vector3& v3)
@@ -1168,9 +1097,9 @@ Mesh* Mesh::CreateTextImmediate(Rgba color, const Vector2& drawmin, const Bitmap
 	mb.Begin(DRAW_TRIANGLE, true);
 	mb.SetColor(color);
 
-	//Create and attach new mesh.
-	//We have updated text stored.
-	//Process each character, and create an integrated mesh for it.
+	// Create and attach new mesh.
+	// We have updated text stored.
+	// Process each character, and create an integrated mesh for it.
 	float cellWidth = cellHeight * (font->GetGlyphAspect() * asepctScale);
 	for (size_t charIdx = 0; charIdx < text.length(); ++charIdx)
 	{

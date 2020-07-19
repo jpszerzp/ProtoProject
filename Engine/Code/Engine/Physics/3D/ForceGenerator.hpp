@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Engine/Physics/3D/Rigidbody3.hpp"
 #include "Engine/Physics/3D/RF/CollisionEntity.hpp"
 #include "Engine/Math/Vector3.hpp"
 

@@ -4,6 +4,9 @@
 
 #include <algorithm>
 
+using std::min;
+using std::max;
+
 const Rgba Rgba::WHITE = Rgba(255, 255, 255);
 const Rgba Rgba::BLUE = Rgba(0, 0, 255);
 const Rgba Rgba::YELLOW = Rgba(255, 255, 0);
@@ -48,13 +51,11 @@ Rgba::~Rgba()
 
 }
 
-
 Rgba::Rgba( unsigned char redByte, unsigned char greenByte, unsigned char blueByte, unsigned char alphaByte)
 	: r( redByte ), g( greenByte ), b( blueByte ), a ( alphaByte )
 {
 
 }
-
 
 void Rgba::SetAsBytes(unsigned char redByte, unsigned char greenByte, unsigned char blueByte, unsigned char alphaByte)
 {
@@ -64,7 +65,6 @@ void Rgba::SetAsBytes(unsigned char redByte, unsigned char greenByte, unsigned c
 	a = alphaByte;
 }
 
-
 void Rgba::SetAsFloats(float normalizedRed, float normalizedGreen, float normalizedBlue, float normalizedAlpha)
 {
 	r = static_cast<unsigned char>(normalizedRed * 255.f);
@@ -73,12 +73,10 @@ void Rgba::SetAsFloats(float normalizedRed, float normalizedGreen, float normali
 	a = static_cast<unsigned char>(normalizedAlpha * 255.f);
 }
 
-
 void Rgba::SetAlphaAsFloat(float normalizedAlpha)
 {
 	a = static_cast<unsigned char>(normalizedAlpha * 255.f);
 }
-
 
 void Rgba::GetAsFloats(float& out_normalizedRed, float& out_normalizedGreen, float& out_normalizedBlue, float& out_normalizedAlpha) const
 {
@@ -87,7 +85,6 @@ void Rgba::GetAsFloats(float& out_normalizedRed, float& out_normalizedGreen, flo
 	out_normalizedBlue = static_cast<float>(b) / 255.f;
 	out_normalizedAlpha = static_cast<float>(a) / 255.f;
 }
-
 
 void Rgba::ScaleRGB(float rgbScale)
 {
@@ -104,14 +101,12 @@ void Rgba::ScaleRGB(float rgbScale)
 	b = static_cast<unsigned char>(clampedB);
 }
 
-
 void Rgba::ScaleAlpha(float alphaScale)
 {
 	float scaledA = static_cast<float>(a) * alphaScale;
 	float clampedA = ClampZeroToFloat(255.f, scaledA);
 	a = static_cast<unsigned char>(clampedA);
 }
-
 
 void Rgba::SetFromText( const char* text )
 {
@@ -128,7 +123,6 @@ void Rgba::SetFromText( const char* text )
 		a = static_cast<unsigned char>(atoi(comma3 + 1));
 	}
 }
-
 
 Vector4 Rgba::ToVec4()
 {
@@ -147,7 +141,6 @@ bool Rgba::operator==( const Rgba& compare ) const
 	return false;
 }
 
-
 const Rgba GetRandomColor()
 {
 	unsigned char r = (unsigned char)GetRandomIntInRange(0, 255);
@@ -158,13 +151,6 @@ const Rgba GetRandomColor()
 
 const Rgba Interpolate( const Rgba& start, const Rgba& end, float fractionTowardEnd )
 {
-	//unsigned char r = Interpolate(start.r, end.r, fractionTowardEnd);
-	//unsigned char g = Interpolate(start.g, end.g, fractionTowardEnd);
-	//unsigned char b = Interpolate(start.b, end.b, fractionTowardEnd);
-	//unsigned char a = Interpolate(start.a, end.a, fractionTowardEnd);
-
-	//return Rgba(r, g, b, a);
-
 	Vector4 startVec4;
 	start.GetAsFloats(startVec4.x, startVec4.y, startVec4.z, startVec4.w);
 
@@ -190,7 +176,6 @@ const Rgba Interpolate( const Rgba& start, const Rgba& end, float fractionToward
 
 	return rgba;
 }
-
 
 Vector3 RGBToHSL(Vector3 rgb)
 {
@@ -220,7 +205,6 @@ Vector3 RGBToHSL(Vector3 rgb)
 	return Vector3( hue, sat, lum ); 
 }
 
-
 Vector3 HSLToRGB(Vector3 hsl)
 {
 	float h = hsl.x;
@@ -244,7 +228,6 @@ Vector3 HSLToRGB(Vector3 hsl)
 		ret = Vector3( x, 0.0f, c );
 	else 
 		ret = Vector3( c, 0.0f, x );
-	
 
 	ret = ret + Vector3( m, m, m );
 	return ret;

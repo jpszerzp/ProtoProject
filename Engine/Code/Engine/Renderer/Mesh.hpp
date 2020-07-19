@@ -5,7 +5,6 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 class MeshBuilder;
-class MapChunk;
 
 // Just Geometry
 class Mesh 
@@ -39,7 +38,6 @@ public:
 	static Mesh* CreateTextImmediate(Rgba color, const Vector2& drawmin, const BitmapFont* font,
 		float cellHeight, float asepctScale, std::string text, eVertexType type);
 	static Mesh* CreateTerrainImmediateFromSurfacePatch(SurfacePatch* patch, eVertexType type);
-	static Mesh* CreateTerrainImmediateFromChunk(MapChunk* chunk, eVertexType type);
 	static Mesh* CreateTriangleImmediate(eVertexType type, const Rgba& color,
 		const Vector3& v1, const Vector3& v2, const Vector3& v3);
 	static Mesh* CreateTetrahedronImmediate(eVertexType type, const Rgba& color,
@@ -49,7 +47,6 @@ public:
 	// 2D
 	static Mesh* CreateQuad2D(eVertexType type, Rgba color = Rgba::WHITE);
 	static Mesh* CreateDisc2D(eVertexType type, Rgba color = Rgba::WHITE);
-	//static Mesh* CreateCapsule2D(eVertexType type, Rgba color = Rgba::WHITE);
 	static Mesh* CreateDiscImmediate2D(Vector2 center, Rgba tint, float radius, int lineSegNum);
 	static Mesh* CreateLineImmediate2D(const Vector2& start, const Vector2& end, const Rgba& tint, eVertexType type);
 	static Mesh* CreatePointImmediate2D(eVertexType type, Vector2 pos, Rgba color);
@@ -89,7 +86,6 @@ public:
 	Rgba m_textMeshColor;
 	Vector2 m_textMeshDrawmin2;		// 2D
 };
-
 
 template<typename T>
 void Mesh::FromBuilder(const MeshBuilder& builder)

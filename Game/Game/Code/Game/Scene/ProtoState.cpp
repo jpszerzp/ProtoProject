@@ -1,6 +1,5 @@
 #include "Game/Scene/ProtoState.hpp"
 #include "Engine/Renderer/Window.hpp"
-#include "Engine/Core/Primitive/Quad.hpp"
 
 PrototypeState::PrototypeState()
 {

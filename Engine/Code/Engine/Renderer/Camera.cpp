@@ -73,18 +73,6 @@ void Camera::Finalize()
 	m_output.Finalize();
 }
 
-Ray3 Camera::ComputeRay() const
-{
-	Vector3 worldPosition = GetWorldPosition();
-	Vector3 rayStart = worldPosition;
-
-	Vector3 worldForward = GetWorldForward();
-	Vector3 rayDirection = worldForward.GetNormalized();
-
-	Ray3 ray = Ray3(rayStart, rayDirection);
-	return ray;
-}
-
 Vector3 Camera::GetLocalForward() const
 {
 	Matrix44 modelMatrix = m_transform.GetLocalMatrixEulerTranspose();
@@ -109,7 +97,6 @@ Vector3 Camera::GetLocalRight() const
 Vector3 Camera::GetWorldForward() const
 {
 	Matrix44 worldModelMatrix = m_transform.GetWorldMatrixEulerTranspose();
-	//Matrix44 worldModelMatrix = m_transform.GetWorldMatrix();
 	Vector3 forward = Vector3(worldModelMatrix.Kx, worldModelMatrix.Ky, worldModelMatrix.Kz);
 	return forward;
 }
@@ -117,7 +104,6 @@ Vector3 Camera::GetWorldForward() const
 Vector3 Camera::GetWorldUp() const
 {
 	Matrix44 worldModelMatrix = m_transform.GetWorldMatrixEulerTranspose();
-	//Matrix44 worldModelMatrix = m_transform.GetWorldMatrix();
 	Vector3 up = Vector3(worldModelMatrix.Jx, worldModelMatrix.Jy, worldModelMatrix.Jz);
 	return up;
 }
@@ -125,7 +111,6 @@ Vector3 Camera::GetWorldUp() const
 Vector3 Camera::GetWorldRight() const
 {
 	Matrix44 worldModelMatrix = m_transform.GetWorldMatrixEulerTranspose();
-	//Matrix44 worldModelMatrix = m_transform.GetWorldMatrix();
 	Vector3 right = Vector3(worldModelMatrix.Ix, worldModelMatrix.Iy, worldModelMatrix.Iz);
 	return right;
 }
@@ -133,7 +118,6 @@ Vector3 Camera::GetWorldRight() const
 Vector3 Camera::GetWorldPosition() const
 {
 	Matrix44 worldModelMatrix = m_transform.GetWorldMatrixEulerTranspose();
-	//Matrix44 worldModelMatrix = m_transform.GetWorldMatrix();
 	Vector3 translation = Vector3(worldModelMatrix.Tx, worldModelMatrix.Ty, worldModelMatrix.Tz);
 	return translation;
 }
@@ -159,14 +143,6 @@ Matrix44 Camera::LookAtLocal(Vector3 position, Vector3 target, Vector3 up)
 		right.z, upDir.z, forward.z, 0.f, 
 		translationX, translationY, translationZ, 1.f
 	};
-
-	/*
-	float entries[16] = { right.x, right.y, right.z, 0.f, 
-		upDir.x, upDir.y, upDir.z, 0.f, 
-		forward.x, forward.y, forward.z, 0.f, 
-		translationX, translationY, translationZ, 1.f
-	};
-	*/
 
 	matrix.SetValues(entries);
 	return matrix;

@@ -2,7 +2,6 @@
 #include "Engine/Core/Transform.hpp"
 #include "Engine/Core/Quaternion.hpp"
 #include "Engine/Core/Util/StringUtils.hpp"
-#include "Engine/Math/Plane.hpp"
 #include "Engine/Math/MathUtils.hpp"
 #include "Game/Test/MathTest.hpp"
 
@@ -11,7 +10,6 @@ void MathTest::RunMathTest()
 	QuaternionTest();
 	MatrixTest();
 	VectorTest();
-	PlaneTest();
 }
 
 void MathTest::QuaternionTest()
@@ -89,31 +87,6 @@ void MathTest::MatrixTest()
 void MathTest::VectorTest()
 {
 
-}
-
-void MathTest::PlaneTest()
-{
-	Plane p1 = Plane(Vector3(0.f, 0.f, 1.f), 1.f);
-	Plane p2 = Plane(Vector3(0.f, 0.f, -1.f), 1.f);
-	Plane p3 = Plane(Vector3(-1.f, 0.f, 0.f), 1.f);
-	Plane p4 = Plane(Vector3(1.f, 0.f, 0.f), 1.f);
-	Plane p5 = Plane(Vector3(0.f, 1.f, 0.f), 1.f);
-	Plane p6 = Plane(Vector3(0.f, -1.f, 0.f), 1.f);
-
-	Vector3 intersection;
-	bool i1 = ComputePlaneIntersectionPoint(p1, p2, p3, intersection);
-	ASSERT_OR_DIE(i1 == false, "There is no intersection for parallel planes");
-	DebuggerPrintf("There is no intersection for parallel planes\n");
-
-	bool i2 = ComputePlaneIntersectionPoint(p2, p3, p5, intersection);
-	ASSERT_OR_DIE(i2 == true, "There should be an intersection for unparallel planes");
-	ASSERT_OR_DIE(IsCloseEnoughVec3(intersection, Vector3(-1.f, 1.f, -1.f)), 
-		"Unmatch of intersection point");
-	
-	bool i3 = ComputePlaneIntersectionPoint(p6, p4, p1, intersection);
-	ASSERT_OR_DIE(i3 == true, "There should be an intersection for unparallel planes");
-	ASSERT_OR_DIE(IsCloseEnoughVec3(intersection, Vector3(1.f, -1.f, 1.f)),
-		"Unmatch of intersection point");
 }
 
 bool IsCloseEnoughFloats(const float& f1, const float& f2)

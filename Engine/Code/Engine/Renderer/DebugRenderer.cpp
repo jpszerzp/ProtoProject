@@ -1,9 +1,5 @@
 ﻿#include "Engine/Renderer/DebugRenderer.hpp"
 #include "Engine/Renderer/Renderable.hpp"
-#include "Engine/Core/Primitive/Quad.hpp"
-#include "Engine/Core/Primitive/Cube.hpp"
-#include "Engine/Core/Primitive/Point.hpp"
-#include "Engine/Core/Primitive/Line.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
 #include "Engine/Math/MathUtils.hpp"
 
@@ -18,7 +14,6 @@ void DebugRenderStartup()
 	// By default, debug render mode is on
 	g_debugrenderOn = true;
 }
-
 
 void DebugRenderShutdown()
 {
@@ -55,7 +50,6 @@ void DebugRenderUpdate(float deltaTime)
 	}
 }
 
-
 void DebugRenderRenderAll(Renderer* renderer)
 {
 	if (g_debugrenderOn)
@@ -69,7 +63,6 @@ void DebugRenderRenderAll(Renderer* renderer)
 		}
 	}
 }
-
 
 void DebugRenderRender3D(Renderer* renderer)
 {
@@ -88,7 +81,6 @@ void DebugRenderRender3D(Renderer* renderer)
 	}
 }
 
-
 void DebugRenderRender2D(Renderer* renderer)
 {
 	if (g_debugrenderOn)
@@ -106,7 +98,6 @@ void DebugRenderRender2D(Renderer* renderer)
 	}
 }
 
-
 void DebugRenderTasksFlush()
 {
 	for (DebugRenderTask* task : g_debugRenderTasks)
@@ -118,24 +109,20 @@ void DebugRenderTasksFlush()
 	g_debugRenderTasks.clear();
 }
 
-
 void DebugRenderToggle()
 {
 	g_debugrenderOn = !g_debugrenderOn;
 }
-
 
 void SetDebugRenderOn(bool on)
 {
 	g_debugrenderOn = on;
 }
 
-
 bool DebugRenderOn()
 {
 	return g_debugrenderOn;
 }
-
 
 void DebugRenderSet3DCamera( Camera* camera )
 {
@@ -164,18 +151,15 @@ DebugRenderTask::~DebugRenderTask()
 	m_debugObj = nullptr;
 }
 
-
 void DebugRenderTask::Age(float deltaTime)
 {
 	m_timeTillDeath -= deltaTime;
 }
 
-
 bool DebugRenderTask::IsDead()
 {
 	return (m_timeTillDeath <= 0.f);
 }
-
 
 float DebugRenderTask::GetNormalizedAge()
 {
@@ -190,76 +174,21 @@ float DebugRenderTask::GetNormalizedAge()
 	return ClampZeroToOne(dead);
 }
 
-
-DebugRenderTaskAABB3::DebugRenderTaskAABB3(float lifeTime, const Rgba& startTimeColor, const Rgba& endTimeColor, eDebugDrawMode mode)
-{
-	m_debugOption = sDebugRenderOption(startTimeColor, endTimeColor, lifeTime, mode);
-	m_timeTillDeath = lifeTime;
-	m_2D = false;
-}
-
-
-void DebugRenderTaskAABB3::SetDebugObject(AABB3 bounds)
-{
-	Renderer* renderer = Renderer::GetInstance();
-
-	Vector3 center	= (bounds.m_min	  + bounds.m_max)	/ 2.f;
-	float	scaleX	= (bounds.m_max.x - bounds.m_min.x) / 1.f;
-	float	scaleY	= (bounds.m_max.y - bounds.m_min.y) / 1.f;
-	float	scaleZ	= (bounds.m_max.z - bounds.m_min.z) / 1.f;
-
-	m_debugObj = new Cube(center, Vector3::ZERO, Vector3(scaleX, scaleY, scaleZ), Rgba::WHITE, "cube_pcu", "", MOVE_STATIC, BODY_PARTICLE);
-
-	// fill texture and shader of material only for debug object
-	// this is because debug obj material is not defined from .mat
-	Material* material = m_debugObj->m_renderable->GetMaterial();				// empty material
-	Shader* shader = renderer->CreateOrGetShader("wireframe");
-	material->m_shader = shader;
-	material->FillPropertyBlocks();
-	material->FillTextures();
-}
-
-
-void DebugRenderTaskAABB3::Update(float deltaTime)
-{
-	m_debugObj->Update(deltaTime);
-
-	// Lerp color
-	float timePassed = GetNormalizedAge();
-	Rgba tint = Interpolate(m_debugOption.m_startTimeColor, m_debugOption.m_endTimeColor, timePassed);
-	Vector4 tintVec4;
-	tint.GetAsFloats(tintVec4.x, tintVec4.y, tintVec4.z, tintVec4.w);
-	m_debugObj->m_renderable->m_tint = tintVec4;
-
-	Age(deltaTime);
-}
-
-
-void DebugRenderTaskAABB3::Render(Renderer* renderer)
-{
-	renderer->SetCamera(g_3DCamera);
-	m_debugObj->Render(renderer);
-}
-
-
 DebugRenderTaskQuad::DebugRenderTaskQuad(float lifeTime, const Rgba& startTimeColor, const Rgba& endTimeColor, eDebugDrawMode mode)
 {
 	m_debugOption = sDebugRenderOption(startTimeColor, endTimeColor, lifeTime, mode);
 	m_timeTillDeath = lifeTime;
 }
 
-
 void DebugRenderTaskQuad::SetDebugObject(Vector3 drawmin, Vector3 up, Vector3 right, float width, float height, std::string shaderName, bool isFont)
 {
 
 }
 
-
 void DebugRenderTaskQuad::SetDebugObject(Vector3 drawmin, Vector3 up, Vector3 right, float width, float height, std::string shaderName, bool isFont, Vector2 uvBL, Vector2 uvBR, Vector2 uvTL, Vector2 uvTR)
 {
 
 }
-
 
 void DebugRenderTaskQuad::Update(float deltaTime)
 {
@@ -275,7 +204,6 @@ void DebugRenderTaskQuad::Update(float deltaTime)
 	Age(deltaTime);
 }
 
-
 void DebugRenderTaskQuad::Render(Renderer* renderer)
 {
 	if (!m_2D)
@@ -290,7 +218,6 @@ void DebugRenderTaskQuad::Render(Renderer* renderer)
 	m_debugObj->Render(renderer);
 }
 
-
 DebugRenderTaskPoint::DebugRenderTaskPoint(float lifeTime, const Rgba& startTimeColor, const Rgba& endTimeColor, eDebugDrawMode mode)
 {
 	m_debugOption = sDebugRenderOption(startTimeColor, endTimeColor, lifeTime, mode);
@@ -301,7 +228,6 @@ void DebugRenderTaskPoint::SetDebugObject(Vector3 position, Vector3 rot, float s
 {
 
 }
-
 
 void DebugRenderTaskPoint::Update(float deltaTime)
 {
@@ -316,7 +242,6 @@ void DebugRenderTaskPoint::Update(float deltaTime)
 	Age(deltaTime);
 }
 
-
 void DebugRenderTaskPoint::Render(Renderer* renderer)
 {
 	if (!m_2D)
@@ -327,13 +252,11 @@ void DebugRenderTaskPoint::Render(Renderer* renderer)
 	m_debugObj->Render(renderer);
 }
 
-
 DebugRenderTaskLine::DebugRenderTaskLine(float lifeTime, const Rgba& startTimeColor, const Rgba& endTimeColor, eDebugDrawMode mode)
 {
 	m_debugOption = sDebugRenderOption(startTimeColor, endTimeColor, lifeTime, mode);
 	m_timeTillDeath = lifeTime;
 }
-
 
 void DebugRenderTaskLine::SetDebugInfo(Vector3 start, Vector3 end, float lineWidth)
 {
@@ -349,20 +272,17 @@ void DebugRenderTaskLine::Update(float deltaTime)
 	Age(deltaTime);
 }
 
-
 void DebugRenderTaskLine::Render(Renderer* renderer)
 {
 	renderer->SetCamera(g_3DCamera);
 	renderer->DrawLine3D(m_start, m_end, m_tint, m_thickness);
 }
 
-
 DebugRenderTaskText2D::DebugRenderTaskText2D(float lifetime, const Rgba& startTimeColor, const Rgba& endTimeColor, eDebugDrawMode mode)
 {
 	m_debugOption = sDebugRenderOption(startTimeColor, endTimeColor, lifetime, mode);
 	m_timeTillDeath = lifetime;
 }
-
 
 DebugRenderTaskText2D::~DebugRenderTaskText2D()
 {
@@ -385,7 +305,6 @@ void DebugRenderTaskText2D::SetDebugInfo(std::string text, Vector2 drawmin, floa
 		m_cellHeight, m_aspectScale, m_text, VERT_PCU);
 }
 
-
 void DebugRenderTaskText2D::Update(float deltaTime)
 {
 	float timePassed = GetNormalizedAge();
@@ -402,7 +321,6 @@ void DebugRenderTaskText2D::Update(float deltaTime)
 	Age(deltaTime);
 }
 
-
 void DebugRenderTaskText2D::Render(Renderer* renderer)
 {
 	renderer->SetCamera(g_2DCamera);
@@ -418,20 +336,6 @@ void DebugRenderTaskText2D::Render(Renderer* renderer)
 	}
 }
 
-
-void DebugRenderWireAABB3( float lifetime, const AABB3& bounds, const Rgba& startTimeColor, const Rgba& endTimeColor, eDebugDrawMode mode )
-{
-	// set time countdown and debug render option 
-	DebugRenderTaskAABB3* aabb3Task = new DebugRenderTaskAABB3(lifetime, startTimeColor, endTimeColor, mode);
-	aabb3Task->m_2D = false;
-
-	// set debug object 
-	aabb3Task->SetDebugObject(bounds);
-
-	g_debugRenderTasks.push_back(aabb3Task);
-}
-
-
 void DebugRenderQuad(float lifetime, Vector3 drawmin, Vector3 up, Vector3 right, float width, float height, const Rgba& startTimeColor, const Rgba& endTimeColor, eDebugDrawMode mode, bool isFont)
 {
 	DebugRenderTaskQuad* quadTask = new DebugRenderTaskQuad(lifetime, startTimeColor, endTimeColor, mode);
@@ -442,7 +346,6 @@ void DebugRenderQuad(float lifetime, Vector3 drawmin, Vector3 up, Vector3 right,
 	g_debugRenderTasks.push_back(quadTask);
 }
 
-
 void DebugRenderLine(float lifeTime, Vector3 start, Vector3 end, float lineWidth, const Rgba& startTimeColor, const Rgba& endTimeColor, eDebugDrawMode mode)
 {
 	DebugRenderTaskLine* lineTask = new DebugRenderTaskLine(lifeTime, startTimeColor, endTimeColor, mode);
@@ -452,7 +355,6 @@ void DebugRenderLine(float lifeTime, Vector3 start, Vector3 end, float lineWidth
 
 	g_debugRenderTasks.push_back(lineTask);
 }
-
 
 void DebugRenderBasis(float lifetime, Vector3 start, Vector3 endX, Vector3 endY, Vector3 endZ, float lineWidth, eDebugDrawMode mode)
 {
@@ -535,7 +437,6 @@ void DebugRenderPlaneGrid(float lifetime, Vector3 bl, Vector3 tl, Vector3 tr, Ve
 	}
 }
 
-
 void DebugRenderPoint( float lifetime,
 	float size,
 	Vector3 const &position, 
@@ -565,7 +466,6 @@ void DebugRender2DQuad( float lifetime, Vector2 drawmin, float width, float heig
 	g_debugRenderTasks.push_back(quadTask2D);
 }
 
-
 void DebugRender2DText(std::string text, float lifetime, Vector2 drawmin, float cellHeight, 
 	float aspectScale, const Rgba& startTimeColor, const Rgba& endTimeColor, eDebugDrawMode mode)
 {
@@ -576,34 +476,3 @@ void DebugRender2DText(std::string text, float lifetime, Vector2 drawmin, float 
 
 	g_debugRenderTasks.push_back(text2DTask);
 }
-
-/*
-void DebugRender2DChar(char character, float lifetime, Vector2 drawmin, float cellHeight, float aspectScale,
-	const Rgba& startTimeColor, const Rgba& endTimeColor, eDebugDrawMode mode, BitmapFont* font)
-{
-	AABB2 uvBound = font->GetUVsForGlyph(character);
-	std::vector<Vector2> corners = uvBound.GetCornersFromBLInCounterClockwise();
-	Vector2 uvBL = corners[0];
-	Vector2 uvBR = corners[1];
-	Vector2 uvTL = corners[3];
-	Vector2 uvTR = corners[2];
-
-	float width = aspectScale * cellHeight;
-	DebugRender2DQuadTextured(lifetime, drawmin, width, cellHeight, startTimeColor, endTimeColor, mode, "cutout", uvBL, uvBR, uvTL, uvTR, true);
-}
-
-void DebugRender2DQuadTextured(float lifetime, Vector2 drawmin, float width, float height, Rgba const &startTimeColor, Rgba const &endTimeColor,
-	eDebugDrawMode mode, std::string shaderName, Vector2 uvBL, Vector2 uvBR, Vector2 uvTL, Vector2 uvTR, bool isFont)
-{
-	DebugRenderTaskQuad* quadTask2D = new DebugRenderTaskQuad(lifetime, startTimeColor, endTimeColor, mode);
-	quadTask2D->m_2D = true;
-
-	Vector3 drawmin3D = drawmin.ToVector3(0.f);
-	Vector3 up3D = Vector3(0.f, 1.f, 0.f);
-	Vector3 right3D = Vector3(-1.f, 0.f, 0.f);
-
-	quadTask2D->SetDebugObject(drawmin3D, up3D, right3D, width, height, shaderName, isFont, uvBL, uvBR, uvTL, uvTR);
-
-	g_debugRenderTasks.push_back(quadTask2D);
-}
-*/

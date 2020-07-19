@@ -7,42 +7,35 @@ float ConvertDegreesToRadians(float degrees)
 	return degrees * (PI / 180.f);
 }
 
-
 float ConvertRadiansToDegrees(float radians)
 {
 	return radians * (180.f / PI);
 }
-
 
 float CosDegrees(float degrees)
 {
 	return cosf(ConvertDegreesToRadians(degrees));
 }
 
-
 float SinDegrees(float degrees)
 {
 	return sinf(ConvertDegreesToRadians(degrees));
 }
-
 
 float GetRandomFloatInRange(float minInclusive, float maxInclusive)
 {
 	return (GetRandomFloatZeroToOne() * (maxInclusive - minInclusive)) + minInclusive;
 }
 
-
 float GetRandomFloatZeroToOne()
 {
 	return static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
 }
 
-
 int GetRandomIntInRange(int minInclusive, int maxInclusive)
 {
 	return GetRandomIntLessThan(maxInclusive - minInclusive + 1) + minInclusive;
 }
-
 
 int GetRandomIntLessThan(int maxNotInclusive)
 {
@@ -79,21 +72,6 @@ float GetDistanceSquared(const Vector2& a, const Vector2& b)
 	return GetDistance(a, b) * GetDistance(a, b);
 }
 
-
-//bool DoDiscsOverlap (const Vector2& aCenter, float aRadius, const Vector2& bCenter, float bRadius)
-//{
-//	float discsDistance = GetDistance(aCenter, bCenter);
-//	
-//	return (discsDistance <= (aRadius + bRadius));
-//}
-//
-//
-//bool DoDiscsOverlap (const Disc2& a, const Disc2& b)
-//{
-//	return DoDiscsOverlap(a.center, a.radius, b.center, b.radius);
-//}
-
-
 bool DoAABBsOverlap( const AABB2& a, const AABB2& b )
 {
 	Vector2 aCenter = a.GetCenter();
@@ -106,7 +84,6 @@ bool DoAABBsOverlap( const AABB2& a, const AABB2& b )
 
 	return ( overlapX && overlapY );
 }
-
 
 float RangeMapFloat(float inValue, float inStart, float inEnd, float outStart, float outEnd)
 {
@@ -124,7 +101,6 @@ float RangeMapFloat(float inValue, float inStart, float inEnd, float outStart, f
 	return (outStart + outRelativeToStart);
 }
 
-
 float ClampZeroToOne(float value)
 {
 	if (value > 1.f)
@@ -138,7 +114,6 @@ float ClampZeroToOne(float value)
 
 	return value;
 }
-
 
 float ClampZeroToFloat(float valueClampTo, float value)
 {
@@ -154,7 +129,6 @@ float ClampZeroToFloat(float valueClampTo, float value)
 	return value;
 }
 
-
 bool CheckRandomChance( float chanceForSuccess )
 {
 	float random = GetRandomFloatInRange(0.0f, 1.0f);
@@ -166,7 +140,6 @@ bool CheckRandomChance( float chanceForSuccess )
 
 	return false;
 }
-
 
 float GetAngularDisplacement( float startDegrees, float endDegrees )
 {
@@ -229,7 +202,6 @@ float GetAngularDisplacement( float startDegrees, float endDegrees )
 	return direction * displacement;
 }
 
-
 float TurnToward( float currentDegrees, float goalDegrees, float maxTurnDegrees )
 {
 	float displacement = GetAngularDisplacement(currentDegrees, goalDegrees);
@@ -251,24 +223,20 @@ float TurnToward( float currentDegrees, float goalDegrees, float maxTurnDegrees 
 	return goalDegrees;
 }
 
-
 float DotProduct( const Vector2& a, const Vector2& b )
 {
 	return (a.x * b.x) + (a.y * b.y);
 }
-
 
 float DotProduct( const Vector3& a, const Vector3& b )
 {
 	return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
 }
 
-
 float DotProduct( const Vector4& a, const Vector4& b )
 {
 	return (a.x * b.x) + (a.y * b.y) + (a.z * b.z) + (a.w * b.w);
 }
-
 
 int RoundToNearestInt( float inValue )
 {
@@ -281,7 +249,6 @@ int RoundToNearestInt( float inValue )
 		return static_cast<int>( roundf(inValue) );
 	}
 }
-
 
 float RoundToNearest05(float inValue)
 {
@@ -311,8 +278,6 @@ float RoundToNearest05(float inValue)
 	return res;
 }
 
-
-
 int ClampInt( int inValue, int min, int max )
 {
 	if (inValue > max)
@@ -328,7 +293,6 @@ int ClampInt( int inValue, int min, int max )
 		return inValue;
 	}
 }
-
 
 float ClampFloat( float inValue, float min, float max )
 {
@@ -346,7 +310,6 @@ float ClampFloat( float inValue, float min, float max )
 	}
 }
 
-
 float ClampFloatNegativeOneToOne( float inValue )
 {
 	if (inValue < -1.f)
@@ -363,12 +326,10 @@ float ClampFloatNegativeOneToOne( float inValue )
 	}
 }
 
-
 float GetFractionInRange( float inValue, float rangeStart, float rangeEnd )
 {
 	return (inValue - rangeStart) / (rangeEnd - rangeStart);
 }
-
 
 bool AreBitsSet( unsigned char bitFlags8, unsigned char flagsToCheck )
 {
@@ -382,7 +343,6 @@ bool AreBitsSet( unsigned char bitFlags8, unsigned char flagsToCheck )
 	return false;
 }
 
-
 bool AreBitsSet( unsigned int bitFlags32, unsigned int flagsToCheck )
 {
 	unsigned int res = bitFlags32 & flagsToCheck;
@@ -395,18 +355,15 @@ bool AreBitsSet( unsigned int bitFlags32, unsigned int flagsToCheck )
 	return false;
 }
 
-
 void SetBits( unsigned char& bitFlags8, unsigned char flagsToSet )
 {
 	bitFlags8 = bitFlags8 | flagsToSet;
 }
 
-
 void SetBits( unsigned int& bitFlags32, unsigned int flagsToSet )
 {
 	bitFlags32 = bitFlags32 | flagsToSet;
 }
-
 
 void ClearBits( unsigned char& bitFlags8, unsigned char flagToClear )
 {
@@ -414,13 +371,11 @@ void ClearBits( unsigned char& bitFlags8, unsigned char flagToClear )
 	bitFlags8 = bitFlags8 & reverseMask;
 }
 
-
 void ClearBits( unsigned int& bitFlags32, unsigned int flagToClear )
 {
 	unsigned int reverseMask = ~(flagToClear);
 	bitFlags32 = bitFlags32 & reverseMask;
 }
-
 
 int CheckBit(int& subject, int bitPos)
 {
@@ -574,54 +529,45 @@ float	SmoothStart2( float t )
 	return t * t;
 }
 
-
 float	SmoothStart3( float t )
 {
 	return t * t * t;
 }
-
 
 float	SmoothStart4( float t )
 {
 	return t * t * t * t;
 }
 
-
 float	SmoothStop2( float t )
 {
 	return 1 - ((1 - t) * (1 - t));
 }
-
 
 float	SmoothStop3( float t )
 {
 	return 1 - ((1 - t) * (1 - t) * (1 - t));
 }
 
-
 float	SmoothStop4( float t )
 {
 	return 1 - ((1 - t) * (1 - t) * (1 - t) * (1 - t));
 }
-
 
 float	SmoothStep3( float t )
 {
 	return SmoothStart2(t) + t * (SmoothStop2(t) - SmoothStart2(t));
 }
 
-
 float Interpolate( float start, float end, float fractionTowardEnd )
 {
 	return (start + ((end - start) * fractionTowardEnd));
 }
 
-
 Vector3 Interpolate(Vector3 start, Vector3 end, float fractionTowardEnd)
 {
 	return start + (end - start) * fractionTowardEnd;
 }
-
 
 int Interpolate( int start, int end, float fractionTowardEnd )
 {
@@ -637,7 +583,6 @@ int Interpolate( int start, int end, float fractionTowardEnd )
 	}
 	return start + increment;
 }
-
 
 unsigned char Interpolate( unsigned char start, unsigned char end, float fractionTowardEnd )
 {
@@ -655,7 +600,6 @@ unsigned char Interpolate( unsigned char start, unsigned char end, float fractio
 	return start + increment;
 }
 
-
 std::vector<int> SetFromText(const char* text)
 {
 	std::vector<int> intVec;
@@ -672,7 +616,6 @@ std::vector<int> SetFromText(const char* text)
 	return intVec;
 }
 
-
 Vector2 PolarToCartesian(float radius, float degree)
 {
 	float x = radius * CosDegrees(degree);
@@ -680,7 +623,6 @@ Vector2 PolarToCartesian(float radius, float degree)
 
 	return Vector2(x, y);
 }
-
 
 Vector3 PolarToCartesian( float radius, float rotationDeg, float azimuthDeg )
 {
@@ -693,7 +635,6 @@ Vector3 PolarToCartesian( float radius, float rotationDeg, float azimuthDeg )
 	return res;
 }
 
-
 Vector3 PolarToCartesian( Vector3 spherical )
 {
 	Vector3 res;
@@ -702,7 +643,6 @@ Vector3 PolarToCartesian( Vector3 spherical )
 
 	return res;
 }
-
 
 Vector3 CartesianToPolar( Vector3 position )
 {
@@ -749,26 +689,6 @@ void MakeOrthonormalBasisOpt(const Vector3& x, Vector3& y, Vector3& z)
 	y.z = -x.y * z.x;
 }
 
-/*
-void MakeOrthonormalBasisStable(const Vector3& x)
-{
-	if (abs(x.x) > abs(x.y))
-	{
-		// near x axis, suggest y axis
-		Vector3 y = Vector3(0.f, 1.f, 0.f);
-		Vector3 z;
-		MakeOrthonormalBasisOpt(x, y, z);
-	}
-	else
-	{
-		// near y axis, suggest x axis
-		Vector3 y = Vector3(1.f, 0.f, 0.f);
-		Vector3 z;
-		MakeOrthonormalBasisOpt(x, y, z);
-	}
-}
-*/
-
 bool ProjectPlaneToSphere(Vector2 pos, float r, Vector3& out_pos)
 {
 	bool inCircle = IsPointInCircle(pos, r);
@@ -782,78 +702,6 @@ bool ProjectPlaneToSphere(Vector2 pos, float r, Vector3& out_pos)
 	out_pos.y = height;
 	out_pos.z = pos.y;
 	return inCircle;
-}
-
-Vector3 ProjectPointToLine(const Vector3& point, const Line3& line, float& dist)
-{
-	// extension is based 'one_end' of the line
-	const Vector3& one_end = line.one;
-	const Vector3& the_other_end = line.the_other;
-
-	Vector3 one_end_to_point = point - one_end;
-	Vector3 dir = (the_other_end - one_end).GetNormalized();
-
-	float ext = DotProduct(one_end_to_point, dir);
-
-	Vector3 projection = one_end + dir * ext;
-
-	// point - projection = vert_disp 
-	dist = (point - projection).GetLength();
-
-	return projection;
-}
-
-/*
- * Instead of recording the vertical dist, record the horizontal extension
- */
-Vector3 ProjectPointToLineExt(const Vector3& point, const Line3& line, float& ext)
-{
-	// extension is based 'one_end' of the line
-	const Vector3& one_end = line.one;
-	const Vector3& the_other_end = line.the_other;
-
-	Vector3 one_end_to_point = point - one_end;
-	Vector3 dir = (the_other_end - one_end).GetNormalized();
-
-	ext = DotProduct(one_end_to_point, dir);
-
-	Vector3 projection = one_end + dir * ext;
-
-	return projection;
-}
-
-/*
- * Projection is constraint to feature
- */ 
-Vector3 ProjectPointToLineFeature(const Vector3& point, const Line3& line, float& dist)
-{
-	const Vector3& one_end = line.one;
-	const Vector3& the_other_end = line.the_other;
-
-	Vector3 one_end_to_point = point - one_end;
-	Vector3 dir = (the_other_end - one_end).GetNormalized();
-
-	float ext = DotProduct(one_end_to_point, dir);
-
-	if (ext < 0.f)
-	{
-		dist = (point - one_end).GetLength();
-		return one_end;
-	}
-
-	Vector3 projection = one_end + dir * ext;
-	Vector3 to_other_end = projection - the_other_end;
-	
-	ext = DotProduct(to_other_end, dir);
-
-	if (ext < 0.f)
-	{
-		dist = (point-projection).GetLength();
-		return projection;
-	}
-
-	dist = (point-the_other_end).GetLength();
-	return the_other_end;
 }
 
 Vector3 ProjectPointToPlane(const Vector3& point, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3, float& dist)
@@ -1017,7 +865,6 @@ bool Quadratic(Vector2& out, float a, float b, float c)
 	return true;
 }
 
-
 int ComputeManhattanDistanceInt(IntVector2 v1, IntVector2 v2)
 {
 	int x = abs(v1.x - v2.x);
@@ -1026,7 +873,6 @@ int ComputeManhattanDistanceInt(IntVector2 v1, IntVector2 v2)
 	return (x + y);
 }
 
-
 float ComputeManhattanDistanceFloat(Vector2 v1, Vector2 v2)
 {
 	float x = abs(v1.x - v2.x);
@@ -1034,7 +880,6 @@ float ComputeManhattanDistanceFloat(Vector2 v1, Vector2 v2)
 
 	return (x + y);
 }
-
 
 // v1, v2 and v3 in CCW order
 float ComputeTriangleArea(Vector3 v1, Vector3 v2, Vector3 v3)
@@ -1049,7 +894,6 @@ float ComputeTriangleArea(Vector3 v1, Vector3 v2, Vector3 v3)
 
 	return triangleArea;
 }
-
 
 // v1, v2 and v3 in CCW order
 Vector3 ComputeTriangleCenter(const Vector3& v1, const Vector3& v2, const Vector3& v3)
@@ -1067,7 +911,6 @@ Vector3 ComputeTriangleCenter(const Vector3& v1, const Vector3& v2, const Vector
 	return center;
 }
 
-
 Vector3 Slerp(const Vector3& v1, const Vector3& v2, float fraction)
 {
 	float len1 = v1.GetLength();
@@ -1077,7 +920,6 @@ Vector3 Slerp(const Vector3& v1, const Vector3& v2, float fraction)
 	Vector3 res = SlerpUnit( v1 / len1, v2 / len2, fraction ); 
 	return res * len;
 }
-
 
 Vector3 SlerpUnit(const Vector3& v1, const Vector3& v2, float fraction)
 {
@@ -1097,7 +939,6 @@ Vector3 SlerpUnit(const Vector3& v1, const Vector3& v2, float fraction)
 	}
 }
 
-
 Matrix44 LerpTransform(const Matrix44& m1, const Matrix44& m2, float fraction)
 {
 	Vector3 m1_right = m1.GetRight();
@@ -1116,7 +957,6 @@ Matrix44 LerpTransform(const Matrix44& m1, const Matrix44& m2, float fraction)
 
 	return Matrix44::FromBasisTranslation(right, up, forward, translation);
 }
-
 
 void SwapFloat(float& t1, float& t2)
 {
@@ -1152,93 +992,6 @@ bool IsIdenticalVector3(Vector3 v1, Vector3 v2)
 	}
 }
 
-float GetSquredDistPointVsAABB3(const Vector3& point, const AABB3& aabb3)
-{
-	float squaredDistance = 0.f;
-
-	float pointX = point.x;
-	float pointY = point.y;
-	float pointZ = point.z;
-
-	float xSquaredDistance = 0.f;
-	float ySquaredDistance = 0.f;
-	float zSquaredDistance = 0.f;
-
-	// x test
-	float xMin = aabb3.m_min.x;
-	float xMax = aabb3.m_max.x;
-	if (pointX < xMin)
-	{
-		float distance = xMin - pointX;
-		xSquaredDistance = distance * distance;
-	}
-	else if (pointX > xMax)
-	{
-		float distance = pointX - xMax;
-		xSquaredDistance = distance * distance;
-	}
-
-	// y test
-	float yMin = aabb3.m_min.y;
-	float yMax = aabb3.m_max.y;
-	if (pointY < yMin)
-	{
-		float distance = yMin - pointY;
-		ySquaredDistance = distance * distance;
-	}
-	else if (pointY > yMax)
-	{
-		float distance = pointY - yMax;
-		ySquaredDistance = distance * distance;
-	}
-
-	// z test
-	float zMin = aabb3.m_min.z;
-	float zMax = aabb3.m_max.z;
-	if (pointZ < zMin)
-	{
-		float distance = zMin - pointZ;
-		zSquaredDistance = distance * distance;
-	}
-	else if (pointZ > zMax)
-	{
-		float distance = pointZ - zMax;
-		zSquaredDistance = distance * distance;
-	}
-
-	squaredDistance = xSquaredDistance + ySquaredDistance + zSquaredDistance;
-
-	return squaredDistance;
-}
-
-bool SphereVsAABB3Intersection(const Sphere3& sphere, const AABB3& aabb3)
-{
-	Vector3 center = sphere.m_center;
-	float radius = sphere.m_radius;
-
-	float squredSphereDistToAABB3 = GetSquredDistPointVsAABB3(center, aabb3);
-
-	bool intersected = (squredSphereDistToAABB3 <= (radius * radius));
-	
-	return intersected;
-}
-
-bool SphereVsSphereIntersection(const Sphere3& s1, const Sphere3& s2)
-{
-	Vector3 center1 = s1.m_center;
-	Vector3 center2 = s2.m_center;
-
-	float radius1 = s1.m_radius;
-	float radius2 = s2.m_radius;
-
-	float distance = (center1 - center2).GetLength();
-	float threshold = radius1 + radius2;
-
-	bool intersected = (distance <= threshold);
-
-	return intersected;
-}
-
 Vector3 TransformBasisPoint(const Vector3& point, const Matrix44& basis)
 {
 	Vector4 pointV4 = Vector4(point.x, point.y, point.z, 1.f);
@@ -1248,213 +1001,6 @@ Vector3 TransformBasisPoint(const Vector3& point, const Matrix44& basis)
 	Vector3 transformedPoint = Vector3(transformedPointV4.x, transformedPointV4.y, transformedPointV4.z);
 
 	return transformedPoint;
-}
-
-bool SphereVsOBB3Intersection(const Sphere3&, const OBB3&)
-{
-	return false;
-}
-
-bool AABB3VsPlaneIntersection(const AABB3& aabb, const Plane& plane)
-{
-	float dist[8];
-	Vector3 vertices[8];
-	aabb.GetVertices(vertices);
-
-	float planeOffset = plane.GetOffset();
-	Vector3 planeNormal = plane.GetNormal();
-
-	for (uint idx = 0; idx < 8; ++idx)
-	{
-		Vector3 vert = vertices[idx];
-
-		float dot = DotProduct(vert, planeNormal);
-		float signedDist = dot - planeOffset;
-
-		dist[idx] = signedDist;
-	}
-
-	bool intersected = false;
-	bool front = dist[0] > 0.f;		// forwardness/backwardness of first vert
-
-	if (front)
-	{
-		for (uint idx = 1; idx < 8; ++idx)
-		{
-			if (dist[idx] <= 0.f)
-			{
-				intersected = true;
-				break;
-			}
-		}
-	}
-	else
-	{
-		for (uint idx = 1; idx < 8; ++idx)
-		{
-			if (dist[idx] >= 0.f)
-			{
-				intersected = true;
-				break;
-			}
-		}
-	}
-
-	return intersected;
-}
-
-bool AABB3VsAABB3Intersection(const AABB3& aabb_1, const AABB3& aabb_2)
-{
-	// Get all 15 axis to test with SAT.
-	// 3 principal axes for aabb_1, 3 for aabb_2,
-	// 9 for axes perpendicular to each pair of principal axes from each aabb.
-	// However, in special case of aabb, there are a lot of overlap of those axes,
-	// and all of them fall into the 3 principal axes of the space,
-	// not considering 0 vector resulting from cross product of identical vectors.
-
-	// x
-	Vector3 x_axis = Vector3(1.f, 0.f, 0.f);
-	bool x_overlap = OverlapOnAxis(aabb_1, aabb_2, x_axis);
-
-	if (!x_overlap) return false;
-
-	// y 
-	Vector3 y_axis = Vector3(0.f, 1.f, 0.f);
-	bool y_overlap = OverlapOnAxis(aabb_1, aabb_2, y_axis);
-
-	if (!y_overlap) return false;
-
-	// z
-	Vector3 z_axis = Vector3(0.f, 0.f, 1.f);
-	bool z_overlap = OverlapOnAxis(aabb_1, aabb_2, z_axis);
-
-	if (!z_overlap) return false;
-
-	return true;
-}
-
-/*
- * Returns if two boxes overlap.
- * @param overlap: amount overlapped. axis: overlap axis, for aabbs, it is either x, y or z
- */
-// UNTESTED
-bool AABB3VsAABB3Intersection(const AABB3& aabb_1, const AABB3& aabb_2, Vector3& axis, float& overlap)
-{
-	Vector3 x_axis = Vector3(1.f, 0.f, 0.f);
-	float x_overlap;
-	bool x_overlapped = OverlapOnAxis(aabb_1, aabb_2, x_axis, x_overlap);
-
-	if (!x_overlapped)
-	{
-		axis = Vector3::ZERO;
-		overlap = 0;
-		return false;
-	}
-
-	Vector3 y_axis = Vector3(0.f, 1.f, 0.f);
-	float y_overlap;
-	bool y_overlapped = OverlapOnAxis(aabb_1, aabb_2, y_axis, y_overlap);
-
-	if (!y_overlapped)
-	{
-		axis = Vector3::ZERO;
-		overlap = 0;
-		return false;
-	}
-
-	Vector3 z_axis = Vector3(0.f, 0.f, 1.f);
-	float z_overlap;
-	bool z_overlapped = OverlapOnAxis(aabb_1, aabb_2, z_axis, z_overlap);
-
-	if (!z_overlapped)
-	{
-		axis = Vector3::ZERO;
-		overlap = 0;
-		return false;
-	}
-
-	// two aabb3s overlap
-	float min_overlap = INFINITY;
-	if (x_overlap < min_overlap)
-	{
-		axis = Vector3(1.f, 0.f, 0.f);
-		min_overlap = x_overlap;
-	}
-	if (y_overlap < min_overlap)
-	{
-		axis = Vector3(0.f, 1.f, 0.f);
-		min_overlap = y_overlap;
-	}
-	if (z_overlap < min_overlap)
-	{
-		axis = Vector3(0.f, 0.f, 1.f);
-		min_overlap = z_overlap;
-	}
-
-	overlap = min_overlap;
-	return true;
-}
-
-DirectionalInterval GetIntervalOfBoxAcrossAxis(const OBB3& obb, const Line3& line)
-{
-	// first we get the direction of line, because the extremal problem is subject to the direction
-	const Vector3& one_end = line.one;
-	const Vector3& the_other = line.the_other;
-
-	// two directions
-	Vector3 dir = (the_other - one_end).GetNormalized();		// the direction for max winner
-	Vector3 reverse_dir = -dir;									// the direction for min winner
-
-	std::vector<Vector3> obb_vertices;
-	const Vector3& ftl = obb.GetFTL();	obb_vertices.push_back(ftl); 
-	const Vector3& fbl = obb.GetFBL();	obb_vertices.push_back(fbl);
-	const Vector3& fbr = obb.GetFBR();	obb_vertices.push_back(fbr);
-	const Vector3& ftr = obb.GetFTR();	obb_vertices.push_back(ftr);
-	const Vector3& btl = obb.GetBTL();	obb_vertices.push_back(btl);
-	const Vector3& bbl = obb.GetBBL();	obb_vertices.push_back(bbl);
-	const Vector3& bbr = obb.GetBBR();	obb_vertices.push_back(bbr);
-	const Vector3& btr = obb.GetBTR();	obb_vertices.push_back(btr);
-
-	Vector3 min_winner;
-	Vector3 max_winner;
-	float max_ext;
-	float min_ext;
-	float ext = 0.f;		// ext is with respect to 'one_end' of line
-
-	for (int i = 0; i < obb_vertices.size(); ++i)
-	{
-		const Vector3& candidate = obb_vertices[i];
-
-		// project this point onto the line
-		const Vector3& projection = ProjectPointToLineExt(candidate, line, ext);
-
-		// at the first round, the first we consider will take over both winner place
-		if (i == 0)
-		{
-			min_winner = projection;
-			max_winner = projection;
-			max_ext = ext;
-			min_ext = ext;
-			continue;
-		}
-
-		if (ext > max_ext)
-		{
-			max_winner = projection;
-			max_ext = ext;
-		}
-
-		if (ext < min_ext)
-		{
-			min_winner = projection;
-			min_ext = ext;
-		}
-	}
-
-	return DirectionalInterval(min_winner, max_winner);
-	// the number of interval ends does not tell meaningful thing
-	// it only tells the min/max relation based on the relation between 'one_end' and 'the_other' of the line3
-	// shortly put, this min/max reflect direction of line3 itself
 }
 
 /*
@@ -1498,7 +1044,6 @@ AABB2 MinkowskiAABBVsAABB(const AABB2& aabb1, const AABB2& aabb2)
 	return AABB2(bottomLeft, topRight);
 }
 
-
 std::set<Vector3> MinkowskiDifferenceHull(const std::set<Vector3>& hull_0, const std::set<Vector3>& hull_1)
 {
 	// A - B == A + (-B)
@@ -1508,7 +1053,6 @@ std::set<Vector3> MinkowskiDifferenceHull(const std::set<Vector3>& hull_0, const
 
 	return MinkowskiSumHull(hull_0, reversed_hull_1);
 }
-
 
 std::set<Vector3> MinkowskiSumHull(const std::set<Vector3>& hull_0, const std::set<Vector3>& hull_1)
 {
@@ -1525,7 +1069,6 @@ std::set<Vector3> MinkowskiSumHull(const std::set<Vector3>& hull_0, const std::s
 
 	return sums;
 }
-
 
 bool IsPointInCircle(Vector2 pos, float r)
 {
@@ -1556,179 +1099,9 @@ float DistPointToPlaneSigned(const Vector3& pt, const Vector3& vert1, const Vect
 	return signed_dist;
 }
 
-float DistPointToPlaneSigned(const Vector3& pt, const Plane& plane)
-{
-	// get info from plane
-	const Vector3& normal = plane.GetNormal();
-	const float& offset = plane.GetOffset();
-
-	// pt itself is the direction vector considering origin
-	float dot_pt = DotProduct(pt, normal);
-
-	return (dot_pt - offset);
-}
-
-bool IsPointOutwardPlane(const Vector3& pt, const Plane& plane)
-{
-	return DistPointToPlaneSigned(pt, plane) > 0.f;
-}
-
-bool SATTestBoxVsBox(const CollisionBox& b1, const CollisionBox& b2, Vector3 axis, const Vector3& disp, unsigned index, float& smallest_pen, unsigned& smallest_index)
-{
-	if (axis.GetLengthSquared() < .0001f)
-		return true;
-
-	axis.Normalize();
-
-	float penetration = SATTestPenetrationBoxVsBox(b1, b2, axis, disp);
-
-	if (penetration < 0.f)
-		return false;
-
-	if (penetration < smallest_pen)
-	{
-		smallest_pen = penetration;
-		smallest_index = index;
-	}
-
-	return true;
-}
-
-float SATTestPenetrationBoxVsBox(const CollisionBox& b1, const CollisionBox& b2, const Vector3& axis, const Vector3& disp)
-{
-	float half_project_1 = SATHalfProjectionBox(b1, axis);
-	float half_project_2 = SATHalfProjectionBox(b2, axis);
-
-	float dist = abs(DotProduct(disp, axis));
-
-	return (half_project_1 + half_project_2 - dist);
-}
-
-float SATHalfProjectionBox(const CollisionBox& b, const Vector3& axis)
-{
-	float x = b.GetHalfSize().x * abs(DotProduct(axis, b.GetBasisAndPosition(0)));
-	float y = b.GetHalfSize().y * abs(DotProduct(axis, b.GetBasisAndPosition(1)));
-	float z = b.GetHalfSize().z * abs(DotProduct(axis, b.GetBasisAndPosition(2)));
-
-	return x + y + z;
-}
-
-// test of box and convex shapes along the given axis
-bool SATTestBoxVsConvex(const CollisionBox& b1, const CollisionConvexObject& cobj, Vector3 axis, const Vector3&, unsigned idx, float& smallest_pen, unsigned& smallest_idx,
-	Vector3& box_min, Vector3& box_max, Vector3& convex_min, Vector3& convex_max)
-{
-	// axes was parallel, ignore
-	if (axis.GetLengthSquared() < .0001f)
-		return true;
-
-	axis.Normalize();
-
-	float tmin_b, tmax_b, tmin_c, tmax_c; 
-	Vector3 vmin_b, vmax_b, vmin_c, vmax_c;
-
-	// intervals, all v are in world space
-	b1.ProjectToAxisForInterval(axis, tmin_b, tmax_b, vmin_b, vmax_b);
-	cobj.ProjectToAxisForInterval(axis, tmin_c, tmax_c, vmin_c, vmax_c);
-
-	if (!(tmin_c < tmax_b) && (tmax_c > tmin_b))
-		return false;
-
-	// get penetration
-	float pen;
-	if (tmax_c > tmax_b) 
-		pen = tmax_b - tmin_c;
-	else if (tmin_c < tmin_b)
-		pen = tmax_c - tmin_b;
-	else
-	{
-		if ((tmax_b - tmin_b) < (tmax_c - tmin_c))
-			pen = tmax_b - tmin_b;
-		else
-			pen = tmax_c - tmin_c;
-	}
-	//ASSERT_OR_DIE(pen > 0, "penetration should be larger than 0");
-
-	if (pen < smallest_pen)
-	{
-		smallest_pen = pen;
-		smallest_idx = idx;
-
-		box_min = vmin_b;
-		box_max = vmax_b;
-
-		convex_min = vmin_c;
-		convex_max = vmax_c;
-	}
-	
-	return true;
-}
-
 float DistPointToPlaneUnsigned(const Vector3& pt, const Vector3& vert1, const Vector3& vert2, const Vector3& vert3)
 {
 	return abs(DistPointToPlaneSigned(pt, vert1, vert2, vert3));
-}
-
-Vector3 ComputePlaneIntersectionPointLA(const Plane& p1, const Plane& p2, const Plane& p3)
-{
-	const Vector3& n1 = p1.GetNormal();
-	const Vector3& n2 = p2.GetNormal();
-	const Vector3& n3 = p3.GetNormal();
-
-	const float& d1 = p1.GetOffset();
-	const float& d2 = p2.GetOffset();
-	const float& d3 = p3.GetOffset();
-
-	Vector3 ns_i = Vector3(n1.x, n2.x, n3.x);
-	Vector3 ns_j = Vector3(n1.y, n2.y, n3.y);
-	Vector3 ns_k = Vector3(n1.z, n2.z, n3.z);
-	Matrix33 ns = Matrix33(ns_i, ns_j, ns_k);
-
-	Vector3 dv = Vector3(d1, d2, d3);
-
-	const Matrix33& ns_inv = ns.GetInverse();
-
-	return ns_inv * dv;
-}
-
-bool ComputePlaneIntersectionPoint(const Plane& p1, const Plane& p2, const Plane& p3, Vector3& p)
-{
-	const Vector3& n1 = p1.GetNormal();
-	const Vector3& n2 = p2.GetNormal();
-	const Vector3& n3 = p3.GetNormal();
-
-	const float& d1 = p1.GetOffset();
-	const float& d2 = p2.GetOffset();
-	const float& d3 = p3.GetOffset();
-
-	float denom = DotProduct(n1, n2.Cross(n3));
-	if (denom == 0)
-		return false;
-
-	Vector3 f1 = (n2.Cross(n3)) * d1;
-	Vector3 f2 = (n3.Cross(n1)) * d2;
-	Vector3 f3 = (n1.Cross(n2)) * d3;
-
-	p = (f1 + f2 + f3) / denom;
-
-	return true;
-}
-
-Vector3 GetPolygonCentroid(const std::vector<Vector3>& verts, const ConvexPolygon& polygon)
-{
-	Vector3 centroid = Vector3::ZERO;
-
-	const std::vector<int>& vert_indices = polygon.m_vert_idx;
-
-	for (int i = 0; i < vert_indices.size(); ++i)
-	{
-		centroid += verts[vert_indices[i]];
-	}
-
-	uint vert_num = (uint)vert_indices.size();
-
-	centroid /= (float)vert_num;
-
-	return centroid;
 }
 
 Matrix33 GetCanonicalTetrahedronCovariance()

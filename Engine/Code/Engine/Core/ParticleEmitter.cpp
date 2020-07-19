@@ -7,7 +7,6 @@ ParticleEmitter::ParticleEmitter(Vector3 pos, float spawnRate, float rotation, f
 	m_spawnRate = spawnRate;
 	m_rotation = rotation;
 	m_azimuth = azimuth;
-	//m_lifetime = 0.f;
 	m_on = true;
 	m_particleLifetime = particleLifetime;
 }

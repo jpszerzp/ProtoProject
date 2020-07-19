@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Engine/Math/AABB3.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Core/GameObject.hpp"
 
@@ -97,19 +96,6 @@ public:
 	GameObject*			m_debugObj;
 };
 
-
-class DebugRenderTaskAABB3 : public DebugRenderTask
-{
-public:
-	void SetDebugObject(AABB3 bounds);
-
-	virtual void Render(Renderer* renderer) override;
-	virtual void Update(float deltaTime) override;
-
-	DebugRenderTaskAABB3(float lifeTime, const Rgba& startTimeColor, const Rgba& endTimeColor, eDebugDrawMode mode);
-};
-
-
 class DebugRenderTaskQuad : public DebugRenderTask
 {
 public:
@@ -134,7 +120,6 @@ public:
 	DebugRenderTaskPoint(float lifeTime, const Rgba& startTimeColor, const Rgba& endTimeColor, eDebugDrawMode mode);
 };
 
-
 class DebugRenderTaskLine : public DebugRenderTask
 {
 public:
@@ -151,7 +136,6 @@ public:
 	Vector3 m_end;
 	float   m_thickness;
 };
-
 
 class DebugRenderTaskText2D : public DebugRenderTask
 {
@@ -174,15 +158,6 @@ public:
 	~DebugRenderTaskText2D();
 };
 
-
-void DebugRenderWireAABB3(
-	float lifetime, 
-	AABB3 const &bounds, 
-	Rgba const &startTimeColor, 
-	Rgba const &endTimeColor, 
-	eDebugDrawMode mode ); 
-
-
 void DebugRenderQuad(float lifetime,
 	Vector3 drawmin, Vector3 up, Vector3 right,
 	float width, float height,
@@ -191,14 +166,12 @@ void DebugRenderQuad(float lifetime,
 	eDebugDrawMode mode,
 	bool isFont = false);
 
-
 void DebugRenderPoint( float lifetime, 
 	float size,
 	Vector3 const &position, 
 	Rgba const &startTimeColor, 
 	Rgba const &endTimeColor,
 	eDebugDrawMode const mode ); 
-
 
 void DebugRenderLine(float lifeTime, 
 	Vector3 start, Vector3 end, float lineWidth, 
@@ -222,21 +195,5 @@ void DebugRender2DQuad(
 	std::string shaderName,
 	bool isFont = false); 
 
-
 void DebugRender2DText(std::string text, float lifetime, Vector2 drawmin, float cellHeight, 
 	float aspectScale, const Rgba& startTimeColor, const Rgba& endTimeColor, eDebugDrawMode mode);
-
-/*
-void DebugRender2DChar(char character, float lifetime, Vector2 drawmin, float cellHeight, 
-	float aspectScale, const Rgba& startTimeColor, const Rgba& endTimeColor,
-	eDebugDrawMode mode, BitmapFont* font);
- 
-void DebugRender2DQuadTextured(float lifetime, 
-	Vector2 drawmin, float width, float height,
-	Rgba const &startTimeColor, 
-	Rgba const &endTimeColor,
-	eDebugDrawMode mode,
-	std::string shaderName,
-	Vector2 uvBL, Vector2 uvBR, Vector2 uvTL, Vector2 uvTR,
-	bool isFont = false);
-*/

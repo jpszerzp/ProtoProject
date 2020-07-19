@@ -6,7 +6,6 @@
 #include "Engine/Renderer/FrameBuffer.hpp"
 #include "Engine/Renderer/Material.hpp"
 #include "Engine/Core/Transform.hpp"
-#include "Engine/Core/Ray3.hpp"
 
 class Camera
 {
@@ -34,8 +33,6 @@ public:
 	GLuint			GetFrameBufferHandle() const { return m_output.GetHandle(); }
 	FrameBuffer&	GetFrameBuffer() { return m_output; }
 	Transform&		GetTransform() { return m_transform; }
-	Ray3			GetRay() const { return m_forwardRay; }
-	Ray3			ComputeRay() const;
 
 	Vector3 GetLocalForward() const;
 	Vector3 GetLocalUp() const;
@@ -60,6 +57,4 @@ public:
 	FrameBuffer m_output;
 
 	std::vector<Material*> m_effectMats;
-
-	Ray3 m_forwardRay;
 };

@@ -25,9 +25,6 @@ GameObject::~GameObject()
 
 	delete m_rightBasisMesh;
 	m_rightBasisMesh = nullptr;
-
-	//delete m_physEntity;
-	//m_physEntity = nullptr;
 }
 
 void GameObject::UpdateBasis()
@@ -113,7 +110,6 @@ void GameObject::Render(Renderer* renderer)
 
 		// Update object UBO values 
 		renderer->m_objectData.model = transform.GetWorldMatrix();
-		//renderer->m_objectData.model = transform.GetLocalMatrix();
 
 		// set desired compare
 		for each (eDepthCompare c in renderer->m_currentShader->m_state.m_depthCompares)
@@ -149,9 +145,6 @@ void GameObject::Render(Renderer* renderer)
 	}
 
 	RenderBasis(renderer);
-
-	if (m_physEntity != nullptr)
-		m_physEntity->Render(renderer);
 }
 
 
@@ -218,34 +211,6 @@ void GameObject::RenderBasis(Renderer* renderer)
 		renderer->DrawMesh(m_rightBasisMesh);
 	}
 }
-
-void GameObject::ToggleBoundSphereDebugDraw()
-{
-	if (m_physEntity != nullptr)
-	{
-		bool draw = m_physEntity->GetDrawBoundingSphere();
-		m_physEntity->SetDrawBoundingSphere(!draw);
-	}
-}
-
-void GameObject::ToggleBoundBoxDebugDraw()
-{
-	if (m_physEntity != nullptr)
-	{
-		bool draw = m_physEntity->GetDrawBoundingBox();
-		m_physEntity->SetDrawBoundingBox(!draw);
-	}
-}
-
-/*
- * Entity driven movement of game object
- */
-void GameObject::EntityDrivePosition(Vector3 translation)
-{
-	m_physEntity->Translate(translation);								// first update entity
-	m_renderable->m_transform = m_physEntity->GetEntityTransform();		// then drive gameobject
-}
-
 
 Vector3 GameObject::GetWorldPosition()
 {
