@@ -2,7 +2,9 @@
 #include "Engine/Renderer/MaterialProperty.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Core/Util/XmlUtilities.hpp"
+#include "Engine/Core/Util/AssetUtils.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
+
 
 Material::Material()
 {
@@ -358,11 +360,11 @@ void Material::FillTextures(bool isFont)
 		std::string fullPath = "";
 		if (!isFont)
 		{
-			fullPath = "Data/Images/" + bindSrc;
+			fullPath = GetAbsImgPath(bindSrc);
 		}
 		else
 		{
-			fullPath = "Data/Fonts/" + bindSrc;
+			fullPath = GetAbsFontPath(bindSrc);
 		}
 
 		Renderer* r = Renderer::GetInstance();
@@ -430,5 +432,4 @@ void Material::RemoveProperty(const char*)
 {
 	// Remove prop that is already in single props vector
 	// - deprecated (prop block is used)
-
 }

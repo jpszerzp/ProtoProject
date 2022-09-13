@@ -1,9 +1,10 @@
 ﻿#include "Engine/Renderer/DebugRenderer.hpp"
 #include "Engine/Renderer/Renderable.hpp"
+#include "Engine/Renderer/Camera.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
+#include "Engine/Core/Util/AssetUtils.hpp"
 #include "Engine/Math/MathUtils.hpp"
 
-#include "Engine/Renderer/Camera.hpp"
 static std::vector<DebugRenderTask*> g_debugRenderTasks;
 static Camera* g_2DCamera; 
 static Camera* g_3DCamera; 
@@ -299,7 +300,7 @@ void DebugRenderTaskText2D::SetDebugInfo(std::string text, Vector2 drawmin, floa
 	m_aspectScale = aspectScale;
 
 	Renderer* renderer = Renderer::GetInstance();
-	m_font = renderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
+	m_font = renderer->CreateOrGetBitmapFont(GetAbsFontPath().c_str());
 
 	m_textMesh = Mesh::CreateTextImmediate(m_tint, m_drawmin, m_font,
 		m_cellHeight, m_aspectScale, m_text, VERT_PCU);
@@ -327,7 +328,7 @@ void DebugRenderTaskText2D::Render(Renderer* renderer)
 	if (m_textMesh != nullptr)
 	{
 		Shader* shader = renderer->CreateOrGetShader("cutout_nonmodel");
-		Texture* texture = renderer->CreateOrGetTexture("Data/Fonts/SquirrelFixedFont.png");
+		Texture* texture = renderer->CreateOrGetTexture(GetAbsFontPath());
 		renderer->UseShader(shader);
 		renderer->SetTexture2D(0, texture);
 		renderer->SetSampler2D(0, texture->GetSampler());

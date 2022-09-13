@@ -13,6 +13,7 @@
 #include "Engine/Core/Light/PointLight.hpp"
 #include "Engine/Core/Light/DirectionalLight.hpp"
 #include "Engine/Core/Light/SpotLight.hpp"
+#include "Engine/Core/Util/AssetUtils.hpp"
 #include "Engine/Math/MathUtils.hpp"
 
 //#define STB_IMAGE_IMPLEMENTATION    
@@ -586,7 +587,7 @@ Mesh* Renderer::CreateOrGetMesh(std::string meshName)
 			mesh = Mesh::CreateUVSphere(VERT_PCU, 18, 36);
 		else if (meshName == "ship_pcu")
 		{
-			std::string modelPath = "Data/Models/scifi_fighter_mk6.obj";
+			std::string modelPath = GetAbsModelPath("scifi_fighter_mk6");
 			mesh = Mesh::CreateModel(modelPath, VERT_PCU);
 		}
 		else if (meshName == "point_pcu")
@@ -599,7 +600,7 @@ Mesh* Renderer::CreateOrGetMesh(std::string meshName)
 			mesh = Mesh::CreateQuad2D(VERT_PCU);
 		else if (meshName == "ship_lit")
 		{
-			std::string modelPath = "Data/Models/scifi_fighter_mk6.obj";
+			std::string modelPath = GetAbsModelPath("scifi_fighter_mk6");
 			mesh = Mesh::CreateModel(modelPath, VERT_LIT);
 		}
 		else if (meshName == "quad_lit")
@@ -665,8 +666,10 @@ ShaderProgram* Renderer::CreateOrGetShaderProgram(const char* fileName, const ch
 	if (!shaderProgramLoaded)
 	{
 		ShaderProgram* shaderProgram = new ShaderProgram();
-		std::string header = "Data/Shaders/";
-		bool programLinked = shaderProgram->LoadFromFiles(header.append(fileName).c_str(), delimited);
+		std::string path = GetRunWinPath();
+		std::string header = "Data\\Shaders\\";
+		path.append(header);
+		bool programLinked = shaderProgram->LoadFromFiles(path.append(fileName).c_str(), delimited);
 		if (!programLinked)
 		{
 			return m_loadedShaderPrograms["invalid"];
@@ -689,7 +692,7 @@ Shader* Renderer::CreateOrGetShader(std::string shaderName)
 
 	if (!shaderLoaded)
 	{
-		std::string header = "Data/Shaders/" + shaderName + ".xml";
+		std::string header = "Data\\Shaders\\" + shaderName + ".xml";
 		Shader* shader = Shader::AcquireResource(header.c_str());
 		m_loadedShaders.emplace(shaderName, shader);
 
@@ -708,7 +711,7 @@ Shader* Renderer::MakeShader(std::string shaderName)
 
 	if (!shaderLoaded)
 	{
-		std::string header = "Data/Shaders/" + shaderName + ".xml";
+		std::string header = "Data\\Shaders\\" + shaderName + ".xml";
 		Shader* shader = Shader::MakeShader(header.c_str());
 		m_loadedShaders.emplace(shaderName, shader);
 
@@ -734,7 +737,7 @@ Material* Renderer::CreateOrGetMaterial(std::string matName)
 
 	if (!matLoaded)
 	{
-		std::string header = "Data/Materials/" + matName + ".mat";
+		std::string header = GetAbsMatPath(matName);
 		Material* mat = Material::AcquireShaderResource(header.c_str());
 
 		// Do not let block and single prop coexist
@@ -770,7 +773,7 @@ Material* Renderer::CreateOrGetStagedMaterial(std::string matName)
 
 	if (!matLoaded)
 	{
-		std::string header = "Data/Materials/" + matName + ".mat";
+		std::string header = GetAbsMatPath(matName);
 		Material* mat = Material::AcquireShaderChannelResource(header.c_str());
 
 		// fill property block and texture storage in shader pass
@@ -793,7 +796,7 @@ ShaderChannel* Renderer::CreateOrGetShaderChannel(std::string channelName)
 
 	if (!channelLoaded)
 	{
-		std::string header = "Data/Shaders/" + channelName + ".xml";
+		std::string header = "Data\\Shaders\\" + channelName + ".xml";
 		ShaderChannel* channel = ShaderChannel::AcquireResource(header.c_str());
 		m_loadedChannels.emplace(channelName, channel);
 
@@ -906,7 +909,7 @@ void Renderer::DrawText2D( const Vector2& drawMins, const std::string& asciiText
 
 void Renderer::DrawPoint2D(const Vector2& point, const Rgba& color, eVertexType type, float size)
 {
-	Texture* texture = CreateOrGetTexture("Data/Images/white.png");
+	Texture* texture = CreateOrGetTexture(GetAbsImgPath("white"));
 	SetTexture2D(0, texture);
 	SetSampler2D(0, texture->GetSampler());
 
@@ -921,7 +924,7 @@ void Renderer::DrawPoint2D(const Vector2& point, const Rgba& color, eVertexType 
 
 void Renderer::DrawPolygon2D(const Vector2& bl, const Vector2& br, const Vector2& tl, const Vector2& tr, const Rgba& color, eVertexType type)
 {
-	Texture* texture = CreateOrGetTexture("Data/Images/white.png");
+	Texture* texture = CreateOrGetTexture(GetAbsImgPath("white"));
 	SetTexture2D(0, texture);
 	SetSampler2D(0, texture->GetSampler());
 
@@ -935,7 +938,7 @@ void Renderer::DrawPolygon2D(const Vector2& bl, const Vector2& br, const Vector2
 
 void Renderer::DrawLine3D( const Vector3& start, const Vector3& end, const Rgba& color, float lineThickness )
 {
-	Texture* texture = CreateOrGetTexture("Data/Images/white.png");
+	Texture* texture = CreateOrGetTexture(GetAbsImgPath("white"));
 	SetTexture2D(0, texture);
 	SetSampler2D(0, texture->GetSampler());
 

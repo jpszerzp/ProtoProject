@@ -2,6 +2,7 @@
 #include "Engine/Core/Console/Command.hpp"
 #include "Engine/Core/Console/DevConsole.hpp"
 #include "Engine/Core/Util/StringUtils.hpp"
+#include "Engine/Core/Util/AssetUtils.hpp"
 #include "Engine/Core/Thread/Thread.hpp"
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Renderer/DebugRenderer.hpp"
@@ -42,7 +43,7 @@ void SaveLogCommand(Command& cmd)
 	if (fileName.find('\"') != std::string::npos)
 	{
 		fileName = fileName.substr(1, fileName.length() - 2);
-		fileName = "Data/Logs/" + fileName;
+		fileName = GetAbsLogPath(fileName);
 		BufferWriteToFile(fileName.c_str());
 		console->ClearOutputBufferFormat();
 

@@ -1,11 +1,12 @@
 #include "Engine/Core/Util/RenderUtil.hpp"
+#include "Engine/Core/Util/AssetUtils.hpp"
 
 void DrawGraphAlpha(Renderer* renderer, Mesh* mesh)
 {
 	if (mesh != nullptr)
 	{
 		Shader* shader = renderer->CreateOrGetShader("2d_direct_alpha");
-		Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
+		Texture* texture = renderer->CreateOrGetTexture(GetAbsImgPath("white"));
 		renderer->UseShader(shader);
 		renderer->SetTexture2D(0, texture);
 		renderer->SetSampler2D(0, texture->GetSampler());
@@ -20,7 +21,7 @@ void DrawTextCut(Mesh* textMesh)
 	if (textMesh != nullptr)
 	{
 		Shader* shader = renderer->CreateOrGetShader("cutout_nonmodel");
-		Texture* texture = renderer->CreateOrGetTexture("Data/Fonts/SquirrelFixedFont.png");
+		Texture* texture = renderer->CreateOrGetTexture(GetAbsFontPath());
 		renderer->UseShader(shader);
 		renderer->SetTexture2D(0, texture);
 		renderer->SetSampler2D(0, texture->GetSampler());
@@ -42,7 +43,7 @@ extern void DrawPoint(Mesh* point_mesh, uint size)
 		Shader* shader = renderer->CreateOrGetShader("wireframe_color");
 		renderer->UseShader(shader);
 
-		Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
+		Texture* texture = renderer->CreateOrGetTexture(GetAbsImgPath("white"));
 		renderer->SetTexture2D(0, texture);
 		renderer->SetSampler2D(0, texture->GetSampler());
 		glPointSize((GLfloat)size);
@@ -61,7 +62,7 @@ extern void DrawLine(Mesh* line_mesh)
 		Shader* shader = renderer->CreateOrGetShader("wireframe_color");
 		renderer->UseShader(shader);
 
-		Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
+		Texture* texture = renderer->CreateOrGetTexture(GetAbsImgPath("white"));
 		renderer->SetTexture2D(0, texture);
 		renderer->SetSampler2D(0, texture->GetSampler());
 		glLineWidth(5.f);
@@ -80,7 +81,7 @@ extern void DrawTriangle(Mesh* triangle_mesh)
 		Shader* shader = renderer->CreateOrGetShader("wireframe_color");
 		renderer->UseShader(shader);
 
-		Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
+		Texture* texture = renderer->CreateOrGetTexture(GetAbsImgPath("white"));
 		renderer->SetTexture2D(0, texture);
 		renderer->SetSampler2D(0, texture->GetSampler());
 		glLineWidth(5.f);
@@ -99,7 +100,7 @@ extern void DrawTetrahedron(Mesh* tetra_mesh)
 		Shader* shader = renderer->CreateOrGetShader("wireframe_color");
 		renderer->UseShader(shader);
 
-		Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
+		Texture* texture = renderer->CreateOrGetTexture(GetAbsImgPath("white"));
 		renderer->SetTexture2D(0, texture);
 		renderer->SetSampler2D(0, texture->GetSampler());
 		glLineWidth(5.f);

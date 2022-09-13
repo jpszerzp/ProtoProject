@@ -1,5 +1,6 @@
 /*
 #include "Engine/Physics/3D/PHYSX/PhysXObject.hpp"
+#include "Engine/Core/Util/AssetUtils.hpp"
 
 #define MAX_NUM_ACTOR_SHAPES_OBJ 128
 
@@ -98,7 +99,7 @@ void PhysXObject::RenderActor(Renderer* rdr)
 
 		// default
 		std::string shader_name = "default";
-		std::string tex_name = "Data/Images/white.png";
+		std::string tex_name = GetAbsImgPath("white");
 
 		// render config
 		const std::string& mesh_name = ChooseMesh(h);
@@ -193,13 +194,13 @@ void PhysXObject::ChooseTexture(const bool& is_sleep, const bool& is_trigger, st
 {
 	// sleep
 	if (is_sleep)
-		tn = "Data/Images/white.png";
+		tn = GetAbsImgPath("white");
 	// non sleep but trigger
 	else if (is_trigger)
-		tn = "Data/Images/white.png";
+		tn = GetAbsImgPath("white");
 	// non sleep non trigger
 	else
-		tn = "Data/Images/orient.png";
+		tn = GetAbsImgPath("orient");
 }
 
 void PhysXObject::DisableGravity()

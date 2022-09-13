@@ -1,5 +1,6 @@
 #include "Game/Scene/ProtoState.hpp"
 #include "Engine/Renderer/Window.hpp"
+#include "Engine/Core/Util/AssetUtils.hpp"
 
 PrototypeState::PrototypeState()
 {
@@ -37,7 +38,7 @@ PrototypeState::PrototypeState()
 	Vector2 titleTextMin = Vector2(-width / 2.f, height / 2.f - 32.f);
 	float titleHeight = height / 50.f;
 	Rgba titleTextTint = Rgba::WHITE;
-	BitmapFont* font = renderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
+	BitmapFont* font = renderer->CreateOrGetBitmapFont(GetAbsFontPath().c_str());
 	std::string title = "Welcome to ProtoState!";
 	m_title_mesh = Mesh::CreateTextImmediate(titleTextTint, titleTextMin, font, titleHeight, 1.f, title, VERT_PCU);
 }
@@ -81,7 +82,7 @@ void PrototypeState::Render(Renderer* renderer)
 	{
 		Renderer* renderer = Renderer::GetInstance();
 		Shader* shader = renderer->CreateOrGetShader("cutout_nonmodel");
-		Texture* texture = renderer->CreateOrGetTexture("Data/Fonts/SquirrelFixedFont.png");
+		Texture* texture = renderer->CreateOrGetTexture(GetAbsFontPath());
 		renderer->UseShader(shader);
 		renderer->SetTexture2D(0, texture);
 		renderer->SetSampler2D(0, texture->GetSampler());

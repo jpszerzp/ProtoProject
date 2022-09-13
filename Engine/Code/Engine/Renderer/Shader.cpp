@@ -1,7 +1,10 @@
 #include "Engine/Renderer/Shader.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Core/Util/XmlUtilities.hpp"
+#include "Engine/Core/Util/AssetUtils.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
+
+#include <algorithm>
 
 static eRenderQueue ToRenderQueue(std::string queueStr)
 {
@@ -37,12 +40,22 @@ Shader::~Shader()
 }
 
 
+static void LoadShaderDoc(const char* fp, XMLDocument& outDoc)
+{
+	std::string path = GetRunWinPath();
+	std::string fpStr(fp);
+	path.append(fpStr);
+
+	outDoc.LoadFile(path.c_str());
+}
+
+
 Shader* Shader::AcquireResource(const char* fp)
 {
 	Shader* res = new Shader();
 
 	XMLDocument shaderDoc;
-	shaderDoc.LoadFile(fp);
+	LoadShaderDoc(fp, shaderDoc);
 
 	for (XMLElement* ele = shaderDoc.FirstChildElement()->FirstChildElement();
 		ele != 0; ele = ele->NextSiblingElement())
@@ -71,7 +84,13 @@ Shader* Shader::AcquireResource(const char* fp)
 
 			vsPath = "Data/" + vsPath;
 			fsPath = "Data/" + fsPath;
-			bool programLinked = shaderProgram->LoadFromFiles(vsPath.c_str(), fsPath.c_str(), "");
+			std::replace(vsPath.begin(), vsPath.end(), '/', '\\');
+			std::replace(fsPath.begin(), fsPath.end(), '/', '\\');
+			std::string vsRunPath = GetRunWinPath();
+			std::string fsRunPath = GetRunWinPath();
+			vsRunPath.append(vsPath);
+			fsRunPath.append(fsPath);
+			bool programLinked = shaderProgram->LoadFromFiles(vsRunPath.c_str(), fsRunPath.c_str(), "");
 			if (!programLinked)
 			{
 				TODO("Load the invalid shader program");
@@ -300,7 +319,7 @@ Shader* Shader::MakeShader(const char* fp)
 	Shader* res = new Shader();
 
 	XMLDocument shaderDoc;
-	shaderDoc.LoadFile(fp);
+	LoadShaderDoc(fp, shaderDoc);
 
 	for (XMLElement* ele = shaderDoc.FirstChildElement()->FirstChildElement(); ele != 0; ele = ele->NextSiblingElement())
 	{
@@ -328,7 +347,13 @@ Shader* Shader::MakeShader(const char* fp)
 
 			vsPath = "Data/" + vsPath;
 			fsPath = "Data/" + fsPath;
-			bool programLinked = shaderProgram->LoadFromFiles(vsPath.c_str(), fsPath.c_str(), "");
+			std::replace(vsPath.begin(), vsPath.end(), '/', '\\');
+			std::replace(fsPath.begin(), fsPath.end(), '/', '\\');
+			std::string vsRunPath = GetRunWinPath();
+			std::string fsRunPath = GetRunWinPath();
+			vsRunPath.append(vsPath);
+			fsRunPath.append(fsPath);
+			bool programLinked = shaderProgram->LoadFromFiles(vsRunPath.c_str(), fsRunPath.c_str(), "");
 			if (!programLinked)
 			{
 				TODO("Load the invalid shader program");
@@ -454,7 +479,7 @@ ShaderChannel* ShaderChannel::AcquireResource(const char* fp)
 	}
 
 	XMLDocument channelDoc;
-	channelDoc.LoadFile(fp);
+	LoadShaderDoc(fp, channelDoc);
 
 	for (XMLElement* ele = channelDoc.FirstChildElement()->FirstChildElement();
 		ele != 0; ele = ele->NextSiblingElement())
@@ -483,9 +508,14 @@ ShaderChannel* ShaderChannel::AcquireResource(const char* fp)
 					fsPath = ParseXmlAttribute(*spHeader, "file", "");
 					vsPath = "Data/" + vsPath;
 					fsPath = "Data/" + fsPath;
+					std::replace(vsPath.begin(), vsPath.end(), '/', '\\');
+					std::replace(fsPath.begin(), fsPath.end(), '/', '\\');
+					std::string vsRunPath = GetRunWinPath();
+					std::string fsRunPath = GetRunWinPath();
+					vsRunPath.append(vsPath);
+					fsRunPath.append(fsPath);
 
-					bool programLinked = shaderProgram->LoadFromFiles(vsPath.c_str(), fsPath.c_str(), "");
-
+					bool programLinked = shaderProgram->LoadFromFiles(vsRunPath.c_str(), fsRunPath.c_str(), "");
 					if (!programLinked)
 					{
 						TODO("Load the invalid shader program");
@@ -856,7 +886,7 @@ void ShaderChannel::FillTextures()
 
 				std::string bindName = tex->m_bindName;
 				std::string bindSrc = tex->m_bindSrc;
-				std::string fullPath = "Data/Images/" + bindSrc;
+				std::string fullPath = GetAbsImgPath(bindSrc);
 
 				Renderer* r = Renderer::GetInstance();
 				Texture* texture = r->CreateOrGetTexture(fullPath);

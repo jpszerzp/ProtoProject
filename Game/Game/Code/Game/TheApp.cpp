@@ -10,7 +10,7 @@
 #include "Engine/Core/ErrorWarningAssert.hpp"
 #include "Engine/Core/Console/Command.hpp"
 #include "Engine/Core/Console/DevConsole.hpp"
-#include "Engine/Core/ErrorWarningAssert.hpp"
+#include "Engine/Core/Util/AssetUtils.hpp"
 
 TheApp::TheApp()
 {
@@ -163,7 +163,7 @@ void TheApp::ConsoleStartup()
 {
 	DevConsole* theConsole = DevConsole::GetInstance();
 	theConsole->RegisterConsoleHandler();
-	theConsole->SetFont(g_renderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png"));
+	theConsole->SetFont(g_renderer->CreateOrGetBitmapFont(GetAbsFontPath().c_str()));
 	theConsole->ConfigureMeshes();
 	CommandStartup();
 }
@@ -171,7 +171,8 @@ void TheApp::ConsoleStartup()
 void TheApp::BlackboardStartup()
 {
 	XMLDocument gameConfigDoc;
-	gameConfigDoc.LoadFile("Data/GameConfig.xml");
+	std::string path = GetAbsConfigPath();
+	gameConfigDoc.LoadFile(path.c_str());
 	g_config_blackboard = new Blackboard();
 	g_config_blackboard->PopulateFromXmlElementAttributes(*(gameConfigDoc.FirstChildElement()));
 }

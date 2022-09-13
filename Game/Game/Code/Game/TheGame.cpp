@@ -7,6 +7,7 @@
 #include "Engine/Core/Console/DevConsole.hpp"
 #include "Engine/Core/Time/Clock.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
+#include "Engine/Core/Util/AssetUtils.hpp"
 #include "Engine/Renderer/Window.hpp"
 #include "Engine/Renderer/SpriteSheet.hpp"
 #include "Engine/Renderer/DebugRenderer.hpp"
@@ -26,7 +27,7 @@ TheGame::TheGame()
 	Vector2 titleTextMin = Vector2(-width / 2.f, height / 2.f - 64.f);
 	float titleHeight = height / 50.f;
 	Rgba titleTextTint = Rgba::WHITE;
-	BitmapFont* font = renderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
+	BitmapFont* font = renderer->CreateOrGetBitmapFont(GetAbsFontPath().c_str());
 	std::string fps_str = Stringf("FPS:%f", m_clock->GetFPS());
 	m_fps_mesh = Mesh::CreateTextImmediate(titleTextTint, titleTextMin, font, titleHeight, 1.f, fps_str, VERT_PCU);
 }
@@ -64,7 +65,7 @@ void TheGame::UseDefaultState(GameState* defaultState)
 
 void TheGame::InitializeBitMapFont()
 {
-	g_renderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
+	g_renderer->CreateOrGetBitmapFont(GetAbsFontPath().c_str());
 }
 
 void TheGame::InitializeTextures()
@@ -96,7 +97,7 @@ void TheGame::Update()
 		Vector2 titleTextMin = Vector2(-width / 2.f, height / 2.f - 64.f);
 		float titleHeight = height / 50.f;
 		Rgba titleTextTint = Rgba::WHITE;
-		BitmapFont* font = renderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
+		BitmapFont* font = renderer->CreateOrGetBitmapFont(GetAbsFontPath().c_str());
 		std::string fps_str = Stringf("FPS:%f", m_clock->GetFPS());
 		m_fps_mesh = Mesh::CreateTextImmediate(titleTextTint, titleTextMin, font, titleHeight, 1.f, fps_str, VERT_PCU);
 	}
@@ -122,7 +123,7 @@ void TheGame::Render(Renderer* renderer)
 	{
 		//Renderer* renderer = Renderer::GetInstance();
 		Shader* shader = renderer->CreateOrGetShader("cutout_nonmodel");
-		Texture* texture = renderer->CreateOrGetTexture("Data/Fonts/SquirrelFixedFont.png");
+		Texture* texture = renderer->CreateOrGetTexture(GetAbsFontPath());
 		renderer->UseShader(shader);
 		renderer->SetTexture2D(0, texture);
 		renderer->SetSampler2D(0, texture->GetSampler());

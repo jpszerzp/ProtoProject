@@ -1,5 +1,6 @@
 #include "Engine/Core/Thread/Thread.hpp"
 #include "Engine/Core/Log/FileUtils.hpp"
+#include "Engine/Core/Util/AssetUtils.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
 #include "Engine/Math/MathUtils.hpp"
 
@@ -192,7 +193,8 @@ void ThreadSleep(uint ms)
 
 void ThreadTest(void*)
 {
-	File* file = new File("Data/Logs/garbage.dat");
+	const std::string& path = GetAbsLogPath("garbage", ".dat");
+	File* file = new File(path.c_str());
 	file->WriteTest();
 
 	delete file;

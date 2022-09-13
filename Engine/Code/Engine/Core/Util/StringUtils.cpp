@@ -1,6 +1,9 @@
 #include "Engine/Core/Util/StringUtils.hpp"
 #include <stdarg.h>
 #include <limits.h>
+#include <windows.h>
+
+#define MAX_PATH 260
 
 //-----------------------------------------------------------------------------------------------
 const int STRINGF_STACK_LOCAL_TEMP_LENGTH = 2048;
@@ -96,14 +99,12 @@ bool FindSubStringInString(const char*, const char*)
 bool IsStringInComment(const char*, const char*)
 {
 	return false;
-
 }
 
 
 bool IsStringInString(const char*, const char*)
 {
 	return false;
-
 }
 
 int StringGetSize(const char* charArr)

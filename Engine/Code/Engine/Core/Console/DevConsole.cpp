@@ -3,6 +3,7 @@
 #include "Engine/Core/Console/Command.hpp"
 #include "Engine/Core/Console/DevConsole.hpp"
 #include "Engine/Core/Util/StringUtils.hpp"
+#include "Engine/Core/Util/AssetUtils.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
 
 #include <math.h>
@@ -489,7 +490,7 @@ void DevConsole::UpdateInputBuffer()
 	if (m_inputBuffer != "")
 	{
 		Rgba textTint = Rgba::WHITE;
-		BitmapFont* font = renderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
+		BitmapFont* font = renderer->CreateOrGetBitmapFont(GetAbsFontPath().c_str());
 		m_inputBufferMesh = Mesh::CreateTextImmediate(textTint, m_inputBox.mins,
 			font, m_uniformCellHeight, ASPECT_SCALE, m_inputBuffer, VERT_PCU);
 	}
@@ -504,7 +505,7 @@ void DevConsole::FillOutputBuffer(Rgba tint)
 	for (int outputIdx = 0; outputIdx < outputTextSize; ++outputIdx)
 	{
 		//Rgba textTint = Rgba::WHITE;
-		BitmapFont* font = renderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
+		BitmapFont* font = renderer->CreateOrGetBitmapFont(GetAbsFontPath().c_str());
 		Mesh* outputMesh = Mesh::CreateTextImmediate(tint, m_inputBox.mins +
 			Vector2(0.f, (outputTextSize - outputIdx) * m_uniformCellHeight), font,
 			m_uniformCellHeight, ASPECT_SCALE, m_outputText[outputIdx], VERT_PCU);
@@ -522,7 +523,7 @@ void DevConsole::FillOutputBufferUnit(Rgba tint)
 
 		Renderer* renderer = Renderer::GetInstance();
 		//int outputTextSize = (int)m_outputText.size();
-		BitmapFont* font = renderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
+		BitmapFont* font = renderer->CreateOrGetBitmapFont(GetAbsFontPath().c_str());
 
 		for (uint i = 0; i < m_outputMeshes.size(); ++i)
 		{
@@ -561,7 +562,7 @@ void DevConsole::FillOutputBufferUnit(Rgba tint)
 	else
 	{
 		Renderer* renderer = Renderer::GetInstance();
-		BitmapFont* font = renderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
+		BitmapFont* font = renderer->CreateOrGetBitmapFont(GetAbsFontPath().c_str());
 		Mesh* exclusiveMesh = Mesh::CreateTextImmediate(tint, m_inputBox.mins + Vector2(0.f, m_uniformCellHeight), font,
 			m_uniformCellHeight, ASPECT_SCALE, m_outputText[0], VERT_PCU);
 		m_outputMeshes.push_back(exclusiveMesh);
@@ -576,7 +577,7 @@ void DevConsole::FillOutputBufferThreadSafe(Rgba tint)
 	for (int outputIdx = 0; outputIdx < outputTextSize; ++outputIdx)
 	{
 		//Rgba textTint = Rgba::WHITE;
-		BitmapFont* font = renderer->CreateOrGetBitmapFont("Data/Fonts/SquirrelFixedFont.png");
+		BitmapFont* font = renderer->CreateOrGetBitmapFont(GetAbsFontPath().c_str());
 		Mesh* outputMesh = Mesh::CreateTextImmediate(tint, m_inputBox.mins +
 			Vector2(0.f, (outputTextSize - outputIdx) * m_uniformCellHeight), font,
 			m_uniformCellHeight, ASPECT_SCALE, m_threadSafeMsg.m_data[outputIdx], VERT_PCU);
@@ -596,7 +597,7 @@ void DevConsole::Render(Renderer* renderer)
 
 		// Render output buffer - content from threaded or non-threaded consoleprintf
 		shader = renderer->CreateOrGetShader("cutout_nonmodel");
-		texture = renderer->CreateOrGetTexture("Data/Fonts/SquirrelFixedFont.png");
+		texture = renderer->CreateOrGetTexture(GetAbsFontPath());
 		renderer->UseShader(shader);
 		renderer->SetTexture2D(0, texture);
 		renderer->SetSampler2D(0, texture->GetSampler());
@@ -608,7 +609,7 @@ void DevConsole::Render(Renderer* renderer)
 
 		// render rcs status
 		shader = renderer->CreateOrGetShader("cutout_nonmodel");
-		texture = renderer->CreateOrGetTexture("Data/Fonts/SquirrelFixedFont.png");
+		texture = renderer->CreateOrGetTexture(GetAbsFontPath());
 		renderer->UseShader(shader);
 		renderer->SetTexture2D(0, texture);
 		renderer->SetSampler2D(0, texture->GetSampler());
@@ -617,7 +618,7 @@ void DevConsole::Render(Renderer* renderer)
 		if (m_cursorTimer >= 0.f)
 		{
 			shader = renderer->CreateOrGetShader("2d_direct_opague");
-			texture = renderer->CreateOrGetTexture("Data/Images/white.png");
+			texture = renderer->CreateOrGetTexture(GetAbsImgPath("white"));
 			renderer->UseShader(shader);
 			renderer->SetTexture2D(0,  texture);
 			renderer->SetSampler2D(0, texture->GetSampler());
@@ -628,7 +629,7 @@ void DevConsole::Render(Renderer* renderer)
 		if (m_inputBufferMesh != nullptr)
 		{
 			shader = renderer->CreateOrGetShader("2d_direct_opague");
-			texture = renderer->CreateOrGetTexture("Data/Fonts/SquirrelFixedFont.png");
+			texture = renderer->CreateOrGetTexture(GetAbsFontPath());
 			renderer->UseShader(shader);
 			renderer->SetTexture2D(0, texture);
 			renderer->SetSampler2D(0, texture->GetSampler());
@@ -637,7 +638,7 @@ void DevConsole::Render(Renderer* renderer)
 
 		// Render input box 
 		shader = renderer->CreateOrGetShader("2d_direct_opague");
-		texture = renderer->CreateOrGetTexture("Data/Images/white.png");
+		texture = renderer->CreateOrGetTexture(GetAbsImgPath("white"));
 		renderer->UseShader(shader);
 		renderer->SetTexture2D(0,  texture);
 		renderer->SetSampler2D(0, texture->GetSampler());
@@ -645,7 +646,7 @@ void DevConsole::Render(Renderer* renderer)
 
 		// Render background img
 		shader = renderer->CreateOrGetShader("2d_direct_alpha");
-		texture = renderer->CreateOrGetTexture("Data/Images/Artorias.png");
+		texture = renderer->CreateOrGetTexture(GetAbsImgPath("Artorias"));
 		renderer->UseShader(shader);
 		renderer->SetTexture2D(0, texture);
 		renderer->SetSampler2D(0, texture->GetSampler());

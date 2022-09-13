@@ -1,6 +1,7 @@
 ﻿#include "Engine/Renderer/ShaderProgram.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
 #include "Engine/Core/Util/StringUtils.hpp"
+#include "Engine/Core/Util/AssetUtils.hpp"
 
 #include <string>
 #include <fstream>
@@ -59,7 +60,9 @@ static std::string ExpandInclude(std::vector<std::string>& includeLst, std::stri
 				// "inc/A.glsl"
 				std::string bareFileSubpath(std::find(includeLine.begin(), includeLine.end(), '"') + 1, includeLine.end() - 1);
 
-				std::string fullPath = "Data/Shaders/glsl/" + bareFileSubpath;
+				std::string fullPath = GetRunWinPath();
+				std::string interPath = "Data\\Shaders\\glsl\\" + bareFileSubpath;
+				fullPath.append(interPath);
 				char* includedSrc = (char*)FileReadToNewBuffer(fullPath.c_str());
 
 				std::string includedSrcStr(includedSrc);
@@ -442,8 +445,10 @@ void* FileReadToNewBuffer(char const* path)
 void ShaderProgram::Reload(const char* shaderName, const char* delimited)
 {
 	std::string sn(shaderName);
-	std::string fp = "Data/Shaders/" + sn;
-	LoadFromFiles(fp.c_str(), delimited);
+	std::string path = GetRunWinPath();
+	std::string fp = "Data\\Shaders\\" + sn;
+	path.append(fp);
+	LoadFromFiles(path.c_str(), delimited);
 
 	std::string printMsg = sn + " reloaded\n";
 	DebuggerPrintf(printMsg.c_str());

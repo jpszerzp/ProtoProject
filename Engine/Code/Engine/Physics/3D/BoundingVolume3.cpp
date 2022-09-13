@@ -1,5 +1,6 @@
 #include "Engine/Physics/3D/BoundingVolume3.hpp"
 #include "Engine/Math/MathUtils.hpp"
+#include "Engine/Core/Util/AssetUtils.hpp"
 
 BoundingSphere::BoundingSphere(const BoundingSphere& child_one, const BoundingSphere& child_two)
 {
@@ -81,7 +82,7 @@ void BoundingSphere::DrawBound(Renderer* renderer)
 		Shader* shader = renderer->CreateOrGetShader("wireframe");
 		renderer->UseShader(shader);
 
-		Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
+		Texture* texture = renderer->CreateOrGetTexture(GetAbsImgPath("white"));
 		renderer->SetTexture2D(0, texture);
 		renderer->SetSampler2D(0, texture->GetSampler());
 

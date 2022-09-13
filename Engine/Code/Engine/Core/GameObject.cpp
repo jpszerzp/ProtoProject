@@ -1,5 +1,6 @@
 #include "Engine/Core/GameObject.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
+#include "Engine/Core/Util/AssetUtils.hpp"
 #include "Engine/Renderer/Renderable.hpp"
 
 
@@ -88,7 +89,7 @@ void GameObject::Render(Renderer* renderer)
 		{
 			shader = renderer->CreateOrGetShader("wireframe");
 
-			Texture* texture = renderer->CreateOrGetTexture("Data/Images/white.png");
+			Texture* texture = renderer->CreateOrGetTexture(GetAbsImgPath("white"));
 			renderer->SetTexture2D(0, texture);
 			renderer->SetSampler2D(0, texture->GetSampler());
 
@@ -165,8 +166,8 @@ void GameObject::RenderWithBorder(Renderer* renderer)
 		Shader* shader_inner = m_renderable->GetShader();
 		Shader* shader_outer = renderer->MakeShader("shader/border");
 
-		Texture* tex_inner = renderer->CreateOrGetTexture("Data/Images/couch/couch_diffuse.png");
-		Texture* tex_outer = renderer->CreateOrGetTexture("Data/Images/white.png");
+		Texture* tex_inner = renderer->CreateOrGetTexture(GetAbsImgPath("couch\\couch_diffuse"));
+		Texture* tex_outer = renderer->CreateOrGetTexture(GetAbsImgPath("white"));
 
 		// draw the inner object, normally
 		renderer->UseShader(shader_inner);
@@ -200,7 +201,7 @@ void GameObject::RenderBasis(Renderer* renderer)
 	{
 		Shader* basisShader = renderer->CreateOrGetShader("direct");
 		renderer->UseShader(basisShader);
-		Texture* basisTexture = renderer->CreateOrGetTexture("Data/Images/white.png");
+		Texture* basisTexture = renderer->CreateOrGetTexture(GetAbsImgPath("white"));
 		renderer->SetTexture2D(0, basisTexture);
 		renderer->SetSampler2D(0, basisTexture->GetSampler());
 
