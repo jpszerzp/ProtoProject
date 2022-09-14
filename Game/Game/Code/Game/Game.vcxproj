@@ -306,39 +306,32 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Scene/ProtoState.cpp" />
-    <ClCompile Include="Scene/GameState.cpp" />
-    <ClCompile Include="Test/DelegateTest.cpp" />
-    <ClCompile Include="Util/GameCommon.cpp" />
-    <ClCompile Include="Main_Win32.cpp">
-      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ShowIncludes>
-      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='DebugInline|Win32'">false</ShowIncludes>
-      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ShowIncludes>
-      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ShowIncludes>
-      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='DebugInline|x64'">false</ShowIncludes>
-      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ShowIncludes>
-    </ClCompile>
-    <ClCompile Include="Scene/GameStateMachine.cpp" />
-    <ClCompile Include="Test/MathTest.cpp" />
-    <ClCompile Include="Test/TransformTest.cpp" />
-    <ClCompile Include="TheApp.cpp" />
-    <ClCompile Include="TheGame.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\..\..\Engine\Code\Engine\Engine.vcxproj">
       <Project>{92d08103-0ea6-4ac9-9a72-975604b60232}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Scene/ProtoState.hpp" />
-    <ClInclude Include="Scene/GameStateMachine.hpp" />
-    <ClInclude Include="Scene/GameState.hpp" />
-    <ClInclude Include="Test/DelegateTest.hpp" />
-    <ClInclude Include="Test/TransformTest.hpp" />
-    <ClInclude Include="Test/MathTest.hpp" />
-    <ClInclude Include="Util/GameCommon.hpp" />
+    <ClCompile Include="Main_Win32.cpp" />
+    <ClCompile Include="Scene\GameState.cpp" />
+    <ClCompile Include="Scene\GameStateMachine.cpp" />
+    <ClCompile Include="Scene\ProtoState.cpp" />
+    <ClCompile Include="Test\DelegateTest.cpp" />
+    <ClCompile Include="Test\MathTest.cpp" />
+    <ClCompile Include="Test\TransformTest.cpp" />
+    <ClCompile Include="TheApp.cpp" />
+    <ClCompile Include="TheGame.cpp" />
+    <ClCompile Include="Util\GameCommon.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Scene\GameState.hpp" />
+    <ClInclude Include="Scene\GameStateMachine.hpp" />
+    <ClInclude Include="Scene\ProtoState.hpp" />
+    <ClInclude Include="Test\DelegateTest.hpp" />
+    <ClInclude Include="Test\MathTest.hpp" />
+    <ClInclude Include="Test\TransformTest.hpp" />
     <ClInclude Include="TheApp.hpp" />
     <ClInclude Include="TheGame.hpp" />
+    <ClInclude Include="Util\GameCommon.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

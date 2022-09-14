@@ -1,56 +1,87 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    <Filter Include="Game">
+      <UniqueIdentifier>{962dbf8c-bfc9-4de6-8847-0ed6172e2f00}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Code">
+      <UniqueIdentifier>{09605e0f-4f4f-4132-b616-17a6e5da0388}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Code\Game">
+      <UniqueIdentifier>{f5baf2b3-3864-4d9a-869c-f42999c93169}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Code\ThirdParty">
+      <UniqueIdentifier>{171e4b91-a7eb-406e-b90c-161a10832376}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Code\Game\Scene">
+      <UniqueIdentifier>{732f0a4e-ba26-476e-ae11-4caf380fea5a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Code\Game\Test">
+      <UniqueIdentifier>{d2e764c2-b40f-4cbf-a623-105284f0c5ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Code\Game\Util">
+      <UniqueIdentifier>{94e1beb0-354c-4556-aa36-fa90af396d33}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main_Win32.cpp">
-      <Filter>Source</Filter>
+      <Filter>Game\Code\Game</Filter>
     </ClCompile>
     <ClCompile Include="TheApp.cpp">
-      <Filter>Source</Filter>
+      <Filter>Game\Code\Game</Filter>
     </ClCompile>
     <ClCompile Include="TheGame.cpp">
-      <Filter>Source</Filter>
+      <Filter>Game\Code\Game</Filter>
     </ClCompile>
-    <ClCompile Include="Scene/ProtoState.cpp">
-      <Filter>Source</Filter>
+    <ClCompile Include="Scene\GameState.cpp">
+      <Filter>Game\Code\Game\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Scene/GameState.cpp">
-      <Filter>Source</Filter>
+    <ClCompile Include="Scene\GameStateMachine.cpp">
+      <Filter>Game\Code\Game\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Test/DelegateTest.cpp">
-      <Filter>Source</Filter>
+    <ClCompile Include="Scene\ProtoState.cpp">
+      <Filter>Game\Code\Game\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Util/GameCommon.cpp">
-      <Filter>Source</Filter>
+    <ClCompile Include="Test\DelegateTest.cpp">
+      <Filter>Game\Code\Game\Test</Filter>
     </ClCompile>
-    <ClCompile Include="Scene/GameStateMachine.cpp">
-      <Filter>Source</Filter>
+    <ClCompile Include="Test\MathTest.cpp">
+      <Filter>Game\Code\Game\Test</Filter>
     </ClCompile>
-    <ClCompile Include="Test/MathTest.cpp">
-      <Filter>Source</Filter>
+    <ClCompile Include="Test\TransformTest.cpp">
+      <Filter>Game\Code\Game\Test</Filter>
     </ClCompile>
-    <ClCompile Include="Test/TransformTest.cpp">
-      <Filter>Source</Filter>
+    <ClCompile Include="Util\GameCommon.cpp">
+      <Filter>Game\Code\Game\Util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TheApp.hpp">
-      <Filter>Source</Filter>
+      <Filter>Game\Code\Game</Filter>
     </ClInclude>
     <ClInclude Include="TheGame.hpp">
-      <Filter>Source</Filter>
+      <Filter>Game\Code\Game</Filter>
     </ClInclude>
-    <ClInclude Include="Scene/GameState.hpp" />
-    <ClInclude Include="Test/DelegateTest.hpp" />
-    <ClInclude Include="Test/TransformTest.hpp" />
-    <ClInclude Include="Test/MathTest.hpp" />
-    <ClInclude Include="Util/GameCommon.hpp" />
-    <ClInclude Include="Scene/ProtoState.hpp" />
-    <ClInclude Include="Scene/GameStateMachine.hpp" />
+    <ClInclude Include="Scene\GameState.hpp">
+      <Filter>Game\Code\Game\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\GameStateMachine.hpp">
+      <Filter>Game\Code\Game\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\ProtoState.hpp">
+      <Filter>Game\Code\Game\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Test\DelegateTest.hpp">
+      <Filter>Game\Code\Game\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="Test\MathTest.hpp">
+      <Filter>Game\Code\Game\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="Test\TransformTest.hpp">
+      <Filter>Game\Code\Game\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\GameCommon.hpp">
+      <Filter>Game\Code\Game\Util</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
